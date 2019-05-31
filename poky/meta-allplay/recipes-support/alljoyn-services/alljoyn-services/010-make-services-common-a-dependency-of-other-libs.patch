@@ -1,0 +1,48 @@
+Index: alljoyn-services-15.04.00-src/services/base/notification/cpp/src/SConscript
+===================================================================
+--- alljoyn-services-15.04.00-src.orig/services/base/notification/cpp/src/SConscript
++++ alljoyn-services-15.04.00-src/services/base/notification/cpp/src/SConscript
+@@ -26,7 +26,9 @@ libs.append(nsenv.StaticLibrary('alljoyn
+ 
+ # Shared library
+ if nsenv.get('LIBTYPE', 'static') != 'static':
+-    shobjs = nsenv.SharedObject(srcs)
+-    libs.append(nsenv.SharedLibrary('alljoyn_notification', shobjs))
++    dyn_nsenv = nsenv.Clone()
++    dyn_nsenv.Prepend(LIBS = ['alljoyn_services_common']);
++    shobjs = dyn_nsenv.SharedObject(srcs)
++    libs.append(dyn_nsenv.SharedLibrary('alljoyn_notification', shobjs))
+ 
+ Return('libs')
+Index: alljoyn-services-15.04.00-src/services/base/config/cpp/src/SConscript
+===================================================================
+--- alljoyn-services-15.04.00-src.orig/services/base/config/cpp/src/SConscript
++++ alljoyn-services-15.04.00-src/services/base/config/cpp/src/SConscript
+@@ -31,7 +31,9 @@ libs.append(config_env.StaticLibrary('al
+ 
+ # Shared library
+ if config_env.get('LIBTYPE', 'static') != 'static':
+-    shobjs = config_env.SharedObject(srcs)
+-    libs.append(config_env.SharedLibrary('alljoyn_config', shobjs))
++    dyn_config_env = config_env.Clone()
++    dyn_config_env.Prepend(LIBS = ['alljoyn_services_common']);
++    shobjs = dyn_config_env.SharedObject(srcs)
++    libs.append(dyn_config_env.SharedLibrary('alljoyn_config', shobjs))
+ 
+ Return('libs')
+Index: alljoyn-services-15.04.00-src/services/base/onboarding/cpp/src/SConscript
+===================================================================
+--- alljoyn-services-15.04.00-src.orig/services/base/onboarding/cpp/src/SConscript
++++ alljoyn-services-15.04.00-src/services/base/onboarding/cpp/src/SConscript
+@@ -31,7 +31,9 @@ libs.append(onb_env.StaticLibrary('alljo
+ 
+ # Shared library
+ if onb_env.get('LIBTYPE', 'static') != 'static':
+-    shobjs = onb_env.SharedObject(srcs)
+-    libs.append(onb_env.SharedLibrary('alljoyn_onboarding', shobjs))
++    dyn_onb_env = onb_env.Clone()
++    dyn_onb_env.Prepend(LIBS = ['alljoyn_services_common']);
++    shobjs = dyn_onb_env.SharedObject(srcs)
++    libs.append(dyn_onb_env.SharedLibrary('alljoyn_onboarding', shobjs))
+ 
+ Return ('libs')

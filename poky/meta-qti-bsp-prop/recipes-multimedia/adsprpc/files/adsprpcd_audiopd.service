@@ -1,0 +1,17 @@
+# Copyright (c) 2018 Qualcomm Technologies, Inc.
+# All Rights Reserved.
+# Confidential and Proprietary - Qualcomm Technologies, Inc.
+#
+
+[Unit]
+Description=adsprpc Service
+SourcePath=/usr/bin/adsprpcd
+
+[Service]
+User=system
+Group=system
+Restart=always
+ExecStart=/usr/bin/adsprpcd audiopd
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,17 @@
+# Copyright (c) 2017 Qualcomm Technologies, Inc.
+# All Rights Reserved.
+# Confidential and Proprietary - Qualcomm Technologies, Inc.
+#
+
+[Unit]
+Description=LE-Updater Service
+SourcePath=/etc/initscripts/start-le-updater
+
+[Service]
+Restart=no
+RemainAfterExit=yes
+ExecStart=/etc/initscripts/start-le-updater start
+ExecStop=/etc/initscripts/start-le-updater stop
+
+[Install]
+WantedBy=multi-user.target

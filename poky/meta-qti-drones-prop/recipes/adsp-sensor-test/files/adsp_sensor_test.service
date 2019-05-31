@@ -1,0 +1,16 @@
+# Copyright (c) 2017 Qualcomm Technologies, Inc.
+# All Rights Reserved.
+# Confidential and Proprietary - Qualcomm Technologies, Inc.
+
+[Unit]
+Description=adsp sensor test Service
+SourcePath=/etc/init.d/start_adsp_sensor_test
+Before=ffbm_mmi.service
+
+[Service]
+Restart=always
+ExecStart=/etc/init.d/start_adsp_sensor_test start
+ExecStop=/etc/init.d/start_adsp_sensor_test stop
+
+[Install]
+WantedBy=ffbm.target

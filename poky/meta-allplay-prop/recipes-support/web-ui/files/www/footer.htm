@@ -1,0 +1,79 @@
+			<div class="footer">
+			<%_&#169; Qualcomm Connected Experiences | All rights reserved.%>
+			</div><!-- /footer -->
+	</div><!-- /force_width_outer_wrapper -->
+
+	<div id="language_selection_dialog_wrapper">
+	<div id="modal" onclick="javascript:display_language_selections();">
+	</div>
+		<div id="language_selection_dialog" class="shadow_dark">
+		<!-- menu items -->
+		</div>
+	</div><!-- /language_selection_dialog_wrapper -->
+
+	<noscript>
+		<div id="wrapper_root" class="force_width_outer_wrapper custom_background_image custom_background_image_friendly_name" style="display:block;">
+		<div class="force_width_inner_wrapper">
+			<div class="header">
+				<div class="header_logo">&nbsp;</div><!-- /header_logo -->
+			</div><!-- /header -->
+
+			<div class="activity_header">
+				<div class="activity_title">
+				<%_JavaScript Disabled%>
+				</div><!-- /activity_title -->
+			</div><!-- /activity_title_header -->
+
+			<div class="activity_content_wrapper">
+				<div class="information_field">
+				<%_Please use a JavaScript-enabled browser to configure this product.%>
+				<hr/>
+				</div><!-- /information_field -->
+			</div><!-- /activity_content_wrapper -->
+			<div class="activity_content_shadow_wrapper">
+				<div class="activity_content_shadow_left"></div>
+				<div class="activity_content_shadow_right"></div>
+				<div class="activity_content_shadow_middle"></div>
+				<div class="float_clear"></div>
+			</div><!-- /activity_content_shadow_wrapper -->
+		</div><!-- /force_width_inner_wrapper -->
+			<div class="footer">
+			<%_&#169; Qualcomm Connected Experiences | All rights reserved.%>
+			</div><!-- /footer -->
+		</div><!-- /force_width_outer_wrapper -->
+	</noscript>
+	<script type="text/javascript" src="/js/lang_menu.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			appendLangMenu();
+		});
+		function appendLangMenu() {
+			lang_menu = getLangMenu();
+			for (i=0; i<lang_menu.length; i++) {
+				var lang = lang_menu[i].lang;
+				var menu_item =
+					"<div class=\"language_selection_item\" " +
+					"id=\"langselector_" + lang + "\" " +
+					"onclick=\"javascript:selectLanguage('" + lang + "');\" >" +
+					lang_menu[i].name +
+					"</div>";
+				$("#language_selection_dialog").append(menu_item);
+			}
+		}
+		function selectLanguage(lang) {
+			display_language_selections();
+			$.post("/ui/set_language", { "language" : lang }, function() {
+				/* using pathname as 'reload' will redirect the page */
+				window.location.href=window.location.pathname;
+			});
+		}
+		function refresh_selected_language(){
+			$("div[id^='langselector_']").each(function() {
+				$((this).id).removeClass( "language_selection_selected" );
+			});
+			$("#langselector_<%_lang%>").addClass("language_selection_selected");
+		}
+
+	</script>
+</body>
+</html>

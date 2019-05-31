@@ -1,0 +1,3 @@
+EXTRA_CFLAGS =
+AM_CFLAGS=
+SUBDIRS =  aec_bg_stats47

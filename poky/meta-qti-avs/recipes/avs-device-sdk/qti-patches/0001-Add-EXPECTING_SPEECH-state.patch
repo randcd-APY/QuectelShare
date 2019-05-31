@@ -1,0 +1,53 @@
+From 355d3056955c2e697bad91f894358e336a8f3ff0 Mon Sep 17 00:00:00 2001
+From: Abhinav Asati <asatiabhi@codeaurora.org>
+Date: Thu, 22 Mar 2018 22:54:45 +0530
+Subject: [PATCH] Add EXPECTING_SPEECH state
+
+Change-Id: I6885f3ac34cc8351457bcfa293c9b188564d228f
+---
+ AVSCommon/AVS/src/DialogUXStateAggregator.cpp                       | 4 +++-
+ .../AVSCommon/SDKInterfaces/DialogUXStateObserverInterface.h        | 6 ++++++
+ 2 files changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/AVSCommon/AVS/src/DialogUXStateAggregator.cpp b/AVSCommon/AVS/src/DialogUXStateAggregator.cpp
+index 02707ad..4f5bf1d 100644
+--- a/AVSCommon/AVS/src/DialogUXStateAggregator.cpp
++++ b/AVSCommon/AVS/src/DialogUXStateAggregator.cpp
+@@ -76,7 +76,9 @@ void DialogUXStateAggregator::onStateChanged(AudioInputProcessorObserverInterfac
+                 return;
+             case AudioInputProcessorObserverInterface::State::EXPECTING_SPEECH:
+                 onActivityStarted();
+-                setState(DialogUXStateObserverInterface::DialogUXState::LISTENING);
++                //QTI ADDED: Expected Speech state
++                setState(DialogUXStateObserverInterface::DialogUXState::EXPECTING_SPEECH);
++                //setState(DialogUXStateObserverInterface::DialogUXState::LISTENING);
+                 return;
+             case AudioInputProcessorObserverInterface::State::BUSY:
+                 setState(DialogUXStateObserverInterface::DialogUXState::THINKING);
+diff --git a/AVSCommon/SDKInterfaces/include/AVSCommon/SDKInterfaces/DialogUXStateObserverInterface.h b/AVSCommon/SDKInterfaces/include/AVSCommon/SDKInterfaces/DialogUXStateObserverInterface.h
+index de2d383..49b676d 100644
+--- a/AVSCommon/SDKInterfaces/include/AVSCommon/SDKInterfaces/DialogUXStateObserverInterface.h
++++ b/AVSCommon/SDKInterfaces/include/AVSCommon/SDKInterfaces/DialogUXStateObserverInterface.h
+@@ -35,6 +35,9 @@ public:
+         /// Alexa is currently listening.
+         LISTENING,
+ 
++        //QTI ADDED: Expected Speech state
++        EXPECTING_SPEECH,
++
+         /**
+          * A customer request has been completed and no more input is accepted. In this state, Alexa is waiting for a
+          * response from AVS.
+@@ -81,6 +84,9 @@ inline std::string DialogUXStateObserverInterface::stateToString(DialogUXState s
+             return "IDLE";
+         case DialogUXState::LISTENING:
+             return "LISTENING";
++        //QTI ADDED: Expected Speech state
++        case DialogUXState::EXPECTING_SPEECH:
++            return "EXPECTING_SPEECH";
+         case DialogUXState::THINKING:
+             return "THINKING";
+         case DialogUXState::SPEAKING:
+-- 
+1.9.1
+

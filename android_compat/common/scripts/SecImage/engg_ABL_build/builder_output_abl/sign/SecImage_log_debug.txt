@@ -1,0 +1,331 @@
+DEBUG: Debug logging to Y:\SDX24_Sign\Temp_SecTools_v5.0\engg_ABL_build\builder_output_abl\sign\SecImage_log_debug.txt
+
+
+    SecImage launched as: "Y:\SDX24_Sign\Temp_SecTools_v5.0\sectools.py secimage -i Y:\SDX24_Sign\Temp_SecTools_v5.0\engg_ABL_build\unsigned_input\abl.elf -g abl -c Y:\SDX24_Sign\Temp_SecTools_v5.0\config\integration\secimage_eccv3.xml --cfg_soc_hw_version 0x60020000 --cfg_in_use_soc_hw_version 1 --cfg_soc_vers 0x6002 -v -sa -o Y:\SDX24_Sign\Temp_SecTools_v5.0\engg_ABL_build\builder_output_abl\sign"
+
+Config path is set to: Y:\SDX24_Sign\Temp_SecTools_v5.0\config\integration\secimage_eccv3.xml
+WARNING: OEM ID is set to 0 for sign_id "abl"
+Output dir is set to: Y:\SDX24_Sign\Temp_SecTools_v5.0\engg_ABL_build\builder_output_abl\sign
+Openssl v1.0.1 or greater is available at: "Y:\SDX24_Sign\Temp_SecTools_v5.0\bin\WIN\openssl.exe"
+------------------------------------------------------
+Processing 1/1: Y:\SDX24_Sign\Temp_SecTools_v5.0\engg_ABL_build\unsigned_input\abl.elf
+
+DEBUG: DataProvisioner database verification passed
+l1_file_name = Y:\SDX24_Sign\Temp_SecTools_v5.0\resources\data_prov_assets\Encryption\Unified\default\l1_key.bin
+DEBUG: DataProvisioner config: <sectools.common.data_provisioning.data_prov.DictToObject object at 0x02BEBCB0>
+l2_file_name = Y:\SDX24_Sign\Temp_SecTools_v5.0\resources\data_prov_assets\Encryption\Unified\default\l2_key.bin
+DEBUG: DataProvisioner config: <sectools.common.data_provisioning.data_prov.DictToObject object at 0x02BEBCB0>
+l3_file_name = Y:\SDX24_Sign\Temp_SecTools_v5.0\resources\data_prov_assets\Encryption\Unified\default\l3_key.bin
+DEBUG: DataProvisioner config: <sectools.common.data_provisioning.data_prov.DictToObject object at 0x02BEBCB0>
+Clear L1 key, clear L2 key, and clear L3 keys were provided locally.
+DEBUG: L1 Key: 
+0000  6c 26 d6 28 5e f3 22 ef 9e e5 81 04 b5 34 96 cb   l&.(^."......4..
+
+DEBUG: L2 Key: 
+0000  c5 7e 66 0c 80 ae 7e 8c f1 7b 70 90 6c bf 92 74   .~f...~..{p.l..t
+
+DEBUG: L3 Key: 
+0000  48 2d b5 8a b5 0d 87 f1 83 63 54 d7 9d a0 12 b5   H-.......cT.....
+
+DEBUG: Configured Encryption Parameters L2 Associated Data version is 1.0
+DEBUG: L1 encrypted L2 key:
+DEBUG: PT = 
+0000  c5 7e 66 0c 80 ae 7e 8c f1 7b 70 90 6c bf 92 74   .~f...~..{p.l..t
+
+DEBUG: KEY = 
+0000  36 63 32 36 64 36 32 38 35 65 66 33 32 32 65 66   6c26d6285ef322ef
+0010  39 65 65 35 38 31 30 34 62 35 33 34 39 36 63 62   9ee58104b53496cb
+
+DEBUG: IV = 
+0000  37 34 63 38 61 39 35 31 36 31 35 65 32 63 64 32   74c8a951615e2cd2
+0010  36 65 66 66 39 31 62 65 61 62                     6eff91beab
+
+DEBUG: AAD = 
+0000  30 30 32 30 30 30 30 30 30 31 30 30 30 33 30 30   0020000001000300
+0010  30 30 30 30 30 30 31 30 30 30 30 30 30 30 30 30   0000001000000000
+0020  30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30   0000000000000000
+0030  30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30   0000000000000000
+
+DEBUG: L2 encrypted L3 key:
+DEBUG: PT = 
+0000  48 2d b5 8a b5 0d 87 f1 83 63 54 d7 9d a0 12 b5   H-.......cT.....
+
+DEBUG: KEY = 
+0000  63 35 37 65 36 36 30 63 38 30 61 65 37 65 38 63   c57e660c80ae7e8c
+0010  66 31 37 62 37 30 39 30 36 63 62 66 39 32 37 34   f17b70906cbf9274
+
+DEBUG: IV = 
+0000  30 66 37 31 66 35 66 36 64 64 33 37 63 38 30 35   0f71f5f6dd37c805
+0010  63 64 33 33 30 62 32 38 64 35                     cd330b28d5
+
+DEBUG: AAD = 
+0000  30 30 32 30 30 30 30 30 30 31 30 31 30 30 30 30   0020000001010000
+0010  30 30 30 30 30 30 30 30 30 31 30 30 30 30 30 30   0000000001000000
+0020  30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30   0000000000000000
+0030  30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30   0000000000000000
+
+DEBUG: Encryption Params: 
+0000  49 53 4d 51 01 00 00 00 10 00 01 00 00 00 00 00   ISMQ............
+0010  45 49 55 51 c0 00 01 01 00 01 00 00 00 00 00 00   EIUQ............
+0020  79 74 c8 a9 51 61 5e 2c d2 6e ff 91 be ab 00 10   yt..Qa^,.n......
+0030  00 20 00 00 01 00 03 00 00 00 00 10 00 00 00 00   . ..............
+0040  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00   ................
+0050  dd f4 c6 a7 43 d5 c5 93 2f 2a 46 d6 4d e0 81 63   ....C.../*F.M..c
+0060  a0 1a 93 40 34 ef ed 01 ae 57 98 8d 40 75 aa d7   ...@4....W..@u..
+0070  79 0f 71 f5 f6 dd 37 c8 05 cd 33 0b 28 d5 00 10   y.q...7...3.(...
+0080  00 20 00 00 01 01 00 00 00 00 00 00 01 00 00 00   . ..............
+0090  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00   ................
+00a0  ca 3e 4e ab 2f 49 57 34 f4 90 77 86 2c 6c d4 9c   .>N./IW4..w.,l..
+00b0  ec db f4 c5 e9 ea 4d 69 bc 20 08 f7 ee 0a c4 81   ......Mi. ......
+00c0  6e 0f 14 a7 3a d9 a1 15 f0 ac 02 ca f7 f4 28 1e   n...:.........(.
+
+Performing OEM sign on image: Y:\SDX24_Sign\Temp_SecTools_v5.0\engg_ABL_build\unsigned_input\abl.elf
+DEBUG: DataProvisioner database verification passed
+attestation_certificate_extensions = Y:\SDX24_Sign\Temp_SecTools_v5.0\resources\data_prov_assets\General_Assets\Signing\openssl\v3_attest.ext
+DEBUG: DataProvisioner config: <sectools.common.data_provisioning.data_prov.DictToObject object at 0x02C08890>
+ca_certificate_extensions = Y:\SDX24_Sign\Temp_SecTools_v5.0\resources\data_prov_assets\General_Assets\Signing\openssl\v3.ext
+DEBUG: DataProvisioner config: <sectools.common.data_provisioning.data_prov.DictToObject object at 0x02C08890>
+openssl_configfile = Y:\SDX24_Sign\Temp_SecTools_v5.0\resources\data_prov_assets\General_Assets\Signing\openssl\opensslroot.cfg
+DEBUG: DataProvisioner config: <sectools.common.data_provisioning.data_prov.DictToObject object at 0x02C08890>
+DEBUG: Adding hash seg after phdrs, aligned to 0x1000
+DEBUG: Updating version to 6
+DEBUG: Masked QTI sig size and cert chain size
+DEBUG: msm_id : 0x6002000000000000L
+sw_id  : 0x1c
+hash_algo  : sha384
+hmac_type : SHA
+ipad  : 0x3636363636363636L
+opad  : 0x5c5c5c5c5c5c5c5cL
+Using SHA (sha384)
+Using ECDSA with secp384r1 curve
+DEBUG: DataProvisioner database verification passed
+DEBUG: DataProvisioner config: <sectools.common.data_provisioning.data_prov.DictToObject object at 0x02C08690>
+DEBUG: DataProvisioner config: <sectools.common.data_provisioning.data_prov.DictToObject object at 0x02C08690>
+DEBUG: DataProvisioner config: <sectools.common.data_provisioning.data_prov.DictToObject object at 0x02C08690>
+DEBUG: DataProvisioner config: <sectools.common.data_provisioning.data_prov.DictToObject object at 0x02C08690>
+Initialization with dataprov. These fields might not be used in final output if overridden
+Using a predefined Root private key from: Y:\SDX24_Sign\Temp_SecTools_v5.0\resources\data_prov_assets\Signing\Local\qti_presigned_certs-secp384r1\qpsa_rootca.key
+DEBUG: Running command: ['Y:\\SDX24_Sign\\Temp_SecTools_v5.0\\bin\\WIN\\openssl.exe', 'ec', '-in', 'c:\\users\\jshriram\\appdata\\local\\temp\\tmprdtnsd', '-pubout']
+Using a predefined Root certificate from: Y:\SDX24_Sign\Temp_SecTools_v5.0\resources\data_prov_assets\Signing\Local\qti_presigned_certs-secp384r1\qpsa_rootca.cer
+DEBUG: Running command: ['Y:\\SDX24_Sign\\Temp_SecTools_v5.0\\bin\\WIN\\openssl.exe', 'x509', '-in', 'c:\\users\\jshriram\\appdata\\local\\temp\\tmpqvixks', '-inform', 'DER', '-outform', 'PEM']
+Initialization with dataprov. These fields might not be used in final output if overridden
+Using a predefined CA private key from: Y:\SDX24_Sign\Temp_SecTools_v5.0\resources\data_prov_assets\Signing\Local\qti_presigned_certs-secp384r1\qpsa_attestca.key
+DEBUG: Running command: ['Y:\\SDX24_Sign\\Temp_SecTools_v5.0\\bin\\WIN\\openssl.exe', 'ec', '-in', 'c:\\users\\jshriram\\appdata\\local\\temp\\tmp8q21l8', '-pubout']
+Using a predefined CA certificate from: Y:\SDX24_Sign\Temp_SecTools_v5.0\resources\data_prov_assets\Signing\Local\qti_presigned_certs-secp384r1\qpsa_attestca.cer
+DEBUG: Running command: ['Y:\\SDX24_Sign\\Temp_SecTools_v5.0\\bin\\WIN\\openssl.exe', 'x509', '-in', 'c:\\users\\jshriram\\appdata\\local\\temp\\tmpwys_v_', '-inform', 'DER', '-outform', 'PEM']
+Initialization with dataprov. These fields might not be used in final output if overridden
+Generating new certificate Attest
+Skipping adding OU fields to attest certificate.
+Generating new private/public key pair for Attest
+DEBUG: Running command: ['Y:\\SDX24_Sign\\Temp_SecTools_v5.0\\bin\\WIN\\openssl.exe', 'ecparam', '-genkey', '-name', 'secp384r1', '-outform', 'PEM', '-noout', '-text']
+DEBUG: Writing generated private key to PEM file: c:\users\jshriram\appdata\local\temp\tmppbqda_
+DEBUG: Running command: ['Y:\\SDX24_Sign\\Temp_SecTools_v5.0\\bin\\WIN\\openssl.exe', 'ec', '-in', 'c:\\users\\jshriram\\appdata\\local\\temp\\tmpqkompo', '-pubout']
+Creating certificate request for Attest
+DEBUG: Running command: ['Y:\\SDX24_Sign\\Temp_SecTools_v5.0\\bin\\WIN\\openssl.exe', 'req', '-new', '-key', 'c:\\users\\jshriram\\appdata\\local\\temp\\tmpnueefk', '-subj', '/C=US/ST=California/CN=SecTools Test User/O=SecTools/L=San Diego', '-config', 'Y:\\SDX24_Sign\\Temp_SecTools_v5.0\\resources\\data_prov_assets\\General_Assets\\Signing\\openssl\\opensslroot.cfg']
+Signing certificate request for Attest
+DEBUG: Running command: ['Y:\\SDX24_Sign\\Temp_SecTools_v5.0\\bin\\WIN\\openssl.exe', 'x509', '-req', '-in', 'c:\\users\\jshriram\\appdata\\local\\temp\\tmp0z2gap', '-CAkey', 'c:\\users\\jshriram\\appdata\\local\\temp\\tmpuntqaf', '-CA', 'c:\\users\\jshriram\\appdata\\local\\temp\\tmpbgsfhy', '-days', '7300', '-set_serial', '1', '-extfile', 'Y:\\SDX24_Sign\\Temp_SecTools_v5.0\\resources\\data_prov_assets\\General_Assets\\Signing\\openssl\\v3_attest.ext', '-sha384', '-CAcreateserial']
+DEBUG: Running command: ['Y:\\SDX24_Sign\\Temp_SecTools_v5.0\\bin\\WIN\\openssl.exe', 'x509', '-in', 'c:\\users\\jshriram\\appdata\\local\\temp\\tmp6ihz4e', '-inform', 'PEM', '-noout', '-text', '-certopt', 'ext_dump']
+Creating signature
+DEBUG: Running command: ['Y:\\SDX24_Sign\\Temp_SecTools_v5.0\\bin\\WIN\\openssl.exe', 'pkeyutl', '-sign', '-inkey', 'c:\\users\\jshriram\\appdata\\local\\temp\\tmpldcpn0', '-in', 'c:\\users\\jshriram\\appdata\\local\\temp\\tmp7lribo']
+DEBUG: Running command: ['Y:\\SDX24_Sign\\Temp_SecTools_v5.0\\bin\\WIN\\openssl.exe', 'x509', '-in', 'c:\\users\\jshriram\\appdata\\local\\temp\\tmp5kibuz', '-inform', 'PEM', '-outform', 'DER']
+DEBUG: Running command: ['Y:\\SDX24_Sign\\Temp_SecTools_v5.0\\bin\\WIN\\openssl.exe', 'x509', '-in', 'c:\\users\\jshriram\\appdata\\local\\temp\\tmphcz_mg', '-inform', 'PEM', '-outform', 'DER']
+DEBUG: Running command: ['Y:\\SDX24_Sign\\Temp_SecTools_v5.0\\bin\\WIN\\openssl.exe', 'x509', '-in', 'c:\\users\\jshriram\\appdata\\local\\temp\\tmptlmd5m', '-inform', 'PEM', '-outform', 'DER']
+DEBUG: Running command: ['Y:\\SDX24_Sign\\Temp_SecTools_v5.0\\bin\\WIN\\openssl.exe', 'x509', '-in', 'c:\\users\\jshriram\\appdata\\local\\temp\\tmp3hxbbz', '-inform', 'PEM', '-outform', 'DER']
+DEBUG: Adding hash seg after phdrs, aligned to 0x1000
+Signed image is stored at Y:\SDX24_Sign\Temp_SecTools_v5.0\engg_ABL_build\builder_output_abl\sign\default\abl\abl.elf
+DEBUG: DataProvisioner config: <sectools.common.data_provisioning.data_prov.DictToObject object at 0x02BEBBF0>
+DEBUG: DataProvisioner config: <sectools.common.data_provisioning.data_prov.DictToObject object at 0x02BEBBF0>
+DEBUG: DataProvisioner config: <sectools.common.data_provisioning.data_prov.DictToObject object at 0x02BEBBF0>
+Clear L1 key, clear L2 key, and clear L3 keys were provided locally.
+DEBUG: L1 Key: 
+0000  6c 26 d6 28 5e f3 22 ef 9e e5 81 04 b5 34 96 cb   l&.(^."......4..
+
+DEBUG: L2 Key: 
+0000  c5 7e 66 0c 80 ae 7e 8c f1 7b 70 90 6c bf 92 74   .~f...~..{p.l..t
+
+DEBUG: L3 Key: 
+0000  48 2d b5 8a b5 0d 87 f1 83 63 54 d7 9d a0 12 b5   H-.......cT.....
+
+DEBUG: Configured Encryption Parameters L2 Associated Data version is 1.0
+DEBUG: L1 encrypted L2 key:
+DEBUG: PT = 
+0000  c5 7e 66 0c 80 ae 7e 8c f1 7b 70 90 6c bf 92 74   .~f...~..{p.l..t
+
+DEBUG: KEY = 
+0000  36 63 32 36 64 36 32 38 35 65 66 33 32 32 65 66   6c26d6285ef322ef
+0010  39 65 65 35 38 31 30 34 62 35 33 34 39 36 63 62   9ee58104b53496cb
+
+DEBUG: IV = 
+0000  65 30 61 36 39 64 39 35 65 61 30 63 63 62 31 66   e0a69d95ea0ccb1f
+0010  34 38 66 38 31 64 34 33 33 64                     48f81d433d
+
+DEBUG: AAD = 
+0000  30 30 32 30 30 30 30 30 30 31 30 30 30 33 30 30   0020000001000300
+0010  30 30 30 30 30 30 31 30 30 30 30 30 30 30 30 30   0000001000000000
+0020  30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30   0000000000000000
+0030  30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30   0000000000000000
+
+DEBUG: L2 encrypted L3 key:
+DEBUG: PT = 
+0000  48 2d b5 8a b5 0d 87 f1 83 63 54 d7 9d a0 12 b5   H-.......cT.....
+
+DEBUG: KEY = 
+0000  63 35 37 65 36 36 30 63 38 30 61 65 37 65 38 63   c57e660c80ae7e8c
+0010  66 31 37 62 37 30 39 30 36 63 62 66 39 32 37 34   f17b70906cbf9274
+
+DEBUG: IV = 
+0000  64 31 36 65 31 39 33 37 32 37 30 61 39 63 37 63   d16e1937270a9c7c
+0010  31 63 37 31 39 65 35 61 30 36                     1c719e5a06
+
+DEBUG: AAD = 
+0000  30 30 32 30 30 30 30 30 30 31 30 31 30 30 30 30   0020000001010000
+0010  30 30 30 30 30 30 30 30 30 31 30 30 30 30 30 30   0000000001000000
+0020  30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30   0000000000000000
+0030  30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30   0000000000000000
+
+DEBUG: Encryption Params: 
+0000  49 53 4d 51 01 00 00 00 10 00 01 00 00 00 00 00   ISMQ............
+0010  45 49 55 51 c0 00 01 01 00 01 00 00 00 00 00 00   EIUQ............
+0020  79 e0 a6 9d 95 ea 0c cb 1f 48 f8 1d 43 3d 00 10   y........H..C=..
+0030  00 20 00 00 01 00 03 00 00 00 00 10 00 00 00 00   . ..............
+0040  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00   ................
+0050  d6 6f 26 0c a2 f8 68 d2 59 ad 9e fc 7e 0d 93 04   .o&...h.Y...~...
+0060  a6 6e c9 b2 11 97 65 d3 9e 05 13 d9 dc aa 64 19   .n....e.......d.
+0070  79 d1 6e 19 37 27 0a 9c 7c 1c 71 9e 5a 06 00 10   y.n.7'..|.q.Z...
+0080  00 20 00 00 01 01 00 00 00 00 00 00 01 00 00 00   . ..............
+0090  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00   ................
+00a0  79 1e 69 fb 86 af 15 ee 92 cb 63 a7 28 3d de ad   y.i.......c.(=..
+00b0  fe 93 a4 3b 0f 6c bc 6f 43 6a 49 70 94 b8 44 92   ...;.l.oCjIp..D.
+00c0  87 0c 51 fd a4 72 25 aa cb cc 8d 38 14 4e 2f 00   ..Q..r%....8.N/.
+
+DEBUG: Number of hash entries: 1
+DEBUG: Hash table size: 144
+DEBUG: Hash size: 48
+DEBUG: Determined hash table algorithm: sha384
+DEBUG: DataProvisioner config: <sectools.common.data_provisioning.data_prov.DictToObject object at 0x02C089F0>
+DEBUG: DataProvisioner config: <sectools.common.data_provisioning.data_prov.DictToObject object at 0x02C089F0>
+DEBUG: DataProvisioner config: <sectools.common.data_provisioning.data_prov.DictToObject object at 0x02C089F0>
+DEBUG: Adding hash seg after phdrs, aligned to 0x1000
+DEBUG: Updating version to 6
+DEBUG: Masked QTI sig size and cert chain size
+DEBUG: Running command: ['Y:\\SDX24_Sign\\Temp_SecTools_v5.0\\bin\\WIN\\openssl.exe', 'x509', '-in', 'c:\\users\\jshriram\\appdata\\local\\temp\\tmpkbv146', '-inform', 'DER', '-noout', '-text', '-certopt', 'ext_dump']
+DEBUG: SW_ID = 000000000000001C
+DEBUG: HW_ID = 0000000000000000
+DEBUG: Signer is relying on config's hmac value to determine whether signature was generated using HMAC or SHA.
+DEBUG: Signer is assuming that signature was generated using SHA.
+OEM signed image with ECDSA
+DEBUG: Running command: ['Y:\\SDX24_Sign\\Temp_SecTools_v5.0\\bin\\WIN\\openssl.exe', 'x509', '-in', 'c:\\users\\jshriram\\appdata\\local\\temp\\tmpbbor_k', '-inform', 'DER', '-outform', 'PEM']
+DEBUG: Running command: ['Y:\\SDX24_Sign\\Temp_SecTools_v5.0\\bin\\WIN\\openssl.exe', 'x509', '-in', 'c:\\users\\jshriram\\appdata\\local\\temp\\tmpsqxwmv', '-inform', 'DER', '-outform', 'PEM']
+DEBUG: Running command: ['Y:\\SDX24_Sign\\Temp_SecTools_v5.0\\bin\\WIN\\openssl.exe', 'x509', '-in', 'c:\\users\\jshriram\\appdata\\local\\temp\\tmpnitakm', '-inform', 'DER', '-outform', 'PEM']
+DEBUG: Running command: ['Y:\\SDX24_Sign\\Temp_SecTools_v5.0\\bin\\WIN\\openssl.exe', 'x509', '-in', 'c:\\users\\jshriram\\appdata\\local\\temp\\tmpbkb6yk', '-inform', 'PEM', '-noout', '-text', '-certopt', 'ext_dump']
+DEBUG: Running command: ['Y:\\SDX24_Sign\\Temp_SecTools_v5.0\\bin\\WIN\\openssl.exe', 'verify', '-attime', '1504636044', '-CAfile', 'c:\\users\\jshriram\\appdata\\local\\temp\\tmpmlusvj', 'c:\\users\\jshriram\\appdata\\local\\temp\\tmpl6_a12']
+DEBUG: Running command: ['Y:\\SDX24_Sign\\Temp_SecTools_v5.0\\bin\\WIN\\openssl.exe', 'x509', '-in', 'c:\\users\\jshriram\\appdata\\local\\temp\\tmp3q1atr', '-pubkey', '-noout', '-inform', 'PEM']
+DEBUG: Running command: ['Y:\\SDX24_Sign\\Temp_SecTools_v5.0\\bin\\WIN\\openssl.exe', 'pkeyutl', '-verify', '-pubin', '-inkey', 'c:\\users\\jshriram\\appdata\\local\\temp\\tmpwm5su2', '-in', 'c:\\users\\jshriram\\appdata\\local\\temp\\tmpu0rg_5', '-sigfile', 'c:\\users\\jshriram\\appdata\\local\\temp\\tmp4fb9lo']
+DEBUG: Running command: ['Y:\\SDX24_Sign\\Temp_SecTools_v5.0\\bin\\WIN\\openssl.exe', 'x509', '-in', 'c:\\users\\jshriram\\appdata\\local\\temp\\tmpbzwx_j', '-inform', 'DER', '-noout', '-text', '-certopt', 'ext_dump']
+DEBUG: Running command: ['Y:\\SDX24_Sign\\Temp_SecTools_v5.0\\bin\\WIN\\openssl.exe', 'asn1parse', '-in', 'c:\\users\\jshriram\\appdata\\local\\temp\\tmp1cgttz', '-inform', 'DER']
+DEBUG: Running command: ['Y:\\SDX24_Sign\\Temp_SecTools_v5.0\\bin\\WIN\\openssl.exe', 'x509', '-in', 'c:\\users\\jshriram\\appdata\\local\\temp\\tmplathkq', '-inform', 'DER', '-noout', '-text', '-certopt', 'ext_dump']
+DEBUG: Running command: ['Y:\\SDX24_Sign\\Temp_SecTools_v5.0\\bin\\WIN\\openssl.exe', 'asn1parse', '-in', 'c:\\users\\jshriram\\appdata\\local\\temp\\tmpdz3p7j', '-inform', 'DER']
+DEBUG: 
+No TCGs found in Attestation cert or CA cert. This is OK.
+DEBUG: 
+Attestation cert : tcg_min=None tcg_max=None
+CA cert (allowed): tcg_min=None tcg_max=None
+
+DEBUG: Running command: ['Y:\\SDX24_Sign\\Temp_SecTools_v5.0\\bin\\WIN\\openssl.exe', 'x509', '-in', 'c:\\users\\jshriram\\appdata\\local\\temp\\tmpzlcirn', '-inform', 'DER', '-noout', '-text', '-certopt', 'ext_dump']
+Image Y:\SDX24_Sign\Temp_SecTools_v5.0\engg_ABL_build\builder_output_abl\sign\default\abl\abl.elf signature is valid
+Image Y:\SDX24_Sign\Temp_SecTools_v5.0\engg_ABL_build\builder_output_abl\sign\default\abl\abl.elf is not encrypted
+
+Base Properties: 
+| Integrity Check                 | True  |
+| Signed                          | True  |
+| Encrypted                       | False |
+| Size of signature               | 104   |
+| Size of one cert                | 2048  |
+| Num of certs in cert chain      | 3     |
+| Number of root certs            | 1     |
+| Maximum number of root certs    | 1     |
+| Hash Page Segments as segments  | False |
+| Cert chain size                 | 6144  |
+
+ELF Properties: 
+Elf Header: 
+| Magic                      | ELF                           |
+| Class                      | ELF32                          |
+| Data                       | 2's complement, little endian  |
+| Version                    | 1 (Current)                    |
+| OS/ABI                     | No extensions or unspecified   |
+| ABI Version                | 0                              |
+| Type                       | EXEC (Executable file)         |
+| Machine                    | Advanced RISC Machines ARM     |
+| Version                    | 0x1                            |
+| Entry address              | 0x8fc00000                     |
+| Program headers offset     | 0x00000034                     |
+| Section headers offset     | 0x00000000                     |
+| Flags                      | 0x00000000                     |
+| ELF header size            | 52                             |
+| Program headers size       | 32                             |
+| Number of program headers  | 1                              |
+| Section headers size       | 0                              |
+| Number of section headers  | 0                              |
+| String table section index | 0                              |
+
+Elf Program Headers: 
+| S.No | Type | Offset | VirtAddr | PhysAddr | FileSize | MemSize | Flags | Align |
+|------|------|--------|----------|----------|----------|---------|-------|-------|
+|  1   | LOAD | 0x3000 |0x8fc00000|0x8fc00000| 0x1e000  | 0x1e000 |  0x7  | 0x1000|
+
+Hash Segment Properties: 
+| Header Size     | 168B  |
+| Hash Algorithm  | sha384|
+
+Header: 
+| cert_chain_ptr              | 0xffffffff  |
+| cert_chain_size             | 0x00001800  |
+| cert_chain_size_qti         | 0x00000000  |
+| code_size                   | 0x00000090  |
+| image_id                    | 0x00000000  |
+| image_size                  | 0x000018f8  |
+| metadata_major_version      | 0x00000000  |
+| metadata_major_version_qti  | 0x00000000  |
+| metadata_minor_version      | 0x00000000  |
+| metadata_minor_version_qti  | 0x00000000  |
+| metadata_size               | 0x00000078  |
+| metadata_size_qti           | 0x00000000  |
+| sig_ptr                     | 0xffffffff  |
+| sig_size                    | 0x00000068  |
+| sig_size_qti                | 0x00000000  |
+| version                     | 0x00000006  |
+Metadata:
+| anti_rollback_version        | 0x00000000  |
+| app_id                       | 0x00000000  |
+| debug                        | 0x00000001  |
+| hw_id                        | 0x00000000  |
+| in_use_soc_hw_version        | 0x00000001  |
+| model_id                     | 0x00000000  |
+| mrc_index                    | 0x00000000  |
+| multi_serial_numbers         | 0x00000000  |
+| oem_id                       | 0x00000000  |
+| oem_id_independent           | 0x00000000  |
+| root_revoke_activate_enable  | 0x00000000  |
+| rot_en                       | 0x00000000  |
+| soc_vers                     | 0x00006002  |
+| sw_id                        | 0x0000001c  |
+| uie_key_switch_enable        | 0x00000000  |
+| use_serial_number_in_signing | 0x00000000  |
+
+SecElf Properties: 
+| image_type        | 0     |
+| max_elf_segments  | 100   |
+| testsig_serialnum | None  |
+
+------------------------------------------------------
+
+SUMMARY:
+Following actions were performed: "sign, validate"
+Output is saved at: Y:\SDX24_Sign\Temp_SecTools_v5.0\engg_ABL_build\builder_output_abl\sign
+
+| Idx | SignId | Parse | Integrity | Sign | Encrypt |              Validate              |
+|     |        |       |           |      |         | Parse | Integrity | Sign | Encrypt |
+|-----|--------|-------|-----------|------|---------|-------|-----------|------|---------|
+|  1. |  abl   |   T   |     NA    |  T   |    NA   |   T   |     T     |  T   |    F    |
+

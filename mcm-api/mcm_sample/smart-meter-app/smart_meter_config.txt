@@ -1,0 +1,5 @@
+Emergency=1234567890
+Server=9876543210
+Interval=5
+
+

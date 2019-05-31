@@ -1,0 +1,18 @@
+# Packages installed to the root file system
+
+IMAGE_INSTALL += "lib32-audio-generic-effect-framework"
+IMAGE_INSTALL += "lib32-audio-qap-wrapper"
+IMAGE_INSTALL += "lib32-audio-effects-noship"
+#DOLBY_DIR_PRESENT = "${@os.path.exists('${WORKSPACE}/prebuilt_HY11/apq8098/lib32-audio-dolby-ms12-noship') or os.path.exists('${WORKSPACE}/audio/mm-audio-noship')}"
+#IMAGE_INSTALL += "${@base_conditional('DOLBY_DIR_PRESENT', 'True', 'lib32-audio-dolby-ms12-noship', '', d)}"
+#DOLBY64_DIR_PRESENT = "${@os.path.exists('${WORKSPACE}/prebuilt_HY11/apq8098/audio-dolby-ms12-noship') or os.path.exists('${WORKSPACE}/audio/mm-audio-noship')}"
+#IMAGE_INSTALL += "${@base_conditional('DOLBY64_DIR_PRESENT', 'True', 'audio-dolby-ms12-noship', '', d)}"
+IP_HDLR_DIR_PRESENT = "${@os.path.exists('${WORKSPACE}/prebuilt_HY11/apq8098/lib32-audio-ip-handler') or os.path.exists('${WORKSPACE}/audio/mm-audio-noship')}"
+IMAGE_INSTALL += "${@base_conditional('IP_HDLR_DIR_PRESENT', 'True', 'lib32-audio-ip-handler', '', d)}"
+IP_HDLR_64_DIR_PRESENT = "${@os.path.exists('${WORKSPACE}/prebuilt_HY11/apq8098/audio-ip-handler') or os.path.exists('${WORKSPACE}/audio/mm-audio-noship')}"
+IMAGE_INSTALL += "${@base_conditional('IP_HDLR_64_DIR_PRESENT', 'True', 'audio-ip-handler', '', d)}"
+IMAGE_INSTALL += "lib32-audio-qap-wrapper"
+DTS_DIR_PRESENT = "${@os.path.exists('${WORKSPACE}/prebuilt_HY11/apq8098/lib32-audio-dts-m8-noship') or os.path.exists('${WORKSPACE}/audio/mm-audio-noship')}"
+IMAGE_INSTALL += "${@base_conditional('DTS_DIR_PRESENT', 'True', 'lib32-audio-dts-m8-noship', '', d)}"
+DTS64_DIR_PRESENT = "${@os.path.exists('${WORKSPACE}/prebuilt_HY11/apq8098/audio-dts-m8-noship') or os.path.exists('${WORKSPACE}/audio/mm-audio-noship')}"
+IMAGE_INSTALL += "${@base_conditional('DTS64_DIR_PRESENT', 'True', 'audio-dts-m8-noship', '', d)}"

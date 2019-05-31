@@ -1,0 +1,81 @@
+<script type="text/javascript">//<![CDATA[
+
+	$(function() {
+		 $("#next").click(function() {
+				if ($("#friendly-name").val() != "" && $("#friendly-name").val().length>0 ) {
+					$.post("/ui/set_friendly_name", { friendlyName : $("#friendly-name").val() })
+					.done(function() {
+					    $("#next-form").submit();
+					})
+					.fail(function() {
+					   $("#message_tip").text('<%_Device name update failed.%>').addClass('error');
+					});
+				}
+				else{
+					$("#message_tip").text('<%_Please enter a name for your device.%>').addClass('error');
+				 }
+		 });
+
+		$("#friendly-name").keyup(function(event) {
+			/* replace unicode control characters */
+			if (event.which == 13) {
+				$("#friendly-name").val( ($("#friendly-name").val()).replace(/[\u0000-\u001f]/g, ''));
+				event.preventDefault();
+				$("#next").click();
+			}
+		});
+	});
+
+//]]></script>
+
+	<div id="wrapper_root" class="force_width_outer_wrapper custom_background_image custom_background_image_friendly_name">
+		<div class="force_width_inner_wrapper">
+			<div class="language_selection_button shadow" onclick="javascript:display_language_selections();">&nbsp;</div>
+			<div class="header">
+				<div class="header_logo">&nbsp;</div><!-- /header_logo -->
+			</div><!-- /header -->
+
+			<div class="activity_header">
+				<div class="activity_title">
+				<%_Device Name%>
+				</div><!-- /activity_title -->
+			</div><!-- /activity_title_header -->
+
+			<div class="activity_content_wrapper">
+				<div class="information_field">
+					<div id="message_tip">
+					<%_Please give your device a name to identify it on the network.  Examples: Kitchen, Bedroom.%>
+					</div><!-- message_tip -->
+				<hr/>
+				</div><!-- /information_field -->
+				<div style="text-align:right"><span class="red">*</span>
+				 <%_must be completed%><br/><br/></div>
+					<div class="form_row_float_left"><span class="red">*</span> <%_Device Name%></div>
+					<div class="form_row_float_right">
+					<input type="text" id="friendly-name" class="form_text_input"
+						maxlength="60" tabindex="1" /></div>
+					<div class="float_clear"></div>
+
+
+			</div><!-- /activity_content_wrapper -->
+			<div class="activity_content_shadow_wrapper">
+				<div class="activity_content_shadow_left"></div>
+				<div class="activity_content_shadow_right"></div>
+				<div class="activity_content_shadow_middle"></div>
+				<div class="float_clear"></div>
+			</div><!-- /activity_content_shadow_wrapper -->
+
+			<!-- powered by float -->
+			<div class="powered_by_footer  float_left">&nbsp;</div>
+			<!-- /powered by float -->
+			<div class="form_button float_right" id="next" tabindex="2">
+			<%_Next%>
+			</div>
+			<div class="float_clear"></div>
+
+		</div><!-- /force_width_inner_wrapper -->
+
+		<!-- hidden form -->
+		<form id="next-form" action="/ui/select" method="post">
+		<!-- /hidden form -->
+	</form>

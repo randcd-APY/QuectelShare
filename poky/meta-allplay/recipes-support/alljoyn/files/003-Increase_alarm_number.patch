@@ -1,0 +1,12 @@
+diff -ur a/common/src/IODispatch.cc b/common/src/IODispatch.cc
+--- a/common/src/IODispatch.cc	2015-01-28 18:30:00.738561860 -0800
++++ b/common/src/IODispatch.cc	2015-01-28 18:43:56.646561760 -0800
+@@ -29,7 +29,7 @@
+ int32_t IODispatch::iodispatchCnt = 0;
+ 
+ IODispatch::IODispatch(const char* name, uint32_t concurrency) :
+-    timer((String(name) + U32ToString(IncrementAndFetch(&iodispatchCnt)).c_str()), true, concurrency, false, 96),
++    timer((String(name) + U32ToString(IncrementAndFetch(&iodispatchCnt)).c_str()), true, concurrency, false, 768),
+     reload(false),
+     isRunning(false),
+     numAlarmsInProgress(0),

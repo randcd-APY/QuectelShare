@@ -1,0 +1,4 @@
+# Appended to modules/contrib/shutdown.te in meta-selinux
+
+allow shutdown_t bin_t:lnk_file read;
+allow shutdown_t self:unix_dgram_socket create_socket_perms;

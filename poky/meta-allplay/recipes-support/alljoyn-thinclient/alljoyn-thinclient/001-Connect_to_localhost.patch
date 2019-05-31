@@ -1,0 +1,13 @@
+diff --git a/inc/aj_config.h b/inc/aj_config.h
+index 267346d..e8f8ba6 100644
+--- a/inc/aj_config.h
++++ b/inc/aj_config.h
+@@ -36,7 +36,7 @@ extern "C" {
+ #define AJ_DUMP_BYTE_SIZE           16          //aj_debug.c
+ 
+ /* Network options */
+-#define AJ_CONNECT_LOCALHOST        0           //Enable to bypass discovery and connect locally
++#define AJ_CONNECT_LOCALHOST        1           //Enable to bypass discovery and connect locally
+ #define AJ_MAX_TIMERS               4           //maximum number of timers              (aj_helper.c)
+ #define AJ_ROUTING_NODE_BLACKLIST_SIZE 16       // maximum number of blacklisted routing nodes
+ 

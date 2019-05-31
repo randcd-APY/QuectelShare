@@ -1,0 +1,112 @@
+#ifndef CSR_UI_ICON_INDEX_H__
+#define CSR_UI_ICON_INDEX_H__
+
+#include "csr_synergy.h"
+/*****************************************************************************
+
+Copyright (c) 2009-2016 Qualcomm Technologies International, Ltd.
+All Rights Reserved. 
+Qualcomm Technologies International, Ltd. Confidential and Proprietary.
+
+*****************************************************************************/
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define CSR_UI_ICON_NONE 0
+#define CSR_UI_ICON_EMPTY 1
+#define CSR_UI_ICON_BELL 2
+#define CSR_UI_ICON_BLUETOOTH 3
+#define CSR_UI_ICON_BOOK 4
+#define CSR_UI_ICON_BOX 5
+#define CSR_UI_ICON_BRICK 6
+#define CSR_UI_ICON_CALCULATOR 7
+#define CSR_UI_ICON_CALENDAR 8
+#define CSR_UI_ICON_CAMCORDER 9
+#define CSR_UI_ICON_CAMERA 10
+#define CSR_UI_ICON_CAR 11
+#define CSR_UI_ICON_CD 12
+#define CSR_UI_ICON_CD_MUSIC 13
+#define CSR_UI_ICON_CHECKBOX_CLEAR 14
+#define CSR_UI_ICON_CHECKBOX_SET 15
+#define CSR_UI_ICON_CLOCK 16
+#define CSR_UI_ICON_COMPUTER 17
+#define CSR_UI_ICON_COMPUTER_LAPTOP 18
+#define CSR_UI_ICON_CONNECT 19
+#define CSR_UI_ICON_CROSS 20
+#define CSR_UI_ICON_DEVICE 21
+#define CSR_UI_ICON_DISCONNECT 22
+#define CSR_UI_ICON_DRIVE 23
+#define CSR_UI_ICON_DRIVE_CD 24
+#define CSR_UI_ICON_DUN_GATEWAY 25
+#define CSR_UI_ICON_ERROR 26
+#define CSR_UI_ICON_EYE 27
+#define CSR_UI_ICON_FILMSTRIP 28
+#define CSR_UI_ICON_FOLDER 29
+#define CSR_UI_ICON_FOLDER_EXPLORE 30
+#define CSR_UI_ICON_FOLDER_OPEN 31
+#define CSR_UI_ICON_FOLDER_TRANSFER 32
+#define CSR_UI_ICON_GAMEPAD 33
+#define CSR_UI_ICON_GEAR 34
+#define CSR_UI_ICON_HEADPHONES 35
+#define CSR_UI_ICON_HEADSET 36
+#define CSR_UI_ICON_HEADSET_EARPLUG 37
+#define CSR_UI_ICON_HOURGLASS 38
+#define CSR_UI_ICON_IPOD 39
+#define CSR_UI_ICON_JOYSTICK 40
+#define CSR_UI_ICON_KEY 41
+#define CSR_UI_ICON_KEYBOARD 42
+#define CSR_UI_ICON_LETTER 43
+#define CSR_UI_ICON_LOCK 44
+#define CSR_UI_ICON_LOCK_OPEN 45
+#define CSR_UI_ICON_LOUDSPEAKER 46
+#define CSR_UI_ICON_MAGNIFIER 47
+#define CSR_UI_ICON_MARK_ACCEPT 48
+#define CSR_UI_ICON_MARK_ADD 49
+#define CSR_UI_ICON_MARK_CANCEL 50
+#define CSR_UI_ICON_MARK_DELETE 51
+#define CSR_UI_ICON_MARK_EXCLAMATION 52
+#define CSR_UI_ICON_MARK_HELP 53
+#define CSR_UI_ICON_MARK_INFORMATION 54
+#define CSR_UI_ICON_MARK_NUMBER1 55
+#define CSR_UI_ICON_MARK_NUMBER2 56
+#define CSR_UI_ICON_MARK_SHUTDOWN 57
+#define CSR_UI_ICON_MICROPHONE 58
+#define CSR_UI_ICON_MONITOR 59
+#define CSR_UI_ICON_MOUSE 60
+#define CSR_UI_ICON_MUSIC 61
+#define CSR_UI_ICON_NETWORK_AP 62
+#define CSR_UI_ICON_PDA 63
+#define CSR_UI_ICON_PHONE 64
+#define CSR_UI_ICON_PHONE_ONHOLD 65
+#define CSR_UI_ICON_PICTURE 66
+#define CSR_UI_ICON_PRINTER 67
+#define CSR_UI_ICON_RADIOBUTTON_CLEAR 68
+#define CSR_UI_ICON_RADIOBUTTON_SET 69
+#define CSR_UI_ICON_REMOTECONTROL 70
+#define CSR_UI_ICON_SCANNER 71
+#define CSR_UI_ICON_SERVER 72
+#define CSR_UI_ICON_SERVER_CONNECT 73
+#define CSR_UI_ICON_SOUND 74
+#define CSR_UI_ICON_SPYGLASS 75
+#define CSR_UI_ICON_TAG 76
+#define CSR_UI_ICON_TELEPHONE 77
+#define CSR_UI_ICON_TELEVISION 78
+#define CSR_UI_ICON_TEXT_SIGNATURE 79
+#define CSR_UI_ICON_TEXT_WRITE 80
+#define CSR_UI_ICON_THUMB_DOWN 81
+#define CSR_UI_ICON_THUMB_UP 82
+#define CSR_UI_ICON_TOOLS 83
+#define CSR_UI_ICON_VCARD 84
+#define CSR_UI_ICON_WEBCAM 85
+#define CSR_UI_ICON_WIFI 86
+#define CSR_UI_ICON_WORLD 87
+#define CSR_UI_ICON_WORLD_RING 88
+#define CSR_UI_ICON_WORLD_SEARCH 89
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif

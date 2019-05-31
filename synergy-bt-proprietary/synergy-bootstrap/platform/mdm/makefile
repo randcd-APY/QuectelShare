@@ -1,0 +1,34 @@
+.PHONY: all bt_bootstrap
+
+USE_MDM_PLATFORM := 1
+
+ENABLE_BTSNOOP_LOG := 1
+
+COMPILER_PREFIX := arm-linux-gnueabihf-
+TOOLCHAIN_MAKEFILE := toolchain-linux-cross-compile.cmake
+TARGET := pclin-generic-arm
+
+SYNERGY_ROOT_DIR := $(shell pwd)
+SYNERGY_BOOTSTRAP_DIR := $(SYNERGY_ROOT_DIR)/synergy-bootstrap
+SYNERGY_MIDDLEWARE_DIR := $(SYNERGY_ROOT_DIR)/synergy-middleware
+
+all: bt_bootstrap
+
+OUTPUT_DIR := output/host
+
+export TARGET USE_MDM_PLATFORM ENABLE_BTSNOOP_LOG
+
+CMAKE_BT_DEFINITION += -DCMAKE_VERBOSE_MAKEFILE:STRING=1 \
+			-DCMAKE_TOOLCHAIN_FILE:FILEPATH=$(SYNERGY_BOOTSTRAP_DIR)/build/$(TOOLCHAIN_MAKEFILE) \
+			-DENABLE_BTSNOOP_LOG:BOOL=$(ENABLE_BTSNOOP_LOG) \
+			-DUSE_MDM_PLATFORM:BOOL=$(USE_MDM_PLATFORM)
+
+bt_bootstrap:
+# copy common utility library from synergy-middleware.
+	cp -rf $(SYNERGY_MIDDLEWARE_DIR)/common/build $(SYNERGY_BOOTSTRAP_DIR)
+	cp -rf $(SYNERGY_MIDDLEWARE_DIR)/common/inc $(SYNERGY_BOOTSTRAP_DIR)
+	cp -rf $(SYNERGY_MIDDLEWARE_DIR)/common/util $(SYNERGY_BOOTSTRAP_DIR)
+
+	mkdir $(SYNERGY_BOOTSTRAP_DIR)/$(OUTPUT_DIR) -p
+	cd $(SYNERGY_BOOTSTRAP_DIR)/$(OUTPUT_DIR)&&cmake -G 'Unix Makefiles' $(SYNERGY_BOOTSTRAP_DIR) $(CMAKE_BT_DEFINITION)
+	make -C $(SYNERGY_BOOTSTRAP_DIR)/$(OUTPUT_DIR) all

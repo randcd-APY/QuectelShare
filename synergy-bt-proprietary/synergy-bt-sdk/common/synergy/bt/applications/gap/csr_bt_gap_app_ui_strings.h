@@ -1,0 +1,326 @@
+#ifndef CSR_BT_GAP_APP_UI_STRINGS_H__
+#define CSR_BT_GAP_APP_UI_STRINGS_H__
+/******************************************************************************
+ Copyright (c) 2009-2018 Qualcomm Technologies International, Ltd.
+ All Rights Reserved.
+ Qualcomm Technologies International, Ltd. Confidential and Proprietary.
+
+ REVISION:      $Revision: #2 $
+******************************************************************************/
+
+
+#include "csr_synergy.h"
+#include "csr_bt_ui_strings.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define TEXT_MAIN_MENU_STRING                               "Main Menu"
+#define TEXT_SC_MENU_STRING                                 "SC menu"
+#define TEXT_SC_MODE_MENU_STRING                            "Choose security mode"
+#define TEXT_SC_DISP_CAPB_MENU_STRING                       "Choose Display Capability"
+#define TEXT_SD_MENU_STRING                                 "SD menu"
+#define TEXT_SD_CONFIG_SEARCH_MENU_STRING                   "SD Configure Search"
+#define TEXT_SD_CONFIG_SEARCH_USE_STANDARD_STRING           "Use standard search method: "
+#define TEXT_SD_CONFIG_SEARCH_USE_PRECONFIGRED_STRING       "Use preconfigured search method: "
+#define TEXT_SD_CONFIG_SEARCH_FORCE_NAME_STRING             "Toggle force name update: "
+#define TEXT_SD_CONFIG_SEARCH_SHOW_UNKNOWN_DEVICES_STRING   "Toggle show unknown device names: "
+#define TEXT_SD_CONFIG_SEARCH_HIDE_PAIRED_STRING            "Toggle hide paired devices: "
+#define TEXT_SD_CONFIG_SEARCH_CLEAR_FILTER_STRING           "Toggle do not clear filter: "
+#define TEXT_SD_CONFIG_SEARCH_CONTINUE_AFTER_RSSI_STRING    "Toggle continue after RSSI sorting: "
+#define TEXT_SD_CONFIG_SEARCH_UNSORTED_RESULTS_STRING       "Toggle allow unsorted search results: "
+#define TEXT_SD_CONFIG_SEARCH_LOW_INQUIRY_PRIORITY_DURING_ACL_STRING "Toggle low priority inquiry during ACL: "
+#define TEXT_SD_CONFIG_SEARCH_ENABLE_SCAN_DURING_INQUIRY_STRING    "Toggle enabel inquiry scan during inquiry: "
+#define TEXT_SD_CONFIG_SEARCH_DISABLE_BT_LE_STRING          "Toggle disable LE search: "
+#define TEXT_SD_CONFIG_SEARCH_DISABLE_BT_CLASSIC_STRING     "Toggle disable BT search: "
+#define TEXT_SD_CONFIG_SEARCH_ENABLE_LE_PASSIVE_SCAN_STRING "Toggle enable passive scan on LE: "
+
+#define TEXT_CM_MENU_STRING                                 "CM menu"
+#define TEXT_BACKLOG_STRING                                 "Backlog"
+
+#define TEXT_SD_SEARCH_STRING                               "Search Devices"
+#define TEXT_SD_PROXIMITY_SEARCH_STRING                     "Search Devices Nearby"
+#define TEXT_SD_SEARCHING_STRING                            "Now Searching Devices"
+#define TEXT_SD_NO_DEVICES_FOUND_STRING                     "No Devices Found"
+#define TEXT_SD_CONFIGURE_STRING                            "Configure Search"
+#define TEXT_SD_TRUSTED_DEVICES_STRING                      "List Trusted Devices"
+#define TEXT_SD_READ_SERVICES_STRING                        "Read Available Services"
+#define TEXT_SD_READ_DEVICE_INFO_STRING                     "Read Device Info"
+
+#define TEXT_SC_PASSKEY_STRING                              "Insert passkey"
+#define TEXT_SC_SSP_PASSKEY_STRING                          "[PASSKEY:] Insert passkey"
+#define TEXT_SC_SSP_NOTIFICATION_STRING                     "[NOTIFICATION:] Passkey for Remote device is:"
+#define TEXT_SC_SSP_JUST_WORKS_STRING                       "[JUST WORKS:] Do you want to Accept the Just Works Bonding Indication?"
+#define TEXT_SC_SSP_COMPARE_STRING                          "[NUMERIC COMPARISION:] Is the number displayed below same as the one on remote device?"
+
+#define TEXT_SC_BOND_STRING                                 "Bond device"
+#define TEXT_SC_BONDING_STRING                              "Now Bonding with device"
+#define TEXT_SC_BONDING_SUCCESS_STRING                      "Bonding succeeded"
+#define TEXT_SC_BONDING_FAILED_STRING                       "Bonding failed"
+#define TEXT_SC_DEBOND_STRING                               "Debond device"
+#define TEXT_SC_MODE_STRING                                 "Change SC mode"
+#define TEXT_SC_IO_CAPB_STRING                              "Change Display Capability"
+#define TEXT_SC_CHANGING_MODE_STRING                        "Changing to sec. mode "
+#define TEXT_SC_CHANGING_IO_CAPB_STRING                     "Changing to IO mode: "
+#define TEXT_SC_CHANGING_MODE_ERROR_STRING                  "Mode change is disabled use CSR_BT_INSTALL_SC_SECURITY_MODE to enable it."
+#define TEXT_SC_SSP_COMPLETE_STRING                         "SSP complete"
+#define TEXT_SC_SSP_FAILED_STRING                           "SSP failed"
+
+#define TEXT_SC_SECMODE_1_STRING                            "Sec. mode 1: Non secure"
+#define TEXT_SC_SECMODE_2_STRING                            "Sec. mode 2: Service level security"
+#define TEXT_SC_SECMODE_2A_STRING                           "Sec. mode 2a: (custom) Automatic authorization of a device after bonding"
+#define TEXT_SC_SECMODE_3_STRING                            "Sec. mode 3: Link level security"
+#define TEXT_SC_SECMODE_4_STRING                            "Sec. mode 4: Secure Simple Pairing (Note: When first selected you can't lower the mode again)"
+
+#define TEXT_SSP_IO_CAP_DISPLAY_ONLY                        "Display Only"
+#define TEXT_SSP_IO_CAP_DISPLAY_YES_NO                      "Display Yes/no"
+#define TEXT_SSP_IO_CAP_KEYBOARD_ONLY                       "Keyboard Only"
+#define TEXT_SSP_IO_CAP_NO_IO                               "No IO"
+#define TEXT_SSP_IO_CAP_KEYBOARD_DISPLAY                    "Keyboard Display"
+
+#define TEXT_SSP_IO_CAP_DISPLAY_ONLY_REPORT                 "IO Capability set to-> Display Only"
+#define TEXT_SSP_IO_CAP_DISPLAY_YES_NO_REPORT               "IO Capability set to-> Display Yes/no"
+#define TEXT_SSP_IO_CAP_KEYBOARD_ONLY_REPORT                "IO Capability set to-> Keyboard Only"
+#define TEXT_SSP_IO_CAP_NO_IO_REPORT                        "IO Capability set to-> No IO"
+#define TEXT_SSP_IO_CAP_KEYBOARD_DISPLAY_REPORT             "IO Capability set to-> Keyboard Display"
+
+#define TEXT_SC_AUTH_REQ_MENU_STRING                        "Outgoing Auth requirement"
+#define TEXT_SC_AUTH_REQ_MENU_TITLE                         "Select Auth Requirements"
+#define TEXT_SC_MITM_NOT_REQUIRED_DEDICATED_BONDING         "NO MITM/DEDICATED BONDING"
+#define TEXT_SC_MITM_REQUIRED_DEDICATED_BONDING             "MITM/DEDICATED BONDING"
+
+#define TEXT_CM_LOCAL_NAME_STRING                           "Set local device Name"
+
+#define TEXT_GATT_MENU_STRING                               "GATT Menu"
+
+
+/* UI text defines                          */
+#define TEXT_MAIN_MENU_UCS2                                 CONVERT_TEXT_STRING_2_UCS2(TEXT_MAIN_MENU_STRING)
+#define TEXT_SC_MENU_UCS2                                   CONVERT_TEXT_STRING_2_UCS2(TEXT_SC_MENU_STRING)
+#define TEXT_SC_MODE_MENU_UCS2                              CONVERT_TEXT_STRING_2_UCS2(TEXT_SC_MODE_MENU_STRING)
+#define TEXT_SC_DISP_CAPB_MENU_UCS2                         CONVERT_TEXT_STRING_2_UCS2(TEXT_SC_DISP_CAPB_MENU_STRING)
+#define TEXT_SD_MENU_UCS2                                   CONVERT_TEXT_STRING_2_UCS2(TEXT_SD_MENU_STRING)
+#define TEXT_SD_CONFIG_SEARCH_MENU_UCS2                     CONVERT_TEXT_STRING_2_UCS2(TEXT_SD_CONFIG_SEARCH_MENU_STRING)
+#define TEXT_SD_CONFIG_SEARCH_USE_STANDARD_UCS2             CONVERT_TEXT_STRING_2_UCS2(TEXT_SD_CONFIG_SEARCH_USE_STANDARD_STRING)
+#define TEXT_SD_CONFIG_SEARCH_USE_PRECONFIGURED_UCS2        CONVERT_TEXT_STRING_2_UCS2(TEXT_SD_CONFIG_SEARCH_USE_PRECONFIGRED_STRING)
+#define TEXT_SD_CONFIG_SEARCH_FORCE_NAME_UCS2               CONVERT_TEXT_STRING_2_UCS2(TEXT_SD_CONFIG_SEARCH_FORCE_NAME_STRING)
+#define TEXT_SD_CONFIG_SEARCH_SHOW_UNKNOWN_DEVICES_UCS2     CONVERT_TEXT_STRING_2_UCS2(TEXT_SD_CONFIG_SEARCH_SHOW_UNKNOWN_DEVICES_STRING)
+#define TEXT_SD_CONFIG_SEARCH_HIDE_PAIRED_UCS2              CONVERT_TEXT_STRING_2_UCS2(TEXT_SD_CONFIG_SEARCH_HIDE_PAIRED_STRING)
+#define TEXT_SD_CONFIG_SEARCH_CLEAR_FILTER_UCS2             CONVERT_TEXT_STRING_2_UCS2(TEXT_SD_CONFIG_SEARCH_CLEAR_FILTER_STRING)
+#define TEXT_SD_CONFIG_SEARCH_CONTINUE_AFTER_RSSI_UCS2      CONVERT_TEXT_STRING_2_UCS2(TEXT_SD_CONFIG_SEARCH_CONTINUE_AFTER_RSSI_STRING)
+#define TEXT_SD_CONFIG_SEARCH_UNSORTED_RESULTS_UCS2         CONVERT_TEXT_STRING_2_UCS2(TEXT_SD_CONFIG_SEARCH_UNSORTED_RESULTS_STRING)
+#define TEXT_SD_CONFIG_SEARCH_LOW_INQUIRY_PRIORITY_DURING_ACL_UCS2 CONVERT_TEXT_STRING_2_UCS2(TEXT_SD_CONFIG_SEARCH_LOW_INQUIRY_PRIORITY_DURING_ACL_STRING)
+#define TEXT_SD_CONFIG_SEARCH_ENABLE_SCAN_DURING_INQUIRY_UCS2 CONVERT_TEXT_STRING_2_UCS2(TEXT_SD_CONFIG_SEARCH_ENABLE_SCAN_DURING_INQUIRY_STRING)
+#define TEXT_SD_CONFIG_SEARCH_DISABLE_BT_LE_UCS2            CONVERT_TEXT_STRING_2_UCS2(TEXT_SD_CONFIG_SEARCH_DISABLE_BT_LE_STRING)
+#define TEXT_SD_CONFIG_SEARCH_DISABLE_BT_CLASSIC_UCS2       CONVERT_TEXT_STRING_2_UCS2(TEXT_SD_CONFIG_SEARCH_DISABLE_BT_CLASSIC_STRING)
+#define TEXT_SD_CONFIG_SEARCH_ENABLE_LE_PASSIVE_SCAN_UCS2   CONVERT_TEXT_STRING_2_UCS2(TEXT_SD_CONFIG_SEARCH_ENABLE_LE_PASSIVE_SCAN_STRING)
+
+#define TEXT_CM_MENU_UCS2                                   CONVERT_TEXT_STRING_2_UCS2(TEXT_CM_MENU_STRING)
+#define TEXT_BACKLOG_UCS2                                   CONVERT_TEXT_STRING_2_UCS2(TEXT_BACKLOG_STRING)
+
+#define TEXT_SD_SEARCH_UCS2                                 CONVERT_TEXT_STRING_2_UCS2(TEXT_SD_SEARCH_STRING)
+#define TEXT_SD_PROXIMITY_SEARCH_UCS2                       CONVERT_TEXT_STRING_2_UCS2(TEXT_SD_PROXIMITY_SEARCH_STRING)
+#define TEXT_SD_SEARCHING_UCS2                              CONVERT_TEXT_STRING_2_UCS2(TEXT_SD_SEARCHING_STRING)
+#define TEXT_SD_NO_DEVICES_FOUND_UCS2                       CONVERT_TEXT_STRING_2_UCS2(TEXT_SD_NO_DEVICES_FOUND_STRING)
+#define TEXT_SD_CONFIGURE_SEARCH_UCS2                       CONVERT_TEXT_STRING_2_UCS2(TEXT_SD_CONFIGURE_STRING)
+#define TEXT_SD_TRUSTED_DEVICES_UCS2                        CONVERT_TEXT_STRING_2_UCS2(TEXT_SD_TRUSTED_DEVICES_STRING)
+#define TEXT_SD_READ_SERVICES_UCS2                          CONVERT_TEXT_STRING_2_UCS2(TEXT_SD_READ_SERVICES_STRING)
+#define TEXT_SD_READ_DEVICE_INFO_UCS2                       CONVERT_TEXT_STRING_2_UCS2(TEXT_SD_READ_DEVICE_INFO_STRING)
+
+#define TEXT_SC_PASSKEY_UCS2                                CONVERT_TEXT_STRING_2_UCS2(TEXT_SC_PASSKEY_STRING)
+#define TEXT_SC_SSP_PASSKEY_UCS2                            CONVERT_TEXT_STRING_2_UCS2(TEXT_SC_SSP_PASSKEY_STRING)
+#define TEXT_SC_SSP_NOTIFICATION_UCS2                       CONVERT_TEXT_STRING_2_UCS2(TEXT_SC_SSP_NOTIFICATION_STRING)
+#define TEXT_SC_SSP_COMPARE_UCS2                            CONVERT_TEXT_STRING_2_UCS2(TEXT_SC_SSP_COMPARE_STRING)
+#define TEXT_SC_JUST_WORKS_UCS2                             CONVERT_TEXT_STRING_2_UCS2(TEXT_SC_SSP_JUST_WORKS_STRING)
+
+#define TEXT_SC_BOND_UCS2                                   CONVERT_TEXT_STRING_2_UCS2(TEXT_SC_BOND_STRING)
+#define TEXT_SC_BONDING_UCS2                                CONVERT_TEXT_STRING_2_UCS2(TEXT_SC_BONDING_STRING)
+#define TEXT_SC_BONDING_SUCCESS_UCS2                        CONVERT_TEXT_STRING_2_UCS2(TEXT_SC_BONDING_SUCCESS_STRING)
+#define TEXT_SC_BONDING_FAILED_UCS2                         CONVERT_TEXT_STRING_2_UCS2(TEXT_SC_BONDING_FAILED_STRING)
+#define TEXT_SC_DEBOND_UCS2                                 CONVERT_TEXT_STRING_2_UCS2(TEXT_SC_DEBOND_STRING)
+#define TEXT_SC_MODE_UCS2                                   CONVERT_TEXT_STRING_2_UCS2(TEXT_SC_MODE_STRING)
+#define TEXT_SC_IO_CAPB_UCS2                                CONVERT_TEXT_STRING_2_UCS2(TEXT_SC_IO_CAPB_STRING)
+#define TEXT_SC_SSP_COMPLETE_UCS2                           CONVERT_TEXT_STRING_2_UCS2(TEXT_SC_SSP_COMPLETE_STRING)
+#define TEXT_SC_SSP_FAILED_UCS2                             CONVERT_TEXT_STRING_2_UCS2(TEXT_SC_SSP_FAILED_STRING)
+
+#define TEXT_SC_CHANGING_MODE_UCS2                          CONVERT_TEXT_STRING_2_UCS2(TEXT_SC_CHANGING_MODE_STRING)
+#define TEXT_SC_CHANGING_MODE_ERROR_STRING_UCS              CONVERT_TEXT_STRING_2_UCS2(TEXT_SC_CHANGING_MODE_ERROR_STRING)
+
+#define TEXT_SC_CHANGING_IO_CAPB_UCS2                       CONVERT_TEXT_STRING_2_UCS2(TEXT_SC_CHANGING_IO_CAPB_STRING)
+
+#define TEXT_SC_SECMODE_1_UCS2                              CONVERT_TEXT_STRING_2_UCS2(TEXT_SC_SECMODE_1_STRING)
+#define TEXT_SC_SECMODE_2_UCS2                              CONVERT_TEXT_STRING_2_UCS2(TEXT_SC_SECMODE_2_STRING)
+#define TEXT_SC_SECMODE_2A_UCS2                             CONVERT_TEXT_STRING_2_UCS2(TEXT_SC_SECMODE_2A_STRING)
+#define TEXT_SC_SECMODE_3_UCS2                              CONVERT_TEXT_STRING_2_UCS2(TEXT_SC_SECMODE_3_STRING)
+#define TEXT_SC_SECMODE_4_UCS2                              CONVERT_TEXT_STRING_2_UCS2(TEXT_SC_SECMODE_4_STRING)
+
+#define TEXT_SSP_IO_CAP_DISPLAY_ONLY_UCS2                   CONVERT_TEXT_STRING_2_UCS2(TEXT_SSP_IO_CAP_DISPLAY_ONLY)
+#define TEXT_SSP_IO_CAP_DISPLAY_YES_NO_UCS2                 CONVERT_TEXT_STRING_2_UCS2(TEXT_SSP_IO_CAP_DISPLAY_YES_NO)
+#define TEXT_SSP_IO_CAP_KEYBOARD_ONLY_UCS2                  CONVERT_TEXT_STRING_2_UCS2(TEXT_SSP_IO_CAP_KEYBOARD_ONLY)
+#define TEXT_SSP_IO_CAP_NO_IO_UCS2                          CONVERT_TEXT_STRING_2_UCS2(TEXT_SSP_IO_CAP_NO_IO)
+#define TEXT_SSP_IO_CAP_KEYBOARD_DISPLAY_UCS2               CONVERT_TEXT_STRING_2_UCS2(TEXT_SSP_IO_CAP_KEYBOARD_DISPLAY)
+
+
+#define TEXT_SSP_IO_CAP_DISPLAY_ONLY_REPORT_UCS2            CONVERT_TEXT_STRING_2_UCS2(TEXT_SSP_IO_CAP_DISPLAY_ONLY_REPORT)
+#define TEXT_SSP_IO_CAP_DISPLAY_YES_NO_REPORT_UCS2          CONVERT_TEXT_STRING_2_UCS2(TEXT_SSP_IO_CAP_DISPLAY_YES_NO_REPORT)
+#define TEXT_SSP_IO_CAP_KEYBOARD_ONLY_REPORT_UCS2           CONVERT_TEXT_STRING_2_UCS2(TEXT_SSP_IO_CAP_KEYBOARD_ONLY_REPORT)
+#define TEXT_SSP_IO_CAP_NO_IO_REPORT_UCS2                   CONVERT_TEXT_STRING_2_UCS2(TEXT_SSP_IO_CAP_NO_IO_REPORT)
+#define TEXT_SSP_IO_CAP_KEYBOARD_DISPLAY_REPORT_UCS2        CONVERT_TEXT_STRING_2_UCS2(TEXT_SSP_IO_CAP_KEYBOARD_DISPLAY_REPORT)
+
+#define TEXT_SC_AUTH_REQ_MENU_STRING_UCS2                   CONVERT_TEXT_STRING_2_UCS2(TEXT_SC_AUTH_REQ_MENU_STRING)
+#define TEXT_SC_AUTH_REQ_MENU_TITLE_UCS2                    CONVERT_TEXT_STRING_2_UCS2(TEXT_SC_AUTH_REQ_MENU_TITLE)
+#define TEXT_SC_MITM_NOT_REQUIRED_DEDICATED_BONDING_UCS2    CONVERT_TEXT_STRING_2_UCS2(TEXT_SC_MITM_NOT_REQUIRED_DEDICATED_BONDING)
+#define TEXT_SC_MITM_REQUIRED_DEDICATED_BONDING_UCS2        CONVERT_TEXT_STRING_2_UCS2(TEXT_SC_MITM_REQUIRED_DEDICATED_BONDING)
+
+#define TEXT_CM_LOCAL_NAME_UCS2                             CONVERT_TEXT_STRING_2_UCS2(TEXT_CM_LOCAL_NAME_STRING)
+
+#define TEXT_GATT_MENU_UCS2                                 CONVERT_TEXT_STRING_2_UCS2(TEXT_GATT_MENU_STRING)
+
+/*Bluetooth Service Discovery releated strings                              */
+
+/* Text string for knownServices11_00_31                                    */
+#define TEXT_SPP_STRING                         "Serial Port"
+#define TEXT_LAN_ACCESS_USING_PPP_STRING        "LANAccessUsingPPP"
+#define TEXT_DIAL_UP_NETWOKING_STRING           "Dialup Networking"
+#define TEXT_IR_MC_SYNC_STRING                  "IrMCSync"
+#define TEXT_OPC_STRING                         "Object Push"
+#define TEXT_FTC_STRING                         "File Transfer"
+#define TEXT_BPP_STRING                         "Basic Printing"
+#define TEXT_IR_MC_SYNC_COMMAND_STRING          "IrMCSyncCommand"
+#define TEXT_HS_STRING                          "Headset"
+#define TEXT_CORDLESS_TELEPHONY_STRING          "CordlessTelephony"
+#define TEXT_AUDIO_SOURCE_STRING                "Audio Source"
+#define TEXT_AUDIO_SINK_STRING                  "Audio Sink"
+#define TEXT_AV_REMOTECONTROL_TARGET_STRING     "Remote Control TG"
+#define TEXT_ADVANCED_AUDIO_DIST_SER_STRING     "Advanced Audio"
+#define TEXT_AV_REMOTE_CONTROL_SER_STRING       "Remote Control CT"
+#define TEXT_VIDEO_CONFERENCING_STRING          "VideoConferencing"
+#define TEXT_INTERCOM_STRING                    "Intercom"
+#define TEXT_FAX_STRING                         "Fax"
+#define TEXT_HEADSET_AUDIO_GATEWAY_STRING       "Audio Gateway"
+#define TEXT_WAP_STRING                         "Wap"
+#define TEXT_WAP_CLIENT_STRING                  "Wap Client"
+#define TEXT_PANU_STRING                        "PANU"
+#define TEXT_NAP_STRING                         "NAP"
+#define TEXT_GN_STRING                          "GN"
+#define TEXT_DIRECT_PRINTING_STRING             "Direct Printing"
+#define TEXT_REFERENCE_PRINTING_STRING          "ReferencePrinting"
+#define TEXT_IMAGING_STRING                     "Imaging"
+#define TEXT_IMAGING_RESPONDER_STRING           "ImagingResponder"
+#define TEXT_IMAGING_AUTOMATIC_ARCHIVE_STRING   "ImagingAutoArch"
+#define TEXT_IMAGING_REFERENCE_OBJECTS_STRING   "ImagingRefObjects"
+#define TEXT_HF_STRING                          "Handsfree"
+#define TEXT_HANDSFREE_AUDIO_GATEWAY_STRING     "Handsfree Gateway"
+#define TEXT_DIRECT_PRINT_REF_OBJ_SER_STRING    "DirectPrintRefObj"
+
+/* Text string for knownServices11_32_63                                    */
+#define TEXT_REFLECTED_UI_STRING                "ReflectedUI"
+#define TEXT_BASIC_PRINTING_STRING              "BasicPrinting"
+#define TEXT_PRINTING_STATUS_STRING             "PrintingStatus"
+#define TEXT_HUMAN_INTERFACE_DEVICE_STRING      "HumanInterface"
+#define TEXT_HCRP_STRING                        "HCRP"
+#define TEXT_HCR_PRINT_SERVICE_STRING           "HCRPrintService"
+#define TEXT_HCR_SCAN_SERVICE_STRING            "HCRScanService"
+#define TEXT_COMMON_ISDN_ACCESS_STRING          "CommonISDNService"
+#define TEXT_VIDEO_CONFERENCING_GW_STRING       "VideoConferenceGW"
+#define TEXT_UDI_MT_SERVICE_STRING              "UDI MT Service"
+#define TEXT_UDI_TA_SERVICE_STRING              "UDI TA Service"
+#define TEXT_AUDIO_VIDEO_SERVICE_STRING         "AudioVideoService"
+#define TEXT_SIM_ACCESS_SERVICE_STRING          "SimAccessService"
+#define TEXT_PHONEBOOK_ACCESS_PCE_STRING        "PhoneBookAccessPCE"
+#define TEXT_PHONEBOOK_ACCESS_PSE_STRING        "PhoneBookAccessPSE"
+
+/* Text string for knownServices12_00_31                                    */
+#define TEXT_PNP_INFORMATION_STRING             "PNPInformation"
+#define TEXT_GENERIC_NETWORKING_STRING          "GenericNetworking"
+#define TEXT_GENERIC_FILE_TRANSFER_STRING       "GenericFileTransfer"
+#define TEXT_GENERIC_AUDIO_STRING               "GenericAudio"
+#define TEXT_GENERIC_TELEPHONY_STRING           "GenericTelephony"
+#define TEXT_UPNP_SERVICE_STRING                "UPNP_Service"
+#define TEXT_UPNP_IP_SERVICE_STRING             "UPNP_IP_Service"
+
+/* Text string for knownServices13_00_31                                    */
+#define TEXT_ESDP_UPNP_IP_PAN_STRING            "ESDP_UPNP_IP_PAN"
+#define TEXT_ESDP_UPNP_IP_LAP_STRING            "ESDP_UPNP_IP_LAP"
+#define TEXT_ESDP_UPNP_L2CAP_STRING             "ESDP_UPNP_IP_L2CAP"
+#define TEXT_VIDEO_SOURCE_STRING                "VideoSource"
+#define TEXT_VIDEO_SINK_STRING                  "VideoSink"
+#define TEXT_VIDEO_DISTRIBUTION_STRING          "VideoDistribution"
+
+/* ucs2 string for knownServices11_00_31                                    */
+#define TEXT_SPP_UCS2                       CONVERT_TEXT_STRING_2_UCS2(TEXT_SPP_STRING)
+#define TEXT_LAN_ACCESS_USING_PPP_UCS2      CONVERT_TEXT_STRING_2_UCS2(TEXT_LAN_ACCESS_USING_PPP_STRING)
+#define TEXT_DIAL_UP_NETWOKING_UCS2         CONVERT_TEXT_STRING_2_UCS2(TEXT_DIAL_UP_NETWOKING_STRING)
+#define TEXT_IR_MC_SYNC_UCS2                CONVERT_TEXT_STRING_2_UCS2(TEXT_IR_MC_SYNC_STRING)
+#define TEXT_OPC_UCS2                       CONVERT_TEXT_STRING_2_UCS2(TEXT_OPC_STRING)
+#define TEXT_FTC_UCS2                       CONVERT_TEXT_STRING_2_UCS2(TEXT_FTC_STRING)
+#define TEXT_BPP_UCS2                       CONVERT_TEXT_STRING_2_UCS2(TEXT_BPP_STRING)
+#define TEXT_IR_MC_SYNC_COMMAND_UCS2        CONVERT_TEXT_STRING_2_UCS2(TEXT_IR_MC_SYNC_COMMAND_STRING)
+#define TEXT_HS_UCS2                        CONVERT_TEXT_STRING_2_UCS2(TEXT_HS_STRING)
+#define TEXT_CORDLESS_TELEPHONY_UCS2        CONVERT_TEXT_STRING_2_UCS2(TEXT_CORDLESS_TELEPHONY_STRING)
+#define TEXT_AUDIO_SOURCE_UCS2              CONVERT_TEXT_STRING_2_UCS2(TEXT_AUDIO_SOURCE_STRING)
+#define TEXT_AUDIO_SINK_UCS2                CONVERT_TEXT_STRING_2_UCS2(TEXT_AUDIO_SINK_STRING)
+#define TEXT_AV_REMOTECONTROL_TARGET_UCS2   CONVERT_TEXT_STRING_2_UCS2(TEXT_AV_REMOTECONTROL_TARGET_STRING)
+#define TEXT_ADVANCED_AUDIO_DIST_SER_UCS2   CONVERT_TEXT_STRING_2_UCS2(TEXT_ADVANCED_AUDIO_DIST_SER_STRING)
+#define TEXT_AV_REMOTE_CONTROL_SER_UCS2     CONVERT_TEXT_STRING_2_UCS2(TEXT_AV_REMOTE_CONTROL_SER_STRING)
+#define TEXT_VIDEO_CONFERENCING_UCS2        CONVERT_TEXT_STRING_2_UCS2(TEXT_VIDEO_CONFERENCING_STRING)
+#define TEXT_INTERCOM_UCS2                  CONVERT_TEXT_STRING_2_UCS2(TEXT_INTERCOM_STRING)
+#define TEXT_FAX_UCS2                       CONVERT_TEXT_STRING_2_UCS2(TEXT_FAX_STRING)
+#define TEXT_HEADSET_AUDIO_GATEWAY_UCS2     CONVERT_TEXT_STRING_2_UCS2(TEXT_HEADSET_AUDIO_GATEWAY_STRING)
+#define TEXT_WAP_UCS2                       CONVERT_TEXT_STRING_2_UCS2(TEXT_WAP_STRING)
+#define TEXT_WAP_CLIENT_UCS2                CONVERT_TEXT_STRING_2_UCS2(TEXT_WAP_CLIENT_STRING)
+#define TEXT_PANU_UCS2                      CONVERT_TEXT_STRING_2_UCS2(TEXT_PANU_STRING)
+#define TEXT_NAP_UCS2                       CONVERT_TEXT_STRING_2_UCS2(TEXT_NAP_STRING)
+#define TEXT_GN_UCS2                        CONVERT_TEXT_STRING_2_UCS2(TEXT_GN_STRING)
+#define TEXT_DIRECT_PRINTING_UCS2           CONVERT_TEXT_STRING_2_UCS2(TEXT_DIRECT_PRINTING_STRING)
+#define TEXT_REFERENCE_PRINTING_UCS2        CONVERT_TEXT_STRING_2_UCS2(TEXT_REFERENCE_PRINTING_STRING)
+#define TEXT_IMAGING_UCS2                   CONVERT_TEXT_STRING_2_UCS2(TEXT_IMAGING_STRING)
+#define TEXT_IMAGING_RESPONDER_UCS2         CONVERT_TEXT_STRING_2_UCS2(TEXT_IMAGING_RESPONDER_STRING)
+#define TEXT_IMAGING_AUTOMATIC_ARCHIVE_UCS2 CONVERT_TEXT_STRING_2_UCS2(TEXT_IMAGING_AUTOMATIC_ARCHIVE_STRING)
+#define TEXT_IMAGING_REFERENCE_OBJECTS_UCS2 CONVERT_TEXT_STRING_2_UCS2(TEXT_IMAGING_REFERENCE_OBJECTS_STRING)
+#define TEXT_HF_UCS2                        CONVERT_TEXT_STRING_2_UCS2(TEXT_HF_STRING)
+#define TEXT_HANDSFREE_AUDIO_GATEWAY_UCS2   CONVERT_TEXT_STRING_2_UCS2(TEXT_HANDSFREE_AUDIO_GATEWAY_STRING)
+#define TEXT_DIRECT_PRINT_REF_OBJ_SER_UCS2  CONVERT_TEXT_STRING_2_UCS2(TEXT_DIRECT_PRINT_REF_OBJ_SER_STRING)
+
+/* ucs2 string for knownServices11_32_63                                    */
+#define TEXT_REFLECTED_UI_UCS2              CONVERT_TEXT_STRING_2_UCS2(TEXT_REFLECTED_UI_STRING)
+#define TEXT_BASIC_PRINTING_UCS2            CONVERT_TEXT_STRING_2_UCS2(TEXT_BASIC_PRINTING_STRING)
+#define TEXT_PRINTING_STATUS_UCS2           CONVERT_TEXT_STRING_2_UCS2(TEXT_PRINTING_STATUS_STRING)
+#define TEXT_HUMAN_INTERFACE_DEVICE_UCS2    CONVERT_TEXT_STRING_2_UCS2(TEXT_HUMAN_INTERFACE_DEVICE_STRING)
+#define TEXT_HCRP_UCS2                      CONVERT_TEXT_STRING_2_UCS2(TEXT_HCRP_STRING)
+#define TEXT_HCR_PRINT_SERVICE_UCS2         CONVERT_TEXT_STRING_2_UCS2(TEXT_HCR_PRINT_SERVICE_STRING)
+#define TEXT_HCR_SCAN_SERVICE_UCS2          CONVERT_TEXT_STRING_2_UCS2(TEXT_HCR_SCAN_SERVICE_STRING)
+#define TEXT_COMMON_ISDN_ACCESS_UCS2        CONVERT_TEXT_STRING_2_UCS2(TEXT_COMMON_ISDN_ACCESS_STRING)
+#define TEXT_VIDEO_CONFERENCING_GW_UCS2     CONVERT_TEXT_STRING_2_UCS2(TEXT_VIDEO_CONFERENCING_GW_STRING)
+#define TEXT_UDI_MT_SERVICE_UCS2            CONVERT_TEXT_STRING_2_UCS2(TEXT_UDI_MT_SERVICE_STRING)
+#define TEXT_UDI_TA_SERVICE_UCS2            CONVERT_TEXT_STRING_2_UCS2(TEXT_UDI_TA_SERVICE_STRING)
+#define TEXT_AUDIO_VIDEO_SERVICE_UCS2       CONVERT_TEXT_STRING_2_UCS2(TEXT_AUDIO_VIDEO_SERVICE_STRING)
+#define TEXT_SIM_ACCESS_SERVICE_UCS2        CONVERT_TEXT_STRING_2_UCS2(TEXT_SIM_ACCESS_SERVICE_STRING)
+#define TEXT_PHONEBOOK_ACCESS_PCE_UCS2      CONVERT_TEXT_STRING_2_UCS2(TEXT_PHONEBOOK_ACCESS_PCE_STRING)
+#define TEXT_PHONEBOOK_ACCESS_PSE_UCS2      CONVERT_TEXT_STRING_2_UCS2(TEXT_PHONEBOOK_ACCESS_PSE_STRING)
+
+/* ucs2 string for knownServices12_00_31                                    */
+#define TEXT_PNP_INFORMATION_UCS2           CONVERT_TEXT_STRING_2_UCS2(TEXT_PNP_INFORMATION_STRING)
+#define TEXT_GENERIC_NETWORKING_UCS2        CONVERT_TEXT_STRING_2_UCS2(TEXT_GENERIC_NETWORKING_STRING)
+#define TEXT_GENERIC_FILE_TRANSFER_UCS2     CONVERT_TEXT_STRING_2_UCS2(TEXT_GENERIC_FILE_TRANSFER_STRING)
+#define TEXT_GENERIC_AUDIO_UCS2             CONVERT_TEXT_STRING_2_UCS2(TEXT_GENERIC_AUDIO_STRING)
+#define TEXT_GENERIC_TELEPHONY_UCS2         CONVERT_TEXT_STRING_2_UCS2(TEXT_GENERIC_TELEPHONY_STRING)
+#define TEXT_UPNP_SERVICE_UCS2              CONVERT_TEXT_STRING_2_UCS2(TEXT_UPNP_SERVICE_STRING)
+#define TEXT_UPNP_IP_SERVICE_UCS2           CONVERT_TEXT_STRING_2_UCS2(TEXT_UPNP_IP_SERVICE_STRING)
+
+/* ucs2 string for knownServices13_00_31                                    */
+#define TEXT_ESDP_UPNP_IP_PAN_UCS2          CONVERT_TEXT_STRING_2_UCS2(TEXT_ESDP_UPNP_IP_PAN_STRING)
+#define TEXT_ESDP_UPNP_IP_LAP_UCS2          CONVERT_TEXT_STRING_2_UCS2(TEXT_ESDP_UPNP_IP_LAP_STRING)
+#define TEXT_ESDP_UPNP_L2CAP_UCS2           CONVERT_TEXT_STRING_2_UCS2(TEXT_ESDP_UPNP_L2CAP_STRING)
+#define TEXT_VIDEO_SOURCE_UCS2              CONVERT_TEXT_STRING_2_UCS2(TEXT_VIDEO_SOURCE_STRING)
+#define TEXT_VIDEO_SINK_UCS2                CONVERT_TEXT_STRING_2_UCS2(TEXT_VIDEO_SINK_STRING)
+#define TEXT_VIDEO_DISTRIBUTION_UCS2        CONVERT_TEXT_STRING_2_UCS2(TEXT_VIDEO_DISTRIBUTION_STRING)
+
+#ifdef __cplusplus
+}
+#endif
+
+
+
+#endif /* CSR_BT_GAP_APP_UI_STRINGS_H__ */

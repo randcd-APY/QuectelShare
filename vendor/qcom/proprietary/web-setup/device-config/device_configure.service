@@ -1,0 +1,15 @@
+[Unit]
+Description=Device base service
+Before=QCMAP_ConnectionManagerd.service
+Wants=leprop.service
+After=leprop.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStartPre=/bin/sh -c '[ "$(getprop websetup.enable false)" != "false" ]'
+ExecStart=/usr/sbin/device_configure
+
+[Install]
+WantedBy=multi-user.target
+WantedBy=QCMAP_ConnectionManagerd.service

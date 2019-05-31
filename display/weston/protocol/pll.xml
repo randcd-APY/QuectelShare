@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="pll">
+
+  <copyright>
+    Copyright (c) 2017, The Linux Foundation. All rights reserved.
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions are
+    met:
+    * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+    copyright notice, this list of conditions and the following
+    disclaimer in the documentation and/or other materials provided
+    with the distribution.
+    * Neither the name of The Linux Foundation nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+    THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED
+    WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT
+    ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+    BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+    CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+    SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+    BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+    WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+    OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+    IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  </copyright>
+
+  <interface name="wl_pll" version="1">
+    <description summary="PLL update for clock recovery">
+      The global interface exposing PLL updating capabilities is used
+      to update HDMI PLL in order to compensate the PLL drift during
+      AV transmission.
+    </description>
+
+    <request name="destroy" type="destructor">
+      <description summary="unbind from the PLL interface">
+        Inform the server that the client will not be using this
+        protocol object anymore.
+      </description>
+    </request>
+
+    <request name="enable_ppm">
+      <description summary="Enable display PLL update function">
+        Enable or diable the display PLL update function according to
+        the input parameter. The ppm changes will be valid only if it
+        enabled, and all ppm changes done to hardward will be discarded
+        once it is disabled.
+      </description>
+
+      <arg name="enable" type="int" summary="enable or diable"/>
+    </request>
+
+    <request name="set_ppm">
+      <description summary="Update display PLL by the ppm parameter">
+        Adjust the display PLL by some ratio which is indicated by the
+        input ppm parameter.
+      </description>
+
+      <arg name="ppm" type="int" summary="the ratio of PLL change"/>
+    </request>
+  </interface>
+</protocol>

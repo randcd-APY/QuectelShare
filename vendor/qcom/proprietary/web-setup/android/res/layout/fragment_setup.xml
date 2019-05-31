@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ Copyright (C) 2017 Qualcomm Technologies, Inc.
+ All rights reserved
+ Confidential and Proprietary - Qualcomm Technologies, Inc.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:orientation="vertical">
+
+	<FrameLayout
+		android:id="@+id/setup_frame"
+		android:layout_width="match_parent"
+		android:layout_height="0dp"
+		android:layout_weight="1"/>
+
+	<Button
+		android:layout_width="match_parent"
+		android:layout_height="@dimen/setup_fragment_button_height"
+		android:layout_marginLeft="@dimen/setup_fragment_button_horizontal_margin"
+		android:layout_marginRight="@dimen/setup_fragment_button_horizontal_margin"
+		android:layout_marginBottom="@dimen/setup_fragment_button_vertical_margin"
+		android:id="@+id/setup_top_button"
+		style="@style/SetupFragmentButton"/>
+
+	<Button
+		android:layout_width="match_parent"
+		android:layout_height="@dimen/setup_fragment_button_height"
+		android:layout_marginLeft="@dimen/setup_fragment_button_horizontal_margin"
+		android:layout_marginRight="@dimen/setup_fragment_button_horizontal_margin"
+		android:layout_marginBottom="@dimen/setup_fragment_button_vertical_margin"
+		android:id="@+id/setup_middle_button"
+		style="@style/SetupFragmentButton"/>
+
+	<Button
+		android:layout_width="match_parent"
+		android:layout_height="@dimen/setup_fragment_button_height"
+		android:layout_marginLeft="@dimen/setup_fragment_button_horizontal_margin"
+		android:layout_marginRight="@dimen/setup_fragment_button_horizontal_margin"
+		android:layout_marginBottom="@dimen/setup_fragment_button_horizontal_margin"
+		android:id="@+id/setup_bottom_button"
+		style="@style/SetupFragmentButton"/>
+</LinearLayout>

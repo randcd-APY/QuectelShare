@@ -1,0 +1,1948 @@
+/*****************************************************************************
+  @FILE     mcm_sim_v01.idl
+
+  @BRIEF    Mobile Connection Manager Subscriber Identity Module (MCM_SIM)
+
+  @DESCRIPTION
+    IoE Mobile Connection Manager Subscriber Identity Module API (MCM_SIM)
+
+    This API provides Data Structures for managing the Subscriber Identity
+    Module (SIM) aka SIM, USIM, CSIM, RUIM.
+
+  MCM API Major Version 0
+  MCM API Minor Version 1
+
+  @COPYRIGHT Copyright (c) 2013 Qualcomm Technologies, Inc.
+  All rights reserved.
+  Confidential and Proprietary - Qualcomm Technologies, Inc.
+*****************************************************************************/
+
+include "mcm_common_v01.idl";
+
+revision 1;
+
+//=============================================================================
+// CONSTANTS
+//=============================================================================
+const MCM_SIM_IMSI_LEN                  = 16;    //!< Maximum length of IMSI data.
+const MCM_SIM_ICCID_LEN                 = 20;    //!< Maximum length of ICCID data.
+const MCM_SIM_NUM_PLMN_MAX              = 24;    //!< Maximum number of PLMN data sets.
+const MCM_SIM_CHAR_PATH_MAX             = 20;    //!< Maximum length of a full file path in ASCII format.
+const MCM_SIM_DATA_MAX                  = 4096;  //!< Maximum size of data to be read/written.
+const MCM_SIM_PIN_MAX                   = 8;     //!< Maximum length of PIN data.
+const MCM_SIM_MAX_NUM_CARDS             = 2;     //!< Maximum number of cards.
+const MCM_SIM_MAX_REFRESH_FILES         = 35;    //!< Maximum number of refresh files.
+const MCM_SIM_MAX_BINARY_PATHS          = 10;    //!< Maximum length of a full file path in binary format.
+const MCM_SIM_CK_MAX                    = 16;    //!< Maximum length of personalization control key data
+const MCM_SIM_MCC_LEN                   = 3;     //!< Length of the MCC.
+const MCM_SIM_MNC_MAX                   = 3;     //!< Maximum length of the MNC.
+const MCM_SIM_PHONE_NUMBER_MAX          = 82;    //!< Maximum phone number length.
+const MCM_SIM_IRM_CODE_LEN              = 4;     //!< Length of the IRM code.
+const MCM_SIM_MSIN_MAX                  = 10;    //!< Maximum length of the MSIN.
+const MCM_SIM_PERSO_NUM_NW_MAX          = 85;    //!< Maximum number of network personalization data sets.
+const MCM_SIM_PERSO_NUM_NS_MAX          = 64;    //!< Maximum number of network subset personalization data sets.
+const MCM_SIM_PERSO_NUM_GW_SP_MAX       = 64;    //!< Maximum number of service provider personalization data sets.
+const MCM_SIM_PERSO_NUM_GW_CP_MAX       = 51;    //!< Maximum number of corporate personalization data sets.
+const MCM_SIM_PERSO_NUM_SIM_MAX         = 32;    //!< Maximum number of SIM personalization data sets.
+const MCM_SIM_PERSO_NUM_1X_NW2_MAX      = 128;   //!< Maximum number of network type 2 personalization data sets.
+
+
+//=============================================================================
+// DATA TYPES
+//=============================================================================
+enum {
+  MCM_SIM_SLOT_ID_1 = 0xB01,
+  /**< Identify card in slot 1. */
+  MCM_SIM_SLOT_ID_2
+  /**< Identify card in slot 2. */
+} mcm_sim_slot_id_t;  //!< SIM slot ID.
+
+enum {
+  MCM_SIM_APP_TYPE_UNKNOWN = 0xB00,
+  /**< Unknown application type. */
+  MCM_SIM_APP_TYPE_3GPP,
+  /**< Identify the SIM/USIM application on the card. */
+  MCM_SIM_APP_TYPE_3GPP2,
+  /**< Identify the RUIM/CSIM application on the card. */
+  MCM_SIM_APP_TYPE_ISIM
+  /**< Identify the ISIM application on the card. */
+} mcm_sim_app_type_t;  //!< SIM application type.
+
+enum {
+  MCM_SIM_FILE_TYPE_UNKNOWN = 0xB00,
+  /**< Unknown file type. */
+  MCM_SIM_FILE_TYPE_TRANSPARENT,
+  /**< File structure consisting of a sequence of bytes. */
+  MCM_SIM_FILE_TYPE_CYCLIC,
+  /**< File structure consisting of a sequence of records, each
+       containing the same fixed size in chronological order.
+       Once all the records have been used, the oldest data is
+       overwritten. */
+  MCM_SIM_FILE_TYPE_LINEAR_FIXED
+  /**< File structure consisting of a sequence of records, each
+       containing the same fixed size. */
+} mcm_sim_file_type_t;  //!< SIM file type.
+
+enum {
+  MCM_SIM_PIN_ID_1 = 0xB01,
+  /**< Level 1 user verification. */
+  MCM_SIM_PIN_ID_2
+  /**< Level 2 user verification. */
+} mcm_sim_pin_id_t;  //!< SIM PIN ID.
+
+enum {
+  MCM_SIM_PERSO_FEATURE_STATUS_UNKNOWN = 0xB00,
+  /**< Unknown personalization feature. */
+  MCM_SIM_PERSO_FEATURE_STATUS_3GPP_NETWORK,
+  /**< Featurization based on 3GPP MCC and MNC. */
+  MCM_SIM_PERSO_FEATURE_STATUS_3GPP_NETWORK_SUBSET,
+  /**< Featurization based on 3GPP MCC, MNC, and IMSI digits 6 and 7. */
+  MCM_SIM_PERSO_FEATURE_STATUS_3GPP_SERVICE_PROVIDER,
+  /**< Featurization based on 3GPP MCC, MNC, and GID1. */
+  MCM_SIM_PERSO_FEATURE_STATUS_3GPP_CORPORATE,
+  /**< Featurization based on 3GPP MCC, MNC, GID1, and GID2. */
+  MCM_SIM_PERSO_FEATURE_STATUS_3GPP_SIM,
+  /**< Featurization based on the 3GPP IMSI. */
+  MCM_SIM_PERSO_FEATURE_STATUS_3GPP2_NETWORK_TYPE_1,
+  /**< Featurization based on 3GPP2 MCC and MNC. */
+  MCM_SIM_PERSO_FEATURE_STATUS_3GPP2_NETWORK_TYPE_2,
+  /**< Featurization based on 3GPP2 IRM code. */
+  MCM_SIM_PERSO_FEATURE_STATUS_3GPP2_RUIM
+  /**< Featurization based on 3GPP2 IMSI_M. */
+} mcm_sim_perso_feature_t;
+
+enum {
+  MCM_SIM_PERSO_OPERATION_DEACTIVATE = 0xB00,
+  /**< Disable an active personalization feature. */
+  MCM_SIM_PERSO_OPERATION_UNBLOCK
+  /**< Unblock a personalization feature that has been blocked. */
+} mcm_sim_perso_operation_t;
+
+enum {
+  MCM_SIM_CARD_TYPE_UNKNOWN = 0xB00,
+  /**< Unidentified card type. */
+  MCM_SIM_CARD_TYPE_ICC,
+  /**< Card of SIM or RUIM type. */
+  MCM_SIM_CARD_TYPE_UICC
+  /**< Card of USIM or CSIM type. */
+} mcm_sim_card_t;
+
+enum {
+  MCM_SIM_PROV_STATE_NONE = 0xB00,
+  /**< Nonprovisioning. */
+  MCM_SIM_PROV_STATE_PRI,
+  /**< Primary provisioning subscription. */
+  MCM_SIM_PROV_STATE_SEC
+  /**< Secondary provisioning subscription. */
+} mcm_sim_subscription_t;
+
+enum {
+  MCM_SIM_APP_STATE_UNKNOWN = 0xB00,
+  /**< Application state unknown. */
+  MCM_SIM_APP_STATE_DETECTED,
+  /**< Detected state. */
+  MCM_SIM_APP_STATE_PIN1_REQ,
+  /**< PIN1 required. */
+  MCM_SIM_APP_STATE_PUK1_REQ,
+  /**< PUK1 required. */
+  MCM_SIM_APP_STATE_INITALIZATING,
+  /**< Initializing. */
+  MCM_SIM_APP_STATE_PERSO_CK_REQ,
+  /**< Personalization control key required. */
+  MCM_SIM_APP_STATE_PERSO_PUK_REQ,
+  /**< Personalization unblock key required. */
+  MCM_SIM_APP_STATE_PERSO_PERMANENTLY_BLOCKED,
+  /**< Personalization is permanently blocked. */
+  MCM_SIM_APP_STATE_PIN1_PERM_BLOCKED,
+  /**< PIN1 is permanently blocked. */
+  MCM_SIM_APP_STATE_ILLEGAL,
+  /**< Illegal application state. */
+  MCM_SIM_APP_STATE_READY
+  /**< Application ready state. */
+} mcm_sim_app_state_t; /**< SIM application states. */
+
+enum {
+  MCM_SIM_PIN_STATE_UNKNOWN = 0xB01,
+  /**< Unknown PIN state. */
+  MCM_SIM_PIN_STATE_ENABLED_NOT_VERIFIED,
+   /**< PIN required, but has not been verified. */
+  MCM_SIM_PIN_STATE_ENABLED_VERIFIED,
+   /**< PIN required and has been verified. */
+  MCM_SIM_PIN_STATE_DISABLED,
+   /**< PIN not required. */
+  MCM_SIM_PIN_STATE_BLOCKED,
+   /**< PIN verification has failed too many times and is blocked. Recoverable through PUK verification. */
+  MCM_SIM_PIN_STATE_PERMANENTLY_BLOCKED
+   /**< PUK verification has failed too many times and is not recoverable. */
+} mcm_sim_pin_state_t; /**< PIN/PUK states. */
+
+enum {
+  MCM_SIM_CARD_STATE_UNKNOWN = 0xB01,
+  /**< Card state unknown. */
+  MCM_SIM_CARD_STATE_ABSENT,
+  /**< Card is absent. */
+  MCM_SIM_CARD_STATE_PRESENT,
+  /**< Card is present. */
+  MCM_SIM_CARD_STATE_ERROR_UNKNOWN,
+  /**< Unknown error state. */
+  MCM_SIM_CARD_STATE_ERROR_POWER_DOWN,
+  /**< Power down. */
+  MCM_SIM_CARD_STATE_ERROR_POLL_ERROR,
+  /**< Poll error. */
+  MCM_SIM_CARD_STATE_ERROR_NO_ATR_RECEIVED,
+  /**< Failed to receive an answer to reset. */
+  MCM_SIM_CARD_STATE_ERROR_VOLT_MISMATCH,
+  /**< Voltage mismatch. */
+  MCM_SIM_CARD_STATE_ERROR_PARITY_ERROR,
+  /**< Parity error. */
+  MCM_SIM_CARD_STATE_ERROR_SIM_TECHNICAL_PROBLEMS
+  /**< Card returned technical problems. */
+} mcm_sim_card_state_t; /**< SIM card state. */
+
+enum {
+  MCM_SIM_REFRESH_RESET = 0xB01,
+  /**< Refresh reset. */
+  MCM_SIM_REFRESH_NAA_INIT,
+  /**< Refresh NAA initialization. */
+  MCM_SIM_REFRESH_NAA_FCN,
+  /**< Refresh NAA file change notification. */
+  MCM_SIM_REFRESH_NAA_INIT_FCN,
+  /**< Refresh NAA initalization and file change notification. */
+  MCM_SIM_REFRESH_NAA_INIT_FULL_FCN,
+  /**< Refresh NAA initalization and full file change notification. */
+  MCM_SIM_REFRESH_NAA_APP_RESET,
+  /**< Refresh NAA application reset. */
+  MCM_SIM_REFRESH_3G_SESSION_RESET
+  /**< Refresh 3G session reset. */
+} mcm_sim_refresh_mode_t; /**< Refresh modes. */
+
+struct {
+  mcm_sim_slot_id_t slot_id;
+  /**< Indicates the slot to be used. Valid values:
+        - 1 -- Slot 1
+        - 2 -- Slot 2
+  */
+  //! Application Type
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.00
+  mcm_sim_app_type_t app_t;
+  /**< Indicates the type of the application. Valid values:
+        - 0 -- Unknown
+        - 1 -- 3GPP application
+        - 2 -- 3GPP2 application
+        - 3 -- ISIM application
+       Other values are reserved for the future and are to be handled as
+       ``Unknown''.
+  */
+} mcm_sim_application_identification_info_t;
+
+struct {
+  char mcc[MCM_SIM_MCC_LEN];
+  //!< MCC value in ASCII characters.
+  char mnc<MCM_SIM_MNC_MAX>;
+  //!< MNC value in ASCII characters.
+} mcm_sim_plmn_t;  //!< SIM PLMN.
+
+struct {
+  uint16 offset;
+  //!< Offset is only required for write file access where data length is indicated.
+  uint8 record_num;
+  //!< Number of records involved in file access. A record number of 0 indicates transparent file access.
+  char path<MCM_SIM_CHAR_PATH_MAX>;
+  //!< File path in ASCII characters.
+} mcm_sim_file_access_t;  //!< SIM file access.
+
+struct {
+  uint8 sw1;
+  //!< SW1 received from the card.
+  uint8 sw2;
+  //!< SW2 received from the card.
+} mcm_sim_card_result_t;  //!< SIM card result.
+
+struct {
+  mcm_sim_file_type_t file_t;
+  /**< File type: \n
+         - 0xB00 -- Unknown
+         - 0xB01 -- Transparent
+         - 0xB02 -- Cyclic
+         - 0xB03 -- Linear fixed
+  */
+  uint16 file_size;
+  //!< Size of transparent files.
+  uint16 record_size;
+  //!< Size of each cyclic or linear fixed file record.
+  uint16 record_count;
+  //!< Number of cyclic or linear fixed file records.
+} mcm_sim_file_info_t;
+
+struct {
+  mcm_sim_perso_feature_t feature;
+  /**< Indicates the personalization feature to deactivate or unblock.
+       Valid values:
+         - 0 -- GW network personalization
+         - 1 -- GW network subset personalization
+         - 2 -- GW service provider personalization
+         - 3 -- GW corporate personalization
+         - 4 -- GW UIM personalization
+         - 5 -- 1X network type 1 personalization
+         - 6 -- 1X network type 2 personalization
+         - 7 -- 1X HRPD personalization
+         - 8 -- 1X service provider personalization
+         - 9 -- 1X corporate personalization
+         - 10 -- 1X RUIM personalization
+  */
+  mcm_sim_perso_operation_t operation;
+  /**< Indicates the operation to perform. Valid values:
+        - 0 -- Deactivate personalization
+        - 1 -- Unblock personalization
+  */
+  //! @LEN_FIELD ck_len
+  char ck_value<MCM_SIM_CK_MAX>;
+  //!< Control key value. This value is a sequence of ASCII characters.
+} mcm_sim_depersonalization_t;
+
+struct {
+  char mcc[MCM_SIM_MCC_LEN];
+  //!< MCC value in ASCII characters.
+  char mnc<MCM_SIM_MNC_MAX>;
+  //!< MNC value in ASCII characters.
+} mcm_sim_network_perso_t;
+
+struct {
+  mcm_sim_network_perso_t network;
+  //!< MCC and MNC network information.
+  char digit6;
+  //!< Digit 6 of the IMSI in ASCII character.
+  char digit7;
+  //!< Digit 7 of the IMSI in ASCII character.
+} mcm_sim_gw_network_subset_perso_t;
+
+struct {
+  mcm_sim_network_perso_t network;
+  //!< MCC and MNC network information.
+  uint8 gid1;
+  //!< Service provider code found in GID1.
+} mcm_sim_gw_sp_perso_t;
+
+struct {
+  mcm_sim_network_perso_t network;
+  //!< MCC and MNC network information.
+  uint8 gid1;
+  //!< Service provider code found in GID1.
+  uint8 gid2;
+  //!< Corporate customer code found in GID2.
+} mcm_sim_gw_corporate_perso_t;
+
+struct {
+  mcm_sim_network_perso_t network;
+  //!< MCC and MNC network information.
+  char msin<MCM_SIM_MSIN_MAX>;
+  //!< MSIN value stored on the card in ASCII characters.
+} mcm_sim_sim_perso_t;
+
+struct {
+  char irm_code[MCM_SIM_IRM_CODE_LEN];
+  //!< First 4 digits of the IRM-based MIN of IMSI_M in ASCII characters.
+} mcm_sim_1x_network_type2_perso_t;
+
+struct {
+  uint8 verify_left;
+  //!< Number of the remaining attempts to verify the personalization.
+  uint8 unblock_left;
+  //!< Number of the remaining attempts to unblock the personalization.
+} mcm_sim_perso_retries_left_t;
+
+struct {
+  mcm_sim_subscription_t subscription;
+  /**< Type of subscription (i.e., primary, secondary, etc.). */
+  mcm_sim_app_state_t app_state;
+  /**< Current state of the application. */
+  mcm_sim_perso_feature_t perso_feature;
+  /**< Current personalization state and feature enabled. */
+  uint8 perso_retries;
+  /**< Number of personalization retries. */
+  uint8 perso_unblock_retries;
+  /**< Number of personalization unblock retries. */
+  mcm_sim_pin_state_t pin1_state;
+  /**< Current PIN 1 state. */
+  uint8 pin1_num_retries;
+  /**< Number of PIN 1 retries. */
+  uint8 puk1_num_retries;
+  /**< Number of PUK 1 retries. */
+  mcm_sim_pin_state_t pin2_state;
+  /**< Current PIN 2 state. */
+  uint8 pin2_num_retries;
+  /**< Number of PIN 2 retries. */
+  uint8 puk2_num_retries;
+  /**< Number of PUK 2 retries. */
+} mcm_sim_app_info_t;
+
+struct {
+  mcm_sim_app_info_t app_3gpp;
+  /**< Stores 3gpp application information. */
+  mcm_sim_app_info_t app_3gpp2;
+  /**< Stores 3gpp2 application information. */
+  mcm_sim_app_info_t app_isim;
+  /**< Stores ISIM application information. */
+} mcm_sim_card_app_info_t;
+
+struct {
+  mcm_sim_card_state_t card_state;
+  /**< Current card and card error state. */
+  mcm_sim_card_t card_t;
+  /**< Card type. */
+  mcm_sim_card_app_info_t card_app_info;
+  /**< Stores all relevant application information. */
+} mcm_sim_card_info_t;
+
+struct {
+   char path_value<MCM_SIM_CHAR_PATH_MAX>;
+   //!< File path of the file in the refresh file list in ASCII characters.
+} mcm_sim_refresh_file_list_t;
+
+struct {
+  //! Application Identification
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mcm_sim_application_identification_info_t app_info;
+  //! Refresh Mode
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mcm_sim_refresh_mode_t refresh_mode;
+  //! Refresh File Data
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mcm_sim_refresh_file_list_t refresh_files<MCM_SIM_MAX_REFRESH_FILES>;
+} mcm_sim_refresh_event_t;
+
+
+//=============================================================================
+// MESSAGES
+//=============================================================================
+//============================================================================
+/** @COMMAND MCM_SIM_GET_SUBSCRIBER_ID
+    @BRIEF Retrieves the International Mobile Subscriber Identity (IMSI) value
+           stored in the specified application.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL Low risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+//! @MSG     MCM_SIM_GET_SUBSCRIBER_ID_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+  //! Application Identification
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_sim_application_identification_info_t app_info;
+  /**< Application identification. */
+
+} mcm_sim_get_subscriber_id_req_msg;
+
+//! @MSG     MCM_SIM_GET_SUBSCRIBER_ID_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;
+  /**< Standard response type. Contains the following data members:	\n
+       - mcm_result_t -- MCM_RESULT_SUCCESS or MCM_RESULT_FAILURE
+       - mcm_error_t  -- Error code. Possible error code values are described
+                          in the error codes section of each message
+                          definition.
+  */
+  //Explain in case of 3GPP2
+  //! IMSI Data
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.00
+  optional char imsi<MCM_SIM_IMSI_LEN>;
+  //!< IMSI data in ASCII characters.
+} mcm_sim_get_subscriber_id_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE                      No error in the request.
+    -MCM_ERROR_INTERNAL                  Unexpected error occurred during processing.
+    -MCM_ERROR_MALFORMED_MSG             Message was not formulated correctly by the
+                                         control point, or the message was corrupted
+                                         during transmission.
+    -MCM_ERROR_NO_MEMORY                 Device could not allocate memory to formulate
+                                         the response.
+    -MCM_ERROR_ACCESS_DENIED             Access to the requested file is denied. This
+                                         can occur when an attempt is made to access a
+                                         PIN-protected file.
+    -MCM_ERROR_SIM_FILE_NOT_FOUND        File is not present on the card.
+    -MCM_ERROR_ARG_TOO_LONG              Path in the request was too long.
+    -MCM_ERROR_INVALID_ARG               Parameters passed as input were invalid (e.g.,
+                                         an odd length of the path).
+    -MCM_ERROR_DEVICE_NOT_READY          Device is not ready.
+    -MCM_ERROR_NOT_PROVISIONED           File is not provisioned on the card.
+    -MCM_ERROR_INSUFFICIENT_RESOURCES    Response is longer than the maximum supported
+                                         size.
+*/
+
+/** @DESCRIPTION
+This command provides a singular command to read the IMSI from the card
+and provides the path to access it.
+
+*/
+
+
+//============================================================================
+/** @COMMAND MCM_SIM_GET_CARD_ID
+    @BRIEF Retrieves the Integrated Circuit Card ID (ICCID) stored on the card.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL Low risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_SIM_GET_CARD_ID_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+  //! Slot ID
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_sim_slot_id_t slot_id;
+  /**< Indicates the slot to be used. Valid values:
+        - 1 -- Slot 1
+        - 2 -- Slot 2
+  */
+
+} mcm_sim_get_card_id_req_msg;
+
+//! @MSG     MCM_SIM_GET_CARD_ID_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;
+  /**< Standard response type. Contains the following data members:
+       - mcm_result_t -- MCM_RESULT_SUCCESS or MCM_RESULT_FAILURE
+       - mcm_error_t  -- Error code. Possible error code values are described
+                          in the error codes section of each message
+                          definition.
+  */
+
+  //! ICCID data
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional char iccid<MCM_SIM_ICCID_LEN>;
+  //!< ICCID data in ASCII characters.
+} mcm_sim_get_card_id_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE                      No error in the request.
+    -MCM_ERROR_INTERNAL                  Unexpected error occurred during processing.
+    -MCM_ERROR_MALFORMED_MSG             Message was not formulated correctly by the
+                                         control point, or the message was corrupted
+                                         during transmission.
+    -MCM_ERROR_NO_MEMORY                 Device could not allocate memory to formulate
+                                         the response.
+    -MCM_ERROR_ACCESS_DENIED             Access to the requested file is denied. This
+                                         can occur when an attempt is made to access a
+                                         PIN-protected file.
+    -MCM_ERROR_SIM_FILE_NOT_FOUND        File is not present on the card.
+    -MCM_ERROR_ARG_TOO_LONG              Path in the request was too long.
+    -MCM_ERROR_INVALID_ARG               Parameters passed as input were invalid (e.g.,
+                                         an odd length of the path).
+    -MCM_ERROR_DEVICE_NOT_READY          Device is not ready.
+    -MCM_ERROR_NOT_PROVISIONED           File is not provisioned on the card.
+    -MCM_ERROR_INSUFFICIENT_RESOURCES    Response is longer than the maximum supported
+                                         size.
+*/
+
+/** @DESCRIPTION
+This command provides a singular command to read the ICCID from the card
+and provides the path to access it.
+
+*/
+
+
+//============================================================================
+/** @COMMAND MCM_SIM_GET_DEVICE_PHONE_NUMBER
+    @BRIEF Retrieves the device phone number stored on the card.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL Low risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_SIM_GET_DEVICE_PHONE_NUMBER_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+  //! Application Identification
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_sim_application_identification_info_t app_info;
+  /**< Application identification. */
+
+} mcm_sim_get_device_phone_number_req_msg;
+
+//! @MSG     MCM_SIM_GET_DEVICE_PHONE_NUMBER_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;
+  /**< Standard response type. Contains the following data members: \n
+       - mcm_result_t -- MCM_RESULT_SUCCESS or MCM_RESULT_FAILURE
+       - mcm_error_t  -- Error code. Possible error code values are described
+                          in the error codes section of each message
+                          definition.
+  */
+
+  //! Device Phone Number
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional char phone_number<MCM_SIM_PHONE_NUMBER_MAX>;
+  //!< Parsed phone number in ASCII characters.
+} mcm_sim_get_device_phone_number_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE                      No error in the request.
+    -MCM_ERROR_INTERNAL                  Unexpected error occurred during processing.
+    -MCM_ERROR_MALFORMED_MSG             Message was not formulated correctly by the
+                                         control point, or the message was corrupted
+                                         during transmission.
+    -MCM_ERROR_NO_MEMORY                 Device could not allocate memory to formulate
+                                         the response.
+    -MCM_ERROR_ACCESS_DENIED             Access to the requested file is denied. This
+                                         can occur when an attempt is made to access a
+                                         PIN-protected file.
+    -MCM_ERROR_SIM_FILE_NOT_FOUND        File is not present on the card.
+    -MCM_ERROR_ARG_TOO_LONG              Path in the request was too long.
+    -MCM_ERROR_INVALID_ARG               Parameters passed as input were invalid (e.g.,
+                                         an odd length of the path).
+    -MCM_ERROR_DEVICE_NOT_READY          Device is not ready.
+    -MCM_ERROR_NOT_PROVISIONED           File is not provisioned on the card.
+    -MCM_ERROR_INSUFFICIENT_RESOURCES    Response is longer than the maximum supported
+                                         size.
+*/
+
+/** @DESCRIPTION
+This command provides a singular command to read the phone number stored on the
+card and provides the path to access it.
+
+*/
+
+
+//============================================================================
+/** @COMMAND MCM_SIM_GET_PREFERRED_OPERATOR_LIST
+    @BRIEF Retrieves the preferred operator list stored on the card
+      Note:
+        This command is only supported by 3GPP applications.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL Low risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_SIM_GET_PREFERRED_OPERATOR_LIST_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+  //! Slot ID
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_sim_slot_id_t slot_id;
+  /**< Indicates the slot to be used. Valid values:
+        - 1 -- Slot 1
+        - 2 -- Slot 2
+  */
+} mcm_sim_get_preferred_operator_list_req_msg;
+
+//! @MSG     MCM_SIM_GET_PREFERRED_OPERATOR_LIST_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;
+  /**< Standard response type. Contains the following data members:	\n
+       - mcm_result_t -- MCM_RESULT_SUCCESS or MCM_RESULT_FAILURE
+       - mcm_error_t  -- Error code. Possible error code values are described
+                          in the error codes section of each message
+                          definition.
+  */
+
+  //! Preferred Operator List
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional mcm_sim_plmn_t preferred_operator_list<MCM_SIM_NUM_PLMN_MAX>;
+  /**< Preferred operator list. */
+} mcm_sim_get_preferred_operator_list_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE                      No error in the request.
+    -MCM_ERROR_INTERNAL                  Unexpected error occurred during processing.
+    -MCM_ERROR_MALFORMED_MSG             Message was not formulated correctly by the
+                                         control point, or the message was corrupted
+                                         during transmission.
+    -MCM_ERROR_NO_MEMORY                 Device could not allocate memory to formulate
+                                         the response.
+    -MCM_ERROR_ACCESS_DENIED             Access to the requested file is denied. This
+                                         can occur when an attempt is made to access a
+                                         PIN-protected file.
+    -MCM_ERROR_SIM_FILE_NOT_FOUND        File is not present on the card.
+    -MCM_ERROR_ARG_TOO_LONG              Path in the request was too long.
+    -MCM_ERROR_INVALID_ARG               Parameters passed as input were invalid (e.g.,
+                                         an odd length of the path).
+    -MCM_ERROR_DEVICE_NOT_READY          Device is not ready.
+    -MCM_ERROR_NOT_PROVISIONED           File is not provisioned on the card.
+    -MCM_ERROR_INSUFFICIENT_RESOURCES    Response is longer than the maximum supported
+                                         size.
+*/
+
+/** @DESCRIPTION
+This command provides a singular command to read the preferred operator list
+stored on the card and the path to access it.
+
+*/
+
+
+//============================================================================
+/** @COMMAND MCM_SIM_READ_FILE
+    @BRIEF Reads data to a specific file on a specified application on the card.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+//! @MSG     MCM_SIM_READ_FILE_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+  //! Application Identification
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_sim_application_identification_info_t app_info;
+  /**< Application identification. */
+  //! File Access Information
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_sim_file_access_t file_access;
+  /**< File access information. */
+
+} mcm_sim_read_file_req_msg;
+
+//! @MSG     MCM_SIM_READ_FILE_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;
+  /**< Standard response type. Contains the following data members:
+       - mcm_result_t -- MCM_RESULT_SUCCESS or MCM_RESULT_FAILURE
+       - mcm_error_t  -- Error code. Possible error code values are described
+                          in the error codes section of each message
+                          definition.
+  */
+
+  //! Card Result
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional mcm_sim_card_result_t card_result;
+  /**< Card result. */
+  //! Data Retrieved from the Card
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional opaque data<MCM_SIM_DATA_MAX>;
+  /**< Data retrieved from the card. */
+} mcm_sim_read_file_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE                      No error in the request.
+    -MCM_ERROR_INTERNAL                  Unexpected error occurred during processing.
+    -MCM_ERROR_MALFORMED_MSG             Message was not formulated correctly by the
+                                       control point, or the message was corrupted
+                                       during transmission.
+    -MCM_ERROR_NO_MEMORY                 Device could not allocate memory to formulate
+                                       the response.
+    -MCM_ERROR_ACCESS_DENIED             Access to the requested file is denied. This
+                                       can occur when an attempt is made to access a
+                                       PIN-protected file.
+    -MCM_ERROR_SIM_FILE_NOT_FOUND        File is not present on the card.
+    -MCM_ERROR_ARG_TOO_LONG              Path in the request was too long.
+    -MCM_ERROR_INVALID_ARG               Parameters passed as input were invalid (e.g.,
+                                       an odd length of the path).
+    -MCM_ERROR_DEVICE_NOT_READY          Device is not ready.
+    -MCM_ERROR_NOT_PROVISIONED           File is not provisioned on the card.
+    -MCM_ERROR_INSUFFICIENT_RESOURCES    Response is longer than the maximum supported
+                                       size.
+*/
+
+/** @DESCRIPTION
+This function provides read access to any file on the card and
+provides access to the file by the path. The type of file is determined by
+the record number field, which indicates a transparent file when zero
+and a record-based file otherwise.
+
+The response contains the status code received from the card (SW1 and SW2)
+when the card responded to the read request, as well as the data that was
+read from the file.
+
+Other error codes not listed in the preceding table are handled as
+MCM_ERROR_INTERNAL.
+*/
+
+
+//============================================================================
+/** @COMMAND MCM_SIM_WRITE_FILE
+    @BRIEF Writes data to a specific file on a specified application on the card.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_SIM_WRITE_FILE_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+  //! Application Identification
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_sim_application_identification_info_t app_info;
+  /**< Application identification. */
+  //! File Access Information
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_sim_file_access_t file_access;
+  /**< File access information. */
+  //! Data to be Updated on Card
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory opaque data<MCM_SIM_DATA_MAX>;
+  /**< Data to be updated on the card. */
+} mcm_sim_write_file_req_msg;
+
+//! @MSG     MCM_SIM_WRITE_FILE_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;
+  /**< Standard response type. Contains the following data members:
+       - mcm_result_t -- MCM_RESULT_SUCCESS or MCM_RESULT_FAILURE
+       - mcm_error_t  -- Error code. Possible error code values are described
+                          in the error codes section of each message
+                          definition.
+  */
+
+  //! Card Result
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional mcm_sim_card_result_t card_result;
+  /**< Card result. */
+} mcm_sim_write_file_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE               No error in the request.
+    -MCM_ERROR_INTERNAL           Unexpected error occurred during processing.
+    -MCM_ERROR_MALFORMED_MSG      Message was not formulated correctly by the
+                                control point, or the message was corrupted
+                                during transmission.
+    -MCM_ERROR_NO_MEMORY          Device could not allocate memory to formulate
+                                the response.
+    -MCM_ERROR_ACCESS_DENIED      Access to the requested file is denied. This
+                                can occur when an attempt is made to access a
+                                PIN-protected file.
+    -MCM_ERROR_SIM_FILE_NOT_FOUND File is not present on the card.
+    -MCM_ERROR_ARG_TOO_LONG       Path in the request was too long.
+    -MCM_ERROR_INVALID_ARG        Parameters passed as input were invalid (e.g.,
+                                an odd length of the path).
+    -MCM_ERROR_DEVICE_NOT_READY   Device is not ready.
+    -MCM_ERROR_NOT_PROVISIONED    File is not provisioned on the card.
+*/
+
+/** @DESCRIPTION
+This function provides write access to any file on the card and
+provides the path to access it. The type of file is determined by
+the record number field, which indicates a transparent file when zero
+and a record-based file otherwise.
+
+The response contains the status code received from the card (SW1 and SW2)
+when the card responded to the write request.
+
+Other error codes not listed in the preceding table are handled as
+MCM_ERROR_INTERNAL.
+*/
+
+
+//============================================================================
+/** @COMMAND MCM_SIM_GET_FILE_SIZE
+    @BRIEF Retrieves the size of a specific file on a specified application on
+           the card.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+//! @MSG     MCM_SIM_GET_FILE_SIZE_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+  //! Application Identification
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_sim_application_identification_info_t app_info;
+  /**< Application identification. */
+  //! File Path
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory char path<MCM_SIM_CHAR_PATH_MAX>;
+  //!< File path in ASCII characters.
+} mcm_sim_get_file_size_req_msg;
+
+//! @MSG     MCM_SIM_GET_FILE_SIZE_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;
+  /**< Standard response type. Contains the following data members:
+       - mcm_result_t -- MCM_RESULT_SUCCESS or MCM_RESULT_FAILURE
+       - mcm_error_t  -- Error code. Possible error code values are described
+                          in the error codes section of each message
+                          definition.
+  */
+  //! Card Result
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional mcm_sim_card_result_t card_result;
+  /**< Card result. */
+  //! File Information
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional mcm_sim_file_info_t file_info;
+  /**< File information. */
+} mcm_sim_get_file_size_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE               No error in the request.
+    -MCM_ERROR_INTERNAL           Unexpected error occurred during processing.
+    -MCM_ERROR_MALFORMED_MSG      Message was not formulated correctly by the
+                                  control point, or the message was corrupted
+                                  during transmission.
+    -MCM_ERROR_NO_MEMORY          Device could not allocate memory to formulate
+                                  the response.
+    -MCM_ERROR_ACCESS_DENIED      Access to the requested file is denied. This
+                                  can occur when an attempt is made to access a
+                                  PIN-protected file.
+    -MCM_ERROR_SIM_FILE_NOT_FOUND File is not present on the card.
+    -MCM_ERROR_ARG_TOO_LONG       Path in the request was too long.
+    -MCM_ERROR_INVALID_ARG        Parameters passed as input were invalid (e.g.,
+                                  an odd length of the path).
+    -MCM_ERROR_DEVICE_NOT_READY   Device is not ready.
+    -MCM_ERROR_NOT_PROVISIONED    File is not provisioned on the card.
+*/
+
+/** @DESCRIPTION
+This function retrieves the file size information of any file on the
+card and provides access to it by the path.
+
+The response contains the status code received from the card (SW1 and SW2)
+when the card responded to the get file size request. The response also
+contains the type of file associated with the size.
+
+Other error codes not listed in the preceding table are handled as
+MCM_ERROR_INTERNAL.
+*/
+
+
+//============================================================================
+/** @COMMAND MCM_SIM_VERIFY_PIN
+    @BRIEF Verifies the PIN value of an application.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+//! @MSG     MCM_SIM_VERIFY_PIN_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+  //! Application Identification
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_sim_application_identification_info_t app_info;
+  /**< Application identification. */
+  //! PIN ID
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_sim_pin_id_t pin_id;
+  /**< PIN ID. */
+  //! Value of the PIN
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory char pin_value<MCM_SIM_PIN_MAX>;
+  /**< PIN value. */
+} mcm_sim_verify_pin_req_msg;
+
+//! @MSG     MCM_SIM_VERIFY_PIN_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;
+  /**< Standard response type. Contains the following data members:
+       - mcm_result_t -- MCM_RESULT_SUCCESS or MCM_RESULT_FAILURE
+       - mcm_error_t  -- Error code. Possible error code values are described
+                          in the error codes section of each message
+                          definition.
+  */
+  //! Verify Retries Remaining
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional uint8 retries_left;
+  /**< Retries remaining. */
+} mcm_sim_verify_pin_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE                  No error in the request.
+    -MCM_ERROR_INTERNAL              Unexpected error occurred during processing.
+    -MCM_ERROR_MALFORMED_MSG         Message was not formulated correctly by the
+                                     control point, or the message was corrupted
+                                     during transmission.
+    -MCM_ERROR_NO_MEMORY             Device could not allocate memory to
+                                     formulate the response.
+    -MCM_ERROR_NO_EFFECT             Operation had no effect.
+    -MCM_ERROR_ARG_TOO_LONG          Device cannot handle the PIN length in the
+                                     request.
+    -MCM_ERROR_INCORRECT_PIN         PIN in the request is incorrect.
+    -MCM_ERROR_PIN_BLOCKED           PIN is blocked. An unblock operation must be
+                                     issued.
+    -MCM_ERROR_PIN_PERM_BLOCKED      PIN is permanently blocked. The SIM is
+                                     unusable.
+    -MCM_ERROR_SIM_NOT_INITIALIZED   PIN is not yet initialized because the SIM
+                                     initialization has not finished. Try the PIN
+                                     operation later.
+    -MCM_ERROR_OP_DEVICE_UNSUPPORTED Operation is not supported by the device nor
+                                     by the SIM card.
+    -MCM_ERROR_MISSING_ARG           TLV was missing in the request.
+    -MCM_ERROR_INVALID_PINID         PIN in the request is invalid.
+    -MCM_ERROR_DEVICE_NOT_READY      Device is not ready.
+*/
+
+/** @DESCRIPTION
+This function verifies the PIN before the card content is accessed.
+
+The same PIN can be used by multiple sessions (i.e., the PIN is shared between
+GSM and RUIM in an ICC card). The PIN is automatically verified for all the
+sessions when the command is executed.
+
+Other error codes not listed in the preceding table are handled as
+MCM_ERROR_INTERNAL.
+*/
+
+
+//============================================================================
+/** @COMMAND MCM_SIM_CHANGE_PIN
+    @BRIEF Changes the PIN value of an application.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_SIM_CHANGE_PIN_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+  //! Application Identification
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_sim_application_identification_info_t app_info;
+  /**< Application identification. */
+  //! PIN ID
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_sim_pin_id_t pin_id;
+  /**< PIN ID. */
+  //! Value of the Old PIN in Sequence of ASCII Characters
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory char old_pin_value<MCM_SIM_PIN_MAX>;
+  /**< Value of the old PIN in a sequence of ASCII characters. */
+  //! Value of the New PIN in Sequence of ASCII Characters
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory char new_pin_value<MCM_SIM_PIN_MAX>;
+  /**< Value of the new PIN in a sequence of ASCII characters. */
+} mcm_sim_change_pin_req_msg;
+
+//! @MSG     MCM_SIM_CHANGE_PIN_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;
+  /**< Standard response type. Contains the following data members:
+       - mcm_result_t -- MCM_RESULT_SUCCESS or MCM_RESULT_FAILURE
+      -  mcm_error_t  -- Error code. Possible error code values are described
+                          in the error codes section of each message
+                          definition.
+  */
+  //! Verify Retries Remaining
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional uint8 retries_left;
+  /**< Retries remaining. */
+} mcm_sim_change_pin_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE                  No error in the request.
+    -MCM_ERROR_INTERNAL              Unexpected error occurred during processing.
+    -MCM_ERROR_MALFORMED_MSG         Message was not formulated correctly by the
+                                     control point, or the message was corrupted
+                                     during transmission.
+    -MCM_ERROR_NO_MEMORY             Device could not allocate memory to
+                                     formulate the response.
+    -MCM_ERROR_NO_EFFECT             Operation had no effect.
+    -MCM_ERROR_ARG_TOO_LONG          Device cannot handle the PIN length in the
+                                     request.
+    -MCM_ERROR_INCORRECT_PIN         PIN in the request is incorrect.
+    -MCM_ERROR_PIN_BLOCKED           PIN is blocked. An unblock operation must be
+                                     issued.
+    -MCM_ERROR_PIN_PERM_BLOCKED      PIN is permanently blocked. The SIM is
+                                     unusable.
+    -MCM_ERROR_SIM_NOT_INITIALIZED   PIN is not yet initialized because the SIM
+                                     initialization has not finished. Try the PIN
+                                     operation later.
+    -MCM_ERROR_OP_DEVICE_UNSUPPORTED Operation is not supported by the device nor
+                                     by the SIM card.
+    -MCM_ERROR_MISSING_ARG           TLV was missing in the request.
+    -MCM_ERROR_INVALID_PINID         PIN in the request is invalid.
+    -MCM_ERROR_DEVICE_NOT_READY      Device is not ready.
+*/
+
+/** @DESCRIPTION
+This function changes the value of the specified PIN. The application
+must pass both the new and the old values of the PIN to complete the
+operation.
+
+The same PIN can be used by multiple sessions (i.e., the PIN is shared between
+GSM and RUIM in an ICC card). The PIN is automatically verified for all the
+sessions when the command is executed.
+
+Other error codes not listed in the preceding table are handled as
+MCM_ERROR_INTERNAL.
+*/
+
+
+//============================================================================
+/** @COMMAND MCM_SIM_UNBLOCK_PIN
+    @BRIEF Unblocks a blocked PIN using the PUK code.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_SIM_UNBLOCK_PIN_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+  //! Application Identification
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_sim_application_identification_info_t app_info;
+  /**< Application identification. */
+  //! PIN ID
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_sim_pin_id_t pin_id;
+  /**< PIN ID. */
+  //! Value of the PUK in Sequence of ASCII Characters
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory char puk_value<MCM_SIM_PIN_MAX>;
+  /**< Value of the PUK in a sequence of ASCII characters. */
+  //! Value of the New PIN in Sequence of ASCII Characters
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory char new_pin_value<MCM_SIM_PIN_MAX>;
+  /**< Value of the new PIN in a sequence of ASCII characters. */
+} mcm_sim_unblock_pin_req_msg;
+
+//! @MSG     MCM_SIM_UNBLOCK_PIN_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;
+  /**< Standard response type. Contains the following data members:
+       - mcm_result_t -- MCM_RESULT_SUCCESS or MCM_RESULT_FAILURE
+       - mcm_error_t  -- Error code. Possible error code values are described
+                          in the error codes section of each message
+                          definition.
+  */
+  //! Unblock Retries Remaining
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional uint8 retries_left;
+  /**< Unblock retries remaining. */
+} mcm_sim_unblock_pin_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE                  No error in the request.
+    -MCM_ERROR_INTERNAL              Unexpected error occurred during processing.
+    -MCM_ERROR_MALFORMED_MSG         Message was not formulated correctly by the
+                                     control point, or the message was corrupted
+                                     during transmission.
+    -MCM_ERROR_NO_MEMORY             Device could not allocate memory to
+                                     formulate the response.
+    -MCM_ERROR_NO_EFFECT             Operation had no effect.
+    -MCM_ERROR_ARG_TOO_LONG          Device cannot handle the PIN length in the
+                                     request.
+    -MCM_ERROR_INCORRECT_PIN         PIN in the request is incorrect.
+    -MCM_ERROR_PIN_BLOCKED           PIN is blocked. An unblock operation must be
+                                     issued.
+    -MCM_ERROR_PIN_PERM_BLOCKED      PIN is permanently blocked. The SIM is
+                                     unusable.
+    -MCM_ERROR_SIM_NOT_INITIALIZED   PIN is not yet initialized because the SIM
+                                     initialization has not finished. Try the PIN
+                                     operation later.
+    -MCM_ERROR_OP_DEVICE_UNSUPPORTED Operation is not supported by the device nor
+                                     by the SIM card.
+    -MCM_ERROR_MISSING_ARG           TLV was missing in the request.
+    -MCM_ERROR_INVALID_PINID         PIN in the request is invalid.
+    -MCM_ERROR_DEVICE_NOT_READY      Device is not ready.
+*/
+
+/** @DESCRIPTION
+This function unblocks a blocked PIN using the PUK code. The client must pass
+PUK1 to unblock PIN1 or PUK2 to unblock PIN2.
+
+The same PIN can be used by multiple sessions (i.e., the PIN is shared between
+GSM and RUIM in an ICC card). The PIN is automatically verified for all the
+sessions when the command is executed.
+
+Other error codes not listed in the preceding table are handled as
+MCM_ERROR_INTERNAL.
+*/
+
+
+//============================================================================
+/** @COMMAND MCM_SIM_ENABLE_PIN
+    @BRIEF Enables the PIN on an application.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL High risk
+    @REQUIRED_ACTION Default
+*/
+
+//============================================================================
+//! @MSG     MCM_SIM_ENABLE_PIN_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+  //! Application Identification
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_sim_application_identification_info_t app_info;
+  /**< Application identification. */
+  //! PIN ID
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_sim_pin_id_t pin_id;
+  /**< PIN ID. */
+  //! Value of the PIN in Sequence of ASCII Characters
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory char pin_value<MCM_SIM_PIN_MAX>;
+  /**< Value of the PIN in a sequence of ASCII characters. */
+} mcm_sim_enable_pin_req_msg;
+
+//! @MSG     MCM_SIM_ENABLE_PIN_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;
+  /**< Standard response type. Contains the following data members:
+       - mcm_result_t -- MCM_RESULT_SUCCESS or MCM_RESULT_FAILURE
+       - mcm_error_t  -- Error code. Possible error code values are described
+                          in the error codes section of each message
+                          definition.
+  */
+  //! Verify Retries Remaining
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional uint8 retries_left;
+  /**< Retries remaining. */
+} mcm_sim_enable_pin_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE                  No error in the request.
+    -MCM_ERROR_INTERNAL              Unexpected error occurred during processing.
+    -MCM_ERROR_MALFORMED_MSG         Message was not formulated correctly by the
+                                     control point, or the message was corrupted
+                                     during transmission.
+    -MCM_ERROR_NO_MEMORY             Device could not allocate memory to
+                                     formulate the response.
+    -MCM_ERROR_NO_EFFECT             Operation had no effect.
+    -MCM_ERROR_ARG_TOO_LONG          Device cannot handle the PIN length in the
+                                     request.
+    -MCM_ERROR_INCORRECT_PIN         PIN in the request is incorrect.
+    -MCM_ERROR_PIN_BLOCKED           PIN is blocked. An unblock operation must be
+                                     issued.
+    -MCM_ERROR_PIN_PERM_BLOCKED      PIN is permanently blocked. The SIM is
+                                     unusable.
+    -MCM_ERROR_SIM_NOT_INITIALIZED   PIN is not yet initialized because the SIM
+                                     initialization has not finished. Try the PIN
+                                     operation later.
+    -MCM_ERROR_OP_DEVICE_UNSUPPORTED Operation is not supported by the device nor
+                                     by the SIM card.
+    -MCM_ERROR_MISSING_ARG           TLV was missing in the request.
+    -MCM_ERROR_INVALID_PINID         PIN in the request is invalid.
+    -MCM_ERROR_DEVICE_NOT_READY      Device is not ready.
+*/
+
+/** @DESCRIPTION
+This message enables the protection of UIM contents by a specific PIN.
+
+The same PIN can be used by multiple sessions (i.e., the PIN is shared between
+GSM and RUIM in an ICC card). The PIN is automatically verified for all the
+sessions when the command is executed.
+
+Other error codes not listed in the preceding table are handled as
+MCM_ERROR_INTERNAL.
+*/
+
+
+//============================================================================
+/** @COMMAND MCM_SIM_DISABLE_PIN
+    @BRIEF Enables or disables the PIN of an application,
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL High risk
+    @REQUIRED_ACTION Default
+*/
+
+//============================================================================
+//! @MSG     MCM_SIM_DISABLE_PIN_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+  //! Application Identification
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_sim_application_identification_info_t app_info;
+  /**< Application identification. */
+  //! PIN ID
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_sim_pin_id_t pin_id;
+  /**< PIN ID. */
+  //! Value of the PIN in Sequence of ASCII Characters
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory char pin_value<MCM_SIM_PIN_MAX>;
+  /**< Value of the PIN in a sequence of ASCII characters. */
+} mcm_sim_disable_pin_req_msg;
+
+//! @MSG     MCM_SIM_DISABLE_PIN_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;
+  /**< Standard response type. Contains the following data members:
+       - mcm_result_t -- MCM_RESULT_SUCCESS or MCM_RESULT_FAILURE
+       - mcm_error_t  -- Error code. Possible error code values are described
+                          in the error codes section of each message
+                          definition.
+  */
+  //! Verify Retries Remaining
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional uint8 retries_left;
+  /**< Retries remaining. */
+} mcm_sim_disable_pin_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE                  No error in the request.
+    -MCM_ERROR_INTERNAL              Unexpected error occurred during processing.
+    -MCM_ERROR_MALFORMED_MSG         Message was not formulated correctly by the
+                                     control point, or the message was corrupted
+                                     during transmission.
+    -MCM_ERROR_NO_MEMORY             Device could not allocate memory to
+                                     formulate the response.
+    -MCM_ERROR_NO_EFFECT             Operation had no effect.
+    -MCM_ERROR_ARG_TOO_LONG          Device cannot handle the PIN length in the
+                                     request.
+    -MCM_ERROR_INCORRECT_PIN         PIN in the request is incorrect.
+    -MCM_ERROR_PIN_BLOCKED           PIN is blocked. An unblock operation must be
+                                     issued.
+    -MCM_ERROR_PIN_PERM_BLOCKED      PIN is permanently blocked. The SIM is
+                                     unusable.
+    -MCM_ERROR_SIM_NOT_INITIALIZED   PIN is not yet initialized because the SIM
+                                     initialization has not finished. Try the PIN
+                                     operation later.
+    -MCM_ERROR_OP_DEVICE_UNSUPPORTED Operation is not supported by the device nor
+                                     by the SIM card.
+    -MCM_ERROR_MISSING_ARG           TLV was missing in the request.
+    -MCM_ERROR_INVALID_PINID         PIN in the request is invalid.
+    -MCM_ERROR_DEVICE_NOT_READY      Device is not ready.
+*/
+
+/** @DESCRIPTION
+This message disables the protection of UIM contents by a specific PIN.
+
+The same PIN can be used by multiple sessions (i.e., the PIN is shared between
+GSM and RUIM in an ICC card). The PIN is automatically verified for all the
+sessions when the command is executed.
+
+Other error codes not listed in the preceding table are handled as
+MCM_ERROR_INTERNAL.
+*/
+
+
+//============================================================================
+/** @COMMAND MCM_SIM_DEPERSONALIZATION
+    @BRIEF   Deactivates or unblocks the personalization on the phone.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+    @SECURITY_SUBLEVEL SFS
+    @REQUIRED_ACTION Review
+*/
+//============================================================================
+
+//! @MSG     MCM_SIM_DEPERSONALIZATION_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+  //! Depersonalization
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_sim_depersonalization_t depersonalization;
+  /**< Depersonalization. */
+} mcm_sim_depersonalization_req_msg;
+
+//! @MSG     MCM_SIM_DEPERSONALIZATION_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;
+  /**< Standard response type. Contains the following data members:
+       - mcm_result_t -- MCM_RESULT_SUCCESS or MCM_RESULT_FAILURE
+       - mcm_error_t  -- Error code. Possible error code values are described
+                          in the error codes section of each message
+                          definition.
+  */
+  //! Retries Remaining
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional mcm_sim_perso_retries_left_t retries_left;
+  /**< Retries remaining. */
+} mcm_sim_depersonalization_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE                  No error in the request.
+    -MCM_ERROR_INTERNAL              Unexpected error occurred during processing.
+    -MCM_ERROR_MALFORMED_MSG         Message was not formulated correctly by the
+                                     control point, or the message was corrupted
+                                     during transmission.
+    -MCM_ERROR_NO_MEMORY             Device could not allocate memory to
+                                     formulate the response.
+    -MCM_ERROR_NO_EFFECT             Operation had no effect.
+    -MCM_ERROR_ARG_TOO_LONG          Device cannot handle the PIN length in the
+                                     request.
+    -MCM_ERROR_INCORRECT_PIN         Control key in the request is incorrect.
+    -MCM_ERROR_PIN_BLOCKED           Simlock feature is blocked. An unblock
+                                     operation must be issued.
+    -MCM_ERROR_PIN_PERM_BLOCKED      Simlock feature is permanently blocked. The
+                                     UE is unusable.
+    -MCM_ERROR_SIM_NOT_INITIALIZED   PIN is not yet initialized because the SIM
+                                     initialization has not finished. Try the PIN
+                                     operation later.
+    -MCM_ERROR_OP_DEVICE_UNSUPPORTED Operation is not supported by the device.
+    -MCM_ERROR_MISSING_ARG           TLV was missing in the request.
+    -MCM_ERROR_DEVICE_NOT_READY      Device is not ready.
+*/
+
+/** @DESCRIPTION
+This function deactivates or unblocks the personalization on the phone. Each
+feature can be deactivated/unblocked independently of the other features.
+
+Other error codes not listed in the preceding table are handled as
+MCM_ERROR_INTERNAL.
+*/
+
+
+//============================================================================
+/** @COMMAND MCM_SIM_PERSONALIZATION
+    @BRIEF   Activates and sets the personalization data on the phone.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+    @SECURITY_SUBLEVEL SFS
+    @REQUIRED_ACTION Review
+*/
+//============================================================================
+
+//! @MSG     MCM_SIM_PERSONALIZATION_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+  //! Control Key
+  //! @VERSION_INTRODUCED 1.36
+  //! @VERSION 1.36
+  mandatory char ck_value<MCM_SIM_CK_MAX>;
+  //!< Control key value. This value is a sequence of ASCII characters.
+  //! GW network personalization
+  //! @VERSION_INTRODUCED 1.36
+  //! @VERSION 1.36
+  optional mcm_sim_network_perso_t feature_gw_network_perso<MCM_SIM_PERSO_NUM_NW_MAX>;
+  /**< GW network personalization. */
+  //! GW Network Subset Personalization
+  //! @VERSION_INTRODUCED 1.36
+  //! @VERSION 1.36
+  optional mcm_sim_gw_network_subset_perso_t feature_gw_network_subset_perso<MCM_SIM_PERSO_NUM_NS_MAX>;
+  /**< GW network subset personalization. */
+  //! GW Service Provider Personalization
+  //! @VERSION_INTRODUCED 1.36
+  //! @VERSION 1.36
+  optional mcm_sim_gw_sp_perso_t feature_gw_sp_perso<MCM_SIM_PERSO_NUM_GW_SP_MAX>;
+  /**< GW service provider personalization. */
+  //! GW Corporate Personalization
+  //! @VERSION_INTRODUCED 1.36
+  //! @VERSION 1.36
+  optional mcm_sim_gw_corporate_perso_t feature_gw_corporate_perso<MCM_SIM_PERSO_NUM_GW_CP_MAX>;
+  /**< GW corporate personalization. */
+  //! GW SIM Personalization
+  //! @VERSION_INTRODUCED 1.36
+  //! @VERSION 1.36
+  optional mcm_sim_sim_perso_t feature_gw_sim_perso<MCM_SIM_PERSO_NUM_SIM_MAX>;
+  /**< GW SIM personalization. */
+  //! 1x Network Type 1 Personalization
+  //! @VERSION_INTRODUCED 1.36
+  //! @VERSION 1.36
+  optional mcm_sim_network_perso_t feature_1x_network1_perso<MCM_SIM_PERSO_NUM_NW_MAX>;
+  /**< 1X network type 1 personalization. */
+  //! 1x Network Type 2 Personalization
+  //! @VERSION_INTRODUCED 1.36
+  //! @VERSION 1.36
+  optional mcm_sim_1x_network_type2_perso_t feature_1x_network2_perso<MCM_SIM_PERSO_NUM_1X_NW2_MAX>;
+  /**< 1X network type 2 personalization. */
+  //! 1x RUIM Personalization
+  //! @VERSION_INTRODUCED 1.36
+  //! @VERSION 1.36
+  optional mcm_sim_sim_perso_t feature_1x_ruim_perso<MCM_SIM_PERSO_NUM_SIM_MAX>;
+  /**< 1X RUIM personalization. */
+} mcm_sim_personalization_req_msg;
+
+//! @MSG     MCM_SIM_PERSONALIZATION_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.36
+  //! @VERSION 1.36
+  mandatory mcm_response_t resp;
+  /**< Standard response type. Contains the following data members:\n
+       - qmi_result_type -- QMI_RESULT_SUCCESS or QMI_RESULT_FAILURE
+       - qmi_error_type  -- Error code. Possible error code values are described
+                          in the error codes section of each message
+                          definition.
+  */
+  //! Retries Remaining
+  //! @VERSION_INTRODUCED 1.36
+  //! @VERSION 1.36
+  optional mcm_sim_perso_retries_left_t retries_left;
+  /**< This value is returned only when activation and setting personalization
+       data fails. */
+} mcm_sim_personalization_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE                  No error in the request.
+    -MCM_ERROR_INTERNAL              Unexpected error occurred during processing.
+    -MCM_ERROR_MALFORMED_MSG         Message was not formulated correctly by the
+                                     control point, or the message was corrupted
+                                     during transmission.
+    -MCM_ERROR_NO_MEMORY             Device could not allocate memory to
+                                     formulate the response.
+    -MCM_ERROR_ARG_TOO_LONG          Device cannot handle the PIN length in the
+                                     request.
+    -MCM_ERROR_INCORRECT_PIN         Control key in the request is incorrect.
+    -MCM_ERROR_PIN_BLOCKED           Simlock feature is blocked. An unblock
+                                     operation must be issued.
+    -MCM_ERROR_PIN_PERM_BLOCKED      Simlock feature is permanently blocked. The
+                                     UE is unusable.
+    -MCM_ERROR_OP_DEVICE_UNSUPPORTED Operation is not supported by the device.
+    -MCM_ERROR_MISSING_ARG           TLV was missing in the request.
+    -MCM_ERROR_DEVICE_NOT_READY      Device is not ready.
+    -MCM_ERROR_NO_SIM                Action being performed on a SIM that is
+                                     not initialized.
+    -MCM_ERROR_INCOMPATIBLE_STATE    Personalization is already activated and
+                                     must be deactivated before reprogramming
+                                     perso data.
+*/
+
+/** @DESCRIPTION
+This function sets the data and then activates personalization on the device, as
+described in \hyperref{S5,[S5]}. Each feature can be activated independently
+of one another, however, network data configurations must be consistent across
+activated personalization modes in order to prevent contradicting featurization,
+and only one feature can be activated per message (one optional TLV per message).
+
+If personalization is already activated, it must first be deactivated before
+being reactivated with new data.
+
+Other error codes not listed in the preceding table are handled as
+MCM_ERROR_INTERNAL.
+*/
+
+
+//============================================================================
+/** @COMMAND MCM_SIM_GET_CARD_STATUS
+    @BRIEF Retrieves the card status stored on a card.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL Low risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+//! @MSG     MCM_SIM_GET_CARD_STATUS_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+  //! Slot
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_sim_slot_id_t slot_id;
+  /**< Slot ID. */
+} mcm_sim_get_card_status_req_msg;
+
+//! @MSG     MCM_SIM_GET_CARD_STATUS_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;
+  /**< Standard response type. Contains the following data members:
+       - mcm_result_t -- MCM_RESULT_SUCCESS or MCM_RESULT_FAILURE
+       - mcm_error_t  -- Error code. Possible error code values are described
+                          in the error codes section of each message
+                          definition.
+  */
+  //! Card Information
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional mcm_sim_card_info_t card_info;
+  /**< Card Information. */
+} mcm_sim_get_card_status_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE           No error in the request.
+    -MCM_ERROR_INTERNAL       Unexpected error occurred during processing.
+    -MCM_ERROR_MALFORMED_MSG  Message was not formulated correctly by the control
+                              point, or the message was corrupted during
+                              transmission.
+    -MCM_ERROR_NO_MEMORY      Device could not allocate memory to formulate the
+                              response.
+*/
+
+/** @DESCRIPTION
+This function retrieves the current status of the cards and the status of all
+applications available on the cards.
+
+The result of this function can be used by the client to determine the
+number of slots supported by the specific target.
+
+During power-up, the status of the card can be unknown for a short period of
+time. An optional TLV indicates whether the reported status is valid.
+If the TLV is missing, the client assumes that the status of the card is valid.
+
+Other error codes not listed in the preceding table are handled as
+MCM_ERROR_INTERNAL.
+*/
+
+
+//=============================================================================
+// EVENT REGISTER
+//=============================================================================
+//=============================================================================
+/** @COMMAND MCM_SIM_EVENT_REGISTER
+    @CMD_VERSION 1.0
+    @BRIEF Registers/deregisters for unsolicited SIM event indications.
+    @DESCRIPTION
+     Corresponding events:
+      - MCM_SIM_CARD_STATUS_EVENT_IND
+      - MCM_SIM_REFRESH_EVENT_IND
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+
+//! @MSG  MCM_SIM_EVENT_REGISTER_REQ
+//! @TYPE Request
+//! @SENDER Control point
+//----------------------------------------------------------------------------
+message {
+  //! Register for Card Status Events
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional boolean register_card_status_event;
+  /**< Register for card status events. */
+  //! Register for Refresh Events
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional boolean register_refresh_event;
+  /**< Register for refresh events. */
+} mcm_sim_event_register_req_msg;
+
+//! @MSG  MCM_SIM_EVENT_REGISTER_RESP
+//! @TYPE Response
+//! @SENDER Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;
+  /**< Standard response type. Contains the following data members:
+       - mcm_result_t -- MCM_RESULT_SUCCESS or MCM_RESULT_FAILURE
+       - mcm_error_t  -- Error code. Possible error code values are described
+                          in the error codes section of each message
+                          definition.
+  */
+} mcm_sim_event_register_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request.
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing.
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the control
+                                 point, or the message was corrupted during
+                                 transmission.
+    -MCM_ERROR_NO_MEMORY         Device could not allocate memory to formulate the
+                                 response.
+    -MCM_ERROR_NO_EFFECT         Operation had no effect.
+*/
+
+/** @DESCRIPTION
+This function registers for card status and/or refresh event notifications from the card.
+
+The client is notified only when any file that belongs to the requested session
+type is modified by the Refresh procedure. The client does not need to specify
+a list of files.
+
+The client can deregister from card status and/or refresh events by indicating a
+FALSE Boolean value.
+
+Other error codes not listed in the preceding table are handled as
+MCM_ERROR_INTERNAL.
+*/
+
+
+//============================================================================
+// UNSOLICITED EVENT INDICATION
+//============================================================================
+//=============================================================================
+/** @COMMAND MCM_SIM_CARD_STATUS_EVENT_IND
+    @CMD_VERSION 1.0
+    @BRIEF Indication corresponding to MCM_SIM_CARD_STATUS_EVENT_IND.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG  MCM_SIM_CARD_STATUS_EVENT_IND
+//! @TYPE Indication
+//! @SENDER Service
+//----------------------------------------------------------------------------
+message {
+  //! Slot ID
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional mcm_sim_slot_id_t slot_id;
+  /**< Identifies to which card the indication corresponds. */
+  //! Card Information Indication
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional mcm_sim_card_info_t card_info;
+  /**< Card information indication. */
+} mcm_sim_card_status_event_ind_msg;
+
+
+//=============================================================================
+/** @COMMAND MCM_SIM_REFRESH_EVENT_IND
+    @CMD_VERSION 1.0
+    @BRIEF Indication corresponding to MCM_SIM_REFRESH_EVENT_IND.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG  MCM_SIM_REFRESH_EVENT_IND
+//! @TYPE Indication
+//! @SENDER Service
+//----------------------------------------------------------------------------
+message {
+  //! Refresh Indication Information
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional mcm_sim_refresh_event_t refresh_event;
+  /**< Refresh indication information. */
+} mcm_sim_refresh_event_ind_msg;
+
+
+//============================================================================
+// Service definition
+//============================================================================
+
+service mcm_sim {
+  //! @ID MCM_SIM_GET_SUBSCRIBER_ID
+  mcm_sim_get_subscriber_id_req_msg   MCM_SIM_GET_SUBSCRIBER_ID_REQ,
+  mcm_sim_get_subscriber_id_resp_msg  MCM_SIM_GET_SUBSCRIBER_ID_RESP = 0x0B00;
+
+  //! @ID MCM_SIM_GET_CARD_ID
+  mcm_sim_get_card_id_req_msg   MCM_SIM_GET_CARD_ID_REQ,
+  mcm_sim_get_card_id_resp_msg  MCM_SIM_GET_CARD_ID_RESP;
+
+  //! @ID MCM_SIM_GET_DEVICE_PHONE_NUMBER
+  mcm_sim_get_device_phone_number_req_msg   MCM_SIM_GET_DEVICE_PHONE_NUMBER_REQ,
+  mcm_sim_get_device_phone_number_resp_msg  MCM_SIM_GET_DEVICE_PHONE_NUMBER_RESP;
+
+  //! @ID MCM_SIM_GET_PREFERRED_OPERATOR_LIST
+  mcm_sim_get_preferred_operator_list_req_msg   MCM_SIM_GET_PREFERRED_OPERATOR_LIST_REQ,
+  mcm_sim_get_preferred_operator_list_resp_msg  MCM_SIM_GET_PREFERRED_OPERATOR_LIST_RESP;
+
+  //! @ID MCM_SIM_READ_FILE
+  mcm_sim_read_file_req_msg   MCM_SIM_READ_FILE_REQ,
+  mcm_sim_read_file_resp_msg  MCM_SIM_READ_FILE_RESP;
+
+  //! @ID MCM_SIM_WRITE_FILE
+  mcm_sim_write_file_req_msg   MCM_SIM_WRITE_FILE_REQ,
+  mcm_sim_write_file_resp_msg  MCM_SIM_WRITE_FILE_RESP;
+
+  //! @ID MCM_SIM_GET_FILE_SIZE
+  mcm_sim_get_file_size_req_msg   MCM_SIM_GET_FILE_SIZE_REQ,
+  mcm_sim_get_file_size_resp_msg  MCM_SIM_GET_FILE_SIZE_RESP;
+
+  //! @ID MCM_SIM_VERIFY_PIN
+  mcm_sim_verify_pin_req_msg   MCM_SIM_VERIFY_PIN_REQ,
+  mcm_sim_verify_pin_resp_msg  MCM_SIM_VERIFY_PIN_RESP;
+
+  //! @ID MCM_SIM_CHANGE_PIN
+  mcm_sim_change_pin_req_msg   MCM_SIM_CHANGE_PIN_REQ,
+  mcm_sim_change_pin_resp_msg  MCM_SIM_CHANGE_PIN_RESP;
+
+  //! @ID MCM_SIM_UNBLOCK_PIN
+  mcm_sim_unblock_pin_req_msg   MCM_SIM_UNBLOCK_PIN_REQ,
+  mcm_sim_unblock_pin_resp_msg  MCM_SIM_UNBLOCK_PIN_RESP;
+
+  //! @ID MCM_SIM_ENABLE_PIN
+  mcm_sim_enable_pin_req_msg   MCM_SIM_ENABLE_PIN_REQ,
+  mcm_sim_enable_pin_resp_msg  MCM_SIM_ENABLE_PIN_RESP;
+
+  //! @ID MCM_SIM_DISABLE_PIN
+  mcm_sim_disable_pin_req_msg   MCM_SIM_DISABLE_PIN_REQ,
+  mcm_sim_disable_pin_resp_msg  MCM_SIM_DISABLE_PIN_RESP;
+
+  //! @ID MCM_SIM_GET_CARD_STATUS
+  mcm_sim_get_card_status_req_msg   MCM_SIM_GET_CARD_STATUS_REQ,
+  mcm_sim_get_card_status_resp_msg  MCM_SIM_GET_CARD_STATUS_RESP;
+
+  //! @ID MCM_SIM_DEPERSONALIZATION
+  mcm_sim_depersonalization_req_msg   MCM_SIM_DEPERSONALIZATION_REQ,
+  mcm_sim_depersonalization_resp_msg  MCM_SIM_DEPERSONALIZATION_RESP;
+
+  //! @ID MCM_SIM_PERSONALIZATION
+  mcm_sim_personalization_req_msg   MCM_SIM_PERSONALIZATION_REQ,
+  mcm_sim_personalization_resp_msg  MCM_SIM_PERSONALIZATION_RESP;
+
+  //! @ID MCM_SIM_EVENT_REGISTER
+  mcm_sim_event_register_req_msg   MCM_SIM_EVENT_REGISTER_REQ,
+  mcm_sim_event_register_resp_msg  MCM_SIM_EVENT_REGISTER_RESP;
+
+  //! @ID MCM_SIM_CARD_STATUS_EVENT_IND
+  mcm_sim_card_status_event_ind_msg  MCM_SIM_CARD_STATUS_EVENT_IND;
+
+  //! @ID MCM_SIM_REFRESH_EVENT_IND
+  mcm_sim_refresh_event_ind_msg  MCM_SIM_REFRESH_EVENT_IND;
+} = 0x0B00;

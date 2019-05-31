@@ -1,0 +1,25 @@
+From b08b97c9508006aabc05f0bd337e25db4afb82e0 Mon Sep 17 00:00:00 2001
+From: Prashanth Vadde <pvadde@codeaurora.org>
+Date: Thu, 12 Jul 2018 12:01:16 +0530
+Subject: [PATCH 1/1] Fix for IDLE wait timeout
+
+---
+ AVSCommon/AVS/src/DialogUXStateAggregator.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/AVSCommon/AVS/src/DialogUXStateAggregator.cpp b/AVSCommon/AVS/src/DialogUXStateAggregator.cpp
+index 02707ad..d870a33 100644
+--- a/AVSCommon/AVS/src/DialogUXStateAggregator.cpp
++++ b/AVSCommon/AVS/src/DialogUXStateAggregator.cpp
+@@ -34,7 +34,7 @@ static const std::string TAG("DialogUXStateAggregator");
+ /**
+  * A short timeout that is used to avoid going to the IDLE state immediately while waiting for other state changes.
+  */
+-static const std::chrono::milliseconds SHORT_TIMEOUT{200};
++static const std::chrono::milliseconds SHORT_TIMEOUT{800};
+
+ DialogUXStateAggregator::DialogUXStateAggregator(std::chrono::milliseconds timeoutForThinkingToIdle) :
+         m_currentState{DialogUXStateObserverInterface::DialogUXState::IDLE},
+--
+2.7.4
+

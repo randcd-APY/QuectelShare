@@ -1,0 +1,157 @@
+#!/bin/sh
+
+# Copyright (C) 2017-2018 Qualcomm Technologies, Inc.
+# All rights reserved
+# Confidential and Proprietary - Qualcomm Technologies, Inc.
+
+source ./web-setup.inc
+
+LANG_PREFIX="../lang/"
+LANG_SUFFIX=".po"
+DEFAULT_LANG="en"
+SYSTEM_CONF="/etc/allplay/system.json"
+
+configRead() {
+	local jsonPath="$1"
+	local jsonFile="$2"
+	[ -f "$jsonFile" ] && jq -ej ".$jsonPath // empty" "$jsonFile"
+}
+
+first_glob_match() {
+	# not perfect: "firstMatch [aA]" will return "[aA]" if that exists
+	# but "a" and "A" don't.
+	[ -e "$1" ] && printf "%s" "$1"
+}
+
+parse_AcceptLanguage() {
+	local lang
+	local langFile
+	local nextLang
+
+	# change language to lower case and split between commas then remove leading/trailing whitespaces
+	printf "%s\\n" "$HTTP_ACCEPT_LANGUAGE" | tr '[:upper:],' '[:lower:]\n' | sed 's/^\s*//;s/\s*$//' | while read -r lang; do
+		# remove args, e.g. ";q=0.5"
+		lang="${lang%%;*}"
+
+		# verify language is legal
+		{ printf "%s" "$lang" | grep -qE "^[[:alpha:]*]+(-[[:alnum:]*]+)*$"; } || continue
+
+		while [ -n "$lang" ]; do
+			langFile="$(first_glob_match "$LANG_PREFIX"$lang"$LANG_SUFFIX")"
+			if [ -n "$langFile" ]; then
+				langFile="${langFile#$LANG_PREFIX}"
+				langFile="${langFile%$LANG_SUFFIX}"
+				echo -n "$langFile"
+				return
+			fi
+
+			nextLang="${lang%-*}"
+			[ "$nextLang" != "$lang" ] || nextLang=
+			lang="$nextLang"
+		done
+	done
+}
+
+set_language() {
+	local language="$(cgiVar language)" || output_html_error "400 Bad Request"
+
+	[ -f "$LANG_PREFIX$language$LANG_SUFFIX" ] || {
+		output_html_error "404 Not Found"
+	}
+
+	echo "Set-Cookie: webui.language=$language; Path=/"
+	echo "{}" | output_json
+}
+
+translate() {
+	local lang=$(expr match "$HTTP_COOKIE" '.*webui.language=\([^ ;\./]\+\)')
+	local langFile="$LANG_PREFIX$lang$LANG_SUFFIX"
+
+	[ -f "$langFile" ] || {
+		lang=$(parse_AcceptLanguage)
+		lang=${lang:-$DEFAULT_LANG}
+		langFile="$LANG_PREFIX$lang$LANG_SUFFIX"
+	}
+
+	# BEGIN block reads the .po language file into 'lookup' array. The AWK record is
+	# multi-line (RS=""), with '"' as the field separator.
+	#
+	# Main block AWK record ($0) is delineated by '<%_' or '%>', with only 1 field.
+	# It cleans up whitespace and then tests if the record is in the lookup table,
+	# prints the table entry (translated text) if found, else leaves input untouched.
+	awk 'BEGIN {
+		RS = "" ; FS = "\""
+		while ((getline < "'$langFile'") > 0) {
+			lookup[$2]=$5
+		}
+		RS="<\\%_|\\%>"; FS=""
+	}
+
+	{
+		test = $0
+		gsub(/[ \t\n]+/," ", test)
+		if (test in lookup) {
+			$0 = lookup[test]
+		}
+		printf "%s", $0
+	}'
+}
+
+output_html() {
+	local view="../view${PATH_INFO}.htm"
+
+	[ -f "$view" ] || output_html_error "404 Not Found"
+
+	echo 'Content-Type: text/html'
+	echo
+	output_content "$view" | translate
+}
+
+escape_js() { #escapes these: <]"'
+	printf "%s" "$*" | sed 's/</\\x3C/g; s/]/\\x5D/g; s/"/\\x22/g;'"s/'/\\\\x27/g"
+}
+
+output_content() {
+	cat ../header.htm
+
+	#ensure ssid/key cannot terminate CDATA section
+	ssid=$(escape_js "$ssid")
+	key=$(escape_js "$key")
+
+	echo '<body><script type="text/javascript">//<![CDATA['
+	echo 'var networkState = "softap"'
+	echo "var params = {'ssid':'$ssid', 'key':'$key', 'stage':'$stage', 'interface':'$interface'};"
+	echo '//]]></script>'
+
+	cat "$@"
+	cat ../footer.htm
+}
+
+set_friendly_name() {
+	local friendlyName="$(cgiVar friendlyName)"
+	[ -n "$friendlyName" ] || output_html_error "400 Bad Request"
+
+	EVENT=event_friendly_name NAME="$friendlyName" /etc/statemgr >/dev/null
+	echo "{}" | output_json
+}
+
+if [ -z "$PATH_INFO" ] || [ "$PATH_INFO" = "/" ]; then
+	[ "$(configRead system.wifiConfigured "$SYSTEM_CONF")" = Yes ] && PATH_INFO="/overview" || PATH_INFO="/name"
+fi
+
+local ssid="$(cgiVar ssid)"
+local key="$(cgiVar key)"
+local stage="$(cgiVar stage)"
+local interface="$(cgiVar interface)"
+
+case "$PATH_INFO" in
+	/set_friendly_name)
+		set_friendly_name
+		;;
+	/set_language)
+		set_language
+		;;
+	*)
+		output_html
+		;;
+esac

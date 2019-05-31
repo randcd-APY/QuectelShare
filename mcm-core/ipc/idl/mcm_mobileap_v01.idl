@@ -1,0 +1,3288 @@
+/*****************************************************************************
+  @FILE     mcm_mobileap_v01.idl
+
+  @BRIEF    MCM Mobile Access Point API (MCM_MOBILEAP)
+
+  @DESCRIPTION
+     Mobile Connection Manager MobileAP API (MCM_MOBILEAP)
+
+    This file provides Mobile Connection Manager(mcm) MobileAP APIs.
+    mcm_mobileap APIs are used for enabling and disabling of Mobile AP
+    functionality, backhaul connectivity, and obtaining other
+    Mobile AP related configuration.
+
+  MCM API Major Version 0
+  MCM API Minor Version 1
+
+  @COPYRIGHT Copyright (c)2013 Qualcomm Technologies, Inc.
+  All rights reserved.
+  Confidential and Proprietary - Qualcomm Technologies, Inc.
+*****************************************************************************/
+
+include "mcm_common_v01.idl";
+
+revision 2;
+
+//=============================================================================
+// EVENT ID CONSTANTS
+//=============================================================================
+// Unsolicited events supported by MCM MobileAP Module.
+const  MCM_MOBILEAP_ENABLED_EV = 0x8000L;  /**< Mobile AP enabled event. */
+const  MCM_MOBILEAP_LAN_CONNECTING_EV = 0x8001L;  /**< LAN connecting event. */
+const  MCM_MOBILEAP_LAN_CONNECTING_FAIL_EV = 0x8002L;  /**< LAN connection failure event. */
+const  MCM_MOBILEAP_LAN_IPv6_CONNECTING_FAIL_EV = 0x8003L;  /**< LAN IPv6 connection failure event. */
+const  MCM_MOBILEAP_LAN_CONNECTED_EV = 0x8004L;  /**< LAN connected event. */
+const  MCM_MOBILEAP_STA_CONNECTED_EV = 0x8005L;  /**< STA connected event. */
+const  MCM_MOBILEAP_LAN_IPv6_CONNECTED_EV = 0x8006L;  /**< LAN IPv6 connected event. */
+const  MCM_MOBILEAP_WAN_CONNECTING_EV = 0x8007L;  /**< WAN connecting event. */
+const  MCM_MOBILEAP_WAN_CONNECTING_FAIL_EV = 0x8008L;  /**< WAN connection failure event. */
+const  MCM_MOBILEAP_WAN_IPv6_CONNECTING_FAIL_EV = 0x8009L;  /**< WAN IPv6 connection failure event. */
+const  MCM_MOBILEAP_WAN_CONNECTED_EV = 0x800AL;  /**< WAN connected event. */
+const  MCM_MOBILEAP_WAN_IPv6_CONNECTED_EV = 0x800BL;  /**< WAN IPv6 connected event. */
+const  MCM_MOBILEAP_WAN_DISCONNECTED_EV = 0x800CL;  /**< WAN disconnected event. */
+const  MCM_MOBILEAP_WAN_IPv6_DISCONNECTED_EV = 0x800DL;  /**< WAN IPv6 disconnected event. */
+const  MCM_MOBILEAP_LAN_DISCONNECTED_EV = 0x800EL;  /**< LAN disconnected event. */
+const  MCM_MOBILEAP_LAN_IPv6_DISCONNECTED_EV = 0x800FL;  /**< LAN IPv6 disconnected event. */
+const  MCM_MOBILEAP_DISABLED_EV = 0x8010L;    /**< Mobile AP disabled event. */
+
+//=============================================================================
+// CONSTANTS
+//=============================================================================
+const MCM_MOBILEAP_MAX_FIREWALL_ENTRIES = 50;
+const MCM_MOBILEAP_MAX_STATIC_NAT_ENTRIES = 50;
+const MCM_MOBILEAP_IPV6_ADDR_LEN         = 16;    //!< IPv6 address length.
+const MCM_MOBILEAP_MAC_ADDR_LEN          = 6;     //!< MAC address length.
+const MCM_MOBILEAP_DEVICE_NAME_MAX       = 100;   //!< Maximum length of the device name.
+const MCM_MOBILEAP_LEASE_TIME_LEN       = 100;    //!< Maximum lease time length.
+
+//=============================================================================
+// DATA TYPES
+//=============================================================================
+enum {
+  MCM_MOBILEAP_NAT_SYMMETRIC_NAT = 0,  //!< Symmetric NAT.
+  MCM_MOBILEAP_NAT_PORT_RESTRICTED_CONE_NAT = 1,  //!< Port-restricted cone NAT.
+  MCM_MOBILEAP_NAT_FULL_CONE_NAT = 2,  //!< Full cone NAT (currently not supported).
+  MCM_MOBILEAP_NAT_ADDRESS_RESTRICTED_NAT = 3  //!< Address-restricted NAT (currently not supported).
+} mcm_mobileap_nat_type_t;  //!< Enum of various NAT types.
+                            //!< Currently MCM_MOBILEAP_NAT_SYMMETRIC_NAT and
+                            //!< MCM_MOBILEAP_NAT_PORT_RESTRICTED_CONE_NAT are supported.
+                            //!< Support for the rest will be added in the future.
+
+enum {
+  MCM_MOBILEAP_IP_FAMILY_V4 = 0x04,  //!< IP family v4.
+  MCM_MOBILEAP_IP_FAMILY_V6 = 0x06,  //!< IP family v6 (currently not supported).
+  MCM_MOBILEAP_IP_FAMILY_V4V6 = 0x0A  //!< IP family v4/v6.
+} mcm_mobileap_ip_family_t;  //!< Enum of IP families. MCM_MOBILEAP_IP_FAMILY_V4 and
+                             //!< MCM_MOBILEAP_IP_FAMILY_V4V6 are the ones currently supported.
+                             //!< Support for the rest will be added in the future.
+
+enum {
+  MCM_MOBILEAP_NAT_TIMEOUT_GENERIC = 0x01, //!< Generic NAT timeout.
+  MCM_MOBILEAP_NAT_TIMEOUT_ICMP = 0x02, //!< NAT timeout for ICMP (currently not supported).
+  MCM_MOBILEAP_NAT_TIMEOUT_TCP_ESTABLISHED = 0x03,
+                                //!< NAT timeout for the established TCP (currently not supported).
+  MCM_MOBILEAP_NAT_TIMEOUT_UDP = 0x04 //!< NAT timeout for UDP (currently not supported).
+}mcm_mobileap_nat_timeout_t;    //!< Different timeout types supported.
+                                //!< Currently only the generic timeout type is
+                                //!< supported. Support for the rest will be
+                                //!< added in the future.
+
+enum {
+  MCM_MOBILEAP_IP_V4 = 4,  /**< IPv4. */
+  MCM_MOBILEAP_IP_V6 = 6   /**< IPv6. */
+} mcm_mobileap_ip_version_t;    //!< IP version types.
+
+
+
+enum {
+  MCM_MOBILEAP_WWAN_STATUS_CONNECTING = 0x01,
+  /**< IPv4 WWAN is in the Connecting state. */
+  MCM_MOBILEAP_WWAN_STATUS_CONNECTING_FAIL,
+  /**< IPv4 connection to the WWAN failed. */
+  MCM_MOBILEAP_WWAN_STATUS_CONNECTED,
+  /**< IPv4 WWAN is in the Connected state. */
+  MCM_MOBILEAP_WWAN_STATUS_DISCONNECTING,
+  /**< IPv4 WWAN is disconnecting. */
+  MCM_MOBILEAP_WWAN_STATUS_DISCONNECTING_FAIL,
+  /**< IPv4 WWAN failed to disconnect. */
+  MCM_MOBILEAP_WWAN_STATUS_DISCONNECTED,
+  /**< IPv4 WWAN is disconnected. */
+  MCM_MOBILEAP_WWAN_STATUS_IPV6_CONNECTING,
+  /**< IPv6 WWAN is in the Connecting state */
+  MCM_MOBILEAP_WWAN_STATUS_IPV6_CONNECTING_FAIL,
+  /**< IPv6 connection to the WWAN failed. */
+  MCM_MOBILEAP_WWAN_STATUS_IPV6_CONNECTED,
+  /**< IPv6 WWAN is in the Connected state. */
+  MCM_MOBILEAP_WWAN_STATUS_IPV6_DISCONNECTING,
+  /**< IPv6 WWAN is disconnecting. */
+  MCM_MOBILEAP_WWAN_STATUS_IPV6_DISCONNECTING_FAIL,
+  /**< IPv6 WWAN failed to disconnect. */
+  MCM_MOBILEAP_WWAN_STATUS_IPV6_DISCONNECTED
+  /**< IPv6 WWAN is disconnected. */
+}mcm_mobileap_wwan_status_t;    //!< Identifies the WWAN status.
+
+
+enum {
+  MCM_MOBILEAP_WWAN_CALL_END_TYPE_INVALID = -1,
+  /**< Unknown. */
+  MCM_MOBILEAP_WWAN_CALL_END_TYPE_MOBILE_IP = 1,
+  /**< Mobile IP. */
+  MCM_MOBILEAP_WWAN_CALL_END_TYPE_INTERNAL,
+  /**< Internal. */
+  MCM_MOBILEAP_WWAN_CALL_END_TYPE_CALL_MANAGER_DEFINED,
+  /**< Call manager-defined. */
+  MCM_MOBILEAP_WWAN_CALL_END_TYPE_3GPP_SPEC_DEFINED,
+  /**< 3GPP specification-defined. */
+  MCM_MOBILEAP_WWAN_CALL_END_TYPE_PPP,
+  /**< PPP. */
+  MCM_MOBILEAP_WWAN_CALL_END_TYPE_EHRPD,
+  /**< EHRPD. */
+  MCM_MOBILEAP_WWAN_CALL_END_TYPE_IPV6
+  /**< IPv6. */
+} mcm_mobileap_wwan_call_end_type_t;    //!< Indicates the reason why the WWAN call ended.
+
+struct
+{
+   mcm_mobileap_wwan_call_end_type_t wwan_call_end_reason_type;
+   /**< WWAN call end type. */
+
+   int32 wwan_call_end_reason_code;
+   /**< WWAN call end reason code. */
+} mcm_mobileap_wwan_call_end_reason_t;
+
+
+
+struct {
+  uint32 addr;
+  /**< IPv4 address as specified in the IPv4 protocol
+       specification (RFC 791 \hyperref{S2,[S2]}).
+  */
+  uint32 subnet_mask;
+  /**< IPv4 subnet mask as specified in the IPv4
+       protocol specification (RFC 791 \hyperref{S2,[S2]}).
+  */
+} mcm_mobileap_ip4_addr_subnet_mask_t; /**< Data structure for IPv4 address and subnet mask. */
+
+
+struct  {
+  uint8 addr[MCM_MOBILEAP_IPV6_ADDR_LEN];
+  /**< IPv6 address as specified in the IPv6
+       protocol specification (RFC 2460 \hyperref{S5,[S5]}).
+  */
+  uint8 prefix_len;
+  /**< IPv6 prefix length as specified in the IPv6
+       protocol specification (RFC 3513 \hyperref{S6,[S6]}).
+  */
+} mcm_mobileap_ip6_addr_prefix_len_t; /**< Data structure for the IPv6 address and prefix. */
+
+
+struct  {
+  uint16 port;
+  /**< TCP/UDP port as specified in the
+       TCP and UDP protocols (RFC 793 \hyperref{S4,[S4]},
+       RFC 768 \hyperref{S1,[S1]}).
+  */
+  uint16 range;
+  /**< TCP/UDP port range as specified in the
+       TCP and UDP protocols (RFC 793 \hyperref{S4,[S4]},
+       RFC 768 \hyperref{S1,[S1]}).
+  */
+} mcm_mobileap_tcp_udp_port_range_t; /**< Data structure for TCP, UDP, and TCP_UDP port and range. */
+
+
+struct  {
+  uint8 value;
+  /**< TOS value as specified in the IPv4 protocol
+       (RFC 791 \hyperref{S2,[S2]}). */
+  uint8 mask;
+  /**< IPv4 TOS mask */
+} mcm_mobileap_ip4_tos_t; /**< Data structure for IPv4 type of service. */
+
+
+struct  {
+  uint8 value;
+  /**< IPv6 traffic class value as specified in the IPv6 protocol
+       (RFC 2460 \hyperref{S5,[S5]}). */
+  uint8 mask;
+  /**< IPv6 traffic class mask */
+} mcm_mobileap_ip6_traffic_class_t; /**< Data structure for IPv6 traffic class. */
+
+struct {
+  uint32   port_fwding_private_ip;    /**< Private IP. */
+  uint16   port_fwding_private_port;  /**< Private port. */
+  uint16   port_fwding_global_port;   /**< Global port. */
+  uint8    port_fwding_protocol;      /**< Protocol. */
+}mcm_mobileap_static_nat_entry_conf_t; //!< Static NAT entry configuration.
+
+
+struct {
+  uint64     bytes_rx;         /**< Rx bytes. */
+  uint64     bytes_tx;         /**< Tx bytes. */
+  uint32     pkts_rx;          /**< Rx packets. */
+  uint32     pkts_tx;          /**< Tx packets. */
+  uint32     pkts_dropped_rx;  /**< Rx packets dropped. */  
+  uint32     pkts_dropped_tx;  /**< Tx packets dropped. */
+} mcm_mobileap_wwan_statistics_t; //!< Mobile AP WWAN statistics.
+
+struct {
+  uint32 intf;     /**< Interface. */
+  uint32 start;    /**< Start. */
+  uint32 end;      /**< End. */
+  char leasetime[MCM_MOBILEAP_LEASE_TIME_LEN];  /**< Lease time length. */
+} mcm_mobileap_dhcpd_config_t; //!< DHCP configuration.
+
+
+struct {
+  boolean enable;        /**< Enable dual AP. */
+  uint32 a5_ip_address;  /**< A5 IP address. */
+  uint32 sub_net_mask;   /**< Subnet mask. */
+} mcm_mobileap_dualap_config_t; //!< Dual AP configuration
+
+enum {
+  MCM_MOBILEAP_STA_CONNECTION_MIN_FORCE_TO_32_BIT = -2147483647,
+                  // Minimum signed uint32 number, to force Enum to be 4 Byte
+  MCM_MOBILEAP_STA_CONNECTION_DYNAMIC = 0,  /**< Dynamic connection. */
+  MCM_MOBILEAP_STA_CONNECTION_STATIC,       /**< Static connection. */
+  MCM_MOBILEAP_STA_CONNECTION_MAX_FORCE_TO_32_BIT = 2147483647
+} mcm_mobileap_sta_connection_t; //!< Station mode connection type.
+
+
+struct {
+  uint32 ip_addr;   /**< IP address. */
+  uint32 gw_ip;     /**< GSM/WCDMA IP. */
+  uint32 netmask;   /**< Net mask. */
+  uint32 dns_addr;  /**< DNS address. */
+} mcm_mobileap_sta_static_ip_config_t; //!< Station mode static IP configuration.
+
+struct {
+  mcm_mobileap_sta_connection_t  conn_type;              /**< Connection type. */
+  mcm_mobileap_sta_static_ip_config_t static_ip_config;  /**< Static IP configuration. */
+} mcm_mobileap_sta_connection_config_t; //!< Station mode configuration.
+
+
+// The following functions are defined in the API Implementation
+// mcm_mobileap_init()
+//mcm_mobileap_deinit()
+
+//=============================================================================
+// MESSAGES
+//=============================================================================
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_ENABLE
+    @BRIEF Enables the mobile AP functionality via a single mobile AP instance
+           on the ARM\reg Cortex\tmns-A5 processor.
+
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_ENABLE_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//! @ASYNC Call
+//----------------------------------------------------------------------------
+message {
+} mcm_mobileap_enable_req_msg;
+
+//! @MSG     MCM_MOBILEAP_ENABLE_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional uint32 mcm_mobileap_handle;  //!< Mobile AP handle.
+  /* techpubs: spaces after _s for formatting.  */
+} mcm_mobileap_enable_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Mobile AP handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_NO_EFFECT         MobileAP is already enabled or a previous request is
+                               still in process
+*/
+
+
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_DISABLE
+    @BRIEF Disables the mobile AP functionality for a mobile AP instance on
+           the Cortex-A5 processor.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_DISABLE_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//! @ASYNC Call
+//----------------------------------------------------------------------------
+
+message {
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 mcm_mobileap_handle;
+  /**< Handle identifying the mobile AP call instance.
+       The value must be the handle previously returned by
+       MCM_MOBILEAP_ENABLE_REQ.
+  */
+ /* techpubs: space after _ for formatting. */
+} mcm_mobileap_disable_req_msg;
+
+//! @MSG     MCM_MOBILEAP_DISABLE_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+} mcm_mobileap_disable_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Mobile AP handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_NO_EFFECT         MobileAP is already disabled or a previous request is
+                               still in process
+*/
+
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_BRING_UP_WWAN
+    @BRIEF Invokes bringing up the WWAN from the mobile AP.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_BRING_UP_WWAN_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//! @ASYNC Call
+//----------------------------------------------------------------------------
+
+message {
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 mcm_mobileap_handle;
+  /**< Handle identifying the mobile AP call instance.
+       The value must be the handle previously returned by
+       MCM_MOBILEAP_ENABLE_REQ.
+  */
+  /**
+    Flag to indicate IP version. Supported only for 9x25 and above.
+   */
+  optional mcm_mobileap_ip_version_t ip_version;
+} mcm_mobileap_bring_up_wwan_req_msg;
+
+//! @MSG     MCM_MOBILEAP_BRING_UP_WWAN_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+} mcm_mobileap_bring_up_wwan_resp_msg;
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Mobile AP handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_NO_EFFECT         WWAN is already enabled or a previous request is
+                               still in process
+*/
+
+/** @DESCRIPTION
+    This command brings up the WWAN connection. The call is established using
+    the stored network policy that enabled the mobile AP via
+    MCM_MOBILEAP_ENABLE_REQ.
+
+    If the control point issues multiple requests in short intervals,
+    an MCM_ERROR_NO_EFFECT error is returned indicating that the previous request
+    is still in process.
+*/
+
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_TEAR_DOWN_WWAN
+    @BRIEF Brings down a WWAN call, if connected.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_TEAR_DOWN_WWAN_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//! @ASYNC Call
+//----------------------------------------------------------------------------
+
+message {
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 mcm_mobileap_handle;
+  /**< Handle identifying the mobile AP call instance.
+       The value must be the handle previously returned by
+       MCM_MOBILEAP_ENABLE_REQ.
+  */
+  /* techpubs note: space added for table formatting */
+  /**
+    Flag to indicate IP version. Supported only for 9x25 and above.
+  */
+  optional mcm_mobileap_ip_version_t ip_version;
+} mcm_mobileap_tear_down_wwan_req_msg;
+
+//! @MSG     MCM_MOBILEAP_TEAR_DOWN_WWAN_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional mcm_response_t resp;  //!< Result code.
+} mcm_mobileap_tear_down_wwan_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Mobile AP handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_NO_EFFECT         WWAN is already disabled or a previous request is
+                               still in process
+*/
+
+/** @DESCRIPTION
+    This command brings down the backhaul functionality.
+
+    If the control point issues multiple requests in short intervals,
+    an MCM_ERROR_NO_EFFECT error is returned indicating that the previous request
+    is still in process.
+*/
+
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_ADD_STATIC_NAT_ENTRY
+    @BRIEF Adds a static NAT entry.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_ADD_STATIC_NAT_ENTRY_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+
+message {
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 mcm_mobileap_handle;
+  /**< Handle identifying the mobile AP call instance.
+       The value must be the handle previously returned by
+       MCM_MOBILEAP_ENABLE_REQ.
+  */
+  /* techpubs note: space added for table formatting */
+
+  //! SNAT Entry Configuration
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_mobileap_static_nat_entry_conf_t nat_entry_config;  //!< SNAT entry configuration.
+
+} mcm_mobileap_add_static_nat_entry_req_msg;
+
+//! @MSG     MCM_MOBILEAP_ADD_STATIC_NAT_ENTRY_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+} mcm_mobileap_add_static_nat_entry_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE                       No error in the request
+    -MCM_ERROR_INTERNAL                   Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG              Message was not formulated correctly by the
+                                        control point or the message was corrupted
+                                        during transmission
+    -MCM_ERROR_MISSING_ARG                One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE             Mobile AP handle provided in the request
+                                        is not valid, i.e., it is not assigned to the
+                                        control point
+    -MCM_ERROR_INVALID_ARG                Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED              Operation is not supported
+    -MCM_ERROR_NO_EFFECT                  Entry is already present.
+    -MCM_ERROR_INSUFFICIENT_RESOURCES     Exceeded maximum number of snat entries
+                                        supported; cannot add more snat entries.
+*/
+
+/** @DESCRIPTION
+    This command adds a static NAT entry.
+*/
+
+
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_GET_STATIC_NAT_ENTRY
+    @BRIEF Queries all static NAT entries.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  Medium risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_GET_STATIC_NAT_ENTRY_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 mcm_mobileap_handle;
+  /**< Handle identifying the mobile AP call instance.
+       The value must be the handle previously returned by
+       MCM_MOBILEAP_MOBILEAP_ENABLE_REQ.
+  */
+  //! Max SNAT Entries.
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 max_entries;
+  /**< Maximum number of SNAT entries requested by the client.
+  */
+  /* techpubs note: space added for table formatting */
+
+} mcm_mobileap_get_static_nat_entry_req_msg;
+
+//! @MSG     MCM_MOBILEAP_GET_STATIC_NAT_ENTRY_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+  //! SNAT Configuration
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional mcm_mobileap_static_nat_entry_conf_t snat_entries<MCM_MOBILEAP_MAX_STATIC_NAT_ENTRIES>;  //!< SNAT configuration.
+
+} mcm_mobileap_get_static_nat_entry_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Mobile AP handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+/** @DESCRIPTION
+    This command queries all static NAT entries. The response message
+    contains the number of entries followed by the value of these entries
+    sequentially.
+*/
+
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_DELETE_STATIC_NAT_ENTRY
+    @BRIEF Deletes a static NAT entry.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_DELETE_STATIC_NAT_ENTRY_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 mcm_mobileap_handle;
+  /**< Handle identifying the mobile AP call instance.
+       The value must be the handle previously returned by
+       MCM_MOBILEAP_ENABLE_REQ.
+  */
+  /* techpubs note: space added for table formatting */
+
+  //! SNAT Entry Configuration
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_mobileap_static_nat_entry_conf_t snat_entry;  //!< SNAT entry configuration.
+
+} mcm_mobileap_delete_static_nat_entry_req_msg;
+
+//! @MSG     MCM_MOBILEAP_DELETE_STATIC_NAT_ENTRY_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+} mcm_mobileap_delete_static_nat_entry_resp_msg;
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Mobile AP handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+    -MCM_ERROR_INVALID_INDEX     Entry is not added.
+*/
+
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_SET_NAT_TIMEOUT
+    @BRIEF Configures different types of NAT timeouts.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_SET_NAT_TIMEOUT_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+
+message {
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 mcm_mobileap_handle;
+  /**< Handle identifying the mobile AP call instance.
+       The value must be the handle previously returned by
+       MCM_MOBILEAP_ENABLE_REQ.
+  */
+
+  //! NAT Timeout Type
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_mobileap_nat_timeout_t timeout_type;
+  /**< NAT timeout type to be used. Values: \n
+       @ENUM ()
+  */
+  //! NAT Timeout Value
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 timeout_value;
+  /**< NAT timeout value to be used, in seconds.
+  */
+
+} mcm_mobileap_set_nat_timeout_req_msg;
+
+
+//! @MSG     MCM_MOBILEAP_SET_NAT_TIMEOUT_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+} mcm_mobileap_set_nat_timeout_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Mobile AP handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+/** @DESCRIPTION
+    This command sets different NAT timeouts on the device. The command
+    handler overwrites any previously configured value with the current value.
+*/
+
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_GET_NAT_TIMEOUT
+    @BRIEF Gets the configured NAT timeout value.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  Medium risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_GET_NAT_TIMEOUT_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+
+message {
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 mcm_mobileap_handle;
+  /**< Handle identifying the mobile AP call instance.
+       The value must be the handle previously returned by
+       MCM_MOBILEAP_ENABLE_REQ.
+  */
+
+  //! NAT Timeout Type
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_mobileap_nat_timeout_t timeout_type;
+  /**< NAT timeout type used. Values: \n
+       @ENUM ()
+  */
+
+} mcm_mobileap_get_nat_timeout_req_msg;
+
+
+//! @MSG     MCM_MOBILEAP_GET_NAT_TIMEOUT_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+  //! NAT Timeout Value
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional uint32 timeout_value;
+  /**< NAT timeout value used, in seconds.
+  */
+} mcm_mobileap_get_nat_timeout_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Mobile AP handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+/** @DESCRIPTION
+    This command gets the configured NAT timeout on the device.
+*/
+
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_SET_NAT_TYPE
+    @BRIEF Configures the NAT type setting.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_SET_NAT_TYPE_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//! @ASYNC Call
+//----------------------------------------------------------------------------
+
+message {
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 mcm_mobileap_handle;
+  /**< Handle identifying the mobile AP call instance.
+       The value must be the handle previously returned by
+       mcm_mobileap_ENABLE_REQ.
+   */
+
+  //! NAT Type Value
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_mobileap_nat_type_t nat_type;
+  /**< NAT type. Values: \n
+       @ENUM ()
+  */
+
+} mcm_mobileap_set_nat_type_req_msg;
+
+//! @MSG     MCM_MOBILEAP_SET_NAT_TYPE_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+} mcm_mobileap_set_nat_type_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Mobile AP handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+/** @DESCRIPTION
+    This command sets the NAT type on the device. The command
+    handler overwrites any previously configured value with the current value.
+*/
+
+
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_GET_NAT_TYPE
+    @BRIEF Gets the NAT type setting.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  Medium risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_GET_NAT_TYPE_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+
+message {
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 mcm_mobileap_handle;
+  /**< Handle identifying the mobile AP call instance.
+    The value must be the handle previously returned by
+    MCM_MOBILEAP_ENABLE_REQ.
+   */
+
+} mcm_mobileap_get_nat_type_req_msg;
+
+//! @MSG     MCM_MOBILEAP_GET_NAT_TYPE_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+  //! NAT Type Value
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional mcm_mobileap_nat_type_t nat_type;
+  /**< NAT type. Values: \n
+       @ENUM ()
+  */
+
+} mcm_mobileap_get_nat_type_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Mobile AP handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+/** @DESCRIPTION
+    This command gets the NAT type on the device.
+*/
+
+
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_ADD_FIREWALL_ENTRY
+    @BRIEF Adds IP filter-based firewall rules.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_ADD_FIREWALL_ENTRY_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+
+message {
+    //! Mobile AP Handle
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    mandatory uint32 mcm_mobileap_handle;
+    /**< Handle identifying the mobile AP call instance.
+         The value must be the handle previously returned by
+         MCM_MOBILEAP_ENABLE_REQ.
+    */
+    /* techpubs note: space added for table formatting */
+
+    //! IP Version
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    mandatory mcm_mobileap_ip_family_t ip_version;
+    /**< Identifies the firewall family version. Values: \n
+         @ENUM ()
+    */
+
+    //! Next Protocol Header After the IP Header
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    optional uint8 next_hdr_prot;
+    /**< IPv4/IPv6 next header protocol. */
+
+    //! TCP, UDP, and TCP_UDP Source Port
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    optional  mcm_mobileap_tcp_udp_port_range_t  tcp_udp_src;
+    /**< TCP, UDP, and TCP_UDP source port. */
+
+    //! TCP, UDP, and TCP_UDP Destination Port
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    optional  mcm_mobileap_tcp_udp_port_range_t  tcp_udp_dst;
+    /**< TCP, UDP, and TCP_UDP destination port. */
+
+    //! ICMP Type
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    optional  uint8  icmp_type;
+    /**< ICMP type, as specified in the ICMP protocol
+         (RFC 792 \hyperref{S3,[S3]}). */
+
+    //! ICMP Code
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    optional  uint8  icmp_code;
+    /**< ICMP code as specified in the ICMP protocol
+         (RFC 792 \hyperref{S3,[S3]}). */
+
+    //! ESP Security Parameter Index
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    optional  uint32 esp_spi;
+    /**< Security parameter index, as specified in the ESP protocol
+        (RFC 4303 \hyperref{S7,[S7]}). */
+
+    //! IPv4 Source Address and Subnet Mask
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    optional  mcm_mobileap_ip4_addr_subnet_mask_t ip4_src_addr;
+    /**< IPv4 source address and subnet mask. */
+
+    //! IPv4 Destination Address and Subnet Mask
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    optional  mcm_mobileap_ip4_addr_subnet_mask_t ip4_dst_addr;
+    /**< IPv4 destination address and subnet mask. */
+
+    //! IPv4 TOS Value and Mask
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    optional  mcm_mobileap_ip4_tos_t  ip4_tos;
+    /**< IPv4 TOS value and mask. */
+
+    //! IPv6 Source Address and Prefix Length
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    optional  mcm_mobileap_ip6_addr_prefix_len_t  ip6_src_addr;
+    /**< IPv6 source address and prefix length. */
+
+    //! IPv6 Destination Address and Prefix Length
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    optional  mcm_mobileap_ip6_addr_prefix_len_t  ip6_dst_addr;
+    /**< IPv6 destination address and prefix length. */
+
+    //! IPv6 Traffic Class Value and Mask
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    optional  mcm_mobileap_ip6_traffic_class_t  ip6_trf_cls;
+    /**< IPv6 traffic class value and mask. */
+
+
+} mcm_mobileap_add_firewall_entry_req_msg;
+
+
+//! @MSG     MCM_MOBILEAP_ADD_FIREWALL_ENTRY_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+    //! Result Code
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    mandatory mcm_response_t resp;  //!< Result code.
+
+    //! Firewall Handle
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    optional uint32 firewall_handle;
+    /**< Identifies the handle for the added firewall rule. */
+
+} mcm_mobileap_add_firewall_entry_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE                       No error in request
+    -MCM_ERROR_INTERNAL                   Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG              Message was not formulated correctly by the
+                                        control point or the message was corrupted
+                                        during transmission
+    -MCM_ERROR_MISSING_ARG                One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE             Mobile AP handle provided in the request
+                                        is not valid, i.e., it is not assigned to the
+                                        control point
+    -MCM_ERROR_INVALID_ARG                Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED              Operation is not supported
+    -MCM_ERROR_NO_EFFECT                  Entry is already present.
+    -MCM_ERROR_INSUFFICIENT_RESOURCES     Exceeded maximum number of snat entries
+                                        supported; cannot add more snat entries.
+
+*/
+
+/** @DESCRIPTION
+This command adds a single IP filter-based
+firewall rule.
+*/
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_GET_FIREWALL_ENTRIES_HANDLE_LIST
+    @BRIEF Gets the handles of all firewall rules.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_GET_FIREWALL_ENTRIES_HANDLE_LIST_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+
+message {
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 mcm_mobileap_handle ;
+  /**< Handle identifying the mobile AP call instance.
+       Value must be the handle previously returned by
+       MCM_MOBILEAP_ENABLE_REQ.
+   */
+  /* techpubs note: space added for table formatting */
+
+  //! IP Version
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_mobileap_ip_family_t ip_version;
+  /**< Identifies the firewall family version. Values: \n
+       @ENUM ()
+   */
+} mcm_mobileap_get_firewall_entries_handle_list_req_msg;
+
+//! @MSG     MCM_MOBILEAP_GET_FIREWALL_ENTRIES_HANDLE_LIST_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+  //! Firewall Handle List
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional uint32 firewall_handle_list<MCM_MOBILEAP_MAX_FIREWALL_ENTRIES>;
+  /**< Handles identifying the firewall entry. The value must be the handle
+       previously returned by MCM_MOBILEAP_ADD_FIREWALL_ENTRY_RESP.
+   */
+/* techpubs: space after _ for formatting. */
+} mcm_mobileap_get_firewall_entries_handle_list_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Mobile AP handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+/** @DESCRIPTION
+    This command gets all the firewall handles associated with a single mobile AP instance.
+*/
+
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_GET_FIREWALL_ENTRY
+    @BRIEF Gets firewall rules.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_GET_FIREWALL_ENTRY_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+
+message {
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 mcm_mobileap_handle;
+  /**< Handle identifying the mobile AP call instance.
+       The value must be the handle previously returned by
+       MCM_MOBILEAP_ENABLE_REQ.
+   */
+  /* techpubs note: space added for table formatting */
+  //! Firewall Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 firewall_handle;
+  /**< Handle identifying the firewall entry. The value must be the handle
+       previously returned by
+       MCM_MOBILEAP_ADD_FIREWALL_ENTRY_RESP or
+       MCM_MOBILEAP_GET_FIREWALL_ENTRIES_HANDLE_LIST_RESP.
+   */
+/* techpubs: the spaces after _ are for formatting */
+} mcm_mobileap_get_firewall_entry_req_msg;
+
+//! @MSG     MCM_MOBILEAP_GET_FIREWALL_ENTRY_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+   mandatory mcm_response_t resp;  //!< Result code.
+  //! IP Version
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional mcm_mobileap_ip_family_t ip_version;
+  /**< Identifies the firewall family version. Values: \n
+       @ENUM ()
+  */
+
+  //! Next Header Protocol
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional uint8 next_hdr_prot;
+  /**< IPv4/IPv6 next header protocol. */
+
+  //! TCP, UDP, and TCP_UDP Source Port
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional  mcm_mobileap_tcp_udp_port_range_t  tcp_udp_src;
+  /**< TCP, UDP, and TCP_UDP source port. */
+
+  //! TCP, UDP, and TCP_UDP Destination Port
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional  mcm_mobileap_tcp_udp_port_range_t  tcp_udp_dst;
+  /**< TCP, UDP, and TCP_UDP destination port. */
+
+  //! ICMP Type
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional  uint8  icmp_type;
+  /**< ICMP type, as specified in the ICMP protocol
+       (RFC 792 \hyperref[S3]{[S3]}). */
+
+  //! ICMP Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional  uint8  icmp_code;
+  /**< ICMP code, as specified in the ICMP protocol
+       (RFC 792 \hyperref[S3]{[S3]}). */
+
+  //! ESP Security Parameter Index
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional  uint32 esp_spi;
+  /**< Security parameter index, as specified in the ESP protocol
+       (RFC 4303 \hyperref[S7]{[S7]}). */
+
+  //! IPv4 Source Address and Subnet Mask
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional  mcm_mobileap_ip4_addr_subnet_mask_t ip4_src_addr;
+  /**< IPv4 source address and subnet mask. */
+
+  //! IPv4 Destination Address and Subnet Mask
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional  mcm_mobileap_ip4_addr_subnet_mask_t ip4_dst_addr;
+  /**< IPv4 destination address and subnet mask. */
+
+  //! IPv4 TOS Value and Mask
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional  mcm_mobileap_ip4_tos_t  ip4_tos;
+  /**< IPv4 TOS value and mask. */
+
+  //! IPv6 Source Address and Prefix Length
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional  mcm_mobileap_ip6_addr_prefix_len_t  ip6_src_addr;
+  /**< IPv6 source address and prefix length. */
+
+  //! IPv6 Destination Address and Prefix Length
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional  mcm_mobileap_ip6_addr_prefix_len_t  ip6_dst_addr;
+  /**< IPv6 destination address and prefix length. */
+
+  //! IPv6 Traffic Class Value and Mask
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional  mcm_mobileap_ip6_traffic_class_t  ip6_trf_cls;
+  /**< IPv6 traffic class value and mask. */
+
+} mcm_mobileap_get_firewall_entry_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Mobile AP handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+    -MCM_ERROR_INVALID_INDEX     Entry is not present.
+*/
+
+/** @DESCRIPTION
+    This command gets a firewall rule associated with a single firewall handle.
+*/
+
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_DELETE_FIREWALL_ENTRY
+    @BRIEF Deletes a firewall rule identified by a handle.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_DELETE_FIREWALL_ENTRY_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+
+	//! Mobile AP Handle
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    mandatory uint32 mcm_mobileap_handle;
+    /**< Handle identifying the mobile AP call instance.
+         Value must be the handle previously returned by
+         MCM_MOBILEAP_ENABLE_REQ.
+    */
+    /* techpubs note: space added for table formatting */
+
+    //! Firewall Handle
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    mandatory uint32 firewall_handle;
+    /**< Handle identifying the firewall entry.
+    */
+
+} mcm_mobileap_delete_firewall_entry_req_msg;
+
+//! @MSG     MCM_MOBILEAP_DELETE_FIREWALL_ENTRY_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+    //! Result Code
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    mandatory mcm_response_t resp;  //!< Result code.
+
+} mcm_mobileap_delete_firewall_entry_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Mobile AP handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+    -MCM_ERROR_INVALID_INDEX     Entry is not present.
+*/
+
+/** @DESCRIPTION
+    This command deletes firewall rules.
+*/
+
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_SET_FIREWALL_CONFIG
+    @BRIEF Sets the firewall configuration.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_SET_FIREWALL_CONFIG_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 mcm_mobileap_handle;
+  /**< Handle identifying the mobile AP call instance.
+       The value must be the handle previously returned by
+       MCM_MOBILEAP_ENABLE_REQ.
+  */
+  //! Firewall Enabled
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory boolean firewall_enabled;
+  /**< Indicates whether the firewall is to be enabled or disabled; a Boolean value.
+  */
+
+  //! Accept or Drop Packets
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional boolean pkts_allowed;
+  /**< Indicates whether packets are to be accepted or dropped; a Boolean value.
+  */
+} mcm_mobileap_set_firewall_config_req_msg;
+
+//! @MSG     MCM_MOBILEAP_SET_FIREWALL_CONFIG_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+} mcm_mobileap_set_firewall_config_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Mobile AP handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+/** @DESCRIPTION
+    This command enables or disables the firewall. If the firewall is enabled, it
+    sets the firewall state to accept or drop the packets.
+*/
+
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_SET_DMZ
+    @BRIEF Sets the DMZ (perimeter network) IP address for the mobile AP.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_SET_DMZ_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 mcm_mobileap_handle;
+  /**< Handle identifying the mobile AP call instance.
+       The value must be the handle previously returned by
+       MCM_MOBILEAP_ENABLE_REQ.
+  */
+  /* techpubs note: space added for table formatting */
+  //! DMZ IP Address
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 dmz_ip_addr;
+  /**< DMZ IP address. */
+
+} mcm_mobileap_add_dmz_req_msg;
+
+//! @MSG     MCM_MOBILEAP_SET_DMZ_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+} mcm_mobileap_add_dmz_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Mobile AP handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+/** @DESCRIPTION
+    This command sets the DMZ IP address for the mobile AP.
+*/
+
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_GET_DMZ
+    @BRIEF Queries the DMZ IP address on the mobile AP.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  Medium risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_GET_DMZ_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 mcm_mobileap_handle;
+  /**< Handle identifying the mobile AP call instance.
+       The value must be the handle previously returned by
+       MCM_MOBILEAP_ENABLE_REQ.
+  */
+  /* techpubs note: space added for table formatting */
+
+} mcm_mobileap_get_dmz_req_msg;
+
+//! @MSG     MCM_MOBILEAP_GET_DMZ_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+  //! DMZ IP Address
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional uint32 dmz_ip_addr;
+  /**< DMZ IP address. */
+
+} mcm_mobileap_get_dmz_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Mobile AP handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+/** @DESCRIPTION
+    This command queries the DMZ entry that was previously set with the
+    MCM_MOBILEAP_SET_DMZ command.
+
+    If no DMZ is set by the client, an IP address of 0.0.0.0 is returned.
+*/
+
+
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_DELETE_DMZ
+    @BRIEF Deletes the DMZ entry or DMZ IP address.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_DELETE_DMZ_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 mcm_mobileap_handle;
+  /**< Handle identifying the mobile AP call instance.
+       The value must be the handle previously returned by
+       MCM_MOBILEAP_ENABLE_REQ.
+  */
+
+  //! DMZ IP Address
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 dmz_ip_addr;
+  /**< DMZ IP address. */
+  /* techpubs note: space added for table formatting */
+
+} mcm_mobileap_delete_dmz_req_msg;
+
+//! @MSG     MCM_MOBILEAP_DELETE_DMZ_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+} mcm_mobileap_delete_dmz_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Mobile AP handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+/** @DESCRIPTION
+    This command deletes the DMZ entry that was previously set with the
+    MCM_MOBILEAP_SET_DMZ command.
+*/
+
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_GET_IPV4_WWAN_CONFIG
+    @BRIEF Queries the WWAN IP configuration.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  Medium risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_GET_IPV4_WWAN_CONFIG_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+
+message {
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 mcm_mobileap_handle;
+  /**< Handle identifying the mobile AP call instance.
+       The value must be the handle previously returned by
+       MCM_MOBILEAP_ENABLE_REQ.
+  */
+
+} mcm_mobileap_get_ipv4_wwan_config_req_msg;
+
+//! @MSG     MCM_MOBILEAP_GET_IPV4_WWAN_CONFIG_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+  //! IPv4 Address
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional uint32 v4_addr;
+  /**< IPv4 address. */
+
+  //! IPv4 Primary DNS Address
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional uint32 v4_prim_dns_addr;
+  /**< IPv4 primary DNS address. */
+
+  //! IPv4 Secondary DNS Address
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional uint32 v4_sec_dns_addr;
+  /**< IPv4 secondary DNS address. */
+
+} mcm_mobileap_get_ipv4_wwan_config_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Mobile AP handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+    -MCM_ERROR_NO_NETWORK_FOUND  WWAN is not UP.
+*/
+
+/** @DESCRIPTION
+    This command queries the WWAN IP configuration for the mobile AP. The
+    command must be issued by the control point after MCM_MOBILEAP_WWAN_STATUS_IND
+    has indicated successfully bringing up a WWAN, otherwise an MCM_ERROR_INTERNAL error
+    is returned.
+*/
+
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_GET_WWAN_STATS
+    @BRIEF Gets WWAN statistics.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  Medium risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_GET_WWAN_STATS_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+
+message {
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 mcm_mobileap_handle;
+  /**< Handle identifying the mobile AP call instance.
+       The value must be the handle previously returned by
+       MCM_MOBILEAP_ENABLE_REQ.
+  */
+  /* techpubs note: space added for table formatting */
+
+  //! IP Family
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_mobileap_ip_family_t ip_family;
+  /**< Identifies the IP version to be used. Values: \n
+       @ENUM ()
+  */
+
+} mcm_mobileap_get_wwan_stats_req_msg;
+
+//! @MSG     MCM_MOBILEAP_GET_WWAN_STATS_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+  //! WWAN Statistics
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional mcm_mobileap_wwan_statistics_t wwan_stats;
+  /**< WWAN statistics. */
+
+} mcm_mobileap_get_wwan_stats_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Mobile AP handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+    -MCM_ERROR_NO_NETWORK_FOUND  WWAN is not UP.
+*/
+
+/** @DESCRIPTION
+    This command gets WWAN statistics for a specific IP family.
+*/
+
+
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_RESET_WWAN_STATS
+    @BRIEF Resets WWAN statistics.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_RESET_WWAN_STATS_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+
+message {
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 mcm_mobileap_handle;
+  /**< Handle identifying the mobile AP call instance.
+       The value must be the handle previously returned by
+       MCM_MOBILEAP_ENABLE_REQ.
+  */
+  /* techpubs note: space added for table formatting */
+
+  //! WWAN Entry With IP Version Configured
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_mobileap_ip_family_t ip_family;
+  /**< Identifies the IP version to be used. Values: \n
+       @ENUM ()
+  */
+
+} mcm_mobileap_reset_wwan_stats_req_msg;
+
+//! @MSG     MCM_MOBILEAP_RESET_WWAN_STATS_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+} mcm_mobileap_reset_wwan_stats_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Mobile AP handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+    -MCM_ERROR_NO_NETWORK_FOUND  WWAN is not UP.
+*/
+
+/** @DESCRIPTION
+    This command resets WWAN statistics for a specific IP family.
+*/
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_SET_DHCPD_CONFIG
+    @BRIEF Deletes the DMZ entry or DMZ IP address.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_SET_DHCPD_CONFIG
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 mcm_mobileap_handle;
+  /**< Handle identifying the mobile AP call instance.
+       The value must be the handle previously returned by
+       MCM_MOBILEAP_ENABLE_REQ.
+  */
+  /* techpubs note: space added for table formatting */
+  mandatory mcm_mobileap_dhcpd_config_t dhcpd_config;
+  /**< DHCPD configuration. */
+} mcm_mobileap_set_dhcpd_config_req_msg;
+
+//! @MSG     MCM_MOBILEAP_SET_DHCPD_CONFIG_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+} mcm_mobileap_set_dhcpd_config_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Mobile AP handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+/** @DESCRIPTION
+    This command deletes the DMZ entry that was previously set with the
+    MCM_MOBILEAP_SET_DMZ command.
+*/
+
+
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_ENABLE_WLAN
+    @BRIEF Enables the WLAN.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_ENABLE_WLAN_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//! @ASYNC Call
+//----------------------------------------------------------------------------
+message {
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 mcm_mobileap_handle;
+  /**< Handle identifying the mobile AP call instance.
+       The value must be the handle previously returned by
+       MCM_MOBILEAP_MOBILEAP_ENABLE_REQ.
+  */
+} mcm_mobileap_enable_wlan_req_msg;
+
+//! @MSG     MCM_MOBILEAP_ENABLE_WLAN_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+} mcm_mobileap_enable_wlan_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+    -MCM_ERROR_NO_EFFECT         WLAN is already enabled
+*/
+
+/** @DESCRIPTION
+    This command enables the WLAN functionality controlled by the service.
+*/
+
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_DISABLE_WLAN
+    @BRIEF Disables the WLAN.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_DISABLE_WLAN_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//! @ASYNC Call
+//----------------------------------------------------------------------------
+message {
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 mcm_mobileap_handle;
+  /**< Handle identifying the mobile AP call instance.
+       The value must be the handle previously returned by
+       MCM_MOBILEAP_MOBILEAP_ENABLE_REQ.
+  */
+} mcm_mobileap_disable_wlan_req_msg;
+
+//! @MSG     MCM_MOBILEAP_DISABLE_WLAN_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+} mcm_mobileap_disable_wlan_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+    -MCM_ERROR_NO_EFFECT         Mobile AP instance is already enabled
+*/
+
+/** @DESCRIPTION
+    This command disables the WLAN functionality.
+*/
+
+
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_SET_IPSEC_VPN_PASS_THROUGH
+    @BRIEF Configures the Internet Protocol Security (IPSec)
+           Virtual Private Network (VPN) passthrough setting.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_SET_IPSEC_VPN_PASS_THROUGH_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+
+message {
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 mcm_mobileap_handle;
+  /**< Handle identifying the mobile AP call instance.
+       The value must be the handle previously returned by
+       MCM_MOBILEAP_ENABLE_REQ.
+  */
+  /* techpubs note: space added for table formatting */
+
+  //! VPN Passthrough Value
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory boolean vpn_pass_through_value;
+  /**< Indicates whether an IPSec VPN passthrough is allowed; a Boolean value.
+  */
+} mcm_mobileap_set_ipsec_vpn_pass_through_req_msg;
+
+//! @MSG     MCM_MOBILEAP_SET_IPSEC_VPN_PASS_THROUGH_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+} mcm_mobileap_set_ipsec_vpn_pass_through_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Mobile AP handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+/** @DESCRIPTION
+    This command sets the IPSec VPN passthrough on the device. The command
+    handler overwrites any previously configured value with the current value.
+*/
+
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_GET_IPSEC_VPN_PASS_THROUGH
+    @BRIEF Queries the IPSec VPN passthrough setting.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  Medium risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_GET_IPSEC_VPN_PASS_THROUGH_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 mcm_mobileap_handle;
+  /**< Handle identifying the mobile AP call instance.
+       The value must be the handle previously returned by
+       MCM_MOBILEAP_ENABLE_REQ.
+  */
+  /* techpubs note: space added for table formatting */
+
+} mcm_mobileap_get_ipsec_vpn_pass_through_req_msg;
+
+//! @MSG     MCM_MOBILEAP_GET_IPSEC_VPN_PASS_THROUGH_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+  //! VPN Passthrough Value
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional boolean vpn_pass_through_value;
+  /**< Indicates whether an IPSec VPN passthrough is allowed; a Boolean value.
+  */
+} mcm_mobileap_get_ipsec_vpn_pass_through_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Mobile AP handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+/** @DESCRIPTION
+    This command queries the IPSec VPN passthrough value on the device.
+*/
+
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_SET_PPTP_VPN_PASS_THROUGH
+    @BRIEF Configures the Point-to-Point Tunneling Protocol (PPTP) VPN
+           passthrough setting.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_SET_PPTP_VPN_PASS_THROUGH_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+
+message {
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 mcm_mobileap_handle;
+  /**< Handle identifying the mobile AP call instance.
+       The value must be the handle previously returned by
+       MCM_MOBILEAP_ENABLE_REQ.
+  */
+  /* techpubs note: space added for table formatting */
+
+  //! VPN Passthrough Value
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory boolean vpn_pass_through_value;
+  /**< Indicates whether a PPTP VPN passthrough is allowed; a Boolean value.
+  */
+
+} mcm_mobileap_set_pptp_vpn_pass_through_req_msg;
+
+//! @MSG     MCM_MOBILEAP_SET_PPTP_VPN_PASS_THROUGH_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+} mcm_mobileap_set_pptp_vpn_pass_through_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Mobile AP handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+/** @DESCRIPTION
+    This command sets the PPTP VPN passthrough on the device. The command
+    handler overwrites any previously configured value with the current value.
+*/
+
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_GET_PPTP_VPN_PASS_THROUGH
+    @BRIEF Queries the PPTP VPN passthrough setting.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  Medium risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_GET_PPTP_VPN_PASS_THROUGH_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 mcm_mobileap_handle;
+  /**< Handle identifying the mobile AP call instance.
+       The value must be the handle previously returned by
+       MCM_MOBILEAP_ENABLE_REQ.
+  */
+  /* techpubs note: space added for table formatting */
+
+} mcm_mobileap_get_pptp_vpn_pass_through_req_msg;
+
+//! @MSG     MCM_MOBILEAP_GET_PPTP_VPN_PASS_THROUGH_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+  //! VPN Passthrough Value
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional boolean vpn_pass_through_value;
+  /**< Indicates whether a PPTP VPN passthrough is allowed; a Boolean value.
+  */
+} mcm_mobileap_get_pptp_vpn_pass_through_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Mobile AP handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+/** @DESCRIPTION
+    This command queries the PPTP VPN passthrough value on the device.
+*/
+
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_SET_L2TP_VPN_PASS_THROUGH
+    @BRIEF Configures the Layer 2 Tunneling Protocol (L2TP) VPN passthrough
+           setting.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_SET_L2TP_VPN_PASS_THROUGH_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+
+message {
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 mcm_mobileap_handle;
+  /**< Handle identifying the mobile AP call instance.
+       The value must be the handle previously returned by
+       MCM_MOBILEAP_ENABLE_REQ.
+  */
+  /* techpubs note: space added for table formatting */
+
+  //! VPN Passthrough Value
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory boolean vpn_pass_through_value;
+  /**< Indicates whether an L2TP VPN passthrough is allowed; a Boolean value.
+  */
+
+} mcm_mobileap_set_l2tp_vpn_pass_through_req_msg;
+
+//! @MSG     MCM_MOBILEAP_SET_L2TP_VPN_PASS_THROUGH_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+} mcm_mobileap_set_l2tp_vpn_pass_through_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Mobile AP handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+/** @DESCRIPTION
+    This command sets the L2TP VPN passthrough on the device. The command
+    handler overwrites any previously configured value with the current value.
+*/
+
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_GET_L2TP_VPN_PASS_THROUGH
+    @BRIEF Queries the L2TP VPN passthrough setting.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  Medium risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_GET_L2TP_VPN_PASS_THROUGH_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 mcm_mobileap_handle;
+  /**< Handle identifying the mobile AP call instance.
+       The value must be the handle previously returned by
+       MCM_MOBILEAP_ENABLE_REQ.
+  */
+  /* techpubs note: space added for table formatting */
+
+} mcm_mobileap_get_l2tp_vpn_pass_through_req_msg;
+
+//! @MSG     MCM_MOBILEAP_GET_L2TP_VPN_PASS_THROUGH_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+  //! VPN Passthrough Value
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional boolean vpn_pass_through_value;
+  /**< Indicates whether an L2TP VPN passthrough is allowed; a Boolean value.
+  */
+} mcm_mobileap_get_l2tp_vpn_pass_through_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Mobile AP handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+/** @DESCRIPTION
+    This command queries the L2TP VPN passthrough value on the device.
+*/
+
+
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_SET_AUTO_CONNECT
+    @BRIEF Sets the auto-connect flag.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_SET_AUTO_CONNECT_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 mcm_mobileap_handle;
+  /**< Handle identifying the mobile AP call instance.
+       The value must be the handle previously returned by
+       MCM_MOBILEAP_ENABLE_REQ.
+  */
+  /* techpubs note: space added for table formatting */
+
+  //! Autoconnect Mode Flag
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory boolean enable;
+  /**< Enable/disable auto-connect. Values:\n
+      - TRUE -- Enable\n
+      - FALSE -- Disable
+   */
+
+} mcm_mobileap_set_auto_connect_req_msg;
+
+//! @MSG     MCM_MOBILEAP_SET_AUTO_CONNECT_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+} mcm_mobileap_set_auto_connect_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Mobile AP handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+/** @DESCRIPTION
+    This command sets the auto-connect mode.
+*/
+
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_GET_AUTO_CONNECT
+    @BRIEF Gets the auto-connect flag.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  Medium risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_GET_AUTO_CONNECT_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 mcm_mobileap_handle;
+  /**< Handle identifying the mobile AP call instance.
+       The value must be the handle previously returned by
+       MCM_MOBILEAP_ENABLE_REQ.
+  */
+  /* techpubs note: space added for table formatting */
+
+} mcm_mobileap_get_auto_connect_req_msg;
+
+//! @MSG     MCM_MOBILEAP_GET_AUTO_CONNECT_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+  //! Autoconnect Mode
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional boolean auto_conn_flag;
+  /**< Auto-connect status. Values: \n
+       - TRUE -- Enabled \n
+       - FALSE -- Disabled
+   */
+} mcm_mobileap_get_auto_connect_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Mobile AP handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+/** @DESCRIPTION
+    This command gets the auto-connect status.
+*/
+
+
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_SET_ROAMING_PREF
+    @BRIEF Configures whether QCMAP_MSGR initiates WWAN data calls while roaming.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_SET_ROAMING_PREF_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 mcm_mobileap_handle;
+  /**< Handle identifying the mobile AP call instance.
+       The value must be the handle previously returned by
+       MCM_MOBILEAP_ENABLE_REQ.
+  */
+  /* techpubs note: space added for table formatting */
+
+  //! Roaming Mode
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory boolean allow_wwan_calls_while_roaming;
+  /**< Indicates whether QCMAP_MSGR connects a data call while roaming; a Boolean value.
+  */
+} mcm_mobileap_set_roaming_pref_req_msg;
+
+//! @MSG     MCM_MOBILEAP_SET_ROAMING_PREF_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+} mcm_mobileap_set_roaming_pref_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Mobile AP handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+/** @DESCRIPTION
+    The Roaming Mode TLV determines the QCMAP_MSGR policy for establishing new data calls.
+    By default, the TLV is assumed to be FALSE. If modified through this interface, it is stored
+    persistently.
+
+    Note: The Roaming Mode TLV does not affect a currently established data connection.
+    For example, if the roaming mode is set to FALSE but a roaming data call is connected
+    (e.g., by a different client or because the mode was TRUE when the call was established),
+    QCMAP_MSGR uses the currently established WWAN data connection.
+*/
+
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_GET_ROAMING_PREF
+    @BRIEF Gets the roaming flag.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  Medium risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_GET_ROAMING_PREF_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 mcm_mobileap_handle;
+  /**< Handle identifying the mobile AP call instance.
+       The value must be the handle previously returned by
+       MCM_MOBILEAP_ENABLE_REQ.
+  */
+  /* techpubs note: space added for table formatting */
+
+} mcm_mobileap_get_roaming_pref_req_msg;
+
+//! @MSG     MCM_MOBILEAP_GET_ROAMING_PREF_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+  //! Roaming Mode
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional boolean allow_wwan_calls_while_roaming;
+  /**< Determines whether the mobile AP connects a data call while roaming; a Boolean value.
+  */
+} mcm_mobileap_get_roaming_pref_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Mobile AP handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+/** @DESCRIPTION
+    The Roaming Mode TLV determines the mobile AP policy for establishing new data calls.
+*/
+
+
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_SET_DUALAP_CONFIG
+    @BRIEF Configures whether the mobile AP initiates WWAN data calls while roaming.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_SET_DUALAP_CONFIG_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 mcm_mobileap_handle;
+  /**< Handle identifying the mobile AP call instance.
+       The value must be the handle previously returned by
+       MCM_MOBILEAP_MSGR_MOBILE_AP_ENABLE_REQ.
+  */
+  /* techpubs note: space added for table formatting */
+
+  //! Dual AP Config
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_mobileap_dualap_config_t dualap_config;
+  /**< Mobile AP dual SSID configuration.
+  */
+} mcm_mobileap_set_dualap_config_req_msg;
+
+//! @MSG     MCM_MOBILEAP_SET_DUALAP_CONFIG_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+} mcm_mobileap_set_dualap_config_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Mobile AP handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+/** @DESCRIPTION
+    Set the configuration required for enabling DUAL AP on the target.
+    For 9x25, Both the wlan interfaces would come under a bridge when AP+AP mode is configured.
+    All the clients associcated with them will have common subnet as of bridge.
+    And since there wouldn't be separate IP address configuration for AP + AP
+    mode, this option will not be supported.
+*/
+
+
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_STATION_MODE_ENABLE
+    @BRIEF Enables Station (STA) mode functionality for a mobile AP instance
+           on the modem.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_STATION_MODE_ENABLE_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//! @ASYNC Call
+//----------------------------------------------------------------------------
+
+message {
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 mcm_mobileap_handle;
+  /**< Handle identifying the mobile AP call instance.
+       The value must be the handle previously returned by
+       MCM_MOBILEAP_ENABLE_REQ.
+  */
+  //! Station Mode Configuration.
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_mobileap_sta_connection_config_t cfg;
+  /**< Station mode configuration to indicate dynamic or static IP
+       configuration.
+  */
+  /* Tech Pubs note: added space after _ to aid in document formatting */
+} mcm_mobileap_station_mode_enable_req_msg;
+
+//! @MSG     MCM_MOBILEAP_STATION_MODE_ENABLE_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+} mcm_mobileap_station_mode_enable_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       Some TLV was missing
+    -MCM_ERROR_INVALID_HANDLE    Mobile AP handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+/** @DESCRIPTION
+    This command enables STA mode functionality at the modem for a single
+    mobile AP instance.
+
+    After this request is successfully processed, all packet connectivity to
+    an outside network occurs through the WLAN station. The modem routing
+    engine appropriately handles the packet routing into and out of the modem.
+
+    For 9x25 and targets above we set the WLAN configuration to AP + STATION
+    mode and then reactivate the WLAN.
+
+    Disabling the station mode sets the WLAN configuration back to AP mode.
+*/
+
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_STATION_MODE_DISABLE
+    @BRIEF Disables STA mode functionality for a mobile AP instance on the
+           modem.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_STATION_MODE_DISABLE_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//! @ASYNC Call
+//----------------------------------------------------------------------------
+
+message {
+  //! Mobile AP Handle
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 mcm_mobileap_handle;
+  /**< Handle identifying the mobile AP call instance.
+       The value must be the handle previously returned by
+       MCM_MOBILEAP_ENABLE_REQ.
+  */
+  /* Tech Pubs note: added space after _ to aid in document formatting */
+} mcm_mobileap_station_mode_disable_req_msg;
+
+//! @MSG     MCM_MOBILEAP_STATION_MODE_DISABLE_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+} mcm_mobileap_station_mode_disable_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       Some TLV was missing
+    -MCM_ERROR_INVALID_HANDLE    Mobile AP handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+/** @DESCRIPTION
+    This command disables STA mode functionality at the modem for a single
+    mobile AP instance. When this request has been successfully processed, the
+    control point invokes bringing up the WWAN from the mobile AP if auto-connect
+    is enabled.
+    For 9x25, whenever Disable station mode is invoked, device switches from AP+STA
+    mode to AP mode. WLAN is restarted for the changes to get effected.
+*/
+
+//=============================================================================
+// EVENT REGISTER
+//=============================================================================
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_EVENT_REGISTER
+    @BRIEF Registers for an indication of events.
+    @DESCRIPTION
+     Corresponding events can be registered: \n
+      - MCM_MOBILEAP_ENABLED_EV
+      - MCM_MOBILEAP_LAN_CONNECTING_EV
+      - MCM_MOBILEAP_LAN_CONNECTING_FAIL_EV
+      - MCM_MOBILEAP_LAN_IPv6_CONNECTING_FAIL_EV
+      - MCM_MOBILEAP_LAN_CONNECTED_EV
+      - MCM_MOBILEAP_STA_CONNECTED_EV
+      - MCM_MOBILEAP_LAN_IPv6_CONNECTED_EV
+      - MCM_MOBILEAP_WAN_CONNECTING_EV
+      - MCM_MOBILEAP_WAN_CONNECTING_FAIL_EV
+      - MCM_MOBILEAP_WAN_IPv6_CONNECTING_FAIL_EV
+      - MCM_MOBILEAP_WAN_CONNECTED_EV
+      - MCM_MOBILEAP_WAN_IPv6_CONNECTED_EV
+      - MCM_MOBILEAP_WAN_DISCONNECTED_EV
+      - MCM_MOBILEAP_WAN_IPv6_DISCONNECTED_EV
+      - MCM_MOBILEAP_LAN_DISCONNECTED_EV
+      - MCM_MOBILEAP_LAN_IPv6_DISCONNECTED_EV
+      - MCM_MOBILEAP_DISABLED_EV
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_EVENT_REGISTER_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+    optional boolean register_event_enabled;
+    /**< Event registration is enabled. */
+    optional boolean register_event_lan_connecting;
+    /**< Register for a LAN connecting event. */
+    optional boolean register_event_lan_connecting_fail;
+    /**< Register for a LAN connection failure event. */
+    optional boolean register_event_lan_ipv6_connecting_fail;
+    /**< Register for a LAN IPv6 connection failure event. */
+    optional boolean register_event_lan_connected;
+    /**< Register for a LAN connected event. */
+    optional boolean register_event_sta_connected;
+    /**< Register for a STA connected event. */
+    optional boolean register_event_lan_ipv6_connected;
+    /**< Register for a LAN IPv6 connected event. */
+    optional boolean register_event_wan_connecting;
+    /**< Register for a WAN connecting event. */
+    optional boolean register_event_wan_connecting_fail;
+    /**< Register for a WAN connection failure event. */
+    optional boolean register_event_wan_ipv6_connecting_fail;
+    /**< Register for a WAN IPv6 connection failure event. */
+    optional boolean register_event_wan_connected;
+    /**< Register for a WAN connected event. */
+    optional boolean register_event_wan_ipv6_connected;
+    /**< Register for a WAN IPv6 connected event. */
+    optional boolean register_event_wan_disconnected;
+    /**< Register for a WAN disconnected event. */
+    optional boolean register_event_wan_ipv6_disconnected;
+    /**< Register for a WAN IPv6 disconnected event. */
+    optional boolean register_event_lan_disconnected;
+    /**< Register for a LAN disconnected event. */
+    optional boolean register_event_lan_ipv6_disconnected;
+    /**< Register for a LAN IPv6 disconnected event. */
+    optional boolean register_event_disabled;
+    /**< Event registration is disabled. */
+} mcm_mobileap_event_register_req_msg;
+
+//! @MSG     MCM_MOBILEAP_EVENT_REGISTER_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+    mandatory mcm_response_t response;  //!< Result code.
+} mcm_mobileap_event_register_resp_msg;
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       Some TLV was missing
+    -MCM_ERROR_INVALID_HANDLE    Mobile AP handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+//============================================================================
+// UNSOLICITED EVENT INDICATION
+//============================================================================
+//============================================================================
+/** @COMMAND MCM_MOBILEAP_UNSOL_EVENT_IND
+    @BRIEF Indication corresponding to a registered unsolicited event.
+    @DESCRIPTION
+     Corresponding events: \n
+      - MCM_MOBILEAP_ENABLED_EV
+      - MCM_MOBILEAP_LAN_CONNECTING_EV
+      - MCM_MOBILEAP_LAN_CONNECTING_FAIL_EV
+      - MCM_MOBILEAP_LAN_IPv6_CONNECTING_FAIL_EV
+      - MCM_MOBILEAP_LAN_CONNECTED_EV
+      - MCM_MOBILEAP_STA_CONNECTED_EV
+      - MCM_MOBILEAP_LAN_IPv6_CONNECTED_EV
+      - MCM_MOBILEAP_WAN_CONNECTING_EV
+      - MCM_MOBILEAP_WAN_CONNECTING_FAIL_EV
+      - MCM_MOBILEAP_WAN_IPv6_CONNECTING_FAIL_EV
+      - MCM_MOBILEAP_WAN_CONNECTED_EV
+      - MCM_MOBILEAP_WAN_IPv6_CONNECTED_EV
+      - MCM_MOBILEAP_WAN_DISCONNECTED_EV
+      - MCM_MOBILEAP_WAN_IPv6_DISCONNECTED_EV
+      - MCM_MOBILEAP_LAN_DISCONNECTED_EV
+      - MCM_MOBILEAP_LAN_IPv6_DISCONNECTED_EV
+      - MCM_MOBILEAP_DISABLED_EV
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL Medium risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_MOBILEAP_UNSOL_EVENT_IND
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+    mandatory int32 event_id;
+    /**< Event ID thats gets populated. Values: \n
+        - 0x8000L -- MCM_MOBILEAP_ENABLED_EV
+        - 0x8001L -- MCM_MOBILEAP_LAN_CONNECTING_EV
+        - 0x8002L -- MCM_MOBILEAP_LAN_CONNECTING_FAIL_EV
+        - 0x8003L -- MCM_MOBILEAP_LAN_IPv6_CONNECTING_FAIL_EV
+        - 0x8004L -- MCM_MOBILEAP_LAN_CONNECTED_EV
+        - 0x8005L -- MCM_MOBILEAP_STA_CONNECTED_EV
+        - 0x8006L -- MCM_MOBILEAP_LAN_IPv6_CONNECTED_EV
+        - 0x8007L -- MCM_MOBILEAP_WAN_CONNECTING_EV
+        - 0x8008L -- MCM_MOBILEAP_WAN_CONNECTING_FAIL_EV
+        - 0x8009L -- MCM_MOBILEAP_WAN_IPv6_CONNECTING_FAIL_EV
+        - 0x8010L -- MCM_MOBILEAP_WAN_CONNECTED_EV
+        - 0x8011L -- MCM_MOBILEAP_WAN_IPv6_CONNECTED_EV
+        - 0x8012L -- MCM_MOBILEAP_WAN_DISCONNECTED_EV
+        - 0x8013L -- MCM_MOBILEAP_WAN_IPv6_DISCONNECTED_EV
+        - 0x8014L -- MCM_MOBILEAP_LAN_DISCONNECTED_EV
+        - 0x8015L -- MCM_MOBILEAP_LAN_IPv6_DISCONNECTED_EV
+        - 0x8016L -- MCM_MOBILEAP_DISABLED_EV
+  */
+} mcm_mobileap_unsol_event_ind_msg;
+
+//============================================================================
+// File footer
+//============================================================================
+/*
+@FOOTER
+*/
+
+//============================================================================
+// SERVICE DEFINITION
+//============================================================================
+service mcm_mobileap {
+
+  // 0x0400
+  //! @ID MCM_MOBILEAP_ENABLE
+  mcm_mobileap_enable_req_msg   MCM_MOBILEAP_ENABLE_REQ,
+  mcm_mobileap_enable_resp_msg  MCM_MOBILEAP_ENABLE_RESP = 0x0400;
+
+  // 0x0401
+  //! @ID MCM_MOBILEAP_DISABLE
+  mcm_mobileap_disable_req_msg   MCM_MOBILEAP_DISABLE_REQ,
+  mcm_mobileap_disable_resp_msg  MCM_MOBILEAP_DISABLE_RESP;
+
+  // 0x0402
+  //! @ID MCM_MOBILEAP_BRING_UP_WWAN
+  mcm_mobileap_bring_up_wwan_req_msg   MCM_MOBILEAP_BRING_UP_WWAN_REQ,
+  mcm_mobileap_bring_up_wwan_resp_msg  MCM_MOBILEAP_BRING_UP_WWAN_RESP;
+
+  // 0x0403
+  //! @ID MCM_MOBILEAP_TEAR_DOWN_WWAN
+  mcm_mobileap_tear_down_wwan_req_msg   MCM_MOBILEAP_TEAR_DOWN_WWAN_REQ,
+  mcm_mobileap_tear_down_wwan_resp_msg  MCM_MOBILEAP_TEAR_DOWN_WWAN_RESP;
+
+  // 0x0404
+  //! @ID MCM_MOBILEAP_ADD_STATIC_NAT_ENTRY
+  mcm_mobileap_add_static_nat_entry_req_msg   MCM_MOBILEAP_ADD_STATIC_NAT_ENTRY_REQ,
+  mcm_mobileap_add_static_nat_entry_resp_msg  MCM_MOBILEAP_ADD_STATIC_NAT_ENTRY_RESP;
+
+  // 0x0405
+  //! @ID MCM_MOBILEAP_GET_STATIC_NAT_ENTRY
+  mcm_mobileap_get_static_nat_entry_req_msg   MCM_MOBILEAP_GET_STATIC_NAT_ENTRY_REQ,
+  mcm_mobileap_get_static_nat_entry_resp_msg  MCM_MOBILEAP_GET_STATIC_NAT_ENTRY_RESP;
+
+  // 0x0406
+  //! @ID MCM_MOBILEAP_DELETE_STATIC_NAT_ENTRY
+  mcm_mobileap_delete_static_nat_entry_req_msg   MCM_MOBILEAP_DELETE_STATIC_NAT_ENTRY_REQ,
+  mcm_mobileap_delete_static_nat_entry_resp_msg  MCM_MOBILEPA_DELETE_STATIC_NAT_ENTRY_RESP;
+
+  // 0x0407
+  //! @ID MCM_MOBILEAP_SET_NAT_TIMEOUT
+  mcm_mobileap_set_nat_timeout_req_msg   MCM_MOBILEAP_SET_NAT_TIMEOUT_REQ,
+  mcm_mobileap_set_nat_timeout_resp_msg  MCM_MOBILEAP_SET_NAT_TIMEOUT_RESP;
+
+ // 0x0408
+  //! @ID MCM_MOBILEAP_GET_NAT_TIMEOUT
+  mcm_mobileap_get_nat_timeout_req_msg   MCM_MOBILEAP_GET_NAT_TIMEOUT_REQ,
+  mcm_mobileap_get_nat_timeout_resp_msg  MCM_MOBILEAP_GET_NAT_TIMEOUT_RESP;
+
+  // 0x0409
+  //! @ID MCM_MOBILEAP_SET_NAT_TYPE
+  mcm_mobileap_set_nat_type_req_msg   MCM_MOBILEAP_SET_NAT_TYPE_REQ,
+  mcm_mobileap_set_nat_type_resp_msg  MCM_MOBILEAP_SET_NAT_TYPE_RESP;
+
+  // 0x040A
+  //! @ID MCM_MOBILEAP_GET_NAT_TYPE
+  mcm_mobileap_get_nat_type_req_msg   MCM_MOBILEAP_GET_NAT_TYPE_REQ,
+  mcm_mobileap_get_nat_type_resp_msg  MCM_MOBILEAP_GET_NAT_TYPE_RESP;
+
+  // 0x040B
+  //! @ID MCM_MOBILEAP_ADD_FIREWALL_ENTRY
+  mcm_mobileap_add_firewall_entry_req_msg   MCM_MOBILEAP_ADD_FIREWALL_ENTRY_REQ,
+  mcm_mobileap_add_firewall_entry_resp_msg  MCM_MOBILEAP_ADD_FIREWALL_ENTRY_RESP;
+
+  // 0x040C
+  //! @ID MCM_MOBILEAP_GET_FIREWALL_ENTRIES_HANDLE_LIST
+  mcm_mobileap_get_firewall_entries_handle_list_req_msg   MCM_MOBILEAP_GET_FIREWALL_ENTRIES_HANDLE_LIST_REQ,
+  mcm_mobileap_get_firewall_entries_handle_list_resp_msg  MCM_MOBILEAP_GET_FIREWALL_ENTRIES_HANDLE_LIST_RESP;
+
+  // 0x040D
+  //! @ID MCM_MOBILEAP_GET_FIREWALL_ENTRY
+  mcm_mobileap_get_firewall_entry_req_msg   MCM_MOBILEAP_GET_FIREWALL_ENTRY_REQ,
+  mcm_mobileap_get_firewall_entry_resp_msg  MCM_MOBILEAP_GET_FIREWALL_ENTRY_RESP;
+
+  // 0x040E
+  //! @ID MCM_MOBILEAP_DELETE_FIREWALL_ENTRY
+  mcm_mobileap_delete_firewall_entry_req_msg   MCM_MOBILEAP_DELETE_FIREWALL_ENTRY_REQ,
+  mcm_mobileap_delete_firewall_entry_resp_msg  MCM_MOBILEAP_DELETE_FIREWALL_ENTRY_RESP;
+
+  // 0x040F
+  //! @ID MCM_MOBILEAP_SET_FIREWALL_CONFIG
+  mcm_mobileap_set_firewall_config_req_msg   MCM_MOBILEAP_SET_FIREWALL_CONFIG_REQ,
+  mcm_mobileap_set_firewall_config_resp_msg  MCM_MOBILEAP_SET_FIREWALL_CONFIG_RESP;
+
+  // 0x0410
+  //! @ID MCM_MOBILEAP_SET_DMZ
+  mcm_mobileap_add_dmz_req_msg   MCM_MOBILEAP_SET_DMZ_REQ,
+  mcm_mobileap_add_dmz_resp_msg  MCM_MOBILEAP_SET_DMZ_RESP;
+
+  // 0x0411
+  //! @ID MCM_MOBILEAP_DELETE_DMZ
+  mcm_mobileap_delete_dmz_req_msg   MCM_MOBILEAP_DELETE_DMZ_REQ,
+  mcm_mobileap_delete_dmz_resp_msg  MCM_MOBILEAP_DELETE_DMZ_RESP;
+
+  // 0x0412
+  //! @ID MCM_MOBILEAP_GET_DMZ
+  mcm_mobileap_get_dmz_req_msg   MCM_MOBILEAP_GET_DMZ_REQ,
+  mcm_mobileap_get_dmz_resp_msg  MCM_MOBILEAP_GET_DMZ_RESP;
+
+  // 0x0413
+  //! @ID MCM_MOBILEAP_GET_IPV4_WWAN_CONFIG
+  mcm_mobileap_get_ipv4_wwan_config_req_msg   MCM_MOBILEAP_GET_IPV4_WWAN_CONFIG_REQ,
+  mcm_mobileap_get_ipv4_wwan_config_resp_msg  MCM_MOBILEAP_GET_IPV4_WWAN_CONFIG_RESP;
+
+  // 0x0414
+  //! @ID MCM_MOBILEAP_GET_WWAN_STATS
+  mcm_mobileap_get_wwan_stats_req_msg   MCM_MOBILEAP_GET_WWAN_STATS_REQ,
+  mcm_mobileap_get_wwan_stats_resp_msg  MCM_MOBILEAP_GET_WWAN_STATS_RESP;
+
+  // 0x0415
+  //! @ID MCM_MOBILEAP_RESET_WWAN_STATS
+  mcm_mobileap_reset_wwan_stats_req_msg   MCM_MOBILEAP_RESET_WWAN_STATS_REQ,
+  mcm_mobileap_reset_wwan_stats_resp_msg  MCM_MOBILEAP_RESET_WWAN_STATS_RESP;
+
+  // 0x0416
+  //! @ID MCM_MOBILEAP_SET_DHCPD_CONFIG
+  mcm_mobileap_set_dhcpd_config_req_msg   MCM_MOBILEAP_SET_DHCPD_CONFIG_REQ,
+  mcm_mobileap_set_dhcpd_config_resp_msg  MCM_MOBILEAP_SET_DHCPD_CONFIG_RESP;
+
+  // 0x0417
+  //! @ID MCM_MOBILEAP_ENABLE_WLAN
+  mcm_mobileap_enable_wlan_req_msg   MCM_MOBILEAP_ENABLE_WLAN_REQ,
+  mcm_mobileap_enable_wlan_resp_msg  MCM_MOBILEAP_ENABLE_WLAN_RESP;
+
+  // 0x0418
+  //! @ID MCM_MOBILEAP_DISABLE_WLAN
+  mcm_mobileap_disable_wlan_req_msg   MCM_MOBILEAP_DISABLE_WLAN_REQ,
+  mcm_mobileap_disable_wlan_resp_msg  MCM_MOBILEAP_DISABLE_WLAN_RESP;
+
+    // 0x0419
+  //! @ID MCM_MOBILEAP_GET_IPSEC_VPN_PASS_THROUGH
+  mcm_mobileap_get_ipsec_vpn_pass_through_req_msg   MCM_MOBILEAP_GET_IPSEC_VPN_PASS_THROUGH_REQ,
+  mcm_mobileap_get_ipsec_vpn_pass_through_resp_msg  MCM_MOBILEAP_GET_IPSEC_VPN_PASS_THROUGH_RESP;
+
+  // 0x041A
+  //! @ID MCM_MOBILEAP_SET_IPSEC_VPN_PASS_THROUGH
+  mcm_mobileap_set_ipsec_vpn_pass_through_req_msg   MCM_MOBILEAP_SET_IPSEC_VPN_PASS_THROUGH_REQ,
+  mcm_mobileap_set_ipsec_vpn_pass_through_resp_msg  MCM_MOBILEAP_SET_IPSEC_VPN_PASS_THROUGH_RESP;
+
+  // 0x041B
+  //! @ID MCM_MOBILEAP_GET_PPTP_VPN_PASS_THROUGH
+  mcm_mobileap_get_pptp_vpn_pass_through_req_msg   MCM_MOBILEAP_GET_PPTP_VPN_PASS_THROUGH_REQ,
+  mcm_mobileap_get_pptp_vpn_pass_through_resp_msg  MCM_MOBILEAP_GET_PPTP_VPN_PASS_THROUGH_RESP;
+
+  // 0x041C
+  //! @ID MCM_MOBILEAP_SET_PPTP_VPN_PASS_THROUGH
+  mcm_mobileap_set_pptp_vpn_pass_through_req_msg   MCM_MOBILEAP_SET_PPTP_VPN_PASS_THROUGH_REQ,
+  mcm_mobileap_set_pptp_vpn_pass_through_resp_msg  MCM_MOBILEAP_SET_PPTP_VPN_PASS_THROUGH_RESP;
+
+  // 0x041D
+  //! @ID MCM_MOBILEAP_GET_L2TP_VPN_PASS_THROUGH
+  mcm_mobileap_get_l2tp_vpn_pass_through_req_msg   MCM_MOBILEAP_GET_L2TP_VPN_PASS_THROUGH_REQ,
+  mcm_mobileap_get_l2tp_vpn_pass_through_resp_msg  MCM_MOBILEAP_GET_L2TP_VPN_PASS_THROUGH_RESP;
+
+  // 0x041E
+  //! @ID MCM_MOBILEAP_SET_L2TP_VPN_PASS_THROUGH
+  mcm_mobileap_set_l2tp_vpn_pass_through_req_msg   MCM_MOBILEAP_SET_L2TP_VPN_PASS_THROUGH_REQ,
+  mcm_mobileap_set_l2tp_vpn_pass_through_resp_msg  MCM_MOBILEAP_SET_L2TP_VPN_PASS_THROUGH_RESP;
+
+  // 0x041F
+  //! @ID MCM_MOBILEAP_SET_AUTO_CONNECT
+  mcm_mobileap_set_auto_connect_req_msg   MCM_MOBILEAP_SET_AUTO_CONNECT_REQ,
+  mcm_mobileap_set_auto_connect_resp_msg  MCM_MOBILEAP_SET_AUTO_CONNECT_RESP;
+
+  // 0x0420
+  //! @ID MCM_MOBILEAP_GET_AUTO_CONNECT
+  mcm_mobileap_get_auto_connect_req_msg   MCM_MOBILEAP_GET_AUTO_CONNECT_REQ,
+  mcm_mobileap_get_auto_connect_resp_msg  MCM_MOBILEAP_GET_AUTO_CONNECT_RESP;
+
+  // 0x0421
+  //! @ID MCM_MOBILEAP_SET_ROAMING_PREF
+  mcm_mobileap_set_roaming_pref_req_msg   MCM_MOBILEAP_SET_ROAMING_PREF_REQ,
+  mcm_mobileap_set_roaming_pref_resp_msg  MCM_MOBILEAP_SET_ROAMING_PREF_RESP;
+
+  // 0x0422
+  //! @ID MCM_MOBILEAP_GET_ROAMING_PREF
+  mcm_mobileap_get_roaming_pref_req_msg   MCM_MOBILEAP_GET_ROAMING_PREF_REQ,
+  mcm_mobileap_get_roaming_pref_resp_msg  MCM_MOBILEAP_GET_ROAMING_PREF_RESP;
+
+  // 0x0423
+  //! @ID MCM_MOBILEAP_SET_DUALAP_CONFIG
+  mcm_mobileap_set_dualap_config_req_msg   MCM_MOBILEAP_SET_DUALAP_CONFIG_REQ,
+  mcm_mobileap_set_dualap_config_resp_msg  MCM_MOBILEAP_SET_DUALAP_CONFIG_RESP;
+
+  // 0x0424
+  //! @ID MCM_MOBILEAP_STATION_MODE_ENABLE
+  mcm_mobileap_station_mode_enable_req_msg   MCM_MOBILEAP_STATION_MODE_ENABLE_REQ,
+  mcm_mobileap_station_mode_enable_resp_msg  MCM_MOBILEAP_STATION_MODE_ENABLE_RESP;
+
+  // 0x0425
+  //! @ID MCM_MOBILEAP_STATION_MODE_DISABLE
+  mcm_mobileap_station_mode_disable_req_msg  MCM_MOBILEAP_STATION_MODE_DISABLE_REQ,
+  mcm_mobileap_station_mode_disable_resp_msg  MCM_MOBILEAP_STATION_MODE_DISABLE_RESP;
+
+  //0x0426
+  //! @ID MCM_MOBILEAP_EVENT_REGISTER
+  mcm_mobileap_event_register_req_msg   MCM_MOBILEAP_EVENT_REGISTER_REQ,
+  mcm_mobileap_event_register_resp_msg  MCM_MOBILEAP_EVENT_REGISTER_RESP;
+
+  //0x0427
+  //! @ID MCM_MOBILEAP_UNSOL_EVENT_IND
+  mcm_mobileap_unsol_event_ind_msg  MCM_MOBILEAP_UNSOL_EVENT_IND;
+
+} = 0x0600;
+
+//============================================================================
+// End of Module
+//============================================================================

@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>700</width>
+    <height>1300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <property name="styleSheet">
+    <string notr="true"/>
+   </property>
+   <widget class="QSwitchButton" name="mSwitch">
+    <property name="geometry">
+     <rect>
+      <x>430</x>
+      <y>10</y>
+      <width>260</width>
+      <height>100</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background:rgb(252, 21, 39)</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>10</y>
+      <width>260</width>
+      <height>100</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Bluetooth</string>
+    </property>
+   </widget>
+   <widget class="QListView" name="mListBt">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>140</y>
+      <width>661</width>
+      <height>771</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="mConBt">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>940</y>
+      <width>451</width>
+      <height>131</height>
+     </rect>
+    </property>
+    <property name="font">
+        <font>
+            <pointsize>6</pointsize>
+        </font>
+    </property>
+    <property name="text">
+        <string>Click on the link to just pair BLE</string>
+    </property>
+</widget>
+<widget class="QLabel" name="mRecvData">
+    <property name="geometry">
+        <rect>
+            <x>60</x>
+            <y>1120</y>
+            <width>571</width>
+            <height>71</height>
+        </rect>
+    </property>
+    <property name="font">
+        <font>
+            <pointsize>6</pointsize>
+        </font>
+    </property>
+    <property name="text">
+        <string>received data:welcome</string>
+    </property>
+</widget>
+<widget class="QPushButton" name="mExit">
+    <property name="geometry">
+        <rect>
+            <x>530</x>
+            <y>940</y>
+            <width>141</width>
+            <height>131</height>
+        </rect>
+    </property>
+    <property name="text">
+        <string>exit</string>
+    </property>
+</widget>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+     <customwidget>
+         <class>QSwitchButton</class>
+   <extends>QLabel</extends>
+   <header>qswitchbutton.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

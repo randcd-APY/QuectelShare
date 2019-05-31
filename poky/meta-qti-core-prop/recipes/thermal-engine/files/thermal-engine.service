@@ -1,0 +1,17 @@
+# Copyright (c) 2017 Qualcomm Technologies, Inc.
+# All Rights Reserved.
+# Confidential and Proprietary - Qualcomm Technologies, Inc.
+#
+
+[Unit]
+Description=Thermal Engine Service
+SourcePath=/usr/bin/thermal-engine
+
+[Service]
+User=root
+Restart=always
+RemainAfterExit=yes
+ExecStart=/usr/bin/thermal-engine
+
+[Install]
+WantedBy=multi-user.target

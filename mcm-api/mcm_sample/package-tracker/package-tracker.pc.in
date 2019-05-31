@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: package-tracker
+Description: Qualcomm MCM Package Tracker Sample App
+Version: @VERSION@
+Libs: -L${libdir} -lpackage-tracker
+Cflags: -I${includedir}/package-tracker

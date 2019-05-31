@@ -1,0 +1,12 @@
+[Unit]
+Description= Remote Storage Service
+SourcePath=/sbin/rmt_storage
+After=usb.service
+Before=init_sys_mss.service
+
+[Service]
+Restart=always
+ExecStart=/sbin/rmt_storage
+
+[Install]
+WantedBy=multi-user.target

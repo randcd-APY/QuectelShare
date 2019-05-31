@@ -1,0 +1,499 @@
+#ifndef _CSR_BT_FEATURE_DEFAULT_H
+#define _CSR_BT_FEATURE_DEFAULT_H
+/******************************************************************************
+ Copyright (c) 2012-2018 Qualcomm Technologies International, Ltd.
+ All Rights Reserved.
+ Qualcomm Technologies International, Ltd. Confidential and Proprietary.
+
+ REVISION:      $Revision: #1 $
+******************************************************************************/
+
+/*--------------------------------------------------------------------------
+ * Version info
+ *--------------------------------------------------------------------------*/
+#cmakedefine CSR_BT_RELEASE_TYPE_TEST
+#define CSR_BT_VERSION_MAJOR    ${CSR_BT_VERSION_MAJOR}
+#define CSR_BT_VERSION_MINOR    ${CSR_BT_VERSION_MINOR}
+#define CSR_BT_VERSION_FIXLEVEL ${CSR_BT_VERSION_FIXLEVEL}
+#define CSR_BT_VERSION_BUILD    ${CSR_BT_VERSION_BUILD}
+#cmakedefine CSR_BT_RELEASE_TYPE_ENG
+#ifdef CSR_BT_RELEASE_TYPE_ENG
+#define CSR_BT_RELEASE_VERSION  "${CSR_BT_VERSION_MAJOR}.${CSR_BT_VERSION_MINOR}.${CSR_BT_VERSION_FIXLEVEL}.${CSR_BT_VERSION_BUILD}"
+#else
+#define CSR_BT_RELEASE_VERSION  "${CSR_BT_VERSION_MAJOR}.${CSR_BT_VERSION_MINOR}.${CSR_BT_VERSION_FIXLEVEL}"
+#endif
+
+/****************************************************************************
+ Csr Bt Component Versions
+ ****************************************************************************/
+#cmakedefine CSR_BT_BT_VERSION ${CSR_BT_BT_VERSION}
+
+/****************************************************************************
+ Csr Board Types
+ ****************************************************************************/
+
+#define CSR_BOARD_M2107_A05 1
+#define CSR_BOARD_M2107_B07 2
+#define CSR_BOARD_M2399_A10 3
+#define CSR_BOARD_M2501_A08 4
+#define CSR_BOARD_M2501_A10 5
+#define CSR_BOARD_M2501_A11 6
+
+/****************************************************************************
+ application defines
+ ****************************************************************************/
+#cmakedefine CSR_BT_APP_AMP_UWB
+#cmakedefine CSR_BT_APP_AMP_WIFI
+#cmakedefine CSR_BT_INSTALL_INTERNAL_APP_DEPENDENCIES
+
+/* Default data storage path, dependent on different host platform. */
+#define DEFAULT_DATA_STORAGE_PATH       "/data/"
+
+/* Default path to store CSR BlueCore psr file. This is dependent on different host platform. */
+#define DEFAULT_PSR_PATH                "/etc/bluetooth/"
+
+/* Default path to store QCA BT firmware (RAM patch and NVM). This is dependent on different host platform. */
+#define DEFAULT_QCA_FIRMWARE_PATH       "/lib/firmware/"
+
+/* Default path to store Synergy log (such as Wireshark and BTSnoop). This is dependent on different host platform. */
+#define DEFAULT_SYNERGY_LOG_PATH        "/data/"
+
+/****************************************************************************
+conversion from global flags to bt flags
+ ****************************************************************************/
+#ifdef CSR_CHIP_MANAGER_TEST
+    #define CSR_CHIP_MANAGER_TEST_ENABLE
+#endif
+
+#ifdef CSR_BUILD_DEBUG
+    #define DM_ACL_DEBUG
+    #define INSTALL_L2CAP_DEBUG
+#endif
+
+/****************************************************************************
+ Random address Types
+ ****************************************************************************/
+#ifdef CSR_BT_LE_ENABLE
+#define RPA    1
+#define NRPA   2
+#define STATIC 3
+#endif
+
+/* Needed to convert to defines used by BT stack */
+#ifndef WIFI_MAJOR_VERSION
+#define WIFI_MAJOR_VERSION    ${CSR_WIFI_VERSION_MAJOR}
+#endif
+#ifndef WIFI_MINOR_VERSION
+#define WIFI_MINOR_VERSION    ${CSR_WIFI_VERSION_MINOR}
+#endif
+#ifndef WIFI_FIXLEVEL_VERSION
+#define WIFI_FIXLEVEL_VERSION ${CSR_WIFI_VERSION_FIXLEVEL}
+#endif
+#ifndef WIFI_BUILD_VERSION
+#define WIFI_BUILD_VERSION    ${CSR_WIFI_VERSION_BUILD}
+#endif
+
+/*Reading root directory path to resolve paths for psr files to open*/
+#define CSR_BT_TOPDIR          ${CSR_BT_ROOT}
+
+#cmakedefine EXCLUDE_CSR_BT_AVRCP_MODULE
+#cmakedefine EXCLUDE_CSR_BT_AVRCP_CT_MODULE
+#cmakedefine EXCLUDE_CSR_BT_AVRCP_TG_MODULE
+#cmakedefine EXCLUDE_CSR_BT_AVRCP_MODULE_OPTIONAL
+#cmakedefine EXCLUDE_CSR_BT_AVRCP_MODULE_COVER_ART
+#cmakedefine EXCLUDE_CSR_BT_AT_MODULE
+#cmakedefine EXCLUDE_CSR_BT_AV_MODULE
+#cmakedefine EXCLUDE_CSR_BT_AV_OPTIONAL
+#cmakedefine EXCLUDE_CSR_BT_BPPS_MODULE
+#cmakedefine EXCLUDE_CSR_BT_BPPS_MODULE_OPTIONAL
+#cmakedefine EXCLUDE_CSR_BT_BPPC_MODULE
+#cmakedefine EXCLUDE_CSR_BT_BPPC_MODULE_OPTIONAL
+#cmakedefine EXCLUDE_CSR_BT_BIPC_MODULE
+#cmakedefine EXCLUDE_CSR_BT_BIPS_MODULE
+#cmakedefine EXCLUDE_CSR_BT_BNEP_MODULE
+#cmakedefine EXCLUDE_CSR_BT_BSL_MODULE
+#cmakedefine EXCLUDE_CSR_BT_CME_BH_FEATURE
+#cmakedefine EXCLUDE_CSR_BT_DG_MODULE
+#cmakedefine EXCLUDE_CSR_BT_DUNC_MODULE
+#cmakedefine EXCLUDE_CSR_BT_FTC_MODULE
+#cmakedefine EXCLUDE_CSR_BT_FTC_MODULE_OPTIONAL
+#cmakedefine EXCLUDE_CSR_BT_FTS_MODULE
+#cmakedefine EXCLUDE_CSR_BT_FTS_MODULE_OPTIONAL
+#cmakedefine EXCLUDE_CSR_BT_GNSS_CLIENT_MODULE
+#cmakedefine EXCLUDE_CSR_BT_GNSS_CLIENT_MODULE_OPTIONAL
+#cmakedefine EXCLUDE_CSR_BT_GNSS_SERVER_MODULE
+#cmakedefine EXCLUDE_CSR_BT_GNSS_SERVER_MODULE_OPTIONAL
+#cmakedefine EXCLUDE_CSR_BT_HCRP_MODULE
+#cmakedefine EXCLUDE_CSR_BT_HDP_MODULE
+#cmakedefine EXCLUDE_CSR_BT_HF_MODULE
+#cmakedefine EXCLUDE_CSR_BT_HF_MODULE_OPTIONAL
+#cmakedefine USE_HF_AUDIO
+#cmakedefine EXCLUDE_CSR_BT_HFG_MODULE
+#cmakedefine EXCLUDE_CSR_BT_HFG_MODULE_OPTIONAL
+#cmakedefine USE_HFG_AUDIO
+#cmakedefine USE_HFG_RIL
+#cmakedefine USE_BT_AUDIO_SERVICE
+#cmakedefine EXCLUDE_CSR_BT_HID_PARSER_MODULE
+#cmakedefine EXCLUDE_CSR_BT_HIDD_MODULE
+#cmakedefine EXCLUDE_CSR_BT_HIDH_MODULE
+#cmakedefine EXCLUDE_CSR_BT_HOGH_MODULE
+#cmakedefine EXCLUDE_CSR_BT_IWU_MODULE
+#cmakedefine EXCLUDE_CSR_BT_JSR82_MODULE
+#cmakedefine EXCLUDE_CSR_BT_MAPC_MODULE
+#cmakedefine EXCLUDE_CSR_BT_MAPS_MODULE
+#cmakedefine EXCLUDE_CSR_BT_MCAP_MODULE
+#cmakedefine EXCLUDE_CSR_BT_OPC_MODULE
+#cmakedefine EXCLUDE_CSR_BT_OPC_MODULE_OPTIONAL
+#cmakedefine EXCLUDE_CSR_BT_OPS_MODULE
+#cmakedefine EXCLUDE_CSR_BT_OPS_MODULE_OPTIONAL
+#cmakedefine EXCLUDE_CSR_BT_PAC_MODULE
+#cmakedefine EXCLUDE_CSR_BT_PAS_MODULE
+#cmakedefine EXCLUDE_CSR_BT_PHDC_AG_MODULE
+#cmakedefine EXCLUDE_CSR_BT_PHDC_MGR_MODULE
+#cmakedefine EXCLUDE_CSR_BT_SAPC_MODULE
+#cmakedefine EXCLUDE_CSR_BT_SAPS_MODULE
+#cmakedefine EXCLUDE_CSR_BT_SCO_MODULE
+#cmakedefine EXCLUDE_CSR_BT_SD_SERVICE_RECORD_MODULE
+#cmakedefine EXCLUDE_CSR_BT_SMLC_MODULE
+#cmakedefine EXCLUDE_CSR_BT_SMLC_MODULE_OPTIONAL
+#cmakedefine EXCLUDE_CSR_BT_SMLS_MODULE
+#cmakedefine EXCLUDE_CSR_BT_SMLS_MODULE_OPTIONAL
+#cmakedefine EXCLUDE_CSR_BT_SPP_MODULE
+#cmakedefine EXCLUDE_CSR_BT_SPP_MODULE_OPTIONAL
+#cmakedefine EXCLUDE_CSR_BT_SYNCC_MODULE
+#cmakedefine EXCLUDE_CSR_BT_SYNCC_MODULE_OPTIONAL
+#cmakedefine EXCLUDE_CSR_BT_SYNCS_MODULE
+#cmakedefine EXCLUDE_CSR_BT_SYNCS_MODULE_OPTIONAL
+#cmakedefine EXCLUDE_CSR_BT_PROX_SRV_MODULE
+#cmakedefine EXCLUDE_CSR_BT_THERM_SRV_MODULE
+#cmakedefine EXCLUDE_CSR_BT_TEST_MODULE
+#cmakedefine EXCLUDE_CSR_BT_SC_MODULE_OPTIONAL
+#cmakedefine EXCLUDE_CSR_BT_SD_MODULE_OPTIONAL
+#cmakedefine EXCLUDE_CSR_BT_CM_MODULE_OPTIONAL
+#cmakedefine EXCLUDE_CSR_BT_OPTIONAL_UTILS
+#cmakedefine EXCLUDE_CSR_BT_TPT_MODULE
+#cmakedefine EXCLUDE_CSR_BT_MDER_MODULE
+#cmakedefine EXCLUDE_CSR_BT_GOEP_20_MODULE
+#cmakedefine EXCLUDE_CSR_BT_SBC_MODULE
+#cmakedefine EXCLUDE_CSR_BT_PPP_MODULE
+#cmakedefine EXCLUDE_CSR_BT_PAN_MODULE
+#cmakedefine EXCLUDE_CSR_BT_GATT_MODULE_OPTIONAL
+#cmakedefine EXCLUDE_CSR_BT_GATT_MODULE_OPTIONAL2
+#cmakedefine CSR_BT_LE_SIGNING_ENABLE
+#cmakedefine EXCLUDE_CSR_BT_L2CA_MODULE
+#cmakedefine EXCLUDE_CSR_BT_RFC_MODULE
+#cmakedefine EXCLUDE_CSR_BT_VCARD_MODULE
+#cmakedefine INSTALL_L2CAP_RAW_SUPPORT
+#cmakedefine CSR_DSPM_ENABLE
+#cmakedefine EXCLUDE_CSR_BT_BSL_FLOW_CONTROL_FEATURE
+#cmakedefine EXCLUDE_CSR_BT_ASM_MODULE
+#cmakedefine EXCLUDE_CSR_BT_ASM_MODULE_OPTIONAL
+
+#cmakedefine CSR_DSPM_DISABLE_SCO_RATEMATCHING
+#cmakedefine CSR_CVC_ENABLE
+#cmakedefine CSR_CVC_NB_FE_ENABLE
+#cmakedefine CSR_BT_APP_OUTPUT_A2DP_TO_I2S
+#cmakedefine CSR_DSPM_SRC_ENABLE
+#cmakedefine CSR_BT_CONFIG_CARKIT
+
+#cmakedefine CSR_BT_BLUE_STACK_DEBUG
+#cmakedefine CSR_BT_CONFIG_L2CAP_FCS
+#cmakedefine CSR_BT_INSTALL_L2CAP_CONNLESS_SUPPORT
+
+#cmakedefine CSR_BT_SC_ONLY_MODE_ENABLE
+#cmakedefine CSR_BT_INSTALL_LESC_SUPPORT
+#cmakedefine CSR_BT_INSTALL_LE_PRIVACY_1P2_SUPPORT
+/*-------------------------------------------------------------------------------------------------------* 
+ * CTKD shall not be enabled when local random address is configured as NRPA or STATIC(static address).  *
+ * 1. In case of NRPA: Synergy does not allow bonding, so keys on other transport cannot be generated.   *
+ * 2. In case of Static address: Synergy distributes the same static address as its Identity address     *
+ *    while pairing, not the public address, so again correct keys can't be generated.                   *
+ *-------------------------------------------------------------------------------------------------------*/
+#if (${CSR_BT_LE_RANDOM_ADDRESS_TYPE} == RPA)
+#define CSR_BT_LE_RANDOM_ADDRESS_TYPE_RPA
+#cmakedefine CSR_BT_INSTALL_CTKD_SUPPORT
+#elif (${CSR_BT_LE_RANDOM_ADDRESS_TYPE} == NRPA)
+#define CSR_BT_LE_RANDOM_ADDRESS_TYPE_NRPA
+#elif (${CSR_BT_LE_RANDOM_ADDRESS_TYPE} == STATIC)
+#define CSR_BT_LE_RANDOM_ADDRESS_TYPE_STATIC
+#endif /* CSR_BT_LE_RANDOM_ADDRESS_TYPE */
+
+/* Conversion of application instances */
+#ifndef EXCLUDE_CSR_BT_AV_MODULE
+#define NUM_AV_INST ${CSR_BT_APP_USE_AV}
+#else
+#define NUM_AV_INST 0
+#endif
+
+#ifndef EXCLUDE_CSR_BT_AVRCP_MODULE
+#define NUM_AVRCP_INST ${CSR_BT_APP_USE_AVRCP}
+#else
+#define NUM_AVRCP_INST 0
+#endif
+
+#ifndef EXCLUDE_CSR_BT_DUNC_MODULE
+#define NUM_DUNC_INST ${CSR_BT_APP_USE_DUNC}
+#else
+#define NUM_DUNC_INST 0
+#endif
+
+#ifndef EXCLUDE_CSR_BT_DG_MODULE
+#define NUM_DG_INST ${CSR_BT_APP_USE_DG}
+#else
+#define NUM_DG_INST 0
+#endif
+
+#ifndef EXCLUDE_CSR_BT_HF_MODULE
+#define NUM_HF_INST ${CSR_BT_APP_USE_HF}
+#else
+#define NUM_HF_INST 0
+#endif
+
+#ifndef EXCLUDE_CSR_BT_HFG_MODULE
+#define NUM_HFG_INST ${CSR_BT_APP_USE_HFG}
+#else
+#define NUM_HFG_INST 0
+#endif
+
+#ifndef EXCLUDE_CSR_BT_HCRP_MODULE
+#define NUM_HCRPS_INST ${CSR_BT_APP_USE_HCRPS}
+#else
+#define NUM_HCRPS_INST 0
+#endif
+
+#ifndef EXCLUDE_CSR_BT_HDP_MODULE
+#define NUM_HDP_INST ${CSR_BT_APP_USE_HDP}
+#else
+#define NUM_HDP_INST 0
+#endif
+
+#ifndef EXCLUDE_CSR_BT_HIDD_MODULE
+#define NUM_HIDD_INST ${CSR_BT_APP_USE_HIDD}
+#else
+#define NUM_HIDD_INST 0
+#endif
+
+#ifndef EXCLUDE_CSR_BT_HIDH_MODULE
+#define NUM_HIDH_INST ${CSR_BT_APP_USE_HIDH}
+#else
+#define NUM_HIDH_INST 0
+#endif
+
+#ifndef EXCLUDE_CSR_BT_GNSS_CLIENT_MODULE
+#define NUM_GNSS_CLIENT_INST ${CSR_BT_APP_USE_GNSS_CLIENT}
+#else
+#define NUM_GNSS_CLIENT_INST    0
+#endif
+
+#ifndef EXCLUDE_CSR_BT_GNSS_SERVER_MODULE
+#define NUM_GNSS_SERVER_INST ${CSR_BT_APP_USE_GNSS_SERVER}
+#else
+#define NUM_GNSS_SERVER_INST    0
+#endif
+
+
+#ifndef EXCLUDE_CSR_BT_BIPC_MODULE
+#define NUM_BIPC_INST ${CSR_BT_APP_USE_BIPC}
+#else
+#define NUM_BIPC_INST    0
+#endif
+
+#ifndef EXCLUDE_CSR_BT_BIPS_MODULE
+#define NUM_BIPS_INST ${CSR_BT_APP_USE_BIPS}
+#else
+#define NUM_BIPS_INST    0
+#endif
+
+#ifndef EXCLUDE_CSR_BT_BPPC_MODULE
+#define NUM_BPPC_INST ${CSR_BT_APP_USE_BPPC}
+#else
+#define NUM_BPPC_INST    0
+#endif
+
+#ifndef EXCLUDE_CSR_BT_BPPS_MODULE
+#define NUM_BPPS_INST ${CSR_BT_APP_USE_BPPS}
+#else
+#define NUM_BPPS_INST    0
+#endif
+
+#ifndef EXCLUDE_CSR_BT_FTC_MODULE
+#define NUM_FTC_INST ${CSR_BT_APP_USE_FTC}
+#else
+#define NUM_FTC_INST    0
+#endif
+
+#ifndef EXCLUDE_CSR_BT_FTS_MODULE
+#define NUM_FTS_INST ${CSR_BT_APP_USE_FTS}
+#else
+#define NUM_FTS_INST    0
+#endif
+
+#ifndef EXCLUDE_CSR_BT_MAPC_MODULE
+#define NUM_MAPC_INST ${CSR_BT_APP_USE_MAPC}
+#else
+#define NUM_MAPC_INST    0
+#endif
+
+#ifndef EXCLUDE_CSR_BT_MAPS_MODULE
+#define NUM_MAPS_INST ${CSR_BT_APP_USE_MAPS}
+#else
+#define NUM_MAPS_INST    0
+#endif
+
+#ifndef EXCLUDE_CSR_BT_PAC_MODULE
+#define NUM_PAC_INST ${CSR_BT_APP_USE_PAC}
+#else
+#define NUM_PAC_INST    0
+#endif
+
+#ifndef EXCLUDE_CSR_BT_PAS_MODULE
+#define NUM_PAS_INST ${CSR_BT_APP_USE_PAS}
+#else
+#define NUM_PAS_INST    0
+#endif
+
+#ifndef EXCLUDE_CSR_BT_OPC_MODULE
+#define NUM_OPC_INST ${CSR_BT_APP_USE_OPC}
+#else
+#define NUM_OPC_INST    0
+#endif
+
+#ifndef EXCLUDE_CSR_BT_OPS_MODULE
+#define NUM_OPS_INST ${CSR_BT_APP_USE_OPS}
+#else
+#define NUM_OPS_INST    0
+#endif
+
+#ifndef EXCLUDE_CSR_BT_SYNCC_MODULE
+#define NUM_SYNCC_INST ${CSR_BT_APP_USE_SYNCC}
+#else
+#define NUM_SYNCC_INST    0
+#endif
+
+#ifndef EXCLUDE_CSR_BT_BSL_MODULE
+#define NUM_PAN_INST ${CSR_BT_APP_USE_PAN}
+#else
+#define NUM_PAN_INST    0
+#endif
+
+#ifndef EXCLUDE_CSR_BT_SAPC_MODULE
+#define NUM_SAPC_INST ${CSR_BT_APP_USE_SAPC}
+#else
+#define NUM_SAPC_INST    0
+#endif
+
+#ifndef EXCLUDE_CSR_BT_SAPS_MODULE
+#define NUM_SAPS_INST ${CSR_BT_APP_USE_SAPS}
+#else
+#define NUM_SAPS_INST    0
+#endif
+
+#ifndef EXCLUDE_CSR_BT_SPP_MODULE
+#define NUM_SPP_INST ${CSR_BT_APP_USE_SPP}
+#else
+#define NUM_SPP_INST    0
+#endif
+
+#ifdef CSR_BT_LE_ENABLE
+#define NUM_GATT_INST ${CSR_BT_APP_USE_GATT}
+#define NUM_GATT_GENERIC_SERVER_INST ${CSR_BT_APP_USE_GATT_GENERIC_SERVER}
+#define NUM_GATT_LE_BROWSER_INST ${CSR_BT_APP_USE_GATT_LE_BROWSER}
+#define NUM_GATT_THERMC_INST ${CSR_BT_APP_USE_GATT_THERMC}
+#define NUM_GATT_THERMS_INST ${CSR_BT_APP_USE_GATT_THERMS}
+#define NUM_GATT_HOGD_INST ${CSR_BT_APP_USE_GATT_HOGD}
+
+#ifndef EXCLUDE_CSR_BT_HOGH_MODULE
+#define NUM_GATT_HOGH_INST ${CSR_BT_APP_USE_GATT_HOGH}
+#endif
+
+#define NUM_GATT_PROXC_INST ${CSR_BT_APP_USE_GATT_PROXC}
+#define NUM_GATT_PROXS_INST ${CSR_BT_APP_USE_GATT_PROXS}
+#define NUM_GATT_RSCC_INST ${CSR_BT_APP_USE_GATT_RSCC}
+#define NUM_GATT_RSCS_INST ${CSR_BT_APP_USE_GATT_RSCS}
+#endif
+
+#ifdef NUM_GATT_HOGH_INST
+#define CSR_BT_HOGH_ENABLE_INITIAL_REPORTS
+#endif
+
+#ifndef EXCLUDE_CSR_BT_PHDC_AG_MODULE
+#define NUM_PHDC_AG_INST ${CSR_BT_APP_USE_PHDC_AG}
+#else
+#define NUM_PHDC_AG_INST    0
+#endif
+
+#ifndef EXCLUDE_CSR_BT_PHDC_MGR_MODULE
+#define NUM_PHDC_MGR_INST ${CSR_BT_APP_USE_PHDC_MGR}
+#else
+#define NUM_PHDC_MGR_INST    0
+#endif
+
+#define NUM_AMPWIFI_INST ${CSR_BT_APP_USE_AMPWIFI}
+
+#define AV_STREAM_INACTIVITY_LP_ENABLE ${AV_STREAM_INACTIVITY_LP_ENABLE}
+
+#ifdef CSR_DSPM_ENABLE
+#if ((NUM_AV_INST) || (NUM_HF_INST) || (NUM_HFG_INST))
+#define CSR_USE_DSPM
+#define EXCLUDE_CSR_BT_CHIP_SUPPORT_MAP_SCO_PCM
+#endif
+
+#ifdef CSR_DSPM_DISABLE_SCO_RATEMATCHING
+#define CSR_DISABLE_SCO_RATEMATCHING
+#endif
+
+#ifdef CSR_CVC_ENABLE
+#define CSR_USE_CVC_1MIC
+#ifdef CSR_CVC_NB_FE_ENABLE
+#define CSR_FE_ENABLE
+#endif
+#endif
+
+#ifdef CSR_DSPM_SRC_ENABLE
+#define CSR_BT_AV_USE_RESAMPLER
+#endif
+
+#ifdef CSR_BT_APP_OUTPUT_A2DP_TO_I2S
+#define CSR_A2DP_OVER_I2S
+#endif
+
+#ifndef EXCLUDE_CSR_BT_ASM_MODULE
+#define CSR_BT_APP_MPAA_ENABLE
+#endif
+
+#endif /* CSR_DSPM_ENABLE */
+
+#ifdef CSR_USE_QCA_CHIP
+#define EXCLUDE_CSR_BT_CM_BCCMD_FEATURE
+#define EXCLUDE_CSR_BT_CHIP_SUPPORT_MAP_SCO_PCM
+#endif
+
+#ifdef CSR_AMP_ENABLE
+#if (${CSR_BOARD} == CSR_BOARD_M2107_A05)
+    #define CSR_WIFI_DESIGN_M2107_R02
+#elif (${CSR_BOARD} == CSR_BOARD_M2107_B07)
+    #define CSR_WIFI_DESIGN_M2107_R03
+#elif (${CSR_BOARD} == CSR_BOARD_M2399_A10)
+    #define CSR_WIFI_DESIGN_M2399_R03
+#elif (${CSR_BOARD} == CSR_BOARD_M2501_A08)
+    #define CSR_WIFI_DESIGN_M2501_R03
+#elif (${CSR_BOARD} == CSR_BOARD_M2501_A10)
+    #define CSR_WIFI_DESIGN_M2501_R03
+#endif /*CSR_BOARD */
+#endif /* CSR_AMP_ENABLE */
+
+#ifdef EXCLUDE_CSR_BT_CME_BH_FEATURE
+#define EXCLUDE_CSR_BT_CM_SET_AV_STREAM_INFO_REQ /* exclude serialization code */
+#endif
+
+/*--------------------------------------------------------------------------
+ * Include csr_bt_devel_config.h if the development Configuration is available
+ *--------------------------------------------------------------------------*/
+#cmakedefine CSR_BT_DEVEL_CONFIG_ENABLE
+#ifdef CSR_BT_DEVEL_CONFIG_ENABLE
+#include "csr_bt_devel_config.h"
+#endif
+
+#include "csr_bt_config_global.h"
+
+#endif /* _CSR_BT_FEATURE_DEFAULT_H */

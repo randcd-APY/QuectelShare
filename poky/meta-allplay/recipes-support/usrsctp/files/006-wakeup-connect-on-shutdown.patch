@@ -1,0 +1,17 @@
+diff --git a/usrsctplib/user_socket.c b/usrsctplib/user_socket.c
+index 0c78198..6da793f 100755
+--- a/usrsctplib/user_socket.c
++++ b/usrsctplib/user_socket.c
+@@ -2113,6 +2113,12 @@ usrsctp_shutdown(struct socket *so, int how)
+ 		errno = EBADF;
+ 		return (-1);
+ 	}
++
++	if (so->so_state & SS_ISCONNECTING) {
++		so->so_error = ECONNABORTED;
++		wakeup(&so->so_timeo, so);
++	}
++
+ 	sctp_flush(so, how);
+ 	if (how != SHUT_WR) {
+ 		 socantrcvmore(so);

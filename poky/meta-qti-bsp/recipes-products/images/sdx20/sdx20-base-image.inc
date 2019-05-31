@@ -1,0 +1,47 @@
+# Rootfs creation.
+
+# Formats of root filesystem images.
+IMAGE_FSTYPES += "ext4 ubi"
+DEPENDS_append_aarch64 += " lib32-lk"
+DEPENDS_append_arm += " lk"
+
+IMAGE_INSTALL += "packagegroup-core-boot"
+IMAGE_INSTALL += "${CORE_IMAGE_EXTRA_INSTALL}"
+
+# The MSM Linux minimal boot image files.
+IMAGE_INSTALL += "alx"
+IMAGE_INSTALL += "base-files"
+IMAGE_INSTALL += "base-passwd"
+IMAGE_INSTALL += "gdbserver"
+IMAGE_INSTALL += "gdb"
+IMAGE_INSTALL += "glib-2.0"
+IMAGE_INSTALL += "iw"
+IMAGE_INSTALL += "kernel-modules"
+IMAGE_INSTALL += "libnl"
+IMAGE_INSTALL += "libcutils"
+IMAGE_INSTALL += "liblog"
+IMAGE_INSTALL += "libstdc++"
+IMAGE_INSTALL += "libxml2"
+IMAGE_INSTALL += "openssl"
+IMAGE_INSTALL += "powerapp"
+IMAGE_INSTALL += "powerapp-powerconfig"
+IMAGE_INSTALL += "powerapp-reboot"
+IMAGE_INSTALL += "powerapp-shutdown"
+IMAGE_INSTALL += "perl"
+IMAGE_INSTALL += "sigma-dut"
+IMAGE_INSTALL += "start-scripts-find-partitions"
+IMAGE_INSTALL += "start-scripts-firmware-links"
+IMAGE_INSTALL += "system-core-adbd"
+IMAGE_INSTALL += "system-core-usb"
+IMAGE_INSTALL += "system-conf"
+IMAGE_INSTALL += "wireless-tools"
+IMAGE_INSTALL += "volatile-binds"
+
+#IMAGE_PREPROCESS_COMMAND += "echo ${MACHINE} >> ${IMAGE_ROOTFS}/target;"
+
+# Below is to generate sparse ext4 system image (OE by default supports raw ext4 images)
+
+do_makesystem() {
+    make_ext4fs -s -l ${SYSTEM_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${SYSTEMIMAGE_TARGET} ${IMAGE_ROOTFS}
+    make_ext4fs -s -l ${SYSTEMRW_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${SYSTEMRWIMAGE_TARGET}
+}

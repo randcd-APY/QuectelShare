@@ -1,0 +1,23 @@
+SectionVerb {
+        EnableSequence [
+                cdev "hw:0"
+                cset "name='MultiMedia1 Mixer TERT_MI2S_TX' 1"
+        ]
+        DisableSequence [
+                cdev "hw:0"
+                cset "name='MultiMedia1 Mixer TERT_MI2S_TX' 0"
+        ]
+}
+
+SectionDevice."PrimaryMIC" {
+        EnableSequence [
+                cdev "hw:0"
+                cset "name='ADC1 Volume' 8"
+                cset "name='DEC1 MUX' 1"
+        ]
+        DisableSequence [
+                cdev "hw:0"
+                cset "name='ADC1 Volume' 0"
+                cset "name='DEC1 MUX' 0"
+        ]
+}

@@ -1,0 +1,3 @@
+docs:
+	doxygen dsrc.doxy
+

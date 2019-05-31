@@ -1,0 +1,65 @@
+
+/****************************************************************************
+ @FILE mcm_client_v01.idl
+ @BRIEF MCM client API
+ @DESCRIPTION
+  IoE Mobile Connection Manager Client API (MCM_CLIENT)
+
+  This API provides Data Structures for dynamic service loading.
+
+ Copyright (c) 2014 Qualcomm Technologies, Inc.  All Rights Reserved.
+ Qualcomm Technologies Proprietary and Confidential.
+****************************************************************************/
+
+include "mcm_common_v01.idl";
+
+revision 1;
+
+//=============================================================================
+// CONSTANTS
+//=============================================================================
+
+mask {
+    MCM_VOICE    = 0x00,
+    MCM_SMS      = 0x01,
+    MCM_DMS      = 0x02,
+    MCM_NW       = 0x04,
+    MCM_SIM      = 0x08,
+    MCM_DATA     = 0x10,
+    MCM_ATCOP    = 0x20,
+    MCM_LOC      = 0x40,
+    MCM_MOBILEAP = 0x80
+} mcm_client_service_type_t;//!< IOE Service Modes. These are or'ed together to specify the
+                            //!< service loaded on the device or to unloaded from the device
+
+//=============================================================================
+// MESSAGES
+//=============================================================================
+message {
+ mandatory uint16 require_service;//!< Preferred services to be loaded on the
+                                  //!< device, a bitmask of mcm_dm_service_type
+}mcm_client_require_req_msg;
+
+message {
+ mandatory mcm_response_t response;
+}mcm_client_require_resp_msg;
+
+message {
+ mandatory uint16 not_require_service;//!< Preferred services to be loaded on the
+                                      //!< device, a bitmask of mcm_dm_service_type
+}mcm_client_not_require_req_msg;
+
+message {
+ mandatory mcm_response_t response;
+}mcm_client_not_require_resp_msg;
+
+
+service mcm_client {
+
+    mcm_client_require_req_msg          MCM_CLIENT_REQUIRE_REQ,
+    mcm_client_require_resp_msg         MCM_CLIENT_REQUIRE_RESP = 0x0800;
+
+    mcm_client_not_require_req_msg      MCM_CLIENT_NOT_REQUIRE_REQ,
+    mcm_client_not_require_resp_msg     MCM_CLIENT_NOT_REQUIRE_RESP;
+
+} = 0x407;

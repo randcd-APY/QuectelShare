@@ -1,0 +1,37 @@
+SectionVerb {
+        EnableSequence [
+                exec "echo enabling adsp sva"
+                cdev "hw:0"
+                cset "name='QUAT_MI2S_TX LSM Function' 4" #SWAUDIO
+                cset "name='LSM1 MUX' 8" #QUAT_MI2S_TX LSM
+        ]
+        DisableSequence [
+                exec "echo disabling adsp sva"
+                cdev "hw:0"
+                cset "name='LSM1 MUX' 0" #NONE
+                cset "name='QUAT_MI2S_TX LSM Function' 0" #NONE
+        ]
+}
+
+SectionDevice."HandsetMic" {
+        EnableSequence [
+                exec "echo enabling adsp handset mic"
+                cdev "hw:0"
+                cset "name='AIF1_CAP Mixer SLIM TX6' 1"
+                cset "name='MI2S_TX Channels' 1"
+                cset "name='SLIM TX6 MUX' 2" #DEC6
+                cset "name='ADC MUX6' 0" #DMIC
+                cset "name='DMIC MUX6' 1" #DMIC0
+                cset "name='TX6 HPF cut off' 2" #CF_NEG_3DB_150HZ
+        ]
+        DisableSequence [
+                exec "echo disabling adsp handset mic"
+                cdev "hw:0"
+                cset "name='AIF1_CAP Mixer SLIM TX6' 0"
+                cset "name='MI2S_TX Channels' 0"
+                cset "name='SLIM TX6 MUX' 0" #ZERO
+                cset "name='ADC MUX6' 1" #AMIC
+                cset "name='DMIC MUX6' 0" #ZERO
+                cset "name='TX6 HPF cut off' 0" #CF_NEG_3DB_4HZ
+        ]
+}

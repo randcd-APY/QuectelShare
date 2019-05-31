@@ -1,0 +1,12 @@
+diff --git a/web-setup/websetup.lighttpd.conf b/web-setup/websetup.lighttpd.conf
+index 9105d9f..6032949 100644
+--- a/web-setup/websetup.lighttpd.conf
++++ b/web-setup/websetup.lighttpd.conf
+@@ -230,6 +230,7 @@ cgi.assign                 = ( ".pl"  => "/usr/bin/perl",
+ url.rewrite = ( "^/config/avs/(.*)"  => "/cgi/avs/$1" )
+ 
+ 
++url.rewrite += ( "^/$"  => "/cgi/ui" )
+ url.rewrite-if-not-file = ( "^/(.*)" => "/cgi/$1"  )
+ $HTTP["url"] =~ "/cgi/*" {
+    cgi.assign = ( "" => "/bin/sh" )

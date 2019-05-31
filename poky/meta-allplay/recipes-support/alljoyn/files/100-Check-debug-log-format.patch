@@ -1,0 +1,34 @@
+diff --git a/common/inc/qcc/Debug.h b/common/inc/qcc/Debug.h
+index 7cb5171..52f06e4 100644
+--- a/common/inc/qcc/Debug.h
++++ b/common/inc/qcc/Debug.h
+@@ -178,6 +178,9 @@
+  *
+  * @return  Number of characters printed.  Negative value indicates an error.
+  */
++ #ifdef __GNUC__
++ __attribute__((format(printf, 1, 2)))
++ #endif // __GNUC__
+ int QCC_SyncPrintf(const char* fmt, ...);
+ 
+ 
+@@ -246,6 +249,9 @@
+  *
+  * @param fmt  A printf() style format specification.
+  */
++ #ifdef __GNUC__
++ __attribute__((format(printf, 1, 2)))
++ #endif // __GNUC__
+ void* _QCC_DbgPrintContext(const char* fmt, ...);
+ 
+ /**
+@@ -255,6 +261,9 @@
+  * @param ctx  Debug context created by _QCC_DbgPrintContext.
+  * @param fmt  A printf() style format specification.
+  */
++ #ifdef __GNUC__
++ __attribute__((format(printf, 2, 3)))
++ #endif // __GNUC__
+ void _QCC_DbgPrintAppend(void* ctx, const char* fmt, ...);
+ 
+ /**

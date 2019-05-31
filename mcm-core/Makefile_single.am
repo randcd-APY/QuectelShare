@@ -1,0 +1,120 @@
+# Makefile.am - Automake script for MCM
+AM_CFLAGS = -Wall \
+        -Wundef \
+        -Wstrict-prototypes \
+        -g -O0  \
+        -fno-inline \
+        -fno-short-enums \
+        -fpic
+
+ACLOCAL_AMFLAGS = -I m4
+AM_CPPFLAGS = -D__packed__= \
+        -DFEATURE_LINUX \
+        -DFEATURE_NATIVELINUX \
+        -DFEATURE_LE_DIAG \
+	-DSINGLE_PROCESS_CONFIG \
+	$(QMIFRAMEWORK_CFLAGS) \
+        $(QMI_CFLAGS) \	
+                  $(DIAG_FLAGS) \
+        -I./../../diag/include/ \
+		-I./ipc \
+		-I./single-process \
+		-I./mcm-hdr \
+		-I./server \
+		-I./server/core \
+		-I./server/core/core \
+		-I./server/hlos \
+		-I./server/hlos/nas \
+		-I./server/hlos/dms \
+		-I./server/hlos/uim \
+		-I./server/hlos/core \
+		-I./server/cri \
+		-I./server/cri/nas \
+		-I./server/cri/dms \
+		-I./server/cri/uim \
+		-I./server/cri/core \
+		-I./server/cri/voice \
+		-I./server/utilities \
+		-I./server/utilities/log \
+		-I./server/utilities/memory \
+		-I./server/utilities/timer \
+		-I./server/utilities/synchronization \
+		-I./server/utilities/control \
+		-I./server/utilities/bit_field \
+		-I./server/utilities/list \
+		-I./client \
+		-I./client/core 
+   
+   
+   
+   
+c_sources = ./single-process/mcm_msg_receiver.c \
+			./single-process/mcm_client_single_process_qmi.c \
+			./ipc/mcm_nw_v01.c \
+			./ipc/mcm_dm_v01.c \
+			./ipc/mcm_voice_v01.c \
+			./ipc/mcm_pb_v01.c \
+			./ipc/mcm_sms_v01.c \
+			./ipc/mcm_common_v01.c \
+			./ipc/mcm_service_object_v01.c \
+			./server/core/core/core_handler.c \
+			./server/core/core/core_queue_util.c \
+			./server/core/core/core_event_lookup.c \
+			./server/hlos/dms/hlos_dms_core.c \
+			./server/hlos/nas/hlos_nas_core.c \
+                        ./server/hlos/uim/mcm_uim_request.c \
+                        ./server/hlos/uim/mcm_uim_response.c \
+                        ./server/hlos/uim/mcm_uim_util.c \
+                        ./server/hlos/uim/mcm_uim_indication.c \
+			./server/hlos/core/mcm_srv_adaptor.c \
+			./server/hlos/core/mcm_msg_queue.c \
+			./server/hlos/core/mcm_srv_internal.c \
+			./server/hlos/core/hlos_event_lookup.c \
+			./server/hlos/core/hlos_core.c \
+			./server/hlos/core/mcm_srv_ext.c \
+			./server/cri/dms/cri_dms_core.c \
+			./server/cri/dms/cri_dms_utils.c \
+			./server/cri/dms/cri_dms_rules.c \
+                        ./server/cri/uim/cri_uim_core.c \
+                        ./server/cri/uim/cri_uim_utils.c \
+			./server/cri/nas/cri_nas_core.c \
+			./server/cri/nas/cri_nas_utils.c \
+			./server/cri/nas/cri_nas_rules.c \
+			./server/cri/core/cri_core.c \
+			./server/cri/core/cri_rule_handler.c \
+			./server/cri/core/cri_event_lookup.c \
+			./server/cri/voice/cri_voice.c \
+			./server/cri/voice/cri_voice_answer.c \
+			./server/cri/voice/cri_voice_call_info.c \
+			./server/cri/voice/cri_voice_call_list.c \
+			./server/cri/voice/cri_voice_call_obj.c \
+			./server/cri/voice/cri_voice_call_summary.c \
+			./server/cri/voice/cri_voice_core.c \
+			./server/cri/voice/cri_voice_dial.c \
+			./server/cri/voice/cri_voice_get_calls.c \
+			./server/cri/voice/cri_voice_hangup.c \
+			./server/cri/voice/cri_voice_ind_hdlr.c \
+			./server/cri/voice/cri_voice_multi_calls.c \
+			./server/cri/voice/cri_voice_qmi_client.c \
+			./server/cri/voice/cri_voice_settings.c \
+			./server/cri/voice/cri_voice_utils.c \
+			./server/utilities/memory/util_memory.c \
+			./server/utilities/timer/timer_event_lookup.c \
+			./server/utilities/timer/util_timer.c \
+			./server/utilities/synchronization/util_synchronization.c \
+			./server/utilities/control/control_core.c \
+			./server/utilities/bit_field/util_bit_field.c \
+			./server/utilities/list/util_list.c \
+			./client/core/mcm_utils.c \
+			./client/core/mcm_client.c \
+			./client/core/mcm_qmi_client.c \
+			./client/core/mcm_client_internal.c  
+			
+bin_PROGRAMS = IoEConsoleApp
+IoEConsoleApp_CC = @CC@
+IoEConsoleApp_SOURCES = $(c_sources)
+IoEConsoleApp_LDADD = -lpthread -lm $(QMIFRAMEWORK_LIBS) -lqmiservices
+IoEConsoleApp_CPPFLAGS = $(AM_CPPFLAGS)
+pkgconfigdir = $(libdir)/pkgconfig
+
+EXTRA_DIST = $(pkgconfig_DATA)

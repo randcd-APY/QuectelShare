@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: AniAsf
+Description: Common functions for AniAsf
+Version: @VERSION@
+Libs: -L${libdir} -lAniAsf
+Cflags: -I${includedir}/AniAsf

@@ -1,0 +1,413 @@
+msid "lang"
+msgstr "zh-tw"
+
+msgid "Content-Type: text/plain; charset=UTF-8"
+msgstr "Content-Type: text/plain; charset=UTF-8"
+
+msgid "(%s available)"
+msgstr "(%s 可用)"
+
+msgid "AllPlay Audio Module"
+msgstr "AllPlay 音訊模組"
+
+msgid "AllPlay Audio Module Configurator"
+msgstr "AllPlay 音訊模組設定器"
+
+msgid "AllPlay Audio Module Firmware Upgrade"
+msgstr "AllPlay 音訊模組韌體升級"
+
+msgid "Apply"
+msgstr "套用"
+
+msgid "Automatic (DHCP)"
+msgstr "自動（DHCP）"
+
+msgid "BSSID"
+msgstr "BSSID"
+
+msgid "Backup / Flash Firmware"
+msgstr "備份/更新韌體"
+
+msgid "Bit Rate"
+msgstr "位元速率"
+
+msgid "Bitrate"
+msgstr "位元速率"
+
+msgid "Cancel"
+msgstr "取消"
+
+msgid "Change"
+msgstr "變更"
+
+msgid "Changes applied."
+msgstr "已套用變更。"
+
+msgid "Channel"
+msgstr "頻道"
+
+msgid "Checksum"
+msgstr "總和檢查碼"
+
+msgid "Choose file"
+msgstr "Choose file"
+
+msgid "Wireless Network Settings"
+msgstr "無線網絡設置"
+
+msgid "Wired Network Settings"
+msgstr "有線網絡設置"
+
+msgid "Choose the wireless network you would like to use, and enter a password if one is required."
+msgstr "選擇您要使用的無線網路，然後輸入密碼 (若需要)。"
+
+msgid "Collecting data"
+msgstr "正在收集資料"
+
+msgid "Collecting data..."
+msgstr "正在收集資料..."
+
+msgid "Configuration files will be kept."
+msgstr "系統將保留設定檔案。"
+
+msgid "Connect"
+msgstr "連線"
+
+msgid "Connected"
+msgstr "已連線"
+
+msgid "Connecting"
+msgstr "正在連線"
+
+msgid "Connecting, please wait..."
+msgstr "正在連線，請稍候..."
+
+msgid "Connection failure, unable to connect to network."
+msgstr "連線失敗，無法連線至網路。"
+
+msgid "Country"
+msgstr "國家"
+
+msgid "DHCP"
+msgstr "DHCP"
+
+msgid "Default gateway"
+msgstr "預設閘道"
+
+msgid "Device Name"
+msgstr "裝置名稱"
+
+msgid "Device name update failed."
+msgstr "裝置名稱更新失敗。"
+
+msgid "Device name updated."
+msgstr "裝置名稱已更新。"
+
+msgid "Disabled [Ethernet is connected]"
+msgstr "已停用 [Ethernet 已連線]"
+
+msgid "Encryption"
+msgstr "加密"
+
+msgid "Erasing..."
+msgstr "正在清除..."
+
+msgid "Ethernet"
+msgstr "Ethernet"
+
+msgid "Firmware Version"
+msgstr "韌體版本"
+
+msgid "Flash Image..."
+msgstr "更新映像..."
+
+msgid "Flash a new firmware image"
+msgstr "更新新的韌體映像"
+
+msgid "Flashing..."
+msgstr "正在更新..."
+
+msgid "Gateway"
+msgstr "閘道"
+
+msgid "General Information"
+msgstr "一般資訊"
+
+msgid "IP Address"
+msgstr "IP 位址"
+
+msgid "It appears you are trying to flash an image that does not fit into memory. Please verify the image file."
+msgstr "您嘗試更新的映像似乎不適用此記憶體，請檢查映像檔。"
+
+msgid "JavaScript Disabled"
+msgstr "JavaScript 已停用"
+
+msgid "Join Network"
+msgstr "加入網路"
+
+msgid "Loading"
+msgstr "正在載入"
+
+msgid "MAC Address"
+msgstr "MAC 位址"
+
+msgid "Manufacturer"
+msgstr "製造商"
+
+msgid "Mode"
+msgstr "模式"
+
+msgid "Model"
+msgstr "型號"
+
+msgid "Network Name"
+msgstr "網路名稱"
+
+msgid "Network Overview"
+msgstr "網路概覽"
+
+msgid "Next"
+msgstr "下一個"
+
+msgid "No file selected."
+msgstr "No file selected."
+
+msgid "No information available"
+msgstr "無可用資訊"
+
+msgid "Noise"
+msgstr "雜訊"
+
+msgid "None"
+msgstr "無"
+
+msgid "Not associated"
+msgstr "不相關"
+
+msgid "Not connected"
+msgstr "未連線"
+
+msgid "OPEN"
+msgstr "開啟"
+
+msgid "Other Network..."
+msgstr "其他網路..."
+
+msgid "Overview"
+msgstr "概覽"
+
+msgid "Package libiwinfo required!"
+msgstr "需要套件 libiwinfo！"
+
+msgid "Password"
+msgstr "密碼"
+
+msgid "Please choose settings for your Wired network."
+msgstr "請選擇您的有線網路設定。"
+
+msgid "Please correct the following items:"
+msgstr "請更正下列項目："
+
+msgid "Please enter a name for your device."
+msgstr "請輸入您的裝置名稱。"
+
+msgid "Please enter a network name."
+msgstr "請輸入網路名稱。"
+
+msgid "Please enter the correct network password for $ssid."
+msgstr "請輸入 $ssid 的正確網路密碼。"
+
+msgid "Please enter the correct password for $ssid."
+msgstr "請輸入 $ssid 的正確密碼。"
+
+msgid "Please enter the password for $ssid."
+msgstr "請輸入 $ssid 的密碼。"
+
+msgid "Note: AllPlay devices are not compatible with $netType security mode. $netType is an outdated mode which is known to be vulnerable to attack.<br/><br/>In order to use an AllPlay device you will need to reconfigure your router to use WPA2-PSK security. Please refer to your router's user manual for more information."
+msgstr "注：AllPlay設備不能含有$netType安全模式兼容。 $netType是一種過時的模式，被稱為是容易受到攻擊。<br/><br/>為了使用AllPlay設備，您將需要重新配置你的路由器使用WPA2-PSK安全。請參閱您的路由器的用戶手冊，了解更多信息。"
+
+msgid "The wireless network '$ssid' is not compatible with AllPlay devices because '$ssid' uses $netType security mode.<br/><br/>In order to use an AllPlay device with '$ssid' you will need to reconfigure your router to use WPA2-PSK security mode. Please refer to your router's user manual for more information."
+msgstr "無線網絡'$ssid'是不符合AllPlay設備兼容，因為'$ssid'使用$netType的安全模式。<br/><br/>為了使用AllPlay裝置'$ssid'，則需要重新配置你的路由器使用WPA2-PSK的安全模式。請參閱您的路由器的用戶手冊，了解更多信息。"
+
+msgid "Please give your device a name to identify it on the network. Examples: Kitchen, Bedroom."
+msgstr "請為您的裝置取一個名稱，以供在網路上進行辨識，例如廚房、臥室等。"
+
+msgid "Please make sure that you have the Qualcomm<sup>&#174;</sup> AllPlay<sup>&#8482;</sup> Jukebox app installed on your mobile device to begin streaming music."
+msgstr "請確定您已在行動裝置上安裝 Qualcomm<sup>&#174;</sup> AllPlay<sup>&#8482;</sup> Jukebox 應用程式，以開始串流音樂。"
+
+msgid "Please select a compatible firmware image."
+msgstr "請選擇相容的韌體映像。"
+
+msgid "Please use a JavaScript-enabled browser to configure this product."
+msgstr "請使用具備 JavaScript 功能的瀏覽器來設定此產品。"
+
+msgid "Please wait..."
+msgstr "請稍候..."
+
+msgid "Primary DNS"
+msgstr "主要 DNS"
+
+msgid "Proceed"
+msgstr "繼續"
+
+msgid "Reboot"
+msgstr "重新開機"
+
+msgid "Rebooting..."
+msgstr "正在重新開機..."
+
+msgid "Reconnecting interface"
+msgstr "正在與介面重新連線"
+
+msgid "Refresh list"
+msgstr "刷新列表"
+
+msgid "SSID"
+msgstr "SSID"
+
+msgid "Secondary DNS"
+msgstr "次要 DNS"
+
+msgid "Security Mode"
+msgstr "安全模式"
+
+msgid "Select '.sam', '.samu' or '.same' firmware images only."
+msgstr "僅限選擇「.sam」、「.samu」或「.same」韌體映像。"
+
+msgid "Show Password"
+msgstr "顯示密碼"
+
+msgid "Signal"
+msgstr "訊號"
+
+msgid "Size"
+msgstr "大小"
+
+msgid "Static"
+msgstr "Static"
+
+msgid "Subnet"
+msgstr "子網路"
+
+msgid "Subnet mask"
+msgstr "子網路遮罩"
+
+msgid "System"
+msgstr "系統"
+
+msgid "The <em>libiwinfo-lua</em> package is not installed.<br/>You must install this component for your wireless configuration to work."
+msgstr "<em>libiwinfo-lua</em> 套件尚未安裝。<br/>您必須安裝此元件才能執行無線設定。"
+
+msgid "The device requires a manual restart."
+msgstr "此裝置需要以手動方式重新啟動。"
+
+msgid "The firmware is flashing now.<br /> DO NOT POWER OFF THE DEVICE!<br /> Wait a few minutes before you try to reconnect. It might be necessary to renew the address of your computer to connect to the device again, depending on your settings."
+msgstr "韌體正在更新。<br /> 請勿關閉裝置電源！<br /> 請稍候幾分鐘，再嘗試重新連線。視您的設定而定，可能需要更新電腦位址才能再次與裝置連線。"
+
+msgid "The flash image was uploaded. The checksum and file size are listed below. Compare them with the original file to ensure data integrity.<br /> Click \"Proceed\" below to start the flash procedure."
+msgstr "快閃映像已上傳。以下列出總和檢查碼與檔案大小的資訊。請使用原始檔案與這些資訊進行比對以確定資料完整性。<br /> 按一下下方的「繼續」以開始更新程序。"
+
+msgid "The network is slow and it is taking a long time to upload the new firmware file. Please try again, or connect to a faster network to perform the update."
+msgstr "The network is slow and it is taking a long time to upload the new firmware file. Please try again, or connect to a faster network to perform the update."
+
+msgid "The system is erasing the configuration partition now and will reboot itself when finished."
+msgstr "系統正在清除設定分割，完成後將會自行重新開機。"
+
+msgid "Tx-Power"
+msgstr "傳輸功率"
+
+msgid "Type"
+msgstr "類型"
+
+msgid "Upgrade Firmware"
+msgstr "升級韌體"
+
+msgid "Upload a compatible image here to replace the running firmware."
+msgstr "請在此上傳相容的映像，以取代使用中的韌體。"
+
+msgid "WEP"
+msgstr "WEP"
+
+msgid "WPA-PSK"
+msgstr "WPA-PSK"
+
+msgid "WPA2-PSK"
+msgstr "WPA2-PSK"
+
+msgid "Waiting for changes to be applied..."
+msgstr "正在等待套用變更..."
+
+msgid "Wi-Fi"
+msgstr "Wi-Fi"
+
+msgid "Wireless is disabled or not associated"
+msgstr "無線連線已停用，或不相關"
+
+msgid "Wireless is restarting..."
+msgstr "正在重新啟動無線連線..."
+
+msgid "You're connected!"
+msgstr "您已連線！"
+
+msgid "Your network connection may be lost shortly."
+msgstr "您的網路連線可能不久後即會中斷。"
+
+msgid "must be completed"
+msgstr "必填"
+
+msgid "AirPlay Password"
+msgstr "AirPlay 密碼"
+
+msgid "AirPlay password"
+msgstr "AirPlay 密碼"
+
+msgid "AirPlay password?"
+msgstr "AirPlay 密碼？"
+
+msgid "AirPlay password updated."
+msgstr "AirPlay 密碼已更新。"
+
+msgid "Choose your security options for the device."
+msgstr "請為裝置選擇安全性選項。"
+
+msgid "Confirm password"
+msgstr "確認密碼"
+
+msgid "Failed to update the AirPlay password."
+msgstr "無法更新 AirPlay 密碼。"
+
+msgid "Incorrect AirPlay password. Please try again."
+msgstr "AirPlay 密碼錯誤。 請再試一次。"
+
+msgid "New password"
+msgstr "新密碼"
+
+msgid "Old AirPlay password"
+msgstr "舊 AirPlay 密碼"
+
+msgid "Old password"
+msgstr "舊密碼"
+
+msgid "Please enter a new password."
+msgstr "請輸入新密碼。"
+
+msgid "Require password"
+msgstr "需要密碼"
+
+msgid "Security"
+msgstr "安全性"
+
+msgid "The AirPlay password does not match the confirm password."
+msgstr "AirPlay 密碼與確認密碼不相符。"
+
+msgid "The new AirPlay password does not match the confirm password."
+msgstr "新的 AirPlay 密碼與確認密碼不相符。"
+
+msgid "Yes"
+msgstr "是"
+
+msgid "No"
+msgstr "否"
+
+msgid "&#169; Qualcomm Connected Experiences | All rights reserved."
+msgstr "&#169; Qualcomm Connected Experiences | All rights reserved."

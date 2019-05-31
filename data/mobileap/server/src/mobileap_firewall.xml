@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2013 Qualcomm Technologies, Inc.  All Rights Reserved.
+     Qualcomm Technologies Proprietary and Confidential. -->
+<system xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="mobileap_firewall_cfg.xsd">
+    <DefaultProfile>1</DefaultProfile>
+    <MobileAPFirewallCfg>
+       <Profile>1</Profile>
+       <NetDev>0</NetDev>
+       <FirewallEnabled>0</FirewallEnabled>
+       <FirewallPktsAllowed>0</FirewallPktsAllowed>
+       <UPNPInboundPinhole>0</UPNPInboundPinhole>
+    </MobileAPFirewallCfg>
+</system>

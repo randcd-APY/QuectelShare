@@ -1,0 +1,14 @@
+[Unit]
+Description=Netmgrd Service
+#Wants=QCMAP_ConnectionManagerd.service
+#After=QCMAP_ConnectionManagerd.service
+
+[Service]
+Type=simple
+ExecStartPre=/bin/sleep 2
+ExecStart=/usr/bin/netmgrd
+ExecStop=/sbin/start-stop-daemon -K -n /usr/bin/netmgrd
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

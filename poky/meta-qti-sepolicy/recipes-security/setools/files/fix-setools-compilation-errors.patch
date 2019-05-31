@@ -1,0 +1,24 @@
+diff -ur a/libapol/src/Makefile.am b/libapol/src/Makefile.am
+--- a/libapol/src/Makefile.am	2017-12-19 15:12:29.511095816 -0800
++++ b/libapol/src/Makefile.am	2017-12-19 15:19:15.905133848 -0800
+@@ -9,7 +9,7 @@
+ 	-DAPOL_INSTALL_DIR='"${setoolsdir}"' \
+ 	-DLIBAPOL_POLICY_INSTALL_DIR='"@selinux_policy_dir@/policy"' \
+ 	-DLIBAPOL_DEFAULT_POLICY='"@selinux_default_policy@"'
+-AM_LDFLAGS = @DEBUGLDFLAGS@ @WARNLDFLAGS@ @PROFILELDFLAGS@
++AM_LDFLAGS = @DEBUGLDFLAGS@ @WARNLDFLAGS@ @PROFILELDFLAGS@ -fuse-ld=bfd
+ 
+ libapol_a_SOURCES = \
+ 	avrule-query.c \
+diff -ur a/libqpol/src/Makefile.am b/libqpol/src/Makefile.am
+--- a/libqpol/src/Makefile.am	2017-12-19 15:12:29.511095816 -0800
++++ b/libqpol/src/Makefile.am	2017-12-19 15:19:46.284687638 -0800
+@@ -12,7 +12,7 @@
+ # search in sepol_srcdir/include before system's sepol directory
+ AM_CFLAGS = @DEBUGCFLAGS@ @WARNCFLAGS@ @PROFILECFLAGS@ \
+ 	-I$(srcdir)/../include -I$(sepol_srcdir)/../include @SELINUX_CFLAGS@ -fpic
+-AM_LDFLAGS = @DEBUGLDFLAGS@ @WARNLDFLAGS@ @PROFILELDFLAGS@
++AM_LDFLAGS = @DEBUGLDFLAGS@ @WARNLDFLAGS@ @PROFILELDFLAGS@ -fuse-ld=bfd
+ 
+ libqpol_a_SOURCES = \
+ 	avrule_query.c \

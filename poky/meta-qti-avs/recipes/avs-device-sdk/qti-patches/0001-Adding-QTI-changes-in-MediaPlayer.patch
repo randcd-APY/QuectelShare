@@ -1,0 +1,1123 @@
+From 476592736c7d92c7c3195f1ac972ef78c25b09dd Mon Sep 17 00:00:00 2001
+From: Prashanth Vadde <pvadde@codeaurora.org>
+Date: Fri, 13 Jul 2018 00:54:58 +0530
+Subject: [PATCH 1/1] Adding QTI changes in MediaPlayer
+
+---
+ .../include/MediaPlayer/AttachmentReaderSource.h   |   2 +-
+ MediaPlayer/include/MediaPlayer/BaseStreamSource.h |   9 +-
+ MediaPlayer/include/MediaPlayer/MediaPlayer.h      |  42 +++
+ MediaPlayer/src/AttachmentReaderSource.cpp         |   3 +-
+ MediaPlayer/src/BaseStreamSource.cpp               |  92 +++++-
+ MediaPlayer/src/CMakeLists.txt                     |   2 +-
+ MediaPlayer/src/MediaPlayer.cpp                    | 361 ++++++++++++++++++---
+ 7 files changed, 450 insertions(+), 61 deletions(-)
+
+diff --git a/MediaPlayer/include/MediaPlayer/AttachmentReaderSource.h b/MediaPlayer/include/MediaPlayer/AttachmentReaderSource.h
+index d65baf7..373996b 100644
+--- a/MediaPlayer/include/MediaPlayer/AttachmentReaderSource.h
++++ b/MediaPlayer/include/MediaPlayer/AttachmentReaderSource.h
+@@ -41,7 +41,7 @@ public:
+     static std::unique_ptr<AttachmentReaderSource> create(
+         PipelineInterface* pipeline,
+         std::shared_ptr<avsCommon::avs::attachment::AttachmentReader> attachmentReader,
+-        const avsCommon::utils::AudioFormat* audioFormat);
++        const avsCommon::utils::AudioFormat* audioFormat,bool isUrlPlayer);
+
+     ~AttachmentReaderSource();
+
+diff --git a/MediaPlayer/include/MediaPlayer/BaseStreamSource.h b/MediaPlayer/include/MediaPlayer/BaseStreamSource.h
+index 4fa251b..734ceb7 100644
+--- a/MediaPlayer/include/MediaPlayer/BaseStreamSource.h
++++ b/MediaPlayer/include/MediaPlayer/BaseStreamSource.h
+@@ -43,7 +43,7 @@ public:
+     bool hasAdditionalData() override;
+     bool handleEndOfStream() override;
+     void preprocess() override;
+-
++    bool m_isUrlPlayer;
+ protected:
+     /**
+      * Initializes a source. Creates all the necessary pipeline elements such that audio output from the final
+@@ -132,6 +132,8 @@ private:
+      */
+     gboolean handleNeedData();
+
++    gboolean handleSourceFound(GstObject  *prop_object, GParamSpec *prop);
++
+     /**
+      * The callback to stop pushing data into the appsrc element.
+      *
+@@ -149,6 +151,8 @@ private:
+
+     static gboolean onSeekData(GstElement* pipeline, guint64 offset, gpointer source);
+
++    static void onSourceFound (GstObject  *gstobject, GstObject  *prop_object, GParamSpec *prop, gpointer userData);
++
+     /**
+      * The callback for reading data from this instance.
+      *
+@@ -189,6 +193,9 @@ private:
+
+     /// ID of idle callback to handle enough data.
+     guint m_enoughDataCallbackId;
++
++    guint m_sourceFoundCallbackId;
++
+ };
+
+ }  // namespace mediaPlayer
+diff --git a/MediaPlayer/include/MediaPlayer/MediaPlayer.h b/MediaPlayer/include/MediaPlayer/MediaPlayer.h
+index 8b143b1..67524d5 100644
+--- a/MediaPlayer/include/MediaPlayer/MediaPlayer.h
++++ b/MediaPlayer/include/MediaPlayer/MediaPlayer.h
+@@ -40,6 +40,17 @@
+ #include "MediaPlayer/OffsetManager.h"
+ #include "MediaPlayer/PipelineInterface.h"
+ #include "MediaPlayer/SourceInterface.h"
++#include <mm-audio/qahw_api/inc/qahw_api.h>
++#include <mm-audio/qahw_api/inc/qahw_defs.h>
++
++#define AUDIO_MODULE "audio.primary"
++#define AVS_AUDIO "/data/AVSAudio.conf"
++
++typedef enum {
++    QTIMEDIAPLAYER_SESSION_DEFAULT,
++    QTIMEDIAPLAYER_SESSION_DEEP_BUFFER,
++    QTIMEDIAPLAYER_SESSION_DIRECT_PCM,
++} qtiMediaPlayerSessionType;
+
+ namespace alexaClientSDK {
+ namespace mediaPlayer {
+@@ -123,6 +134,7 @@ public:
+     /// @}
+
+     void doShutdown() override;
++    static int getCurrentDeviceId();
+
+ private:
+     /**
+@@ -469,6 +481,14 @@ private:
+     bool queryIsSeekable(bool* isSeekable);
+
+     /**
++     * Used to obtain the current buffering status of the pipeline.
++     *
++     * @param[out] buffering Whether the pipeline is currently buffering.
++     * @return A boolean indicating whether the operation was successful.
++     */
++    bool queryBufferingStatus(bool* buffering);
++
++    /**
+      * Performs a seek to the @c seekPoint.
+      *
+      * @return A boolean indicating whether the seek operation was successful.
+@@ -496,6 +516,10 @@ private:
+      */
+     void saveOffsetBeforeTeardown();
+
++    bool setupUrlPipeline();
++    void readAudioConf();
++    void writeAudioConf();
++
+     /**
+      * Destructs the @c m_source with proper steps.
+      */
+@@ -566,6 +590,24 @@ private:
+
+     /// Stream offset before we teardown the pipeline
+     std::chrono::milliseconds m_offsetBeforeTeardown;
++
++   //QTI data structures.
++
++   /// Audio HAL module name
++   static gchar *m_moduleId;
++
++   /// Audio HAL module handle
++   static qahw_module_handle_t  *m_module;
++
++   /// qahwsink pointers
++   static GstElement ** m_speechSink;
++   static GstElement ** m_audioSink;
++   static bool m_deviceMute;
++   bool m_isLive;
++   double m_deviceVolume;
++   qtiMediaPlayerSessionType m_sessionType;
++   pthread_mutex_t m_lock;
++   static int m_currentDeviceId;
+ };
+
+ }  // namespace mediaPlayer
+diff --git a/MediaPlayer/src/AttachmentReaderSource.cpp b/MediaPlayer/src/AttachmentReaderSource.cpp
+index d08b2ec..b5a9b14 100644
+--- a/MediaPlayer/src/AttachmentReaderSource.cpp
++++ b/MediaPlayer/src/AttachmentReaderSource.cpp
+@@ -43,8 +43,9 @@ static const unsigned int CHUNK_SIZE(4096);
+ std::unique_ptr<AttachmentReaderSource> AttachmentReaderSource::create(
+     PipelineInterface* pipeline,
+     std::shared_ptr<avsCommon::avs::attachment::AttachmentReader> attachmentReader,
+-    const avsCommon::utils::AudioFormat* audioFormat) {
++    const avsCommon::utils::AudioFormat* audioFormat, bool isUrlPlayer) {
+     std::unique_ptr<AttachmentReaderSource> result(new AttachmentReaderSource(pipeline, attachmentReader));
++    result->m_isUrlPlayer = isUrlPlayer;
+     if (result->init(audioFormat)) {
+         return result;
+     }
+diff --git a/MediaPlayer/src/BaseStreamSource.cpp b/MediaPlayer/src/BaseStreamSource.cpp
+index bd31fcf..caaa360 100644
+--- a/MediaPlayer/src/BaseStreamSource.cpp
++++ b/MediaPlayer/src/BaseStreamSource.cpp
+@@ -40,6 +40,7 @@ static const std::string TAG("BaseStreamSource");
+ /// The interval to wait (in milliseconds) between successive attempts to read audio data when none is available.
+ static const guint RETRY_INTERVALS_MILLISECONDS[] = {0, 10, 10, 10, 20, 20, 50, 100};
+
++#if 0
+ /**
+  * Method that returns a string to be used in CAPS negotiation (generating right PADS between gstreamer elements based
+  * on audio data.) For raw PCM data without header audioFormat information needs to be passed explicitly for a
+@@ -82,9 +83,11 @@ static std::string getCapsString(const AudioFormat& audioFormat) {
+
+     return caps.str();
+ }
++#endif
+
+ BaseStreamSource::BaseStreamSource(PipelineInterface* pipeline, const std::string& className) :
+         SourceInterface(className),
++        m_isUrlPlayer{false},
+         m_pipeline{pipeline},
+         m_sourceId{0},
+         m_sourceRetryCount{0},
+@@ -94,7 +97,8 @@ BaseStreamSource::BaseStreamSource(PipelineInterface* pipeline, const std::strin
+         m_enoughDataHandlerId{0},
+         m_seekDataHandlerId{0},
+         m_needDataCallbackId{0},
+-        m_enoughDataCallbackId{0} {
++        m_enoughDataCallbackId{0},
++        m_sourceFoundCallbackId{0} {
+ }
+
+ BaseStreamSource::~BaseStreamSource() {
+@@ -126,13 +130,26 @@ BaseStreamSource::~BaseStreamSource() {
+ }
+
+ bool BaseStreamSource::init(const AudioFormat* audioFormat) {
++#if 0
++    if(m_isUrlPlayer){
++
++        ACSDK_DEBUG9(LX("Creating Playbin for URL"));
++        auto decoder = gst_element_factory_make ("playbin", NULL);
++        g_object_set (decoder, "uri", "appsrc://", NULL);
++        g_signal_connect (decoder, "deep-notify::source", G_CALLBACK(onSourceFound), this);
++        m_pipeline->setDecoder(decoder);
++    }
++    else {
++#endif
++    GstElement * decoder;
++    ACSDK_DEBUG9(LX("Creating decodebin for URL"));
+     auto appsrc = reinterpret_cast<GstAppSrc*>(gst_element_factory_make("appsrc", "src"));
+     if (!appsrc) {
+         ACSDK_ERROR(LX("initFailed").d("reason", "createSourceElementFailed"));
+         return false;
+     }
+     gst_app_src_set_stream_type(appsrc, GST_APP_STREAM_TYPE_SEEKABLE);
+-
++#if 0
+     GstCaps* audioCaps = nullptr;
+
+     if (audioFormat) {
+@@ -147,8 +164,11 @@ bool BaseStreamSource::init(const AudioFormat* audioFormat) {
+     } else {
+         ACSDK_DEBUG9(LX("initNoAudioFormat"));
+     }
+-
+-    auto decoder = gst_element_factory_make("decodebin", "decoder");
++#endif
++    if(m_isUrlPlayer)
++        decoder = gst_element_factory_make("parsebin", "avsparser");
++    else
++        decoder = gst_element_factory_make("decodebin", "decoder");
+     if (!decoder) {
+         ACSDK_ERROR(LX("initFailed").d("reason", "createDecoderElementFailed"));
+         return false;
+@@ -205,14 +225,14 @@ bool BaseStreamSource::init(const AudioFormat* audioFormat) {
+         ACSDK_ERROR(LX("initFailed").d("reason", "connectSeekDataSignalFailed"));
+         return false;
+     }
+-
++#if 0
+     if (audioCaps) {
+         gst_caps_unref(audioCaps);
+     }
+-
++#endif
+     m_pipeline->setAppSrc(appsrc);
+     m_pipeline->setDecoder(decoder);
+-
++    //}
+     return true;
+ }
+
+@@ -232,6 +252,7 @@ void BaseStreamSource::signalEndOfData() {
+                         .d("result", gst_flow_get_name(flowRet)));
+     }
+     ACSDK_DEBUG9(LX("gstAppSrcEndOfStreamSuccess"));
++    close();
+     clearOnReadDataHandler();
+ }
+
+@@ -289,6 +310,26 @@ void BaseStreamSource::clearOnReadDataHandler() {
+     m_sourceId = 0;
+ }
+
++void BaseStreamSource::onSourceFound (GstObject  *gstobject, GstObject  *prop_object, GParamSpec *prop, gpointer userData)
++{
++    ACSDK_DEBUG9(LX("onSourceFound"));
++    auto source = static_cast<BaseStreamSource*>(userData);
++    std::lock_guard<std::mutex> lock(source->m_callbackIdMutex);
++    if (source->m_sourceFoundCallbackId) {
++        ACSDK_DEBUG9(LX("m_sourceFoundHandlerId already set"));
++        return;
++    }
++    source->handleSourceFound(prop_object, prop);
++#if 0
++    std::function<gboolean()> callback = [source, prop_object, prop]() {
++        source->handleSourceFound(prop_object, prop);
++        return false;
++    };
++
++   source->m_sourceFoundCallbackId = source->m_pipeline->queueCallback(&callback);
++#endif
++
++}
+ void BaseStreamSource::onNeedData(GstElement* pipeline, guint size, gpointer pointer) {
+     ACSDK_DEBUG9(LX("onNeedDataCalled").d("size", size));
+     auto source = static_cast<BaseStreamSource*>(pointer);
+@@ -327,6 +368,43 @@ gboolean BaseStreamSource::handleEnoughData() {
+     return false;
+ }
+
++gboolean BaseStreamSource::handleSourceFound(GstObject  *prop_object, GParamSpec *prop) {
++    ACSDK_DEBUG9(LX("handleSourceFoundCalled"));
++    //std::lock_guard<std::mutex> lock(m_callbackIdMutex);
++    GstAppSrc * appsrc;
++    g_object_get (prop_object, prop->name, &appsrc, NULL);
++    m_sourceFoundCallbackId = 0;
++    gst_app_src_set_stream_type(appsrc, GST_APP_STREAM_TYPE_SEEKABLE);
++    m_needDataHandlerId = g_signal_connect(appsrc, "need-data", G_CALLBACK(onNeedData), this);
++    if (0 == m_needDataHandlerId) {
++        ACSDK_ERROR(LX("initFailed").d("reason", "connectNeedDataSignalFailed"));
++        return false;
++    }
++    ACSDK_DEBUG9(LX("handleSourceFoundCalled 1"));
++    /*
++     * When the appsrc had enough data, it emits the signal enough-data. Connect the enough-data signal to the
++     * onEnoughData callback which handles stopping the data push to the appsrc element.
++     */
++    m_enoughDataHandlerId = g_signal_connect(appsrc, "enough-data", G_CALLBACK(onEnoughData), this);
++    if (0 == m_enoughDataHandlerId) {
++       ACSDK_ERROR(LX("initFailed").d("reason", "connectEnoughDataSignalFailed"));
++        return false;
++   }
++   ACSDK_DEBUG9(LX("handleSourceFoundCalled 2"));
++    /*
++    * When the appsrc needs to seek to a position, it emits the signal seek-data. Connect the seek-data signal to the
++    * onSeekData callback which handles seeking to the appropriate position.
++    */
++    m_seekDataHandlerId = g_signal_connect(appsrc, "seek-data", G_CALLBACK(onSeekData), this);
++   if (0 == m_seekDataHandlerId) {
++       ACSDK_ERROR(LX("initFailed").d("reason", "connectSeekDataSignalFailed"));
++       return false;
++   }
++   ACSDK_DEBUG9(LX("handleSourceFoundCalled 3"));
++   m_pipeline->setAppSrc(appsrc);
++   return true;
++}
++
+ gboolean BaseStreamSource::onSeekData(GstElement* pipeline, guint64 offset, gpointer pointer) {
+     return static_cast<BaseStreamSource*>(pointer)->handleSeekData(offset);
+ }
+diff --git a/MediaPlayer/src/CMakeLists.txt b/MediaPlayer/src/CMakeLists.txt
+index c8b92d5..327894d 100644
+--- a/MediaPlayer/src/CMakeLists.txt
++++ b/MediaPlayer/src/CMakeLists.txt
+@@ -13,7 +13,7 @@ target_include_directories(MediaPlayer PUBLIC
+     "${GST_INCLUDE_DIRS}"
+     "${PlaylistParser_SOURCE_DIR}/include")
+
+-target_link_libraries(MediaPlayer "${GST_LDFLAGS}" AVSCommon PlaylistParser)
++target_link_libraries(MediaPlayer "${GST_LDFLAGS}" AVSCommon PlaylistParser qahw)
+
+ # install target
+ asdk_install()
+diff --git a/MediaPlayer/src/MediaPlayer.cpp b/MediaPlayer/src/MediaPlayer.cpp
+index 84d97ca..61462f2 100644
+--- a/MediaPlayer/src/MediaPlayer.cpp
++++ b/MediaPlayer/src/MediaPlayer.cpp
+@@ -31,6 +31,8 @@
+
+ #include "MediaPlayer/MediaPlayer.h"
+
++#define DEFAULT_VOLUME 3.0
++#define DEFAULT_DEVICE 2
+ namespace alexaClientSDK {
+ namespace mediaPlayer {
+
+@@ -63,6 +65,11 @@ static const MediaPlayer::SourceId ERROR_SOURCE_ID = MediaPlayer::ERROR;
+
+ /// A value to indicate an unqueued callback. g_idle_add() only returns ids >= 0.
+ static const guint UNQUEUED_CALLBACK = guint(0);
++gchar * MediaPlayer::m_moduleId = NULL;
++qahw_module_handle_t * MediaPlayer::m_module = NULL;
++//double MediaPlayer::m_deviceVolume = DEFAULT_VOLUME;
++//pthread_mutex_t MediaPlayer::m_lock = PTHREAD_MUTEX_INITIALIZER;
++int MediaPlayer::m_currentDeviceId = DEFAULT_DEVICE;
+
+ /**
+  * Create a LogEntry using this file's TAG and the specified event string.
+@@ -78,7 +85,18 @@ static const unsigned int TIMEOUT_ZERO_NANOSECONDS(0);
+ static const int8_t GST_SET_VOLUME_MIN = 0;
+
+ /// GStreamer Volume Element Maximum.
+-static const int8_t GST_SET_VOLUME_MAX = 1;
++static const int8_t GST_SET_VOLUME_MAX = 10;
++///Device Volume table range 0 to 100
++double volumeTable[] = { 0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8,           // Level 0 to 9
++        2.0, 2.1, 2.2, 2.2, 2.3, 2.4, 2.5, 2.6, 2.6, 2.7,        // Level 10 to 19
++        2.8, 2.9, 3.0, 3.0, 3.1, 3.2, 3.3, 3.4, 3.4, 3.5,        // Level 20 to 29
++        3.6, 3.7, 3.8, 3.8, 3.9, 4.0, 4.1, 4.2, 4.2, 4.3,        // Level 30 to 39
++        4.4, 4.5, 4.6, 4.6, 4.7, 4.8, 4.9, 5.0, 5.0, 5.1,        // Level 40 to 49
++        5.2, 5.3, 5.4, 5.4, 5.5, 5.6, 5.7, 5.7, 5.8, 5.9,        // Level 50 to 59
++        6.0, 6.0, 6.1, 6.2, 6.3, 6.4, 6.4, 6.5, 6.6, 6.7,        // Level 60 to 69
++        6.7, 6.8, 6.9, 7.0, 7.0, 7.1, 7.2, 7.3, 7.3, 7.4,        // Level 70 to 79
++        7.5, 7.6, 7.7, 7.7, 7.8, 7.9, 8.0, 8.0, 8.1, 8.2,        // Level 80 to 89
++        8.3, 8.3, 8.4, 8.5, 8.6, 8.6, 8.7, 8.8, 8.9, 8.9, 9.0 }; // Level 90 to 100
+
+ /// GStreamer Volume Adjust Minimum.
+ static const int8_t GST_ADJUST_VOLUME_MIN = -1;
+@@ -147,7 +165,16 @@ std::shared_ptr<MediaPlayer> MediaPlayer::create(
+     SpeakerInterface::Type type,
+     std::string name) {
+     ACSDK_DEBUG9(LX("createCalled"));
++    if (m_module == NULL) {
++        m_moduleId = g_strdup(AUDIO_MODULE);
++        m_module = qahw_load_module(m_moduleId);
++        if (!m_module) {
++            return nullptr;
++        }
++        ACSDK_ERROR(LX("MediaPlayer::create() - qahw module LOADED!"));
++    }
+     std::shared_ptr<MediaPlayer> mediaPlayer(new MediaPlayer(contentFetcherFactory, type, name));
++    mediaPlayer->readAudioConf();
+     if (mediaPlayer->init()) {
+         return mediaPlayer;
+     } else {
+@@ -157,13 +184,22 @@ std::shared_ptr<MediaPlayer> MediaPlayer::create(
+
+ MediaPlayer::~MediaPlayer() {
+     ACSDK_DEBUG9(LX("~MediaPlayerCalled"));
++
+     cleanUpSource();
++    if (m_module != NULL) {
++        qahw_unload_module(m_module);
++        m_module=NULL;
++    }
++
+     g_main_loop_quit(m_mainLoop);
+     if (m_mainLoopThread.joinable()) {
+         m_mainLoopThread.join();
+     }
++
++    pthread_mutex_lock(&m_lock);
+     gst_object_unref(m_pipeline.pipeline);
+     resetPipeline();
++    pthread_mutex_unlock(&m_lock);
+
+     g_source_remove(m_busWatchId);
+     g_main_loop_unref(m_mainLoop);
+@@ -201,6 +237,7 @@ MediaPlayer::SourceId MediaPlayer::setSource(std::shared_ptr<std::istream> strea
+
+ MediaPlayer::SourceId MediaPlayer::setSource(const std::string& url, std::chrono::milliseconds offset) {
+     ACSDK_DEBUG9(LX("setSourceForUrlCalled").sensitive("url", url));
++    std::cout<<"URL "<<url<<std::endl ;
+     std::promise<MediaPlayer::SourceId> promise;
+     auto future = promise.get_future();
+     std::function<gboolean()> callback = [this, url, offset, &promise]() {
+@@ -340,6 +377,7 @@ void MediaPlayer::handleSetVolumeInternal(gdouble gstVolume) {
+
+ void MediaPlayer::handleSetVolume(std::promise<bool>* promise, int8_t volume) {
+     ACSDK_DEBUG9(LX("handleSetVolumeCalled"));
++#if 0
+     auto toGstVolume =
+         Normalizer::create(AVS_SET_VOLUME_MIN, AVS_SET_VOLUME_MAX, GST_SET_VOLUME_MIN, GST_SET_VOLUME_MAX);
+     if (!toGstVolume) {
+@@ -362,6 +400,17 @@ void MediaPlayer::handleSetVolume(std::promise<bool>* promise, int8_t volume) {
+     }
+
+     handleSetVolumeInternal(gstVolume);
++#endif
++    m_deviceVolume = volumeTable[volume];
++    writeAudioConf();
++
++    pthread_mutex_lock(&m_lock);
++    if(m_pipeline.audioSink) {
++        ACSDK_ERROR(LX("MediaPlayer::setDeviceVolume - ").d("Platform Volume ", m_deviceVolume));
++        g_object_set(G_OBJECT(m_pipeline.audioSink), "volume", m_deviceVolume, NULL);
++    }
++    pthread_mutex_unlock(&m_lock);
++
+     promise->set_value(true);
+ }
+
+@@ -389,16 +438,17 @@ void MediaPlayer::handleAdjustVolume(std::promise<bool>* promise, int8_t delta)
+         promise->set_value(false);
+         return;
+     }
+-
++#if 0
+     if (!m_pipeline.volume) {
+         ACSDK_ERROR(LX("adjustVolumeFailed").d("reason", "volumeElementNull"));
+         promise->set_value(false);
+         return;
+     }
+-
+-    gdouble gstVolume;
++#endif
++    gdouble gstVolume = m_deviceVolume;
++#if 0
+     g_object_get(m_pipeline.volume, "volume", &gstVolume, NULL);
+-
++#endif
+     gdouble gstDelta;
+     if (!toGstDeltaVolume->normalize(delta, &gstDelta)) {
+         ACSDK_ERROR(LX("adjustVolumeFailed").d("reason", "normalizeVolumeFailed"));
+@@ -411,8 +461,18 @@ void MediaPlayer::handleAdjustVolume(std::promise<bool>* promise, int8_t delta)
+     // If adjustment exceeds bounds, cap at max/min.
+     gstVolume = std::min(gstVolume, static_cast<gdouble>(GST_SET_VOLUME_MAX));
+     gstVolume = std::max(gstVolume, static_cast<gdouble>(GST_SET_VOLUME_MIN));
+-
++#if 0
+     handleSetVolumeInternal(gstVolume);
++#endif
++    m_deviceVolume = gstVolume;
++    writeAudioConf();
++
++    pthread_mutex_lock(&m_lock);
++    if(m_pipeline.audioSink) {
++        ACSDK_ERROR(LX("MediaPlayer::handleAdjustVolume - ").d("Platform Volume ", m_deviceVolume));
++        g_object_set(G_OBJECT(m_pipeline.audioSink), "volume", m_deviceVolume, NULL);
++    }
++    pthread_mutex_unlock(&m_lock);
+     promise->set_value(true);
+ }
+
+@@ -432,15 +492,25 @@ bool MediaPlayer::setMute(bool mute) {
+
+ void MediaPlayer::handleSetMute(std::promise<bool>* promise, bool mute) {
+     ACSDK_DEBUG9(LX("handleSetMuteCalled"));
++#if 0
+     if (!m_pipeline.volume) {
+         ACSDK_ERROR(LX("setMuteFailed").d("reason", "volumeElementNull"));
+         promise->set_value(false);
+         return;
+     }
+
+-    // A fix for GStreamer crashing for zero volume on PCM data
+-    g_object_set(m_pipeline.volume, "volume", mute || m_lastVolume == 0 ? VOLUME_ZERO : m_lastVolume, NULL);
++    g_object_set(m_pipeline.volume, "mute", static_cast<gboolean>(mute), NULL);
++#endif
++    pthread_mutex_lock(&m_lock);
++
+     m_isMuted = mute;
++
++    if(m_pipeline.audioSink) {
++        g_object_set(G_OBJECT(m_pipeline.audioSink), "mute", m_isMuted, NULL);
++        ACSDK_ERROR(LX("MediaPlayer::setDeviceMute"));
++    }
++
++    pthread_mutex_unlock(&m_lock);
+     promise->set_value(true);
+ }
+
+@@ -466,11 +536,14 @@ void MediaPlayer::handleGetSpeakerSettings(
+         ACSDK_ERROR(LX("getSpeakerSettingsFailed").d("reason", "nullSettings"));
+         promise->set_value(false);
+         return;
+-    } else if (!m_pipeline.volume) {
++    }
++#if 0
++    else if (!m_pipeline.volume) {
+         ACSDK_ERROR(LX("getSpeakerSettingsFailed").d("reason", "volumeElementNull"));
+         promise->set_value(false);
+         return;
+     }
++#endif
+
+     auto toAVSVolume =
+         Normalizer::create(GST_SET_VOLUME_MIN, GST_SET_VOLUME_MAX, AVS_SET_VOLUME_MIN, AVS_SET_VOLUME_MAX);
+@@ -481,9 +554,9 @@ void MediaPlayer::handleGetSpeakerSettings(
+     }
+
+     gdouble avsVolume;
+-    gdouble gstVolume;
+-    gboolean mute;
+-    g_object_get(m_pipeline.volume, "volume", &gstVolume, "mute", &mute, NULL);
++    gdouble gstVolume=m_deviceVolume;
++    gboolean mute=m_isMuted;
++    //g_object_get(m_pipeline.volume, "volume", &gstVolume, "mute", &mute, NULL);
+
+     /// A part of GStreamer crash fix for zero volume on PCM data
+     mute = m_isMuted;
+@@ -547,7 +620,19 @@ MediaPlayer::MediaPlayer(
+         m_playPending{false},
+         m_pausePending{false},
+         m_resumePending{false},
+-        m_pauseImmediately{false} {
++        m_pauseImmediately{false},
++        m_isLive {false},
++        m_deviceVolume{DEFAULT_VOLUME},
++        m_sessionType{qtiMediaPlayerSessionType::QTIMEDIAPLAYER_SESSION_DEFAULT}{
++
++        if (name.compare("SpeakMediaPlayer") == 0)
++            m_sessionType = qtiMediaPlayerSessionType::QTIMEDIAPLAYER_SESSION_DIRECT_PCM;
++        if (name.compare("AudioMediaPlayer") == 0) {
++            m_sessionType = qtiMediaPlayerSessionType::QTIMEDIAPLAYER_SESSION_DEFAULT;
++            m_isLive = true;
++        }
++        if ((name.compare("AlertsMediaPlayer") == 0) || (name.compare("NotificationsMediaPlayer") == 0))
++            m_sessionType = qtiMediaPlayerSessionType::QTIMEDIAPLAYER_SESSION_DEEP_BUFFER;
+ }
+
+ bool MediaPlayer::init() {
+@@ -562,42 +647,83 @@ bool MediaPlayer::init() {
+     };
+
+     m_mainLoopThread = std::thread(g_main_loop_run, m_mainLoop);
+-
++    m_lock = PTHREAD_MUTEX_INITIALIZER;
++#if 0
+     if (!setupPipeline()) {
+         ACSDK_ERROR(LX("initPlayerFailed").d("reason", "setupPipelineFailed"));
+         return false;
+     }
++#endif
++   if ( m_sessionType == qtiMediaPlayerSessionType::QTIMEDIAPLAYER_SESSION_DEFAULT) {
++        if (!setupUrlPipeline()) {
++            ACSDK_ERROR(LX("initPlayerFailed").d("reason", "setupPipelineFailed"));
++            return false;
++        }
++
++   }
++   else {
++         if (!setupPipeline()) {
++            ACSDK_ERROR(LX("initPlayerFailed").d("reason", "setupPipelineFailed"));
++            return false;
++        }
++
++   }
+
+     return true;
+ }
+
+-bool MediaPlayer::setupPipeline() {
+-    m_pipeline.decodedQueue = gst_element_factory_make("queue", "decodedQueue");
+-    // Do not send signals or messages. Let the decoder buffer messages dictate application logic.
+-    g_object_set(m_pipeline.decodedQueue, "silent", TRUE, NULL);
+-    if (!m_pipeline.decodedQueue) {
+-        ACSDK_ERROR(LX("setupPipelineFailed").d("reason", "createQueueElementFailed"));
++bool MediaPlayer::setupUrlPipeline() {
++    pthread_mutex_lock(&m_lock);
++    ACSDK_DEBUG9(LX("Creating Playbin for URL"));
++    m_pipeline.pipeline = gst_pipeline_new("audio-pipeline");
++
++    m_pipeline.audioSink = gst_element_factory_make("qahwsink", "audio_sink");
++    if (!m_pipeline.audioSink) {
++        ACSDK_ERROR(LX("setupPipelineFailed").d("reason", "createAudioSinkElementFailed"));
++        pthread_mutex_unlock(&m_lock);
+         return false;
+     }
++    g_object_set(G_OBJECT(m_pipeline.audioSink),
++                "module-handle", m_module,
++                "volume", m_deviceVolume,
++                "mute", m_isMuted,"sync",false,
++                "output-device", m_currentDeviceId, NULL);
++    pthread_mutex_unlock(&m_lock);
++    if(!m_pipeline.pipeline)
++        ACSDK_ERROR(LX("Playbin Null"));
++    gst_bin_add(
++        GST_BIN(m_pipeline.pipeline), m_pipeline.audioSink);
++    GstBus* bus = gst_pipeline_get_bus(GST_PIPELINE(m_pipeline.pipeline));
++    m_busWatchId = gst_bus_add_watch(bus, &MediaPlayer::onBusMessage, this);
++    gst_object_unref(bus);
++    return true;
++}
++
+
++bool MediaPlayer::setupPipeline() {
++    ACSDK_DEBUG9(LX("setupPipelineCalled"));
+     m_pipeline.converter = gst_element_factory_make("audioconvert", "converter");
+     if (!m_pipeline.converter) {
+         ACSDK_ERROR(LX("setupPipelineFailed").d("reason", "createConverterElementFailed"));
+         return false;
+     }
+-
++#if 0
+     m_pipeline.volume = gst_element_factory_make("volume", "volume");
+     if (!m_pipeline.volume) {
+         ACSDK_ERROR(LX("setupPipelineFailed").d("reason", "createVolumeElementFailed"));
+         return false;
+     }
++#endif
++    ACSDK_DEBUG9(LX("setupPipeline: Creating sink element"));
++    pthread_mutex_lock(&m_lock);
++    m_pipeline.audioSink = gst_element_factory_make("qahwsink", "audio_sink");
+
+-    m_pipeline.audioSink = gst_element_factory_make("autoaudiosink", "audio_sink");
+     if (!m_pipeline.audioSink) {
+         ACSDK_ERROR(LX("setupPipelineFailed").d("reason", "createAudioSinkElementFailed"));
++        pthread_mutex_unlock(&m_lock);
+         return false;
+     }
+-
++#if 0
+     GstCaps* caps = gst_caps_new_empty_simple("audio/x-raw");
+     if (!caps) {
+         ACSDK_ERROR(LX("setupPipelineFailed").d("reason", "createCapabilityStructFailed"));
+@@ -610,7 +736,8 @@ bool MediaPlayer::setupPipeline() {
+     // Check to see if user has specified an output configuration
+     auto configurationRoot =
+         ConfigurationNode::getRoot()[MEDIAPLAYER_CONFIGURATION_ROOT_KEY][MEDIAPLAYER_OUTPUT_CONVERSION_ROOT_KEY];
+-    if (configurationRoot) {
++
++        if (configurationRoot) {
+         std::string value;
+
+         // Search for output configuration keys
+@@ -656,7 +783,7 @@ bool MediaPlayer::setupPipeline() {
+
+     // clean up caps object
+     gst_caps_unref(caps);
+-
++#endif
+     /*
+      * Certain music sources, specifically Audible, were unable to play properly. With Audible, frames were getting
+      * dropped and the audio would play very choppily. For example, in a 10 second chunk, seconds 1-5 would play
+@@ -666,6 +793,14 @@ bool MediaPlayer::setupPipeline() {
+      */
+     g_object_set(m_pipeline.audioSink, "sync", FALSE, NULL);
+
++    g_object_set(G_OBJECT(m_pipeline.audioSink),
++                 "module-handle", m_module,
++                 "volume", m_deviceVolume,
++                 "mute", m_isMuted,
++                 "output-device", m_currentDeviceId,
++                 "session-type", m_sessionType, NULL);
++    pthread_mutex_unlock(&m_lock);
++    ACSDK_DEBUG9(LX("setupPipeline: Creating pipeline element"));
+     m_pipeline.pipeline = gst_pipeline_new("audio-pipeline");
+     if (!m_pipeline.pipeline) {
+         ACSDK_ERROR(LX("setupPipelineFailed").d("reason", "createPipelineElementFailed"));
+@@ -676,15 +811,15 @@ bool MediaPlayer::setupPipeline() {
+     m_busWatchId = gst_bus_add_watch(bus, &MediaPlayer::onBusMessage, this);
+     gst_object_unref(bus);
+
+-    // Link only the queue, converter, volume, and sink here. Src will be linked in respective source files.
++    // Link only the volume, converter, and sink here. Src will be linked in respective source files.
+     gst_bin_add_many(
+-        GST_BIN(m_pipeline.pipeline),
+-        m_pipeline.decodedQueue,
+-        m_pipeline.converter,
+-        m_pipeline.volume,
+-        m_pipeline.audioSink,
+-        nullptr);
++        GST_BIN(m_pipeline.pipeline), m_pipeline.converter, m_pipeline.audioSink, nullptr);
+
++    if (!gst_element_link_many(m_pipeline.converter, m_pipeline.audioSink, nullptr)) {
++        ACSDK_ERROR(LX("setupPipelineFailed").d("reason", "createVolumeToConverterToSinkLinkFailed"));
++        return false;
++    }
++#if 0
+     if (m_pipeline.resample != nullptr && m_pipeline.caps != nullptr) {
+         // Set up pipeline with the resampler
+         gst_bin_add_many(GST_BIN(m_pipeline.pipeline), m_pipeline.resample, m_pipeline.caps, nullptr);
+@@ -712,6 +847,7 @@ bool MediaPlayer::setupPipeline() {
+             return false;
+         }
+     }
++#endif
+
+     return true;
+ }
+@@ -724,6 +860,8 @@ void MediaPlayer::tearDownTransientPipelineElements() {
+     }
+     m_currentId = ERROR_SOURCE_ID;
+     cleanUpSource();
++
++    ACSDK_DEBUG9(LX("tearDownTransientPipelineElements 2"));
+     m_offsetManager.clear();
+     m_playPending = false;
+     m_pausePending = false;
+@@ -748,6 +886,23 @@ void MediaPlayer::resetPipeline() {
+     m_pipeline.audioSink = nullptr;
+ }
+
++bool MediaPlayer::queryBufferingStatus(bool* buffering) {
++    ACSDK_DEBUG9(LX("queryBufferingStatus"));
++    GstQuery* query = gst_query_new_buffering(GST_FORMAT_TIME);
++    if (gst_element_query(m_pipeline.pipeline, query)) {
++        gboolean busy;
++        gst_query_parse_buffering_percent(query, &busy, nullptr);
++        *buffering = busy;
++        ACSDK_INFO(LX("queryBufferingStatus").d("buffering", *buffering));
++        gst_query_unref(query);
++        return true;
++    } else {
++        ACSDK_ERROR(LX("queryBufferingStatusFailed").d("reason", "bufferQueryFailed"));
++        gst_query_unref(query);
++        return false;
++    }
++}
++
+ bool MediaPlayer::queryIsSeekable(bool* isSeekable) {
+     ACSDK_DEBUG9(LX("queryIsSeekable"));
+     gboolean seekable;
+@@ -780,12 +935,13 @@ bool MediaPlayer::seek() {
+                    GST_FORMAT_TIME,  // ns
+                    static_cast<GstSeekFlags>(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_KEY_UNIT),
+                    std::chrono::duration_cast<std::chrono::nanoseconds>(m_offsetManager.getSeekPoint()).count())) {
++                  //0)) {
+         ACSDK_ERROR(LX("seekFailed").d("reason", "gstElementSeekSimpleFailed"));
+         seekSuccessful = false;
+     } else {
+         ACSDK_DEBUG(LX("seekSuccessful").d("offsetInMs", m_offsetManager.getSeekPoint().count()));
+     }
+-
++    std::cout<<"Seek point = "<<std::chrono::duration_cast<std::chrono::nanoseconds>(m_offsetManager.getSeekPoint()).count()<<std::endl;
+     m_offsetManager.clear();
+     return seekSuccessful;
+ }
+@@ -840,7 +996,12 @@ void MediaPlayer::onPadAdded(GstElement* decoder, GstPad* pad, gpointer pointer)
+
+ void MediaPlayer::handlePadAdded(std::promise<void>* promise, GstElement* decoder, GstPad* pad) {
+     ACSDK_DEBUG9(LX("handlePadAddedSignalCalled"));
+-    gst_element_link(decoder, m_pipeline.decodedQueue);
++    GstElement* converter = m_pipeline.converter;
++    GstElement * sink = m_pipeline.audioSink;
++    if(m_isLive)
++        gst_element_link(decoder, sink);
++    else
++        gst_element_link(decoder, converter);
+     promise->set_value();
+ }
+
+@@ -850,20 +1011,25 @@ gboolean MediaPlayer::onBusMessage(GstBus* bus, GstMessage* message, gpointer me
+
+ void MediaPlayer::saveOffsetBeforeTeardown() {
+     gint64 position = -1;
++    if(m_pipeline.pipeline) {
+     if (!gst_element_query_position(m_pipeline.pipeline, GST_FORMAT_TIME, &position)) {
+         // Query Failed.
+         ACSDK_ERROR(LX("saveOffsetBeforeTeardown - gst_element_query_position failed"));
+         m_offsetBeforeTeardown = MEDIA_PLAYER_INVALID_OFFSET;
+         return;
+     }
++    std::cout<<"gst_element_query_position = "<<position<<std::endl;
+     std::chrono::milliseconds startStreamingPoint = std::chrono::milliseconds::zero();
+     if (m_urlConverter) {
+         startStreamingPoint = m_urlConverter->getStartStreamingPoint();
+     }
++    std::cout<<"startStreamingPoint = "<<startStreamingPoint.count()<<std::endl;
+     m_offsetBeforeTeardown =
+         (startStreamingPoint +
+          std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::nanoseconds(position)));
+     ACSDK_DEBUG(LX("saveOffsetBeforeTeardown").d("offset", m_offsetBeforeTeardown.count()));
++    std::cout<<"m_offsetBeforeTeardown = "<<m_offsetBeforeTeardown.count()<<std::endl;
++    }
+ }
+
+ gboolean MediaPlayer::handleBusMessage(GstMessage* message) {
+@@ -888,6 +1054,7 @@ gboolean MediaPlayer::handleBusMessage(GstMessage* message) {
+
+                 // Continue playback if there is additional data.
+                 if (m_source->hasAdditionalData()) {
++                    pthread_mutex_lock(&m_lock);
+                     if (GST_STATE_CHANGE_FAILURE == gst_element_set_state(m_pipeline.pipeline, GST_STATE_NULL)) {
+                         const std::string errorMessage{"reason=setPipelineToNullFailed"};
+                         ACSDK_ERROR(LX("continuingPlaybackFailed").m(errorMessage));
+@@ -901,6 +1068,7 @@ gboolean MediaPlayer::handleBusMessage(GstMessage* message) {
+                         sendPlaybackError(ErrorType::MEDIA_ERROR_INTERNAL_DEVICE_ERROR, errorMessage);
+                         break;
+                     }
++                    pthread_mutex_unlock(&m_lock);
+                 } else {
+                     sendPlaybackFinished();
+                 }
+@@ -989,6 +1157,7 @@ gboolean MediaPlayer::handleBusMessage(GstMessage* message) {
+             ACSDK_DEBUG9(LX("handleBusMessage").d("message", "GST_MESSAGE_BUFFERING").d("percent", bufferPercent));
+
+             if (bufferPercent < 100) {
++#if 0
+                 if (GST_STATE_CHANGE_FAILURE == gst_element_set_state(m_pipeline.pipeline, GST_STATE_PAUSED)) {
+                     std::string error = "pausingOnBufferUnderrunFailed";
+                     ACSDK_ERROR(LX(error));
+@@ -999,11 +1168,14 @@ gboolean MediaPlayer::handleBusMessage(GstMessage* message) {
+                 if (m_playbackStartedSent) {
+                     m_isBufferUnderrun = true;
+                 }
++#endif
+             } else {
++#if 0
+                 if (m_pauseImmediately) {
+                     // To avoid starting to play if a pause() was called immediately after calling a play()
+                     break;
+                 }
++#endif
+                 bool isSeekable = false;
+                 if (queryIsSeekable(&isSeekable)) {
+                     m_offsetManager.setIsSeekable(isSeekable);
+@@ -1015,11 +1187,14 @@ gboolean MediaPlayer::handleBusMessage(GstMessage* message) {
+
+                 if (m_offsetManager.isSeekable() && m_offsetManager.isSeekPointSet()) {
+                     seek();
+-                } else if (GST_STATE_CHANGE_FAILURE == gst_element_set_state(m_pipeline.pipeline, GST_STATE_PLAYING)) {
++                }
++#if 0
++                else if (GST_STATE_CHANGE_FAILURE == gst_element_set_state(m_pipeline.pipeline, GST_STATE_PLAYING)) {
+                     std::string error = "resumingOnBufferRefilledFailed";
+                     ACSDK_ERROR(LX(error));
+                     sendPlaybackError(ErrorType::MEDIA_ERROR_INTERNAL_DEVICE_ERROR, error);
+                 }
++#endif
+             }
+             break;
+         }
+@@ -1062,8 +1237,7 @@ void MediaPlayer::handleSetAttachmentReaderSource(
+     ACSDK_DEBUG(LX("handleSetSourceCalled"));
+
+     tearDownTransientPipelineElements();
+-
+-    std::shared_ptr<SourceInterface> source = AttachmentReaderSource::create(this, reader, audioFormat);
++    std::shared_ptr<SourceInterface> source = AttachmentReaderSource::create(this, reader, audioFormat, m_isLive);
+
+     if (!source) {
+         ACSDK_ERROR(LX("handleSetAttachmentReaderSourceFailed").d("reason", "sourceIsNullptr"));
+@@ -1080,7 +1254,6 @@ void MediaPlayer::handleSetAttachmentReaderSource(
+         promise->set_value(ERROR_SOURCE_ID);
+         return;
+     }
+-
+     m_source = source;
+     m_currentId = ++g_id;
+     m_offsetManager.setIsSeekable(true);
+@@ -1094,7 +1267,6 @@ void MediaPlayer::handleSetIStreamSource(
+     ACSDK_DEBUG(LX("handleSetSourceCalled"));
+
+     tearDownTransientPipelineElements();
+-
+     std::shared_ptr<SourceInterface> source = IStreamSource::create(this, stream, repeat);
+
+     if (!source) {
+@@ -1180,10 +1352,26 @@ void MediaPlayer::handlePlay(SourceId id, std::promise<bool>* promise) {
+     m_playPending = true;
+     m_pauseImmediately = false;
+     promise->set_value(true);
+-
++#if 0
++    gboolean attemptBuffering;
++    g_object_get(m_pipeline.decoder, "use-buffering", &attemptBuffering, NULL);
++    ACSDK_DEBUG(LX("handlePlay").d("attemptBuffering", attemptBuffering));
++#endif
+     GstState startingState = GST_STATE_PLAYING;
+-
++#if 0
++    if (attemptBuffering) {
++        /*
++         * Set pipeline to PAUSED state to attempt buffering.
++         * The pipeline will be set to PLAY in two ways:
++         * i) If buffering is supported, then upon receiving buffer percent = 100.
++         * ii) If buffering is not supported, then the pipeline will be set to PLAY immediately.
++         */
++        startingState = GST_STATE_PAUSED;
++    }
++#endif
++    pthread_mutex_lock(&m_lock);
+     stateChange = gst_element_set_state(m_pipeline.pipeline, startingState);
++    pthread_mutex_unlock(&m_lock);
+     ACSDK_DEBUG(LX("handlePlay")
+                     .d("startingState", gst_element_state_get_name(startingState))
+                     .d("stateReturn", gst_element_state_change_return_get_name(stateChange)));
+@@ -1218,7 +1406,13 @@ void MediaPlayer::handleStop(MediaPlayer::SourceId id, std::promise<bool>* promi
+
+     GstState curState;
+     GstState pending;
+-    auto stateChangeRet = gst_element_get_state(m_pipeline.pipeline, &curState, &pending, TIMEOUT_ZERO_NANOSECONDS);
++    GstStateChangeReturn stateChangeRet;
++
++    if(m_sessionType == qtiMediaPlayerSessionType::QTIMEDIAPLAYER_SESSION_DEFAULT)
++        stateChangeRet = gst_element_get_state(m_pipeline.pipeline, &curState, &pending, GST_CLOCK_TIME_NONE);
++    else
++        stateChangeRet = gst_element_get_state(m_pipeline.pipeline, &curState, &pending, 0);
++
+     if (GST_STATE_CHANGE_FAILURE == stateChangeRet) {
+         ACSDK_ERROR(LX("handleStopFailed").d("reason", "gstElementGetStateFailure"));
+         promise->set_value(false);
+@@ -1237,9 +1431,10 @@ void MediaPlayer::handleStop(MediaPlayer::SourceId id, std::promise<bool>* promi
+         promise->set_value(false);
+         return;
+     }
+-
++    pthread_mutex_lock(&m_lock);
+     stateChangeRet = gst_element_set_state(m_pipeline.pipeline, GST_STATE_NULL);
+     if (GST_STATE_CHANGE_FAILURE == stateChangeRet) {
++        pthread_mutex_unlock(&m_lock);
+         ACSDK_ERROR(LX("handleStopFailed").d("reason", "gstElementSetStateFailure"));
+         promise->set_value(false);
+     } else {
+@@ -1247,6 +1442,7 @@ void MediaPlayer::handleStop(MediaPlayer::SourceId id, std::promise<bool>* promi
+          * Based on GStreamer docs, a gst_element_set_state call to change the state to GST_STATE_NULL will never
+          * return GST_STATE_CHANGE_ASYNC.
+          */
++        pthread_mutex_unlock(&m_lock);
+         promise->set_value(true);
+         if (m_playPending) {
+             sendPlaybackStarted();
+@@ -1283,7 +1479,9 @@ void MediaPlayer::handlePause(MediaPlayer::SourceId id, std::promise<bool>* prom
+             promise->set_value(false);
+             return;
+         }
++        pthread_mutex_lock(&m_lock);
+         stateChangeRet = gst_element_set_state(m_pipeline.pipeline, GST_STATE_PAUSED);
++        pthread_mutex_unlock(&m_lock);
+         if (GST_STATE_CHANGE_FAILURE == stateChangeRet) {
+             ACSDK_ERROR(LX("handlePauseFailed").d("reason", "gstElementSetStateFailure"));
+             promise->set_value(false);
+@@ -1305,8 +1503,9 @@ void MediaPlayer::handlePause(MediaPlayer::SourceId id, std::promise<bool>* prom
+         promise->set_value(false);
+         return;
+     }
+-
++    pthread_mutex_lock(&m_lock);
+     stateChangeRet = gst_element_set_state(m_pipeline.pipeline, GST_STATE_PAUSED);
++    pthread_mutex_unlock(&m_lock);
+     if (GST_STATE_CHANGE_FAILURE == stateChangeRet) {
+         ACSDK_ERROR(LX("handlePauseFailed").d("reason", "gstElementSetStateFailure"));
+         promise->set_value(false);
+@@ -1351,8 +1550,9 @@ void MediaPlayer::handleResume(MediaPlayer::SourceId id, std::promise<bool>* pro
+         promise->set_value(false);
+         return;
+     }
+-
++    pthread_mutex_lock(&m_lock);
+     stateChangeRet = gst_element_set_state(m_pipeline.pipeline, GST_STATE_PLAYING);
++    pthread_mutex_unlock(&m_lock);
+     if (GST_STATE_CHANGE_FAILURE == stateChangeRet) {
+         ACSDK_ERROR(LX("handleResumeFailed").d("reason", "gstElementSetStateFailure"));
+         promise->set_value(false);
+@@ -1368,15 +1568,17 @@ void MediaPlayer::handleGetOffset(SourceId id, std::promise<std::chrono::millise
+     gint64 position = -1;
+     GstState state;
+
++    if (!validateSourceAndId(id)) {
++        promise->set_value(m_offsetBeforeTeardown);
++        return;
++    }
++
++    pthread_mutex_lock(&m_lock);
+     // Check if pipeline is set.
+     if (!m_pipeline.pipeline) {
+         ACSDK_INFO(LX("handleGetOffsetStopped").m("pipelineNotSet"));
+         promise->set_value(MEDIA_PLAYER_INVALID_OFFSET);
+-        return;
+-    }
+-
+-    if (!validateSourceAndId(id)) {
+-        promise->set_value(m_offsetBeforeTeardown);
++        pthread_mutex_unlock(&m_lock);
+         return;
+     }
+
+@@ -1411,9 +1613,11 @@ void MediaPlayer::handleGetOffset(SourceId id, std::promise<std::chrono::millise
+         promise->set_value(
+             startStreamingPoint +
+             std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::nanoseconds(position)));
++        pthread_mutex_unlock(&m_lock);
+         return;
+     }
+
++    pthread_mutex_unlock(&m_lock);
+     promise->set_value(MEDIA_PLAYER_INVALID_OFFSET);
+ }
+
+@@ -1546,13 +1750,70 @@ gboolean MediaPlayer::onErrorCallback(gpointer pointer) {
+ }
+
+ void MediaPlayer::cleanUpSource() {
++    pthread_mutex_lock(&m_lock);
+     if (m_pipeline.pipeline) {
+         gst_element_set_state(m_pipeline.pipeline, GST_STATE_NULL);
+     }
++    pthread_mutex_unlock(&m_lock);
++
+     if (m_source) {
+         m_source->shutdown();
+     }
+     m_source.reset();
+ }
++
++void MediaPlayer::readAudioConf() {
++    FILE * fp;
++    char * tmp;
++    char * token;
++    int len;
++    double vol = 0;
++
++    fp = fopen(AVS_AUDIO, "r");
++    if (fp == NULL) {
++        writeAudioConf();
++        fp = fopen(AVS_AUDIO, "r");
++    }
++
++    if (fp == NULL)
++        return;
++
++    fseek(fp, 0, SEEK_END);
++    len = ftell(fp);
++    fseek(fp, 0, SEEK_SET);
++    tmp = new char[len + 1];
++    fread(tmp, len, 1, fp);
++    tmp[len] = '\n';
++
++    fclose(fp);
++
++    token = strtok(tmp, ":");
++    if (token == NULL) {
++        return;
++    }
++
++    vol = atof(token);
++    token = strtok(NULL, ":");
++    m_currentDeviceId = atoi(token);
++    delete tmp;
++    if (vol > 10)
++        vol = 10.0;
++    if (vol < 0.3)
++        vol = 0.3;
++    m_deviceVolume = vol;
++}
++
++void MediaPlayer::writeAudioConf() {
++    FILE * fp = fopen(AVS_AUDIO, "w");
++    if (fp != NULL) {
++        fprintf(fp, "%.2f:%d", m_deviceVolume, m_currentDeviceId);
++        fclose(fp);
++    }
++}
++
++int MediaPlayer::getCurrentDeviceId() {
++    return m_currentDeviceId;
++}
++
+ }  // namespace mediaPlayer
+ }  // namespace alexaClientSDK
+--
+2.7.4
+

@@ -1,0 +1,187 @@
+#!/bin/sh
+
+# Copyright (C) 2017-2018 Qualcomm Technologies, Inc.
+# All rights reserved
+# Confidential and Proprietary - Qualcomm Technologies, Inc.
+
+source ./web-setup.inc
+
+convPassphraseToPsk() {
+	local ssid="$1"
+	local passphrase="$2"
+
+	wpa_passphrase "$ssid" "$passphrase" | grep '^\s*psk=' | sed 's/^\s*psk=//'
+}
+
+verify_connect() {
+	local ssid="$(cgiVar ssid)" || output_html_error "400 Bad Request"
+	local key="$(cgiVar key)"
+
+	local key_mgmt
+	[ -z "$key" ] && key_mgmt="open" || key_mgmt="wpa"
+
+	rm -rf $WIFI_TRY_RESULT_FILE
+	/sbin/wifi_try -d -s "$ssid" -a "$key_mgmt" -p "$key"
+	echo $? > $WIFI_TRY_RESULT_FILE
+}
+
+
+configure_wifi_full() {
+	local ssid="$1"
+	local key="$2"
+
+	local hexSsid="$(echo -n "$ssid" | hexdump -v -n 32 -e '/1 "%02x"')"
+	local key_mgmt
+	local psk
+
+	if [ -z "$key" ]; then
+		key_mgmt="NONE"
+	else
+		key_mgmt="WPA-PSK"
+		psk="$(convPassphraseToPsk "$ssid" "$key")"
+	fi
+
+	cat > /etc/misc/wifi/wpa_supplicant.conf <<-EOF
+	ctrl_interface=/var/run/wpa_supplicant
+	network={
+		scan_ssid=1
+		key_mgmt=$key_mgmt
+		ssid=$hexSsid
+		${psk:+psk=$psk}
+	}
+	EOF
+
+	qcmapctl wlan sta
+
+	# Start in background so we have time to send the response
+	(sleep 1; qcmapctl wlan activate) 1>/dev/null &
+}
+
+configure_wifi() {
+	local ssid="$(cgiVar ssid)" || output_html_error "400 Bad Request"
+	local key="$(cgiVar key)"
+	local WEB_ONLY_CONFIGURE="./configureWifiWebOnly"
+
+	if [ "$(getprop websetup.enable)" = "webOnly" ] && [ -f "$WEB_ONLY_CONFIGURE" ]; then
+		"$WEB_ONLY_CONFIGURE" "$ssid" "$key"
+	else
+		configure_wifi_full "$ssid" "$key"
+	fi
+	echo
+}
+
+ip_type() {
+	case "$(qcmapctl wlan config | grep "^ip type:" | cut -d ':' -f 2- | tr -d ' ' )" in
+		"dynamic")
+			echo -n "dhcp"
+			;;
+		"static")
+			echo -n "static"
+			;;
+		*)
+			echo -n "unknown"
+			;;
+	esac
+}
+
+ip_net() {
+	local iface="$1"
+	ip addr show dev "$iface" | grep -o "inet [0-9./]*" | head -1 | cut -d ' ' -f 2 | tr -d '\n'
+}
+
+ip_mac() {
+	local iface="$1"
+	ip addr show dev "$iface" | grep -o "link/ether [0-9a-f:]*" | head -1 | cut -d ' ' -f 2 | tr -d '\n'
+}
+
+ip_gateway() {
+	ip route show to 0/0 | cut -d " " -f 3 | tr -d '\n'
+}
+
+wifi_ssid() {
+	iw dev wlan0 link | grep -o "SSID: .*" | cut -d " " -f 2- | tr -d '\n'
+}
+
+wifi_security() {
+	wpa_cli status -i wlan0 | grep "key_mgmt" | cut -d "=" -f 2 | tr -d '\n'
+}
+
+wifi_rssi() {
+	iw dev wlan0 link | grep -o "signal: -[0-9]* dBm" | cut -d " " -f 2 | tr -d '\n'
+}
+
+wifi_frequency() {
+	iw dev wlan0 link | grep -o "freq: [0-9]*" | cut -d " " -f 2 | tr -d '\n'
+}
+
+wifi_tx_bitrate() {
+	iw dev wlan0 link | grep -Eo "bitrate: [0-9.]* .?Bit/s" | cut -d " " -f 2- | tr -d '\n'
+}
+
+wifi_ap_mac() {
+	iw dev wlan0 link | grep -o "Connected to [0-9a-f:]*" | cut -d " " -f 3 | tr -d '\n'
+}
+
+status() {
+	local iface
+	if qcmapctl wlan config | grep -q "mode:\\s*sta$"; then
+		iface=wlan0
+	else
+		iface=bridge0
+	fi
+
+	output_json <<-EOF
+		{
+			"manufacturer": $(jq -e ".manufacturer" </persist/device.conf || echo -n '"n/a"'),
+			"model": $(jq -e ".model" </persist/device.conf || echo -n '"n/a"'),
+			"firmwareVersion": $(cat /etc/version | tr -d '\n' | json_escape),
+			"friendlyName": $(jq '.system.friendlyName // ""' </etc/allplay/system.json),
+			"ip": {
+				"type": $(ip_type | json_escape),
+				"net": $(ip_net "$iface" | json_escape),
+				"mac": $(ip_mac "$iface" | json_escape),
+				"gateway": $(ip_gateway "$iface" | json_escape)
+			},
+			"wifi": {
+				"ssid": $(wifi_ssid | json_escape),
+				"mac": $(wifi_ap_mac | json_escape),
+				"security": $(wifi_security | json_escape),
+				"rssi": $(wifi_rssi | json_escape),
+				"frequency": $(wifi_frequency | json_escape),
+				"tx": {
+					"bitrate": $(wifi_tx_bitrate | json_escape)
+				}
+			}
+		}
+	EOF
+}
+
+
+WIFI_TRY_RESULT_FILE='/tmp/wifi_try_result'
+
+
+case "$PATH_INFO" in
+	/refresh_scan_list)
+		[ -x /usr/bin/wifi_scan ] || output_html_error "500 Internal Server Error"
+		/usr/bin/wifi_scan | output_json
+		;;
+	/verify_connect)
+		verify_connect
+		;;
+	/verify_connecting)
+		[ -e $WIFI_TRY_RESULT_FILE ] && echo 0 || echo 1
+		;;
+	/check_connect_status)
+		cat $WIFI_TRY_RESULT_FILE
+		rm -rf $WIFI_TRY_RESULT_FILE
+		;;
+	/join)
+		configure_wifi
+		;;
+	/status)
+		status
+		;;
+	*)
+		output_html_error "404 Not Found"
+		;;
+esac

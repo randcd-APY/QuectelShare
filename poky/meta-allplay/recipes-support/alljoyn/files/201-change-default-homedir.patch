@@ -1,0 +1,15 @@
+Index: alljoyn-15.04.00b-src/common/os/posix/osUtil.cc
+===================================================================
+--- alljoyn-15.04.00b-src.orig/common/os/posix/osUtil.cc
++++ alljoyn-15.04.00b-src/common/os/posix/osUtil.cc
+@@ -92,8 +92,8 @@ uint32_t qcc::GetUsersGid(const char* na
+ 
+ qcc::String qcc::GetHomeDir()
+ {
+-    /* Defaulting to '/' handles both the plain posix and Android cases. */
+-    return Environ::GetAppEnviron()->Find("HOME", "/");
++    /* Defaulting to '/data' for LE with read-only rootfs. */
++    return Environ::GetAppEnviron()->Find("HOME", "/data");
+ }
+ 
+ qcc::OSType qcc::GetSystemOSType(void)

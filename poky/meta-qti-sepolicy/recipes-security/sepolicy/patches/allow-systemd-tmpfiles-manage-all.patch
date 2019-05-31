@@ -1,0 +1,26 @@
+From 947a800696bfbe8c3b1e05b63d9688700508fb14 Mon Sep 17 00:00:00 2001
+From: Dennis Cagle <dcagle@codeaurora.org>
+Date: Wed, 31 Jan 2018 18:02:00 -0800
+Subject: [PATCH] Allow systemd to manage all tmp files
+
+Change-Id: I18b89c378871c821a19419a818eafdcf9c93b29d
+---
+ policy/booleans.conf | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/policy/booleans.conf b/policy/booleans.conf
+index 32fa070..3b0014b 100644
+--- a/policy/booleans.conf
++++ b/policy/booleans.conf
+@@ -1198,7 +1198,7 @@ allow_mount_anyfile = false
+ #
+ # Enable support for systemd-tmpfiles to manage all non-security files.
+ # 
+-systemd_tmpfiles_manage_all = false
++systemd_tmpfiles_manage_all = true
+ 
+ #
+ # Allow users to connect to mysql
+-- 
+1.9.1
+

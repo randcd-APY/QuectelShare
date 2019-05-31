@@ -1,0 +1,766 @@
+<script type="text/javascript">//<![CDATA[
+var scan_list = [];
+var manual_input = false;
+var ssid_select_handler = null;
+var dhcp_selected = true;
+var failed_ssid=null;
+
+function harden_spaces(str) {
+	return str.replace(/ /g, "\u00A0");
+}
+
+function guess_wifi_signal(net) {
+	var scale = Math.floor((100 / (net.quality_max || 100) * (net.quality || 0)));
+	var icon = "/";
+
+	if (!net.bssid || net.bssid == "00:00:00:00:00:00") {
+		icon += "images/signal-none";
+	}
+	else if (scale < 15) {
+		icon += "images/signal-none";
+	}
+	else if (scale < 35) {
+		icon += "images/signal_0_25";
+	}
+	else if (scale < 55) {
+		icon += "images/signal_25_50";
+	}
+	else if (scale < 75) {
+		icon += "images/signal_50_75";
+	}
+	else {
+		icon += "images/signal_75_100";
+	}
+
+	if (is_net_encrypted(net)) {
+		icon += "_lock.png";
+	} else {
+		icon += "_nolock.png";
+	}
+
+	return icon;
+}
+
+function percent_wifi_signal(net) {
+	var qc = net.quality || 0;
+	var qm = net.quality_max || 0;
+
+	if (net.bssid && qc > 0 && qm > 0)
+		return Math.floor((100 / qm) * qc);
+	else
+		return 0;
+}
+
+function is_net_encrypted(net) {
+	return (net.encryption.wep == "true") || (net.encryption.wpa != 0);
+}
+
+function check_if_network_allowed(net){
+	var wep, wpa=false;
+
+	if ("undefined"===net && !manual_input)
+		return; /* something odd has happened.. do nothing */
+
+	$("#wifi_config_security_warning_text_net_manual").hide();
+	$("#wifi_config_security_warning_text_net_manual").html("<%_Note: AllPlay devices are not compatible with $netType security mode. $netType is an outdated mode which is known to be vulnerable to attack.<br/><br/>In order to use an AllPlay device you will need to reconfigure your router to use WPA2-PSK security. Please refer to your router's user manual for more information.%>");
+
+	$("#wifi_config_security_warning_text_net").hide();
+	$("#wifi_config_security_warning_text_net").html("<%_The wireless network '$ssid' is not compatible with AllPlay devices because '$ssid' uses $netType security mode.<br/><br/>In order to use an AllPlay device with '$ssid' you will need to reconfigure your router to use WPA2-PSK security mode.  Please refer to your router's user manual for more information.%>");
+
+	if ((manual_input && $("#security_mode").val()==1) ||
+			(!manual_input && net.encryption.wep == "true")) wep=true;
+
+	if ((manual_input && $("#security_mode").val()==2) ||
+			(!manual_input && net.encryption.wpa == 1)) wpa=true;
+
+	if( !wep && !wpa){ /* enable submit */
+		$("#wifi_config_security_warning").hide();
+		$("#wifi_config_disabled_area_1").fadeIn(600);
+		$("#wifi_config_disabled_area_2").fadeIn(600);
+		$("#connect").addClass("form_button").removeClass("form_button_disabled");
+		$("#connect").attr("onclick","on_connect_btn_click()");
+	}
+	else {
+		var ssid="";
+		var id_of_net_security_warning_text = "wifi_config_security_warning_text_net";
+		if (manual_input) {
+			id_of_net_security_warning_text+="_manual";
+		}
+		else{
+			ssid = net.ssid;
+		}
+
+		var message_for_net_security_warning = $("#"+id_of_net_security_warning_text).html();
+		message_for_net_security_warning = message_for_net_security_warning.replace(/\$ssid/g, ssid);
+
+		if (wep){
+			message_for_net_security_warning = message_for_net_security_warning.replace(/\$netType/g, "<%_WEP%>");
+		}
+		else if(wpa){
+			message_for_net_security_warning = message_for_net_security_warning.replace(/\$netType/g, "<%_WPA%>");
+		}
+
+		$("#wifi_config_disabled_area_1").hide();
+		$("#wifi_config_disabled_area_2").hide();
+
+		$("#"+id_of_net_security_warning_text).html(message_for_net_security_warning);
+		$("#"+id_of_net_security_warning_text).show();
+		$("#wifi_config_security_warning").fadeIn(600);
+		$("#connect").addClass("form_button_disabled").removeClass("form_button");
+		$("#connect").attr("onclick","");
+	}
+}
+
+function show_pass_toggle(){
+	var input = $("#network_key");
+	var change = $("#show_pass_toggle").prop('checked') ? "text" : "password";
+	/* create new input tag to replace existing: 'prop' fails in ie */
+	var rep = $("<input type='" + change + "' />");
+	$.each(input.get(0).attributes, function(index, attrib) {
+		if(attrib.name != "type" && attrib.specified) {
+			rep.attr(attrib.name, attrib.value);
+		}
+	});
+	/* ie does not transfer the onkeypress attrib - force */
+	rep.attr("onkeypress","javascript:password_field_submit_on_keypress(event);");
+	rep.val(input.val());
+	input.replaceWith(rep);
+}
+
+function validate_form() {
+	var ssid="";
+	var net_object;
+
+	clear_error_message();
+
+	/* static IP check */
+	if (!dhcp_selected){
+		var error_message="";
+
+		if( !validate_ip_address("oct_ipaddress_1") ||
+			!validate_ip_address("oct_ipaddress_2") ||
+			!validate_ip_address("oct_ipaddress_3") ||
+			!validate_ip_address("oct_ipaddress_4") ){
+				error_message += "<%_IP Address%><br />";
+		}
+
+		if( !validate_ip_address("oct_subnet_1") ||
+			!validate_ip_address("oct_subnet_2") ||
+			!validate_ip_address("oct_subnet_3") ||
+			!validate_ip_address("oct_subnet_4") ){
+				error_message += "<%_Subnet mask%><br />";
+		}
+
+		if( !validate_ip_address("oct_gateway_1") ||
+			!validate_ip_address("oct_gateway_2") ||
+			!validate_ip_address("oct_gateway_3") ||
+			!validate_ip_address("oct_gateway_4") ){
+				error_message += "<%_Default gateway%><br />";
+		}
+
+		if( !validate_ip_address("oct_dnspri_1") ||
+			!validate_ip_address("oct_dnspri_2") ||
+			!validate_ip_address("oct_dnspri_3") ||
+			!validate_ip_address("oct_dnspri_4") ){
+				error_message += "<%_Primary DNS%><br />";
+		}
+
+		if ($("#oct_dnssec_1").val().length>0 || $("#oct_dnssec_2").val().length>0 ||
+			$("#oct_dnssec_3").val().length>0 || $("#oct_dnssec_4").val().length>0 ){
+			if( !validate_ip_address("oct_dnssec_1") ||
+				!validate_ip_address("oct_dnssec_2") ||
+				!validate_ip_address("oct_dnssec_3") ||
+				!validate_ip_address("oct_dnssec_4") ){
+				error_message += "<%_Secondary DNS%>";
+			}
+		}
+
+		if (error_message.length>1){
+			error_message = "<%_Please correct the following items:%><br />"+error_message;
+			display_error(error_message);
+			return false;
+		}
+	}
+
+	/* /static IP check */
+	if (networkState=="elan"){
+		return true;
+	}
+	else if(manual_input){
+		if ($("#network_ssid_input").val().length<1){
+			display_error("<%_Please enter a network name.%>");
+			return false;
+		}
+
+		if ($( "#security_mode option:selected" ).text().toUpperCase()==="<%_OPEN%>"){
+			return true;
+		}
+
+		/*  manual mode: populate SSID from input */
+		ssid = $("#network_ssid_input").val();
+	}
+	else{  /* not manual mode */
+		net_object = scan_list[$("#network_ssid").val()];
+		ssid = scan_list[$("#network_ssid").val()].ssid;
+		if (!is_net_encrypted(net_object)) {
+			return true;
+		}
+	}
+
+	/* password 'key' check */
+	var key  = $("#network_key").val();
+
+	if($( "#security_mode option:selected" ).text().toUpperCase()!="<%_OPEN%>"
+		|| ( net_object && (net_object.encryption.wep == "true" || net_object.encryption.wpa ))
+	){
+		if (key.length==0) {
+				var message="<%_Please enter the password for $ssid.%>";
+				message = message.replace("$ssid", ssid);
+				$("#message_tip").text(message).addClass("error");
+				return false;
+		}
+	}
+
+	if($( "#security_mode option:selected" ).text().toUpperCase()==="<%_WEP%>"
+		|| (net_object && net_object.encryption.wep == "true") ){
+		// hex string
+		if (key.length == 10 || key.length == 26 || key.length == 32) {
+			if (/^([a-fA-F0-9])+$/.test(key)){
+				return true;
+			}
+			else {
+				display_password_error(ssid);
+				return false;
+			}
+		}
+		else {
+			if (key.length == 5 || key.length == 13 || key.length == 16) {
+				return true;
+			}
+			else {
+				display_password_error(ssid);
+				return false;
+			}
+		}
+	}
+	else if($( "#security_mode option:selected" ).text().substr(0,3).toUpperCase()==="<%_WPA%>"
+		|| (net_object && net_object.encryption.wpa) ) {
+		if (key.length >= 8) {
+			return true;
+		}
+		else {
+			display_password_error(ssid);
+			return false;
+		}
+	}
+	/* /password 'key' check */
+	return false;
+}
+
+function validate_ip_address(nextOctetId){
+	var octetIntVal = parseInt($("#"+nextOctetId).val());
+	if( octetIntVal >= 0 && octetIntVal <= 255 ){
+		return true;
+	}
+	return false;
+}
+
+function display_password_error(network_name){
+	var message="<%_Please enter the correct password for $ssid.%>";
+	message = message.replace("$ssid", network_name);
+	$("#message_tip").html(message).addClass("error");
+}
+
+function display_error(message){
+	$("#message_tip").html(message).addClass("error");
+}
+
+function clear_error_message(){
+	$("#message_tip").html(" ").removeClass("error");
+}
+
+function on_connect_btn_click() {
+	if (validate_form()) {
+		var net;
+		if (manual_input || networkState=="elan") {
+			net = null;
+		} else {
+			net = scan_list[$("#network_ssid").val()];
+			if (is_net_encrypted(net)) {
+				net.key = $("#network_key").val();
+			}
+		}
+		generate_join_form(net, manual_input);
+		$("#join-network-form").submit();
+	}
+}
+
+function ui_populate_network_ssid(scan_list) {
+	var ssid_select_handler = $("#network_ssid"); //.msDropDown({visibleRows:7, rowHeight:22, showIcon: false}).data("dd");
+	var net = null;
+	var option, text_node, value_node, title_node;
+	var templist = {};
+	ssid_select_handler.empty();
+	for (var i = 0; i < scan_list.length; i++) {
+		net = scan_list[i];
+		if (net.mode == "Ad-Hoc") {
+			// filter out any IBSS networks
+			continue;
+		}
+		if (net.ssid && (!templist[net.ssid])) {
+			ssid_select_handler.append(
+				$('<option></option>').val(i).text(harden_spaces(net.ssid)));
+		}
+		templist[net.ssid] = true;
+	}
+
+	ssid_select_handler.append(
+		$('<option></option>').val(i).html("<%_Other Network...%>")
+		);
+
+	if (failed_ssid) {
+		var current_val = scan_list.findIndex(function(net) {return net.ssid == failed_ssid;});
+		if (current_val < 0) {
+			current_val = i;
+		}
+		ssid_select_handler.val(current_val);
+	}
+}
+
+function refresh_scan_list() {
+	$("#refresh_scan_list_button").hide();
+	$("#refresh_anim").show();
+	$.ajax({
+		method: "POST",
+		url: "/config/refresh_scan_list",
+		dataType: "json",
+		timeout: 30000,
+		success: function(response) {
+			scan_list = response.scanlist;
+			ui_populate_network_ssid(scan_list);
+		},
+		error: function() {
+			alert("<%_Refresh failed.%>");
+		},
+		complete: function() {
+			$("#refresh_scan_list_button").show();
+			$("#refresh_anim").hide();
+			$("#network_ssid").trigger("change");
+		}
+	});
+}
+
+function generate_join_form(net, m) {
+
+	var f = $("#join-network-form");
+	$(f).empty();
+
+	var e = '';
+
+	if (!dhcp_selected){
+		var static_ip_address = ''+ $("#oct_ipaddress_1").val() +'.'+ $("#oct_ipaddress_2").val()+'.'+
+			$("#oct_ipaddress_3").val() +'.'+ $("#oct_ipaddress_4").val();
+
+		var static_ip_subnet = ''+ $("#oct_subnet_1").val() +'.'+ $("#oct_subnet_2").val()+'.'+
+			$("#oct_subnet_3").val() +'.'+ $("#oct_subnet_4").val();
+
+		var static_ip_gateway = ''+ $("#oct_gateway_1").val() +'.'+ $("#oct_gateway_2").val()+'.'+
+			$("#oct_gateway_3").val() +'.'+ $("#oct_gateway_4").val();
+
+		var static_ip_pri_dns = ''+ $("#oct_dnspri_1").val() +'.'+ $("#oct_dnspri_2").val()+'.'+
+			$("#oct_dnspri_3").val() +'.'+ $("#oct_dnspri_4").val();
+
+		var static_ip_sec_dns = ''+ $("#oct_dnssec_1").val() +'.'+ $("#oct_dnssec_2").val()+'.'+
+			$("#oct_dnssec_3").val() +'.'+ $("#oct_dnssec_4").val();
+
+		e += '<input type="hidden" name="static_ip_address" value="' + static_ip_address + '" />';
+		e += '<input type="hidden" name="static_ip_subnet"  value="' + static_ip_subnet + '" />';
+		e += '<input type="hidden" name="static_ip_gateway" value="' + static_ip_gateway + '" />';
+		e += '<input type="hidden" name="static_ip_pri_dns" value="' + static_ip_pri_dns + '" />';
+		e += '<input type="hidden" name="static_ip_sec_dns" value="' + static_ip_sec_dns + '" />';
+	}
+
+	if(networkState!="elan"){
+		e += '<input type="hidden" name="interface" value="wifi" />';
+		e += '<input type="hidden" name="stage" value="verify" />';
+		if (m) {
+			var ssid = $("#network_ssid_input").val();
+			var security_mode = $("#security_mode").val();
+			var encrypt_mode = $("#encrypt_mode").val();
+			var wep, wpa_version, key;
+			f.append($("<input/>").attr("type", "hidden").attr("name", "ssid").val(ssid));
+			e += '<input type="hidden" name="mode" value="sta" />';
+			switch (parseInt(security_mode)) {
+				case 0:
+					//OPEN mode
+					wep = 0;
+					wpa_version = 0;
+					key = "";
+					break;
+				case 1:
+					//WEP mode
+					wep = 1;
+					wpa_version = 0;
+					key = $("#network_key").val();
+					break;
+				case 2:
+					//WPA-PSK
+					wep = 0;
+					wpa_version = 1;
+					key = $("#network_key").val();
+					break;
+				case 3:
+					//WPA2-PSK
+					wep = 0;
+					wpa_version = 2;
+					key = $("#network_key").val();
+					break;
+				default:
+					alert("Unknown security mode: " + security_mode);
+					break;
+			}
+			e += '<input type="hidden" name="wep" value="' + wep + '" />';
+			e += '<input type="hidden" name="wpa_version" value="' + wpa_version + '" />';
+			if(key != "") {
+				e += '<input type="hidden" name="key" value="' + key + '" />';
+			}
+		} else {
+			f.append($("<input/>").attr("type", "hidden").attr("name", "ssid").val(net.ssid));
+			e += '<input type="hidden" name="mode" value="' + net.mode + '" />';
+			e += '<input type="hidden" name="bssid" value="' + net.bssid + '" />';
+			e += '<input type="hidden" name="channel" value="' + net.channel + '" />';
+			e += '<input type="hidden" name="wep" value="' + (net.encryption.wep == "true" ? 1:0) + '" />';
+			if (is_net_encrypted(net)) {
+				f.append($('<input/>').attr("type", "hidden").attr("name", "key").val(net.key));
+			}
+		}
+	} /* wireless config */
+	else
+	{
+		e += '<input type="hidden" name="interface" value="ethernet" />';
+	}
+
+	$(e).appendTo(f);
+}
+
+$(function() {
+
+	if (networkState != "elan") {
+		ui_populate_network_ssid(scan_list);
+		if (scan_list.length == 0) {
+			refresh_scan_list();
+		}
+	}
+	else{
+		hideWifiSettings();
+		$("#connect").addClass("form_button").removeClass("form_button_disabled");
+		$("#connect").attr("onclick","on_connect_btn_click()");
+	}
+
+	var urlParams = new URL(window.location.href).searchParams;
+	if(urlParams.has('connection_failure')) {
+		failed_ssid=urlParams.get('ssid');
+		var ssid=harden_spaces(failed_ssid);
+		var Tip;
+		if ( parseInt(urlParams.get('connection_failure')) == 3 ) {
+			Tip="<%_Please enter the correct network password for $ssid.%>";
+			Tip = Tip.replace("$ssid", ssid);
+		}
+		else {
+			Tip="<%_Connection failure, unable to connect to network.%>";
+			Tip = Tip.concat(": ", ssid);
+		}
+		$("#message_tip").text(Tip).addClass("error");
+	}
+
+	$("#network_ssid").change(function() {
+		if ( $(this).val() == scan_list.length ) { /* manual */
+			manual_input = true;
+			$("#li_sec").show();
+			$("#li_key").hide();
+			$("#li_key_toggle").hide();
+			$("#li_key_text").hide();
+			$("#li_key_toggle_text").hide();
+			$("#network_key").val("");
+			$("#security_mode").trigger("change");
+			$("#network_ssid_input").show();
+		} else { /* wifi from scan */
+			manual_input = false;
+			var net = scan_list[$(this).val()];
+			$("#li_sec").hide();
+			$("#network_key").val("");
+			$("#show_pass_toggle").prop("checked", false);
+			$("#show_pass_toggle").trigger("change");
+
+			if (net && is_net_encrypted(net)) {
+				$("#li_key").show();
+				$("#li_key_toggle").show();
+				$("#li_key_text").show();
+				$("#li_key_toggle_text").show();
+			} else {
+				$("#li_key").hide();
+				$("#li_key_toggle").hide();
+				$("#li_key_text").hide();
+				$("#li_key_toggle_text").hide();
+			}
+			if (net) {
+				check_if_network_allowed(net);
+			}
+			$("#network_ssid_input").hide();
+		}
+	}).trigger("change");
+
+	$("#security_mode").change(function() {
+		if ( $(this).val() == 0) {
+				$("#li_key").hide();
+				$("#li_key_toggle").hide();
+				$("#li_key_text").hide();
+				$("#li_key_toggle_text").hide();
+		} else if ( $(this).val() == 3) {
+				$("#li_key").show();
+				$("#li_key_toggle").show();
+				$("#li_key_text").show();
+				$("#li_key_toggle_text").show();
+		} else{
+				$("#li_key").hide();
+				$("#li_key_toggle").hide();
+				$("#li_key_text").hide();
+				$("#li_key_toggle_text").hide();
+		}
+		check_if_network_allowed();
+	});
+}); /* /_function */
+
+$(document).keydown(function(e) {
+
+	var tabindex=document.activeElement.tabIndex;
+
+	/* Check for actions in the ip fields only */
+	if(tabindex>3 && tabindex<24){
+		if (e.keyCode == 190) { /* tab */
+			tabindex++;
+			$('[tabindex='+tabindex+']').focus();
+			return false;
+		}
+
+		if (e.keyCode == 36 || e.keyCode == 35) { /* home, end */
+			if (document.activeElement.setSelectionRange){
+				var position=(e.keyCode==36?0:3);
+				document.activeElement.setSelectionRange(position, position);
+			}
+			else{ /* ie8 and prior */
+				var range = document.activeElement.createTextRange();
+				range.collapse(e.keyCode==36?true:false);
+				range.select();
+			}
+			return false;
+		}
+
+		if (e.keyCode == 46) { /* delete */
+			return true;
+		}
+
+		var charCode = (e.which) ? e.which : e.keyCode
+		if (charCode > 31 && (charCode < 48 || charCode > 57)
+			&& charCode != 39 && charCode != 37 ){
+			return false;
+		}
+		else{
+			return true;
+		}
+	}
+});
+
+function showHideStaticIPConfig(){
+	if( $('#dhcp_toggle').prop('checked') ){
+		$("#staticIPConfig").hide();
+		$("#wrapper_root").css('height', 100+'%');
+		dhcp_selected=true;
+	}
+	else{
+		$("#staticIPConfig").show();
+		$("#wrapper_root").css('height', 140+'%');
+		dhcp_selected=false;
+	}
+}
+
+function hideWifiSettings(){
+	$("#wifiSettings").hide();
+}
+
+function password_field_submit_on_keypress(event){
+	if (event.keyCode == 13) {
+		$("#connect").click();
+	}
+}
+
+//]]></script>
+<!-- /page specific javascript -->
+
+	<div id="wrapper_root" class="force_width_outer_wrapper custom_background_image custom_background_image_network">
+		<div class="force_width_inner_wrapper">
+			<div class="language_selection_button shadow" onclick="javascript:display_language_selections();">&nbsp;</div>
+			<div class="header">
+				<div class="header_logo">&nbsp;</div><!-- /header_logo -->
+			</div><!-- /header -->
+
+			<div class="activity_header">
+				<div class="activity_title">
+					<%_Wireless Network Settings%>
+				</div><!-- /activity_title -->
+			</div><!-- /activity_title_header -->
+
+			<div class="activity_content_wrapper">
+				<div class="information_field">
+					<div id="message_tip">
+					<%_Choose the wireless network you would like to use, and enter a password if one is required.%>
+					</div><!-- message_tip -->
+				<hr/>
+				</div><!-- /information_field -->
+				<div style="text-align:right"><span class="red">*</span>
+				<%_must be completed%><br/><br/></div>
+
+				<div id="wifiSettings">
+					<div class="form_row_float_left"><span class="red">*</span> <%_Network Name%></div>
+					<div class="form_row_float_right">
+					<select id="network_ssid" name="network_ssid" size="1" tabindex="1" style="width:100%;max-width:100%;"></select>
+					<div id="refresh_scan_list_button">
+						<a href="javascript:refresh_scan_list()"><img class="refresh_image" src="/images/refresh.gif" /></a>
+						<a href="javascript:refresh_scan_list()"><span style="vertical-align: 20%"><%_Refresh list%></span></a>
+					</div>
+					<div id="refresh_anim" style="display:none">
+						<img class="refresh_image" src="/images/refresh_anim.gif" />
+					</div>
+					<input type="text" id="network_ssid_input" name="network_key" value="" maxlength="32" class="form_text_input" style="display: none;"/>
+					</div>
+
+					<div class="float_clear"></div>
+					<!-- hidden form -->
+					<div id="li_sec" style="display:none;">
+						<div class="form_row_float_left"><%_Security Mode%></div>
+						<div class="form_row_float_right">
+						<select id="security_mode" name="security_mode" size="1">
+							<option selected="selected" value="0"><%_OPEN%></option>
+							<option value="1"><%_WEP%></option>
+							<option value="2"><%_WPA-PSK%></option>
+							<option value="3"><%_WPA2-PSK%></option>
+						</select>
+						</div>
+						<div class="float_clear"></div>
+					</div>
+					<!-- /hidden form -->
+
+					<div id="wifi_config_disabled_area_1">
+						<div class="form_row_float_left" id="li_key_text"><span class="red">*</span> <%_Password%></div>
+						<div class="form_row_float_right" id="li_key">
+							<input type="password" id="network_key" name="network_key"
+								class="form_text_input" tabindex="2" value="" maxlength="64"
+								onkeypress="javascript:password_field_submit_on_keypress(event);" />
+						</div>
+						<div class="float_clear"></div>
+						<div class="form_row_float_left" id="li_key_toggle_text"><%_Show Password%></div>
+						<div class="form_row_float_right" id="li_key_toggle">
+							<input type="checkbox" id="show_pass_toggle"
+								onclick="javascript:ie_radio_checkbox();"
+								onchange="javascript:show_pass_toggle();" />
+						</div>
+						<div class="float_clear"></div>
+					</div><!--  /wifi_config_disabled_area_1 -->
+				</div><!-- /wifiSettings -->
+
+				<div id="wifi_config_disabled_area_2">
+					<!-- staticIPConfig -->
+					<div class="form_row_float_left"><%_DHCP%></div>
+					<div class="form_row_float_right">
+						<input type="checkbox" id="dhcp_toggle" checked="checked"
+							onclick="javascript:ie_radio_checkbox();"
+							onchange="javascript:showHideStaticIPConfig();" />
+					</div>
+					<div class="float_clear"></div>
+
+					<div id="staticIPConfig" style="display:none;">
+					<div class="form_row_float_left"><span class="red">*</span> <%_IP Address%></div>
+					<div class="form_row_float_right">
+					<input type="text" id="oct_ipaddress_1" size="3" value="" maxlength="3" tabindex="4" class="select_octet" />
+					<input type="text" id="oct_ipaddress_2" size="3" value="" maxlength="3" tabindex="5" class="select_octet" />
+					<input type="text" id="oct_ipaddress_3" size="3" value="" maxlength="3" tabindex="6" class="select_octet" />
+					<input type="text" id="oct_ipaddress_4" size="3" value="" maxlength="3" tabindex="7" class="select_octet" />
+					</div>
+					<div class="float_clear"></div>
+
+					<div class="form_row_float_left"><span class="red">*</span> <%_Subnet mask%></div>
+					<div class="form_row_float_right">
+					<input type="text" id="oct_subnet_1" size="3" value="255" maxlength="3" tabindex="8" class="select_octet" />
+					<input type="text" id="oct_subnet_2" size="3" value="255" maxlength="3" tabindex="9" class="select_octet" />
+					<input type="text" id="oct_subnet_3" size="3" value="255" maxlength="3" tabindex="10" class="select_octet" />
+					<input type="text" id="oct_subnet_4" size="3" value="0" maxlength="3" tabindex="11" class="select_octet" />
+					</div>
+					<div class="float_clear"></div>
+
+					<div class="form_row_float_left"><span class="red">*</span> <%_Default gateway%></div>
+					<div class="form_row_float_right">
+					<input type="text" id="oct_gateway_1" size="3" value="" maxlength="3" tabindex="12" class="select_octet" />
+					<input type="text" id="oct_gateway_2" size="3" value="" maxlength="3" tabindex="13" class="select_octet" />
+					<input type="text" id="oct_gateway_3" size="3" value="" maxlength="3" tabindex="14" class="select_octet" />
+					<input type="text" id="oct_gateway_4" size="3" value="" maxlength="3" tabindex="15" class="select_octet" />
+					</div>
+					<div class="float_clear"></div>
+
+					<div class="form_row_float_left"><span class="red">*</span> <%_Primary DNS%></div>
+					<div class="form_row_float_right">
+					<input type="text" id="oct_dnspri_1" size="3" value="" maxlength="3" tabindex="16" class="select_octet" />
+					<input type="text" id="oct_dnspri_2" size="3" value="" maxlength="3" tabindex="17" class="select_octet" />
+					<input type="text" id="oct_dnspri_3" size="3" value="" maxlength="3" tabindex="18" class="select_octet" />
+					<input type="text" id="oct_dnspri_4" size="3" value="" maxlength="3" tabindex="19" class="select_octet" />
+					</div>
+					<div class="float_clear"></div>
+
+					<div class="form_row_float_left"><%_Secondary DNS%></div>
+					<div class="form_row_float_right">
+					<input type="text" id="oct_dnssec_1" size="3" value="" maxlength="3" tabindex="20" class="select_octet" />
+					<input type="text" id="oct_dnssec_2" size="3" value="" maxlength="3" tabindex="21" class="select_octet" />
+					<input type="text" id="oct_dnssec_3" size="3" value="" maxlength="3" tabindex="22" class="select_octet" />
+					<input type="text" id="oct_dnssec_4" size="3" value="" maxlength="3" tabindex="23" class="select_octet" />
+					</div>
+					<div class="float_clear"></div>
+
+					</div><!-- /staticIPConfig -->
+				</div><!-- wifi_config_disabled_area_2 -->
+
+				<div id="wifi_config_security_warning">
+					<div class="form_row_float_left">&nbsp;</div>
+
+					<div class="form_row_float_right red" id="wifi_config_security_warning_text_net_manual"
+						style="display:none;">
+					</div><!-- wifi_config_security_warning_text_net_manual -->
+
+					<div class="form_row_float_right red" id="wifi_config_security_warning_text_net"
+						style="display:none;">
+					</div><!-- wifi_config_security_warning_text_net -->
+					<div class="float_clear"></div>
+				</div>
+
+			</div><!-- /activity_content_wrapper -->
+			<div class="activity_content_shadow_wrapper">
+				<div class="activity_content_shadow_left"></div>
+				<div class="activity_content_shadow_right"></div>
+				<div class="activity_content_shadow_middle"></div>
+				<div class="float_clear"></div>
+			</div><!-- /activity_content_shadow_wrapper -->
+			<!-- powered by float -->
+			<div class="powered_by_footer float_left">&nbsp;</div>
+			<!-- /powered by float -->
+			<div id="connect" class="form_button float_right" tabindex="3">
+			<%_Connect%>
+			</div>
+			<div class="float_clear"></div>
+
+			<!-- hidden form -->
+			<div id="join-network-div" title="<%_Join Network%>" style="display:none">
+				<form id="join-network-form" action="/ui/connect" method="post">
+				</form>
+			</div>
+			<!-- /hidden form -->
+
+
+		</div><!-- /force_width_inner_wrapper -->

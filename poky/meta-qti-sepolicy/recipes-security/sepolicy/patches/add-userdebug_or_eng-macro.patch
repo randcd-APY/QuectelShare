@@ -1,0 +1,48 @@
+From 0eb96d2e72f3b2f7d6914bd3542c2f181bbd7b97 Mon Sep 17 00:00:00 2001
+From: Dennis Cagle <dcagle@codeaurora.org>
+Date: Thu, 22 Feb 2018 18:12:53 -0800
+Subject: [PATCH] selinux: Add userdebug_or_eng macro
+
+Add support for userdebug_or_eng macro
+
+Change-Id: Ic278a5d2b1a2ddc926dd06401e60f70d9c511d00
+---
+ Makefile                       | 5 +++++
+ policy/support/misc_macros.spt | 8 ++++++++
+ 2 files changed, 13 insertions(+)
+
+diff --git a/Makefile b/Makefile
+index 154beb5..817dad8 100644
+--- a/Makefile
++++ b/Makefile
+@@ -239,6 +239,11 @@ endif
+ 
+ CTAGS ?= ctags
+ 
++# user build status
++ifeq ($(USER_BUILD),y)
++    M4PARAM += -D user_build
++endif
++
+ m4support := $(m4divert) $(wildcard $(poldir)/support/*.spt)
+ ifdef LOCAL_ROOT
+ m4support += $(wildcard $(local_poldir)/support/*.spt)
+diff --git a/policy/support/misc_macros.spt b/policy/support/misc_macros.spt
+index 7f280db..df44382 100644
+--- a/policy/support/misc_macros.spt
++++ b/policy/support/misc_macros.spt
+@@ -76,3 +76,11 @@ define(`can_exec',`allow $1 $2:file { mmap_file_perms ioctl lock execute_no_tran
+ define(`gen_bool',`
+ 	bool $1 dflt_or_overr(`$1'_conf,$2);
+ ')
++
++########################################
++#
++# userdebug_or_eng(expr)
++#
++
++define(`userdebug_or_eng',`ifndef(`user_build', `$1')')
++
+-- 
+1.9.1
+

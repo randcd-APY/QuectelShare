@@ -1,0 +1,243 @@
+<!--
+Copyright (C) 2017-2018 Qualcomm Technologies, Inc.
+2013-2015 Qualcomm Connected Experiences, Inc.
+2016-2017 Qualcomm Atheros, Inc.
+All rights reserved
+Confidential and Proprietary - Qualcomm Technologies, Inc.
+-->
+<body>
+
+<script type="text/javascript">//<![CDATA[
+		var cnt_down_tid = null;
+		var ethernetConfig = 0;
+		var cnt_down = 30;
+		var connection_requested = 0;
+
+		function count_down_request() {
+			if(ethernetConfig == 1)
+			{
+				verify_ethernet_connect();
+			}
+			else
+			{
+				if(connection_requested == 0)
+				{
+					verify_connecting();
+				}
+			}
+		}
+
+
+		function populate_join_form() {
+			var f = $("#join-network-form");
+			var e = '<input type="hidden" name="stage" value="join" />';
+			f.append($("<input/>").attr("type", "hidden").attr("name", "ssid").val(params.ssid));
+			params.key = (params.key)? params.key : "";
+			f.append($("<input/>").attr("type", "hidden").attr("name", "key").val(params.key));
+
+			if(params.static_ip_address)
+			{
+				e += '<input type="hidden" name="static_ip_address" value="' + params.static_ip_address + '" />';
+				e += '<input type="hidden" name="static_ip_subnet"  value="' + params.static_ip_subnet + '" />';
+				e += '<input type="hidden" name="static_ip_gateway" value="' + params.static_ip_gateway + '" />';
+				e += '<input type="hidden" name="static_ip_pri_dns" value="' + params.static_ip_pri_dns + '" />';
+				e += '<input type="hidden" name="static_ip_sec_dns" value="' + params.static_ip_sec_dns + '" />';
+			}
+			$(e).appendTo(f);
+		}
+
+		function populate_join_ethernet_form() {
+			var f = $("#join-ethernet-form");
+			if(params.static_ip_address)
+			{
+				var e = '<input type="hidden" name="static_ip_address" value="' + params.static_ip_address + '" />';
+				e += '<input type="hidden" name="static_ip_subnet"  value="' + params.static_ip_subnet + '" />';
+				e += '<input type="hidden" name="static_ip_gateway" value="' + params.static_ip_gateway + '" />';
+				e += '<input type="hidden" name="static_ip_pri_dns" value="' + params.static_ip_pri_dns + '" />';
+				e += '<input type="hidden" name="static_ip_sec_dns" value="' + params.static_ip_sec_dns + '" />';
+			}
+			else
+			{
+				var e = '<input type="hidden" name="dhcp" value="true" />';
+			}
+			$(e).appendTo(f);
+		}
+
+		function request_connect() {
+			$.post("/config/join", $("#join-network-form").serialize(),
+				function(data) {
+					//alert("Join network done");
+					//clearInterval(cnt_down_tid);
+					$("#connecting_div").hide();
+					$("#connected_div").show();
+			});
+		}
+
+		function verify_connect_success() {
+			$.post("/config/check_connect_status", $("#check-connect-form").serialize(),
+			function(data) {
+				if(data == 0) {
+					$("#connecting_div").hide();
+					$("#connected_div").show();
+					request_connect();
+				}
+				else
+				{
+					var fail_form = $("#connection-failure-form");
+					fail_form.append($("<input/>").attr("type","hidden").attr("name","ssid").val(params.ssid));
+					fail_form.append($("<input/>").attr("type","hidden").attr("name","connection_failure").val(data));
+					fail_form.submit();
+				}
+			});
+		}
+
+		function verify_connect() {
+			$.post("/config/verify_connect", $("#join-network-form").serialize(),
+			function(data) {
+			});
+			cnt_down_tid = setInterval(count_down_request, 1000);
+		}
+
+		function verify_ethernet_connect() {
+			connection_requested = 1;
+			$.post("/config/verify_connecting", $("#verify-connecting-form").serialize(),
+				function(data) {
+					if(data == 0) {
+						$("#connecting_div").hide();
+						$("#connected_div").show();
+						clearInterval(cnt_down_tid);
+					}
+				});
+		}
+		function connect_ethernet() {
+			$.post("/config/ethernet_connect", $("#join-ethernet-form").serialize(),
+			function(data) {
+				$("#connecting_div").hide();
+				$("#connected_div").show();
+				apply_ethernet_changes();
+			});
+		}
+
+		function apply_ethernet_changes() {
+			$.post("/config/ethernet_apply", $("#apply-ethernet-form").serialize(),
+			function(data) {
+			});
+		}
+
+		function verify_connecting() {
+			connection_requested = 1;
+			$.post("/config/verify_connecting", $("#verify-connecting-form").serialize(),
+				function(data) {
+					if(data == 0) {
+						verify_connect_success();
+					}
+					else
+					{
+						connection_requested = 0;
+					}
+				});
+		}
+
+		$(function() {
+			if (params.interface == "ethernet") {
+				ethernetConfig = 1;
+				populate_join_ethernet_form();
+				connect_ethernet();
+			}
+			else if  (params.interface == "wifi")
+			{
+				ethernetConfig = 0;
+				if (params.stage == "verify") {
+					populate_join_form();
+					setTimeout(verify_connect, 1000);
+				}
+				else {
+					setTimeout(request_connect, 1000);
+				}
+			}
+		});
+
+//]]></script>
+
+
+	<div id="wrapper_root" class="force_width_outer_wrapper custom_background_image custom_background_image_connect">
+		<div class="force_width_inner_wrapper">
+			<div class="header">
+				<div class="header_logo">&nbsp;</div><!-- /header_logo -->
+			</div><!-- /header -->
+
+
+
+		<div id="connecting_div">
+			<div class="activity_header">
+				<div class="activity_title">
+				<%_Connecting%>
+				</div><!-- /activity_title -->
+			</div><!-- /activity_title_header -->
+
+			<div class="activity_content_wrapper">
+				<div class="information_field">
+				<%_Connecting, please wait...%>
+				<hr/>
+				</div><!-- /information_field -->
+
+				<div class="connect_animation_wrapper">
+					<div id="connect_animation_overlay"></div>
+				</div>
+			</div><!-- /activity_content_wrapper -->
+		</div><!-- /connecting_div -->
+
+
+
+		<div id="connected_div" style="display: none;">
+			<div class="activity_header">
+				<div class="activity_title">
+				<%_You're connected!%>
+				</div><!-- /activity_title -->
+			</div><!-- /activity_title_header -->
+
+			<div class="activity_content_wrapper">
+				<div class="information_field">
+					<%_Your network connection may be lost shortly.%><br/><br/>
+					<%_Please make sure that you have the Qualcomm<sup>&#174;</sup> AllPlay<sup>&#8482;</sup> Jukebox app
+					installed on your mobile device to begin streaming music.%><br/><br/>
+				</div><!-- /information_field -->
+				<div class="information_field">
+					<div class="center100Percent">
+						<img src="/images/PhoneConnected.png" />
+					</div>
+				</div><!-- /information_field -->
+			</div><!-- /activity_content_wrapper -->
+		</div><!-- /connected_div -->
+
+			<div class="activity_content_shadow_wrapper">
+				<div class="activity_content_shadow_left"></div>
+				<div class="activity_content_shadow_right"></div>
+				<div class="activity_content_shadow_middle"></div>
+				<div class="float_clear"></div>
+			</div><!-- /activity_content_shadow_wrapper -->
+			<!-- powered by float -->
+			<div class="powered_by_footer  float_left">&nbsp;</div>
+			<!-- /powered by float -->
+			<div class="float_clear"></div>
+
+		</div><!-- /force_width_inner_wrapper -->
+
+		<!-- hidden forms -->
+		<div style="display: none;">
+			<form id="apply-ethernet-form" action="/config/ethernet_apply" method="post">
+			</form>
+			<form id="join-ethernet-form" action="/config/ethernet_connect" method="post">
+			</form>
+			<form id="join-network-form" action="/config/join" method="post">
+			</form>
+			<form id="check-connect-form" action="/config/check_connect_status" method="post">
+			</form>
+			<form id="verify-connecting-form" action="/config/verify_connecting" method="post">
+			</form>
+			<form id="overview-form" action="/ui/overview" method="get">
+			</form>
+			<form id="connection-failure-form" action="/ui/select" method="get">
+			</form>
+		</div>
+		<!-- /hidden forms -->

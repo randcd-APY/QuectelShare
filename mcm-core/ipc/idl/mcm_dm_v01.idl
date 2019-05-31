@@ -1,0 +1,182 @@
+/*****************************************************************************
+ @FILE mcm_dm_v01.idl
+ @BRIEF IoE Mobile Connection Manager Device Manager API (MCM_DM)
+ @DESCRIPTION
+     This API provides the Data Structures for managing a mobile
+     connection device, typically a modem, fusion of modems or multiple modems.
+
+  MCM API Major Version 0
+  MCM API Minor Version 1
+
+  @COPYRIGHT Copyright (c) 2013 Qualcomm Technologies, Inc.
+  All rights reserved.
+  Confidential and Proprietary - Qualcomm Technologies, Inc.
+*****************************************************************************/
+
+include "mcm_common_v01.idl";
+
+revision 1;
+
+//=============================================================================
+// CONSTANTS
+//=============================================================================
+const MCM_MAX_ARRAY_LIMIT = 252; //!< Max array limit
+
+//=============================================================================
+// DATA TYPES
+//=============================================================================
+
+enum {
+ MCM_DM_RADIO_MODE_OFFLINE = 0x0001, //!< Radio power off or unknown.
+ MCM_DM_RADIO_MODE_ONLINE = 0x0002, //!< Radio online.
+ MCM_DM_RADIO_MODE_UNAVAILABLE = 0x0003 //!< Radio unvailable.
+
+} mcm_dm_radio_mode_t;
+
+
+//=============================================================================
+// MESSAGES
+//=============================================================================
+
+//=============================================================================
+/** @COMMAND MCM_DM_GET_RADIO_MODE
+    @CMD_VERSION 1.0
+    @BRIEF Gets the radio mode of the device.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG  MCM_DM_GET_RADIO_MODE_REQ
+//! @TYPE Request
+//! @SENDER Control point
+//----------------------------------------------------------------------------
+message {
+}  mcm_dm_get_radio_mode_req_msg;
+
+//! @MSG  MCM_DM_GET_RADIO_MODE_RESP
+//! @TYPE Response
+//! @SENDER Service
+//----------------------------------------------------------------------------
+message {
+ mandatory mcm_response_t response;
+ optional mcm_dm_radio_mode_t radio_mode; //!< Current radio power level; must
+                                          //!< be one of the modes in
+                                          //!< mcm_dm_radio_mode_t_v01.
+}  mcm_dm_get_radio_mode_resp_msg;
+/** @ERROR
+    MCM_SUCCESS
+    MCM_ERROR_GENERIC
+    MCM_ERROR_BADPARM
+    MCM_ERROR_MEMORY
+    MCM_ERROR_INVALID_STATE
+*/
+
+//=============================================================================
+// Module specific APIs
+//=============================================================================
+//=============================================================================
+/** @COMMAND MCM_DM_SET_RADIO_MODE
+    @CMD_VERSION 1.0
+    @BRIEF Sets the device radio mode.
+    @DESCRIPTION
+       - Generates an MCM_DM_RADIO_MODE_CHANGED_IND on a completed state change
+       - MCM_DM_SET_RADIO_MODE_RESP is sent only when the operation is
+         completed successfully, or if the operation is met with a failure.
+
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG  MCM_DM_SET_RADIO_MODE_REQ
+//! @TYPE Request
+//! @SENDER Control point
+//----------------------------------------------------------------------------
+message {
+ mandatory mcm_dm_radio_mode_t radio_mode;//!< Radio power level to set.
+} mcm_dm_set_radio_mode_req_msg;
+
+//! @MSG  MCM_DM_SET_RADIO_MODE_RESP
+//! @TYPE Response
+//! @SENDER Service
+//----------------------------------------------------------------------------
+message {
+ mandatory mcm_response_t response; //!< Result code.
+ optional uint8 no_change; //!< No change.
+}  mcm_dm_set_radio_mode_resp_msg;
+/** @ERROR
+    MCM_SUCCESS
+    MCM_ERROR_GENERIC
+    MCM_ERROR_BADPARM
+    MCM_ERROR_MEMORY
+    MCM_ERROR_INVALID_STATE
+*/
+
+
+//=============================================================================
+// EVENT REGISTER
+//=============================================================================
+//=============================================================================
+/** @COMMAND MCM_DM_EVENT_REGISTER
+    @CMD_VERSION 1.0
+    @BRIEF Registers for an indication of events.
+    @DESCRIPTION
+     Corresponding events and their indications:
+          - Radio mode changed event (mcm_dm_radio_mode_changed_event_ind)
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+
+//! @MSG  MCM_DM_EVENT_REGISTER_REQ
+//! @TYPE Request
+//! @SENDER Control point
+//----------------------------------------------------------------------------
+message {
+    optional boolean register_radio_mode_changed_event; //!< Radio mode changed event.
+} mcm_dm_event_register_req_msg;
+
+//! @MSG  MCM_DM_EVENT_REGISTER_RESP
+//! @TYPE Response
+//! @SENDER Service
+//----------------------------------------------------------------------------
+message {
+    mandatory mcm_response_t response; //!< Result code.
+} mcm_dm_event_register_resp_msg;
+/** @ERROR
+    MCM_SUCCESS
+    MCM_ERROR_GENERIC
+    MCM_ERROR_BADPARM
+    MCM_ERROR_MEMORY
+    MCM_ERROR_INVALID_STATE
+*/
+
+//============================================================================
+// EVENT INDICATIONS
+//============================================================================
+//=============================================================================
+/** @COMMAND MCM_DM_RADIO_MODE_CHANGED_EVENT_IND
+    @CMD_VERSION 1.0
+    @BRIEF Indication when the radio mode is changed.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+
+//! @MSG  MCM_DM_RADIO_MODE_CHANGED_EVENT_IND
+//! @TYPE Indication
+//! @SENDER Service
+//----------------------------------------------------------------------------
+message {
+  optional mcm_dm_radio_mode_t radio_mode; //! Radio mode.
+} mcm_dm_radio_mode_changed_event_ind_msg;
+
+//============================================================================
+// File footer
+//============================================================================
+/*
+@FOOTER
+*/
+
+//============================================================================
+// End of Module
+//============================================================================

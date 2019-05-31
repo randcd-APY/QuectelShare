@@ -1,0 +1,692 @@
+diff --git a/Makefile.am b/Makefile.am
+index c8c0065..84f39c6 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -87,6 +87,17 @@ requiredlibs += $(ATH6KL_UTILS_LIBS) $(LIBNL_LIBS) -lrt
+ c_sources += ftm_wlan.c
+ endif
+ 
+-ftmdaemon_SOURCES = $(c_sources)
+-ftmdaemon_LDADD = -ldl $(requiredlibs) -lbtnv
+-bin_PROGRAMS = ftmdaemon
++if CONFIG_FTM_QUARTZ
++AM_CFLAGS += -DCONFIG_FTM_QUARTZ -DCONFIG_DAEMON_MODE
++AM_CFLAGS += -Idiag
++AM_CPPFLAGS += -Idiag
++
++requiredlibs +=  -lrt -lpthread
++
++c_sources += diag/diag_api.c
++c_sources += ftm_bt.c
++endif
++
++ftmdaemon_qz_SOURCES = $(c_sources)
++ftmdaemon_qz_LDADD = -ldl $(requiredlibs)
++bin_PROGRAMS = ftmdaemon_qz
+diff --git a/configure.ac b/configure.ac
+index b50f7f8..7c40861 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -116,6 +116,16 @@ AC_ARG_ENABLE([bt],
+ 
+ AM_CONDITIONAL([CONFIG_FTM_BT], [test x$bt = xtrue -o x$all = xtrue])
+ 
++AC_ARG_ENABLE([quartz],
++        [  --enable-quartz Enable QUARTZ FTM functionality],
++        [case "${enableval}" in
++            yes) quartz=true ;;
++            no)  quartz=false ;;
++            *) AC_MSG_ERROR([bad value ${enableval} for --enable-quartz]) ;;
++        esac],[quartz=false])
++
++AM_CONDITIONAL([CONFIG_FTM_QUARTZ], [test x$quartz = xtrue -o x$all = xtrue])
++
+ AC_ARG_ENABLE(target,
+   [AS_HELP_STRING([--enable-target=TARGET], [Specify the target product to build])],
+   [TARGET=$enableval],
+diff --git a/ftm_bt.c b/ftm_bt.c
+index e4073eb..157d5da 100644
+--- a/ftm_bt.c
++++ b/ftm_bt.c
+@@ -45,14 +45,22 @@ when       who     what, where, why
+ #include <stdio.h>
+ #include <cutils/properties.h>
+ #include <pthread.h>
++#if defined(CONFIG_FTM_QUARTZ)
++#include "log.h"
++#include "diagpkt.h"
++#include "ftm_dbg.h"
++#else
+ #include "ftm_bt_power_hal.h"
+ #include "ftm_bt_hci_hal.h"
+ #include "ftm_bt.h"
++#endif
+ #include "ftm_common.h"
+ #include <string.h>
++#if !defined(CONFIG_FTM_QUARTZ)
+ #ifdef BT_NV_SUPPORT
+ #include "ftm_bt_persist.h"
+ #endif
++#endif
+ 
+ #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
+ #define I2C_SLAVE_ADDR 0x0C
+@@ -61,6 +69,7 @@ when       who     what, where, why
+ #define NVM_PAYLOAD_MAXLENGTH (1024)
+ #define MAX_FILE_NAME         (255)
+ 
++#if !defined(CONFIG_FTM_QUARTZ)
+ extern uint8_t is_slim_bus_test;
+ int fd_pintest = -1;
+ FILE *fp;
+@@ -246,12 +255,14 @@ ftm_bt_soc_runtime_cfg_type soc_cfg_parameters;
+ #endif
+ /* Peek table Loop count for 4025 R3 SoC */
+ uint loopCount;
++#endif /* !CONFIG_FTM_QUARTZ */
+ /* Command Queue front pointer */
+ cmdQ *front = NULL;
+ /* Command Queue rear pointer */
+ cmdQ *rear = NULL;
+ /* cmd count for unprocessed cmds in queue */
+ uint32 num_pending_cmds = 0;
++#if !defined(CONFIG_FTM_QUARTZ)
+ /* Descriptors for connectivity test */
+ static int fd_i2c;
+ static char ctime_buf[10];
+@@ -266,6 +277,7 @@ char *get_current_time(void)
+     strftime(ctime_buf, 10, "%T", localtime(&ctime));
+     return ctime_buf;
+ }
++#endif /* !CONFIG_FTM_QUARTZ */
+ /*===========================================================================
+ FUNCTION   qinsert_cmd
+ 
+@@ -284,7 +296,11 @@ SIDE EFFECTS
+   increments the number of commands queued
+ 
+ ===========================================================================*/
++#ifdef CONFIG_FTM_QUARTZ
++boolean qinsert_cmd(void *ftm_bt_pkt, uint16 len)
++#else
+ boolean qinsert_cmd(ftm_bt_pkt_type *ftm_bt_pkt)
++#endif
+ {
+   cmdQ *newitem;
+ #ifdef FTM_DEBUG
+@@ -293,28 +309,39 @@ boolean qinsert_cmd(ftm_bt_pkt_type *ftm_bt_pkt)
+ #endif
+   if(num_pending_cmds == 20)
+   {
+-     ftm_log_send_msg(&event_buf_user_unknown_err[0],logsize);
++//     ftm_log_send_msg(&event_buf_user_unknown_err[0],logsize);
+      return FALSE;
+   }
+   newitem = (cmdQ*)malloc(sizeof(cmdQ));
+   if(newitem == NULL)
+   {
+-    ftm_log_send_msg(&event_buf_user_unknown_err[0],logsize);
++//    ftm_log_send_msg(&event_buf_user_unknown_err[0],logsize);
+     return FALSE;
+   }
+   newitem->next=NULL;
++#ifdef CONFIG_FTM_QUARTZ
++  newitem->data = (void *)malloc(len);
++#else
+   newitem->data = (void *)malloc(ftm_bt_pkt->ftm_hdr.cmd_data_len);
++#endif
+   if(newitem->data == NULL)
+   {
+     free(newitem);
+-    ftm_log_send_msg(&event_buf_user_unknown_err[0],logsize);
++//    ftm_log_send_msg(&event_buf_user_unknown_err[0],logsize);
+     return FALSE;
+   }
+   /* Copy the data into the queue buffer */
++#ifdef CONFIG_FTM_QUARTZ
++  memcpy(newitem->data,(void*)ftm_bt_pkt, len);
++  /* Set Flag to notify BT command*/
++  newitem->bt_command = 0;
++  newitem->cmd_len = len;
++#else
+   memcpy(newitem->data,(void*)ftm_bt_pkt->data, ftm_bt_pkt->ftm_hdr.cmd_data_len);
+   /* Set Flag to notify BT command*/
+   newitem->bt_command = 1;
+   newitem->cmd_len = ftm_bt_pkt->ftm_hdr.cmd_data_len;
++#endif
+ 
+   if(front==NULL && rear==NULL)
+   {
+@@ -365,7 +392,11 @@ void dequeue_send()
+     delitem=front;
+     if(delitem)
+     {
++#if defined(CONFIG_FTM_QUARTZ)
++      ftm_quartz_dispatch(delitem->data,delitem->cmd_len);
++#else
+       ftm_bt_dispatch(delitem->data,delitem->cmd_len);
++#endif
+       front=front->next;
+       if(front == NULL)
+       {
+@@ -431,6 +462,7 @@ void cleanup_pending_cmd_queue()
+ #endif
+ }
+ 
++#if !defined(CONFIG_FTM_QUARTZ)
+ /*===========================================================================
+ FUNCTION   ftm_bt_err_timedout
+ 
+@@ -982,6 +1014,7 @@ void ftm_bt_hci_hal_vs_event
+     }
+   }
+ } /* ftm_bt_hci_hal_vs_event */
++#endif /* CONFIG_FTM_QUARTZ */
+ 
+ /*===========================================================================
+ FUNCTION   ftm_log_send_msg
+@@ -1003,6 +1036,26 @@ SIDE EFFECTS
+ 
+ 
+ void ftm_log_send_msg(const uint8 *pEventBuf,int event_bytes)
++#if defined(CONFIG_FTM_QUARTZ)
++{
++    ftm_quartz_log_pkt_type*  ftm_quartz_log_pkt_ptr = NULL;
++
++    if((pEventBuf == NULL) || (event_bytes == 0))
++      return;
++
++    // event_bytes - 5: remove header (4 bytes) and tail (1 byte)
++    ftm_quartz_log_pkt_ptr =
++	    (ftm_quartz_log_pkt_type *)log_alloc(LOG_BT_HCI_EV_C, FTM_QUARTZ_LOG_HEADER_SIZE + event_bytes - 5);
++    if (ftm_quartz_log_pkt_ptr == NULL)
++    {
++      DPRINTF(FTM_DBG_ERROR,"%s, log buffer alloc fail\n",__func__);
++      return;
++    }
++    memcpy((void *)ftm_quartz_log_pkt_ptr->data,(char *)pEventBuf + 4, event_bytes-1);
++    log_commit( ftm_quartz_log_pkt_ptr );
++    return ;
++}
++#else
+ {
+   if (strcasecmp(transport_type, "smd") || ((pEventBuf != NULL) && (pEventBuf[0] == FTM_BT_CMD_NV_READ)))
+   {
+@@ -1043,6 +1096,9 @@ void ftm_log_send_msg(const uint8 *pEventBuf,int event_bytes)
+     }
+   }
+ }
++#endif
++
++#if !defined(CONFIG_FTM_QUARTZ)
+ /*===========================================================================
+ FUNCTION   ftm_bt_hci_hal_send_reset_cmd
+ 
+@@ -1991,3 +2047,4 @@ boolean isLatestTarget()
+     return TRUE;
+ #endif
+ }
++#endif /* !CONFIG_FTM_QUARTZ */
+diff --git a/ftm_bt.h b/ftm_bt.h
+index e1ed3e3..c625102 100644
+--- a/ftm_bt.h
++++ b/ftm_bt.h
+@@ -29,7 +29,7 @@ when       who     what, where, why
+                     task
+ ===========================================================================*/
+ 
+-#ifdef  CONFIG_FTM_BT
++#if defined(CONFIG_FTM_BT) || defined(CONFIG_FTM_QUARTZ)
+ 
+ #include "diagpkt.h"
+ #include <sys/types.h>
+@@ -43,6 +43,7 @@ when       who     what, where, why
+ ** ------------------------------------------------------------------------- */
+ 
+ #define FTM_BT_CMD_CODE 4          /* BT FTM Command code */
++#define FTM_I15P4_CMD_CODE 5       /* I15P4 FTM Command code */
+ #define FTM_FM_CMD_CODE 28         /* FM FTM Command code */
+ #define HCI_EVT_HDR_SIZE  3
+ #define HCI_ACL_HDR_SIZE  5
+@@ -282,4 +283,4 @@ SIDE EFFECTS
+ ===========================================================================*/
+ boolean isLatestTarget();
+ char *get_current_time(void);
+-#endif /* CONFIG_FTM_BT */
++#endif /* CONFIG_FTM_BT || CONFIG_FTM_QUARTZ*/
+diff --git a/ftm_common.h b/ftm_common.h
+index fc5d697..0bd6d6f 100644
+--- a/ftm_common.h
++++ b/ftm_common.h
+@@ -22,8 +22,12 @@ when       who     what, where, why
+                     I2C registers
+ ===========================================================================*/
+ 
+-#if defined(CONFIG_FTM_BT) || defined(CONFIG_FTM_FM)
++#if defined(CONFIG_FTM_BT) || defined(CONFIG_FTM_FM) || defined(CONFIG_FTM_QUARTZ)
++#if defined(CONFIG_FTM_QUARTZ)
++#include <comdef.h>
++#else
+ #include <ftm_bt_common.h>
++#endif
+ #include <semaphore.h>
+ #include <pthread.h>
+ /* Semaphore shared by the Event handler and main thread */
+@@ -35,6 +39,21 @@ extern sem_t semaphore_cmd_complete;
+ pthread_mutex_t fm_event_lock;
+ pthread_cond_t fm_event_cond;
+ 
++#if defined(CONFIG_FTM_QUARTZ)
++#define TRUE 1
++#define FALSE 0
++
++/* FTM Log Packet - Used to send back the event of a FTM Command */
++typedef PACKED struct
++{
++  log_hdr_type hdr;
++  byte         data[1];         /* Variable length payload,
++                                   look at FTM log id for contents */
++} ftm_quartz_log_pkt_type;
++
++#define FTM_QUARTZ_LOG_HEADER_SIZE (sizeof(ftm_quartz_log_pkt_type) - 1)
++#endif
++
+ typedef struct cmdQ
+ {
+   int command_id;/*Command id */
+@@ -62,7 +81,11 @@ SIDE EFFECTS
+   increments the number of commands queued
+ 
+ ===========================================================================*/
++#if defined(CONFIG_FTM_QUARTZ)
++boolean qinsert_cmd(void *ftm_bt_pkt, uint16 len);
++#else
+ boolean qinsert_cmd(ftm_bt_pkt_type *ftm_bt_pkt);
++#endif
+ /*===========================================================================
+ FUNCTION   dequeue_send
+ 
+@@ -82,6 +105,11 @@ SIDE EFFECTS
+ ===========================================================================*/
+ void dequeue_send();
+ 
++#if defined(CONFIG_FTM_QUARTZ)
++void ftm_quartz_dispatch(void *ftm_quartz_pkt ,int cmd_len );
++#endif
++
++#if !defined(CONFIG_FTM_QUARTZ)
+ /*===========================================================================
+ FUNCTION  i2c_write
+ 
+@@ -134,3 +162,4 @@ unsigned char len,
+ unsigned int slave_addr
+ );
+ #endif
++#endif
+diff --git a/ftm_main.c b/ftm_main.c
+index baa58a0..83b3c9b 100644
+--- a/ftm_main.c
++++ b/ftm_main.c
+@@ -78,13 +78,19 @@ when       who     what, where, why
+ #define strlcpy g_strlcpy
+ #endif
+ 
++#ifdef CONFIG_FTM_QUARTZ
++#include "diag_api.h"
++#endif
++
+ int boardtype = 8660;
+ int first_ant_command;
++int first_quartz_command;
+ 
+ static char *progname = NULL;
+ 
+ unsigned int g_dbg_level = FTM_DBG_DEFAULT;
+ 
++extern int diag_hdlc_toggle(uint8 hdlc_support);
+ #define SHOW_PRIO 1
+ #define SHOW_TIME 2
+ #define SHOW_POLICY 4
+@@ -97,7 +103,7 @@ unsigned int g_dbg_level = FTM_DBG_DEFAULT;
+ static int sk;
+ #endif
+ 
+-#ifdef CONFIG_FTM_BT
++#if defined(CONFIG_FTM_BT) || defined(CONFIG_FTM_QUARTZ)
+ /* Semaphore to monitor the completion of
+ * the queued command before sending down the
+ * next HCI cmd
+@@ -176,6 +182,18 @@ static const diagpkt_user_table_entry_type nfc_ftm_diag_func_table[] =
+ };
+ #endif /* CONFIG_FTM_NFC */
+ 
++#ifdef CONFIG_FTM_QUARTZ
++/* Callback declaration for QUARTZ FTM packet processing */
++void *quartz_ftm_diag_dispatch (void *req_pkt, uint16 pkt_len);
++
++/*Diag pkt table for QUARTZ */
++static const diagpkt_user_table_entry_type quartz_ftm_diag_func_table[] =
++{
++  {FTM_BT_CMD_CODE, FTM_BT_CMD_CODE, quartz_ftm_diag_dispatch},
++  {FTM_I15P4_CMD_CODE, FTM_I15P4_CMD_CODE, quartz_ftm_diag_dispatch}
++};
++#endif /* CONFIG_FTM_QUARTZ */
++
+ #ifdef CONFIG_FTM_BT
+ #ifndef ANDROID
+ /* set up Socket connection to btproperty */
+@@ -621,6 +639,195 @@ void *nfc_ftm_diag_dispatch
+ }
+ #endif /* CONFIG_FTM_NFC */
+ 
++#ifdef CONFIG_FTM_QUARTZ
++void* hdl = NULL;
++
++/* Reader thread handle */
++pthread_t quartz_cmd_thread_hdl;
++
++#define QUARTZ_FTM_CMD_RSP_LEN 1100
++static uint8 quartz_ftm_snd_buffer[QUARTZ_FTM_CMD_RSP_LEN];
++static uint8 quartz_ftm_rcv_buffer[QUARTZ_FTM_CMD_RSP_LEN];
++
++void diag_debug_dump(uint8 *buf, int len)
++{
++  int index = 0;
++  if (g_dbg_level | FTM_DBG_TRACE)
++  {
++    if(buf == NULL || len < 1)
++      printf("%s: FAIL!\n",__func__);
++    else
++    {
++      printf("%s:\n",__func__);
++      while(index < len)
++      {
++        printf("%02x  ", buf[index++]);
++        if (index % 8 == 0)
++          printf("\n");
++      }
++      printf("\n");
++    }
++  }
++}
++
++void *quartz_readerthread(void *ptr)
++{
++  boolean status = FALSE;
++  int ret;
++  void * rsp;
++
++  do
++  {
++    DPRINTF(FTM_DBG_TRACE, "%s: Receiving diag rsp from quartz\n",__func__);
++    ret = diag_recv(hdl, quartz_ftm_rcv_buffer, QUARTZ_FTM_CMD_RSP_LEN, 0);
++    if (ret != -1)
++    {
++      DPRINTF(FTM_DBG_INFO, "%s: Received, len = %d\n",__func__, ret);
++      diag_debug_dump(quartz_ftm_rcv_buffer, ret);
++      rsp = diagpkt_subsys_alloc (DIAG_SUBSYS_FTM, FTM_BT_CMD_CODE, ret-4);
++
++      if (rsp != NULL)
++      {
++        memcpy ((void *) rsp, (void *) quartz_ftm_rcv_buffer+4, ret-4);
++      }
++      else
++      {
++        DPRINTF(FTM_DBG_ERROR, "%s: diagpkt_subsys_alloc fail !\n",__func__);
++	break;
++      }
++      diagpkt_commit(rsp);
++      //ftm_log_send_msg(quartz_ftm_rcv_buffer, ret);
++      sem_post(&semaphore_cmd_complete);
++    }
++    else
++    {
++      DPRINTF(FTM_DBG_ERROR, "%s: diag_recv fail !\n",__func__);
++      break;
++    }
++  }
++  while(1);
++#ifdef FTM_DEBUG
++  printf("\nReader thread exited\n");
++#endif
++  return 0;
++}
++
++/*===========================================================================
++FUNCTION   quartz_ftm_diag_dispatch
++
++DESCRIPTION
++  Processes the request packet and sends it to the FTM QUARTZ layer for further
++  processing
++
++DEPENDENCIES
++  NIL
++
++RETURN VALUE
++  pointer to FTM QUARTZ Response packet
++
++SIDE EFFECTS
++  None
++
++===========================================================================*/
++void *quartz_ftm_diag_dispatch
++(
++  void *req_pkt,
++  uint16 pkt_len
++)
++{
++  void *rsp = NULL;
++  boolean status = TRUE;
++
++  DPRINTF(FTM_DBG_TRACE, "Send Response = %d\n",pkt_len);
++
++  // Allocate the same length as the request.
++#if 0
++  rsp = diagpkt_subsys_alloc (DIAG_SUBSYS_FTM, FTM_BT_CMD_CODE, pkt_len);
++
++  if (rsp != NULL)
++  {
++    memcpy ((void *) rsp, (void *) req_pkt, pkt_len);
++  }
++#endif
++  /* Spurious incoming request packets are occasionally received
++   * by DIAG_SUBSYS_FTM which needs to be ignored and accordingly responded.
++   * TODO: Reason for these spurious incoming request packets is yet to be
++   *       found, though its always found to be corresponding to this majic
++   *       length of 65532.
++   */
++  if (pkt_len == 65532)
++  {
++    DPRINTF(FTM_DBG_ERROR,"\nIgnore spurious DIAG packet processing & respond immediately");
++  }
++  else
++  {
++
++    DPRINTF(FTM_DBG_TRACE, "Insert QUARTZ packet = %d\n", pkt_len);
++
++    /* add the QUARTZ packet into the Cmd Queue
++     * and notify the main thread its queued
++     */
++    status = qinsert_cmd(req_pkt, pkt_len);
++    if(status == TRUE)
++      sem_post(&semaphore_cmd_queued);
++
++    DPRINTF(FTM_DBG_TRACE, "Insert QUARTZ packet done\n");
++
++  }
++  return (rsp);
++}
++
++/*===========================================================================
++FUNCTION   ftm_quartz_dispatch
++
++DESCRIPTION
++  Processes the QUARTZ FTM packet and dispatches the command to IOTD
++
++DEPENDENCIES
++  NIL
++
++RETURN VALUE
++  NIL,The error in the Command Processing is sent to the DIAG App on PC via
++  log packets
++
++SIDE EFFECTS
++  None
++
++===========================================================================*/
++void ftm_quartz_dispatch(void *ftm_quartz_pkt ,int cmd_len )
++{
++  //add header:
++  quartz_ftm_snd_buffer[0] = 0x7e;
++  quartz_ftm_snd_buffer[1] = 0x01;
++  quartz_ftm_snd_buffer[2] = cmd_len & 0xff;
++  quartz_ftm_snd_buffer[3] = (cmd_len>>8) & 0xff;
++
++  //copy pkt data
++  memcpy(quartz_ftm_snd_buffer + 4, (void*)ftm_quartz_pkt, cmd_len);
++
++  //add tail
++  quartz_ftm_snd_buffer[cmd_len + 4] = 0x7e;
++
++  DPRINTF(FTM_DBG_TRACE,"%s ",__func__);
++  diag_debug_dump(quartz_ftm_snd_buffer, cmd_len + 5);
++
++  if (first_quartz_command == 1)
++  {
++    pthread_create( &quartz_cmd_thread_hdl, NULL, quartz_readerthread, NULL);
++    first_quartz_command = 0;
++  }
++
++  if( diag_send(hdl, 0, quartz_ftm_snd_buffer, cmd_len + 5) == -1)
++  {
++    DPRINTF(FTM_DBG_ERROR, "Fail to send test data ....\n");
++    sem_post(&semaphore_cmd_complete);
++    return;
++  }
++  return ;
++}
++
++#endif /* CONFIG_FTM_QUARTZ */
++
+ static void usage(void)
+ {
+     fprintf(stderr, "\nusage: %s [options] \n"
+@@ -664,6 +871,7 @@ SIDE EFFECTS
+ int main(int argc, char *argv[])
+ {
+     int c;
++    int status = 0;
+     static struct option options[] =
+     {
+         {"help", no_argument, NULL, 'h'},
+@@ -754,8 +962,41 @@ int main(int argc, char *argv[])
+         exit(EXIT_FAILURE);
+     }
+ 
++#ifdef CONFIG_FTM_QUARTZ
++    status = diag_hdlc_toggle(1);
++    if (status == 1) {
++        DPRINTF(FTM_DBG_ERROR, "diag_mdlog: HDLC successfully disabled\n");
++    } else {
++        DPRINTF(FTM_DBG_ERROR, "diag_mdlog: Unable to switch the HDLC, exiting app\n");
++        exit(EXIT_FAILURE);
++    }
++#endif
++
+     DPRINTF(FTM_DBG_TRACE, "FTMDaemon: Diag_LSM_Init succesful\n");
+ 
++#ifdef CONFIG_FTM_QUARTZ
++    int ret;
++    hdl = diag_open("/iotdiag");
++    if(!hdl)
++    {
++        DPRINTF(FTM_DBG_ERROR, "ftmd: open /iotdiag\n");
++        exit(EXIT_FAILURE);
++    }
++
++#if 0
++    //Receive the first command from Quartz, wait for 10s
++    ret = diag_recv(hdl, quartz_ftm_rcv_buffer, QUARTZ_FTM_CMD_RSP_LEN, 10000);
++    if (ret != -1)
++    {
++      diag_debug_dump(quartz_ftm_rcv_buffer, ret);
++    }
++    else
++    {
++      DPRINTF(FTM_DBG_INFO,"%s: timeout, miss the first diag event\n",__func__);
++    }
++#endif
++#endif
++
+ #ifdef CONFIG_FTM_BT
+     soc_type = get_bt_soc_type();
+ #endif
+@@ -776,14 +1017,24 @@ int main(int argc, char *argv[])
+     DIAGPKT_DISPATCH_TABLE_REGISTER( DIAG_SUBSYS_FTM, nfc_ftm_diag_func_table);
+ #endif
+ 
+-#ifdef CONFIG_FTM_BT
++#if defined(CONFIG_FTM_BT) || defined(CONFIG_FTM_QUARTZ)
++#if defined(CONFIG_FTM_QUARTZ)
++    DIAGPKT_DISPATCH_TABLE_REGISTER( DIAG_SUBSYS_FTM, quartz_ftm_diag_func_table);
++#else
+     DIAGPKT_DISPATCH_TABLE_REGISTER( DIAG_SUBSYS_FTM, bt_ftm_diag_func_table);
++#endif
+ 
+     sem_init(&semaphore_cmd_complete,0, 1);
+     sem_init(&semaphore_cmd_queued,0,0);
+     first_ant_command = 0;
++    first_quartz_command = 1;
+ 
++
++#if defined(CONFIG_FTM_QUARTZ)
++    DPRINTF(FTM_DBG_TRACE, "Initialised the QUARTZ FTM cmd queue handlers \n");
++#else
+     DPRINTF(FTM_DBG_TRACE, "Initialised the BT FTM cmd queue handlers \n");
++#endif
+ 
+     do
+     {
+@@ -796,7 +1047,7 @@ int main(int argc, char *argv[])
+                 "Wait on cmd complete from the previous command\n");
+         if (clock_gettime(CLOCK_REALTIME, &ts) == -1)
+             printf("get clock_gettime error");
+-        ts.tv_sec += 5;
++        ts.tv_sec += 10;
+         /*we wait for 5 secs for a command already queued for
+          * transmision
+          */
+@@ -804,7 +1055,11 @@ int main(int argc, char *argv[])
+         if(sem_status == -1)
+         {
+             printf("Command complete timed out\n");
++#if defined(CONFIG_FTM_QUARTZ)
++	    //TODO: timeout
++#else
+             ftm_bt_err_timedout();
++#endif
+         }
+ 
+         DPRINTF(FTM_DBG_TRACE, "Waiting on next Cmd to be queued\n");
+@@ -813,7 +1068,7 @@ int main(int argc, char *argv[])
+         dequeue_send();
+     }
+     while(1);
+-#else /* CONFIG_FTM_BT */
++#else /* CONFIG_FTM_BT || CONFIG_FTM_QUARTZ*/
+ #ifdef CONFIG_FTM_FM
+     pthread_cond_init(&fm_event_cond, NULL);
+     pthread_mutex_init(&fm_event_lock, NULL);
+@@ -826,6 +1081,12 @@ int main(int argc, char *argv[])
+     pthread_cond_destroy(&fm_event_cond);
+     pthread_mutex_destroy(&fm_event_lock);
+ #endif
++
++#ifdef CONFIG_FTM_QUARTZ
++    diag_close(hdl);
++    first_quartz_command = 0;
++#endif
++
+     /* Clean up before exiting */
+     Diag_LSM_DeInit();
+ 

@@ -1,0 +1,4 @@
+QT_QPA_EVDEV_TOUCHSCREEN_PARAMETERS=/dev/input/event1
+QT_QPA_GENERIC_PLUGINS=evdevmouse:/dev/input/event1
+QT_QPA_PLATFORM=linuxfb:tty=/dev/fb0
+QT_QPA_FONTDIR=/usr/lib/qt5/fonts

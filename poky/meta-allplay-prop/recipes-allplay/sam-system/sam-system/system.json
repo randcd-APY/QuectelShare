@@ -1,0 +1,7 @@
+{
+	"system": {
+		"ethernetConfigured" : "No",
+		"state" : "unconfigured",
+		"wifiConfigured" : "No"
+	}
+}

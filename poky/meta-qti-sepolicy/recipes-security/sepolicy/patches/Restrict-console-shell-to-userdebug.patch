@@ -1,0 +1,30 @@
+From ff4848cc20777c2e7253ed1e6631ec783b941813 Mon Sep 17 00:00:00 2001
+From: Dennis Cagle <dcagle@codeaurora.org>
+Date: Tue, 7 Aug 2018 12:09:01 -0700
+Subject: [PATCH] Restrict console shell to userdebug
+
+Console logins should only be possible on debug builds
+
+Change-Id: I0b8648e237e6688bb7f4987ad13a1c8e85c070e3
+---
+ policy/modules/system/locallogin.te | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/policy/modules/system/locallogin.te b/policy/modules/system/locallogin.te
+index 8386084..cad01e5 100644
+--- a/policy/modules/system/locallogin.te
++++ b/policy/modules/system/locallogin.te
+@@ -193,7 +193,9 @@ optional_policy(`
+ ')
+ 
+ optional_policy(`
+-	unconfined_shell_domtrans(local_login_t)
++	userdebug_or_eng(`
++		unconfined_shell_domtrans(local_login_t)
++	')
+ ')
+ 
+ optional_policy(`
+-- 
+1.9.1
+

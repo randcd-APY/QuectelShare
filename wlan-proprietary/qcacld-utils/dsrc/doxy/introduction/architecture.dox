@@ -1,0 +1,47 @@
+/**
+@page intro_architecture_overview Architecture
+
+This SDK focuses on the DSRC library, APIs and Sample
+applications included with this kit.
+
+The following diagram shows the relationship between the major components involved
+in achieving the DSRC solution. QCACLD is the wlan host driver by Qualcomm Atheros.
+This driver runs in the kernel and interfaces with the Atheros wifi transciever
+over SDIO bus. DSRC library runs in the user space interacting with the QCACLD
+over ioctl and netlink interfaces through the linux kernel.
+
+\image html layers.svg
+
+DSRC library runs in the User Space of the Linux system. Application interface is
+functionally grouped as Data Path interface and Control Path inteface. Data Path
+interface is achieved over Linux Raw sockets. Control Path interface uses custom
+ioctl commands as well as netlink communication.
+
+@section intro_architecture_data Data Path
+
+In the data path the IO is performed over linux raw sockets.
+
+@subsection intro_architecture_data_tx_packet Sending Packets
+
+A packet for transmit can be prepended with an optional control header.
+\ref dsrc_ocb_tx_ctrl_hdr.
+
+A data packet can be one of these two forms.
+
+1. 802.3 with Ethertype or
+\image html tx_packet_1.svg
+
+2. 802.3 header with 802.2 LLC-SNAP header carrying the Ethertype
+\image html tx_packet_2.svg
+
+
+@subsection intro_architecture_data_rx_packet Recieving Packets
+
+Recieved packet will also provide optional information \ref dsrc_ocb_rx_stats_hdr
+describing the packet's data rate, recieved power, priority, etc.
+
+Use \ref dsrc_socket_recv_eth_frame_and_stats() for incoming packets.
+
+\image html rx_packet.svg
+
+*/

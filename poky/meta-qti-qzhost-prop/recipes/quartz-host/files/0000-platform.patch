@@ -1,0 +1,485 @@
+diff --git a/quartz-host/exthost/Linux/app/NB_QCLI_demo/build/Makefile b/quartz-host/exthost/Linux/app/NB_QCLI_demo/build/Makefile
+index e4e1aae..2c68e6c 100644
+--- a/quartz-host/exthost/Linux/app/NB_QCLI_demo/build/Makefile
++++ b/quartz-host/exthost/Linux/app/NB_QCLI_demo/build/Makefile
+@@ -63,10 +63,6 @@ endif
+ 
+ CFLAGS := $(INCLUDE_DIRS) -pthread -Wall -g -fno-strict-aliasing -Wno-unused-variable -Wno-pointer-sign -std=c99  $(DEFINES)
+ 
+-ifneq ($(DK_CROSS_COMPILE), true)
+-CFLAGS += -m32
+-endif
+-
+ LDFLAGS = -lpthread -lrt 
+ 
+ .PHONY:
+diff --git a/quartz-host/exthost/Linux/app/NB_QCLI_demo/src/hmi/hmi_demo.c b/quartz-host/exthost/Linux/app/NB_QCLI_demo/src/hmi/hmi_demo.c
+index 74e3267..729721e 100644
+--- a/quartz-host/exthost/Linux/app/NB_QCLI_demo/src/hmi/hmi_demo.c
++++ b/quartz-host/exthost/Linux/app/NB_QCLI_demo/src/hmi/hmi_demo.c
+@@ -538,6 +538,7 @@ static uint8_t Get_Next_MSDUHandle(void)
+    return(Ret_Val);
+ }
+ 
++uint32_t g_sigs_mask_data = 0;
+ /**
+    @brief Creates a new Send Info List Entry and adds current send info list.
+           If an entry already exists for the current device, it will be
+@@ -574,12 +575,13 @@ static Send_Info_List_Entry_t *CreateSendInfoListEntry(uint32_t Device_Index, ui
+       {
+ //xxx Comment out the timer related code since Linux OSAL doese not support
+ //xxx timer feature. Need to update the Linux OSAL implementation.
+-#if 0
++#if 1
+          /* Create the timer that will be used for the periodic transmission. */
+          Create_Timer_Attr.deferrable     = false;
+          Create_Timer_Attr.cb_type        = QAPI_TIMER_FUNC1_CB_TYPE;
+          Create_Timer_Attr.sigs_func_ptr  = (void *)Periodic_Send_Timer_CB;
+          Create_Timer_Attr.sigs_mask_data = NewEntry->Device_Index;
++         g_sigs_mask_data = NewEntry->Device_Index;
+          Result = qapi_Timer_Def(&(NewEntry->Timer), &Create_Timer_Attr);
+ 
+          if(Result != QAPI_OK)
+@@ -714,7 +716,8 @@ static void FreeSendInfoListEntry(Send_Info_List_Entry_t *Send_Info_List_Entry)
+    if(Send_Info_List_Entry->Period != 0)
+    {
+ //xxx
+-#if 0
++#if 1
++      qapi_Timer_Stop(Send_Info_List_Entry->Timer);
+       qapi_Timer_Undef(Send_Info_List_Entry->Timer);
+ #endif
+    }
+@@ -2943,7 +2946,7 @@ static QCLI_Command_Status_t HMI_Cmd_StartSend(uint32_t Parameter_Count, QCLI_Pa
+                         {
+ //xxx Comment out the following statements since the Linux OSAL layer does not provide timer feature.
+ //xxx Need to update the Linux OSAL layer.
+-#if 0
++#if 1
+                            /* Start the timer for periodic transmissions. */
+                            Set_Timer_Attr.time                   = Period;
+                            Set_Timer_Attr.reload                 = true;
+@@ -4237,7 +4240,7 @@ static void Periodic_Send_Timer_CB(uint32_t data)
+    qapi_Status_t           Result;
+ 
+    /* Find the send info in the list. */
+-   Send_Info_List_Entry = GetSendInfoListEntryByDeviceIndex(data);
++   Send_Info_List_Entry = GetSendInfoListEntryByDeviceIndex(g_sigs_mask_data);
+    if(Send_Info_List_Entry != NULL)
+    {
+       /* Entry found, make sure the packet is ready for a new transmission. */
+diff --git a/quartz-host/exthost/Linux/app/NB_QCLI_demo/src/spple/spple_demo.c b/quartz-host/exthost/Linux/app/NB_QCLI_demo/src/spple/spple_demo.c
+index baa5c50..4bd504d 100644
+--- a/quartz-host/exthost/Linux/app/NB_QCLI_demo/src/spple/spple_demo.c
++++ b/quartz-host/exthost/Linux/app/NB_QCLI_demo/src/spple/spple_demo.c
+@@ -8,6 +8,7 @@
+ #include <string.h>
+ #include <stdlib.h>
+ 
++#include "qapi_timer.h"
+ #include "spple_demo.h"    /* Main Application Prototypes and Constants.*/
+ #include "qcli_util.h"
+ #include "qapi_ble.h"
+@@ -1144,12 +1145,15 @@ static unsigned long       PacketLength;
+ static unsigned char       TestBuffer[MAXIMUM_TEST_BUFFER];
+ static uint16_t            ConnectionHandle;
+ static uint32_t            TransmitPeriod;
++static qapi_TIMER_handle_t PeriodicSendTimer;
+ 
+    /* The following defines a data sequence that will be used to        */
+    /* generate message data.                                            */
+ static char  DataStr[]  = "~!@#$%^&*()_+`1234567890-=:;\"'<>?,./@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]`abcdefghijklmnopqrstuvwxyz{|}<>\n";
+ static int   DataStrLen = (sizeof(DataStr)-1);
+ 
++unsigned long  qurt_timer_get_ticks(void);
++
+    /*********************************************************************/
+    /**                     SPPLE Service Table                         **/
+    /*********************************************************************/
+@@ -1321,6 +1325,7 @@ static QCLI_Command_Status_t GetAdvertisingParameters(uint32_t Parameter_Count,
+ static QCLI_Command_Status_t SetAdvertisingParameters(uint32_t Parameter_Count, QCLI_Parameter_t *Parameter_List);
+ static QCLI_Command_Status_t GetConnectionParameters(uint32_t Parameter_Count, QCLI_Parameter_t *Parameter_List);
+ static QCLI_Command_Status_t SetConnectionParameters(uint32_t Parameter_Count, QCLI_Parameter_t *Parameter_List);
++static QCLI_Command_Status_t SetTestDataPeriod(uint32_t Parameter_Count, QCLI_Parameter_t *Parameter_List);
+ static QCLI_Command_Status_t SetDataLength(uint32_t Parameter_Count, QCLI_Parameter_t *Parameter_List);
+ static QCLI_Command_Status_t ConfigureAdvReportDisplay(uint32_t Parameter_Count, QCLI_Parameter_t *Parameter_List);
+ static QCLI_Command_Status_t QueryLocalOOBData(uint32_t Parameter_Count, QCLI_Parameter_t *Parameter_List);
+@@ -1768,6 +1773,7 @@ const QCLI_Command_t ble_cmd_list[] =
+    { SetAdvertisingParameters,       false, "SetAdvertisingParameters",      "[Minimum Advertising Interval (ms)] [Maximum Advertising Interval (ms)]",                                                            "Set BLE advertising parameters."                                              },
+    { GetConnectionParameters,        false, "GetConnectionParameters",       "",                                                                                                                                   "Query the current BLE connection parameters."                                 },
+    { SetConnectionParameters,        false, "SetConnectionParameters",       "[Minimum Connection Interval (ms)] [Maximum Connection Interval (ms)] [Slave Latency (number of Connection Events)]",                "Set BLE connection parameters."                                               },
++   { SetTestDataPeriod,              false, "SetTestDataPeriod",             "[BD_ADDR] [Period to wakeup and send data (milliseconds)] [Size of data to send (Bytes, >= 1)]",                                     "Sets a the periodic interval to wakeup and send data on connected device."    },
+    { SetDataLength,                  false, "SetDataLength",                 "[Suggested Packet Size]",                                                                                                            "Set suggested BLE packet size for connection."                                },
+    { ConfigureAdvReportDisplay,      false, "ConfigureAdvReportDisplay",     "[0 = Limited Advertising Display, 1 = Verbose Advertising Display]",                                                                  "Configure how much advertising data to display."                              },
+    { QueryLocalOOBData,              false, "QueryLocalOOBData",             "",                                                                                                                                    "Query local out of band data to send to remote device."                       },
+@@ -2910,6 +2916,54 @@ static void GenerateData2Send(unsigned int Length,  uint8_t *Data)
+    }
+ }
+ 
++   /* The following callback is the period timer callback that is       */
++   /* started for periodically transmitting data.                       */
++static void Period_Tx_Callback(uint32_t data)
++{
++   qapi_Status_t         Result;
++   unsigned long         Temp;
++   static unsigned long  DataIndex = 0;
++   qapi_TIMER_set_attr_t Set_Timer_Attr;
++
++   /* Verify that the stack is opened.                                  */
++   if(BluetoothStackID != 0)
++   {
++      /* Verify that a LE Connection Oriented Channel is open for data  */
++      /* transfer.                                                      */
++      if(CurrentTest == CURRENT_TEST_PERIODIC)
++      {
++         Temp = MAXIMUM_TEST_BUFFER - DataIndex;
++
++         if(PacketLength <= Temp)
++            Temp = PacketLength;
++
++         /* Send the data.                                              */
++         SendACLData(Temp, &(TestBuffer[DataIndex]));
++
++         DataIndex += Temp;
++
++         if(DataIndex >= MAXIMUM_TEST_BUFFER)
++            DataIndex = 0;
++      }
++   }
++
++   /* Restart the timer if necessary.                                   */
++   if(CurrentTest == CURRENT_TEST_PERIODIC)
++   {
++      /* Timer restart necessary, so configure according to the saved   */
++      /* parameters.                                                    */
++      Set_Timer_Attr.time                   = (uint64_t)TransmitPeriod;
++      Set_Timer_Attr.reload                 = true;
++      Set_Timer_Attr.max_deferrable_timeout = (uint64_t)TransmitPeriod;
++      Set_Timer_Attr.unit                   = QAPI_TIMER_UNIT_MSEC;
++
++      Result = qapi_Timer_Set(PeriodicSendTimer, &Set_Timer_Attr);
++      if(Result != QAPI_OK)
++         Display_Function_Error(ble_group, "qapi_Timer_Set", Result);
++   }
++   else
++      DataIndex = 0;
++}
+ /******************************************************************************/
+ /**  SendACLData(char *)                                                     **/
+ /******************************************************************************/
+@@ -5700,6 +5754,150 @@ static QCLI_Command_Status_t SetConnectionParameters(uint32_t Parameter_Count, Q
+    return(ret_val);
+ }
+ 
++   /* The following function is provided to enable a wakeup period to   */
++   /* wakeup for data transfer.  This function returns                  */
++   /* QCLI_STATUS_SUCCESS_E on success or an error enumeration if an    */
++   /* error occurs.                                                     */
++static QCLI_Command_Status_t SetTestDataPeriod(uint32_t Parameter_Count, QCLI_Parameter_t *Parameter_List)
++{
++   uint16_t                 _ConnectionHandle;
++   qapi_Status_t            Result;
++   qapi_BLE_BD_ADDR_t       BD_ADDR;
++   QCLI_Command_Status_t    ret_val;
++   qapi_TIMER_set_attr_t    Set_Timer_Attr;
++   qapi_TIMER_define_attr_t Create_Timer_Attr;
++
++   /* Next check to see if the parameters required for the execution of */
++   /* this function appear to be semi-valid.                            */
++   if((Parameter_Count >= 2) && (Parameter_List) && (strlen((char *)(Parameter_List[0].String_Value)) == (sizeof(qapi_BLE_BD_ADDR_t) * 2)) && (Parameter_List[1].Integer_Is_Valid))
++   {
++      /* Convert the parameter to a Bluetooth Device Address.           */
++      StrToBD_ADDR((char *)(Parameter_List[0].String_Value), &BD_ADDR);
++
++      if((Parameter_Count == 2) || ((Parameter_Count >= 3) && (Parameter_List[2].Integer_Is_Valid) && (Parameter_List[2].Integer_Value >= 1) && (Parameter_List[2].Integer_Value <= MaxACLPacketSize)))
++      {
++         if(Parameter_Count == 2)
++            PacketLength = 27;
++         else
++            PacketLength = Parameter_List[2].Integer_Value;
++
++         if(!qapi_BLE_GAP_LE_Query_Connection_Handle(BluetoothStackID, BD_ADDR, &_ConnectionHandle))
++         {
++            /* Check to see if we are starting or stopping the timer.   */
++            if(Parameter_List[1].Integer_Value == 0)
++            {
++               /* See if the timer is started.                          */
++               if(TransmitPeriod != 0)
++               {
++                  /* Stop the timer.                                    */
++                  qapi_Timer_Stop(PeriodicSendTimer);
++
++                  /* Clean up the timer.                                */
++                  qapi_Timer_Undef(PeriodicSendTimer);
++
++                  TransmitPeriod = 0;
++
++                  QCLI_Printf(ble_group, "Timer stopped.\n");
++               }
++               else
++                  QCLI_Printf(ble_group, "Timer already stopped.\n");
++
++               CurrentTest      = CURRENT_TEST_NONE;
++               ConnectionHandle = QAPI_BLE_HCI_CONNECTION_HANDLE_INVALID_VALUE;
++
++               ret_val          = QCLI_STATUS_SUCCESS_E;
++            }
++            else
++            {
++               /* Verify that the timer isn't already started.          */
++               if((TransmitPeriod == 0) && (CurrentTest == CURRENT_TEST_NONE))
++               {
++                  /* Create the timer.                                  */
++                  Create_Timer_Attr.deferrable     = false;
++                  Create_Timer_Attr.cb_type        = QAPI_TIMER_FUNC1_CB_TYPE;
++                  Create_Timer_Attr.sigs_func_ptr  = (void *)Period_Tx_Callback;
++                  Create_Timer_Attr.sigs_mask_data = 0;
++                  Result = qapi_Timer_Def(&(PeriodicSendTimer), &Create_Timer_Attr);
++
++                  /* Verify that the timer was started successfully.    */
++                  if(Result == QAPI_OK)
++                  {
++                     /* Start the timer for periodic transmissions.     */
++                     Set_Timer_Attr.time                   = (uint64_t)Parameter_List[1].Integer_Value;
++                     Set_Timer_Attr.reload                 = true;
++                     Set_Timer_Attr.max_deferrable_timeout = (uint64_t)Parameter_List[1].Integer_Value;
++                     Set_Timer_Attr.unit                   = QAPI_TIMER_UNIT_MSEC;
++                     Result = qapi_Timer_Set(PeriodicSendTimer, &Set_Timer_Attr);
++
++                     /* Start the timer.                                */
++                     if(Result == QAPI_OK)
++                     {
++                        /* Set the timer period.                        */
++                        TransmitPeriod = Parameter_List[1].Integer_Value;
++
++                        CurrentTest                 = CURRENT_TEST_PERIODIC;
++                        StartTime                   = qurt_timer_get_ticks();
++                        NumberBytes                 = 0;
++                        NumberOutstandingACLPackets = 0;
++
++                        /* Note the connection Handle.                  */
++                        ConnectionHandle            = _ConnectionHandle;
++
++                        QCLI_Printf(ble_group, "Timer started with period %u.\n", (unsigned int)TransmitPeriod);
++
++                        QCLI_Printf(ble_group, "Starting ACL Periodic TX Test, packet size: %u.\n", PacketLength);
++
++                        ret_val = QCLI_STATUS_SUCCESS_E;
++                     }
++                     else
++                     {
++                        /* Clean up the timer.                          */
++                        qapi_Timer_Undef(PeriodicSendTimer);
++
++                        Display_Function_Error(ble_group, "qapi_Timer_Set", Result);
++
++                        ret_val = QCLI_STATUS_ERROR_E;
++                     }
++                  }
++                  else
++                  {
++                     Display_Function_Error(ble_group, "qapi_Timer_Def", Result);
++
++                     ret_val = QCLI_STATUS_ERROR_E;
++                  }
++               }
++               else
++               {
++                  if(TransmitPeriod != 0)
++                     QCLI_Printf(ble_group, "Timer already started with period %u.\n", (unsigned int)TransmitPeriod);
++                  else
++                     QCLI_Printf(ble_group, "Test already in progress.\n");
++
++                  ret_val = QCLI_STATUS_ERROR_E;
++               }
++            }
++         }
++         else
++         {
++            QCLI_Printf(ble_group, "Device is not currently connected.\n");
++
++            ret_val = QCLI_STATUS_ERROR_E;
++         }
++      }
++      else
++      {
++         QCLI_Printf(ble_group, "Data Packet Size must be between 1 and  %u.\n", MaxACLPacketSize);
++
++         ret_val = QCLI_STATUS_ERROR_E;
++      }
++   }
++   else
++      ret_val = QCLI_STATUS_USAGE_E;
++
++   return(ret_val);
++}
++
++
+    /* The following function is provided to set the suggested Tx Packet */
+    /* Size for an LE connection.  This function returns                 */
+    /* QCLI_STATUS_SUCCESS_E on success or an error enumeration if an    */
+diff --git a/quartz-host/exthost/Linux/daemon/Makefile b/quartz-host/exthost/Linux/daemon/Makefile
+index 271fc95..b9474a7 100644
+--- a/quartz-host/exthost/Linux/daemon/Makefile
++++ b/quartz-host/exthost/Linux/daemon/Makefile
+@@ -74,11 +74,6 @@ CFLAGS = $(COPTS) $(DEFINES) $(INCLUDES)
+ LDFLAGS = -lpthread -lrt -g
+ OBJS := $(CSRCS:%.c=$(OBJDIR)/%.o)
+ 
+-ifneq ($(DK_CROSS_COMPILE),true)
+-	COPTS +=  -m32
+-	LDFLAGS +=  -m32
+-endif
+-
+ all: $(OBJS) $(HTC_MBOX_OBJS) $(HTC_DBG_OBJS) $(HTC_HIF_OBJS) $(HTC_OBJS)
+ 	$(CC) -o $(OUTDIR)/$(OUTFILE) $^ $(LDFLAGS)
+ 
+diff --git a/quartz-host/exthost/Linux/daemon/ipc/ipcManager.c b/quartz-host/exthost/Linux/daemon/ipc/ipcManager.c
+index 9575d25..9885168 100644
+--- a/quartz-host/exthost/Linux/daemon/ipc/ipcManager.c
++++ b/quartz-host/exthost/Linux/daemon/ipc/ipcManager.c
+@@ -425,19 +425,19 @@ int32_t ipcManager_init(void* pCxt)
+ 
+     if ((pIPCCxt->iotd_server = mq_open((const char *)pIPCCxt->server_q, O_RDONLY | O_CREAT, 0666, &attr)) == -1)
+     {
+-        iotd_log (0,"IPCM: Server error, mq_open (server) %d\n",strerror(errno));
++        iotd_log (0,"IPCM: Server error, mq_open (server) %s\n",strerror(errno));
+         exit (1);
+     }
+ 
+     if(pthread_create(&(pIPCCxt->tx_thread), NULL, ipcManager_TXthread,pCxt) != 0)
+     {
+-        iotd_log (0,"IPCM: Tx thread creation failed, %d\n",strerror(errno));
++        iotd_log (0,"IPCM: Tx thread creation failed, %s\n",strerror(errno));
+         exit(1);
+     }
+ 
+     if(pthread_create(&(pIPCCxt->rx_thread), NULL, ipcManager_RXthread,pCxt) != 0)
+     {
+-        iotd_log (0,"IPCM: Rx thread creation failed, %d\n",strerror(errno));
++        iotd_log (0,"IPCM: Rx thread creation failed, %s\n",strerror(errno));
+         exit(1);
+     }
+ 
+diff --git a/quartz-host/exthost/Linux/hif/spi/spi_regs.h b/quartz-host/exthost/Linux/hif/spi/spi_regs.h
+index a88a38b..66a5319 100644
+--- a/quartz-host/exthost/Linux/hif/spi/spi_regs.h
++++ b/quartz-host/exthost/Linux/hif/spi/spi_regs.h
+@@ -21,7 +21,7 @@
+ 
+ #define QZ_SPI_MODE                 SPI_MODE_3
+ #define QZ_SPI_BITS_PER_WORD        8
+-#define QZ_SPI_SPEED_HZ             128000 // 1 MHz
++#define QZ_SPI_SPEED_HZ             1000000 // 1 MHz
+ 
+ #define	MAX_LINE_SIZE  256
+ /*
+@@ -146,7 +146,7 @@
+ 
+ #define	TARGET_CPU_INT_WLAN         0x472
+ 
+-#define QZ_SPI_DEVICE              "/dev/spidev1.0"
++#define QZ_SPI_DEVICE              "/dev/spidev0.0"
+ 
+ #define SPIP_MAX_PAYLOAD_FRAME_LENGTH   133
+ #define SPIP_BUFFER_SIZE                136
+diff --git a/quartz-host/quartz/serializer/genedit_files/host/qapi_timer.c b/quartz-host/quartz/serializer/genedit_files/host/qapi_timer.c
+new file mode 100644
+index 0000000..25d5e89
+--- /dev/null
++++ b/quartz-host/quartz/serializer/genedit_files/host/qapi_timer.c
+@@ -0,0 +1,94 @@
++#include <stdlib.h>
++#include <unistd.h>
++#include <stdio.h>
++#include <signal.h>
++#include <time.h>
++
++#include "qapi_timer.h"
++
++#define CLOCKID CLOCK_REALTIME
++#define SIG SIGRTMIN
++
++qapi_Status_t qapi_Timer_Def(
++   qapi_TIMER_handle_t*    timer_handle,
++   qapi_TIMER_define_attr_t*  timer_attr
++)
++{
++    struct sigevent sev;
++    sigset_t mask;
++    struct sigaction sa;
++
++    timer_t* timerid = (timer_t*) malloc(sizeof(timer_t));
++    if (timerid == NULL) {
++        return QAPI_ERR_NO_MEMORY;
++    }
++
++    if (timer_attr->cb_type != QAPI_TIMER_FUNC1_CB_TYPE) {
++        return QAPI_ERR_NOT_SUPPORTED;
++    }
++
++    /* Establish handler for timer signal */
++    sa.sa_flags = SA_SIGINFO | SA_NODEFER;
++    sa.sa_sigaction = timer_attr->sigs_func_ptr;
++
++    sigemptyset(&sa.sa_mask);
++    if (sigaction(SIG, &sa, NULL) == -1)
++        return QAPI_ERROR;
++
++    /* Create the timer */
++
++    sev.sigev_notify = SIGEV_SIGNAL;
++    sev.sigev_signo = SIG;
++    sev.sigev_value.sival_ptr = &timerid;
++    if (timer_create(CLOCKID, &sev, timerid) == -1)
++        return QAPI_ERROR;
++
++    *timer_handle = timerid;
++
++     return QAPI_OK;
++}
++
++qapi_Status_t qapi_Timer_Set(
++   qapi_TIMER_handle_t    timer_handle,
++   qapi_TIMER_set_attr_t* timer_attr
++)
++{
++    struct itimerspec its;
++
++    if (timer_attr->unit == QAPI_TIMER_UNIT_MSEC) {
++        its.it_value.tv_sec = timer_attr->time / 1000;
++        its.it_value.tv_nsec = timer_attr->time % 1000 * 1000000;
++        its.it_interval.tv_sec = its.it_value.tv_sec;
++        its.it_interval.tv_nsec = its.it_value.tv_nsec;
++    } else {
++        return QAPI_ERR_NOT_SUPPORTED;
++    }
++
++    if (timer_settime(*(timer_t*)timer_handle, 0, &its, NULL) == -1)
++        return QAPI_ERROR;
++
++    return QAPI_OK;
++}
++
++qapi_Status_t qapi_Timer_Stop(
++    qapi_TIMER_handle_t    timer_handle
++)
++{
++    timer_delete(*(timer_t*)timer_handle);
++    return QAPI_OK;
++}
++
++qapi_Status_t qapi_Timer_Undef(
++    qapi_TIMER_handle_t    timer_handle
++)
++{
++    free(timer_handle);
++    return QAPI_OK;
++}
++
++
++unsigned long  qurt_timer_get_ticks()
++{
++   return 0;
++}
++       

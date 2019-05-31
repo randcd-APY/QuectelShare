@@ -1,0 +1,96 @@
+From b76364648d78998a67f9769e59aa6a945f5d00d0 Mon Sep 17 00:00:00 2001
+From: Navid Bahrani <nbahrani@codeaurora.org>
+Date: Wed, 20 Sep 2017 21:56:30 -0700
+Subject: [PATCH] protocol: Add wl_output.hdcp_protocol and wl_output.hdr_info events
+
+---
+ protocol/wayland.xml | 66 +++++++++++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 65 insertions(+), 1 deletion(-)
+
+diff --git a/protocol/wayland.xml b/protocol/wayland.xml
+index 42c9309..79219ee 100644
+--- a/protocol/wayland.xml
++++ b/protocol/wayland.xml
+@@ -1757,7 +1757,7 @@
+     </request>
+   </interface>
+ 
+-  <interface name="wl_output" version="2">
++  <interface name="wl_output" version="3">
+     <description summary="compositor output region">
+       An output describes part of the compositor geometry.  The
+       compositor works in the 'compositor coordinate system' and an
+@@ -1895,6 +1895,70 @@
+       </description>
+       <arg name="factor" type="int" summary="scaling factor of output"/>
+     </event>
++
++    <!-- Version 3 additions -->
++
++    <enum name="hdcp_version" since="3">
++      <description summary="hdcp version information">
++	This enumeration describes the hdcp protocol version.
++      </description>
++      <entry name="unknown" value="0"/>
++      <entry name="none" value="1"/>
++      <entry name="1_4" value="2"/>
++      <entry name="2_2" value="3"/>
++    </enum>
++
++    <enum name="hdcp_interface_type" since="3">
++      <description summary="hdcp interface type information">
++	This enumeration describes the hdcp physical-layer interface.
++      </description>
++      <entry name="unknown" value="0"/>
++      <entry name="none" value="1"/>
++      <entry name="mhl" value="2"/>
++      <entry name="hdmi" value="3"/>
++      <entry name="dvi" value="4"/>
++      <entry name="hdbaset" value="5"/>
++      <entry name="dp" value="6"/>
++      <entry name="usb" value="7"/>
++      <entry name="wirelesshd" value="8"/>
++      <entry name="whdi" value="9"/>
++      <entry name="dli" value="10"/>
++      <entry name="gvif" value="11"/>
++      <entry name="gmsl" value="12"/>
++      <entry name="diiva" value="13"/>
++      <entry name="miracast" value="14"/>
++      <entry name="independent" value="15"/>
++    </enum>
++
++    <event name="hdcp_protocol" since="3">
++      <description summary="hdcp parameters of the output">
++	The hdcp protocol event describes hdcp properties of the output.
++	The event is sent when binding to the output object and whenever
++	any of the properties change.
++      </description>
++      <arg name="version" type="uint"
++	   summary="hdcp protocol version  of the data stream"/>
++      <arg name="interface_type" type="uint"
++	   summary="hdcp physical-layer interface type of the data stream"/>
++    </event>
++
++    <enum name="hdr_supported" since="3">
++      <description summary="whether or not hdr is supported">
++	This enumeration describes if HDR is enabled.
++      </description>
++      <entry name="false" value="0"/>
++      <entry name="true" value="1"/>
++    </enum>
++
++    <event name="hdr_info" since="3">
++      <description summary="hdr parameters of the output">
++	The hdr info event describes the hdr properties of the display.
++	The event is sent when binding to the output object and whenever
++	any of the properties change.
++      </description>
++      <arg name="is_supported" type="uint"
++	   summary="if HDR is enabled"/>
++    </event>
+   </interface>
+ 
+   <interface name="wl_region" version="1">
+-- 
+1.9.1
+

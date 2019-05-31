@@ -1,0 +1,26 @@
+#! /bin/sh
+
+set -e
+
+case "$1" in
+  start)
+    echo -n "Starting qcbtdaemon: "
+    start-stop-daemon -S -b -a /usr/bin/qcbtdaemon
+    echo "done"
+    ;;
+  stop)
+    echo -n "Stopping qcbtdaemon: "
+    start-stop-daemon -K -n qcbtdaemon
+    echo "done"
+    ;;
+  restart)
+    $0 stop
+    $0 start
+    ;;
+  *)
+    echo "Usage qcbtdaemon { start | stop | restart }" >&2
+    exit 1
+    ;;
+esac
+
+exit 0

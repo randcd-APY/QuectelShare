@@ -1,0 +1,606 @@
+#!/bin/sh
+#
+# Copyright (C) 2012-2018 Qualcomm Technologies, Inc.
+# 2012-2016 Qualcomm Atheros Inc.
+# 2013-2015 Qualcomm Connected Experiences, Inc.
+#
+# All rights reserved
+# Confidential and Proprietary - Qualcomm Technologies, Inc.
+
+EXIT_OK=0
+EXIT_FAIL=1
+EXIT_BAD_PASSWD=2
+
+WIFI_DEV="$(cat "/sys/class/net/wlan0/phy80211/name")"
+SCAN_IFACE="scan"
+
+SYSTEM_CONF="system.json"
+#WIRELESS_CONF="wireless.json"
+NETWORK_CONF="network.json"
+ALLPLAY_CONF="allplay.json"
+
+configDel() {
+	local jsonPath="$1"
+	local jsonFile="/etc/allplay/$2"
+	local tmpFile="/tmp/$2"
+	[ -f "$jsonFile" ] \
+		&& jq "del(.$jsonPath)" "$jsonFile" > "$tmpFile" \
+		&& cp "$tmpFile" "$jsonFile" \
+		&& rm "$tmpFile"
+}
+
+configRead() {
+	local jsonPath="$1"
+	local jsonFile="/etc/allplay/$2"
+	[ -f "$jsonFile" ] && jq -ej ".$jsonPath // empty" "$jsonFile"
+}
+
+configWrite() {
+	local jsonPath="$1"
+	local jsonValue="$2"
+	local jsonFile="/etc/allplay/$3"
+	local tmpFile="/tmp/$3"
+	[ -f "$jsonFile" ] || echo '{}' > "$jsonFile"
+
+	jq ".$jsonPath=$jsonValue" "$jsonFile" > "$tmpFile" \
+		&& cp "$tmpFile" "$jsonFile" \
+		&& rm "$tmpFile"
+}
+
+configWriteString() {
+	configWrite "$1" "$(echo -n "$2" | jq -Rs ".")" "$3"
+}
+
+logConsole() {
+	local uptime=$(cat /proc/uptime | cut -d' ' -f1)
+	echo "[$uptime] statemgr: $1" > /dev/console
+}
+
+isWifiConfigured() {
+	[ "$(configRead system.wifiConfigured "$SYSTEM_CONF")" = Yes ]
+}
+
+setStateCommitSystem() {
+	configWriteString system.state "$1" "$SYSTEM_CONF"
+	# Alert sam-system of new state
+	systemctl kill --signal=USR2 sam-system
+	return 0
+}
+
+stateConfigured() {
+	#  Set LEDs to configured state
+	#setLEDsOperational
+	setStateCommitSystem "configured"
+}
+
+startWACServer() {
+	[ -e "/etc/init.d/wacserverd" ] && {
+		logConsole "Starting WAC Server..."
+		logger "statemgr ($$): Starting WAC Server..."
+		/etc/init.d/wacserverd start
+	}
+}
+
+stopWACServer() {
+	[ -e "/etc/init.d/wacserverd" ] && {
+		logConsole "Stopping WAC Server..."
+		logger "statemgr ($$): Stopping WAC Server..."
+		/etc/init.d/wacserverd stop
+	}
+}
+
+
+exitInitState() {
+	: # Nothing to do
+}
+
+enterElanState() {
+	local ifname=$(configRead elan.ifname "$NETWORK_CONF")
+	ifname=${ifname:-eth0}
+
+	local ipaddr
+	local netmask
+	local gateway
+	local dns
+
+	/usr/bin/sam-systemd onboarding service off
+
+	#TODO
+	logger "[enterElanState] Not implemented"
+	# if [ "$SOURCE_STATE" = "mlanap" ] || [ "$SOURCE_STATE" = "onboardingmlan" ]; then
+	# 	: # nothing to do
+	# elif [ "$SOURCE_STATE" = "directmode" ] || [ "$SOURCE_STATE" = "elan" ] || [ "$SOURCE_STATE" = "mlansta" ]; then
+	# 	# restart the interface (if it wasn't shutdown yet)
+	# 	ifup -i /data/network/elan.conf eth0
+	# else
+	# 	# interface is already up, need to reset the IP/routes
+	# 	if [ "$(configRead elan.proto "$NETWORK_CONF")" = "dhcp" ]; then
+	# 		kill -USR1 $(cat "/var/run/udhcpc-$ifname.pid")
+	# 	else
+	# 		ipaddr=$(configRead elan.ipaddr "$NETWORK_CONF")
+	# 		netmask=$(configRead elan.netmask "$NETWORK_CONF")
+	# 		gateway=$(configRead elan.gateway "$NETWORK_CONF")
+	#
+	# 		#ifconfig "$ifname" add "$ipaddr" netmask "$netmask"
+	# 		#route add default gw "$gateway" dev "$ifname"
+	# 		ip addr add "${ipaddr}/${netmask}" brd + dev "$ifname"
+	# 		ip route del default
+	# 		ip route add default via "$gateway" dev "$ifname"
+	# 		# The following doesn't work ("File exists" error)
+	# 		#   ip route add 224.0.0.0/4 dev "$ifname"
+	# 		# so we have to use "route add" instead (although that probably
+	# 		# means it's actually incorrect).
+	# 		route add -net 224.0.0.0 netmask 240.0.0.0 "$ifname"
+	#
+	# 		# no need to restore dns since we can't delete it in the first
+	# 		# place (see exitElanState)
+	# 	fi
+	# fi
+
+	systemctl restart nflc.service &
+	#setLEDsOperational
+}
+
+exitElanState() {
+	local ifname
+	local dns
+
+	#TODO
+	logger "[exitElanState] Not implemented"
+	# [ "$TARGET_STATE" = "mlanap" ] || [ "$TARGET_STATE" = "onboardingmlan" ] && return
+	#
+	# ifname=$(configRead elan.ifname "$NETWORK_CONF")
+	# ifname=${ifname:-eth0}
+	#
+	# # reset the IP address, route and DNS resolver to avoid conflicts with
+	# # the other network interface (which may be connected to the same LAN)
+	# if [ "$(configRead elan.proto "$NETWORK_CONF")" = "dhcp" ]; then
+	# 	kill -USR2 $(cat "/var/run/udhcpc-$ifname.pid")
+	# else
+	# 	ip addr flush "$ifname"
+	# 	# ideally we would delete the content of /etc/resolv.conf but
+	# 	# netifd restores it when it adds the dns info for the other
+	# 	# interface
+	# fi
+}
+
+enterSoftApState() {
+	/usr/bin/sam-systemd onboarding service server
+
+	qcmapctl <<-EOF
+		wlan ap
+		wlan enable
+	EOF
+	startWACServer
+
+	systemctl restart nflc.service &
+	#setLEDsNonOperational
+}
+
+exitSoftApState() {
+	qcmapctl wlan disable
+
+	stopWACServer
+}
+
+enterWlanState() {
+	# configured device, available for proxy onboarding
+	/usr/bin/sam-systemd onboarding service proxy
+
+	qcmapctl <<-EOF
+		wlan sta
+		wlan enable
+	EOF
+
+	systemctl restart nflc.service &
+	#setLEDsOperational
+}
+
+exitWlanState() {
+	qcmapctl wlan disable
+}
+
+enterMlanApState() {
+	/usr/bin/sam-systemd onboarding service off
+
+	#TODO
+	logger "[enterMlanApState] Not implemented"
+	# ifup -i /data/network/mlanap.conf wlan0
+
+	systemctl restart nflc.service &
+	#setLEDsOperational
+}
+
+exitMlanApState() {
+	#TODO
+	logger "[exitMlanApState] Not implemented"
+	# ifdown -i /data/network/mlanap.conf wlan0
+}
+
+enterMlanStaState() {
+	/usr/bin/sam-systemd onboarding service off
+
+	#TODO
+	logger "[enterMlanStaState] Not implemented"
+	# # If there is no SSID, don't do anything (to handle a "posix soundbar")
+	# [ "ssid2=" != "$(grep "ssid2=" /data/network/wpa_supplicant.mlansta.conf)" ] || return
+	#
+	# # Make sure Elan is down (can't rely on exitElanState since we could
+	# # have done something like Elan->Wlan->MlanSta)
+	# ifdown elan
+	#
+	# ifup -i /data/network/mlansta.conf wlan0
+
+	systemctl stop nflc.service &
+	#setLEDsOperational
+}
+
+exitMlanStaState() {
+	#TODO
+	logger "[exitMlanStaState] Not implemented"
+	# ifdown -i /data/network/mlansta.conf wlan0
+}
+
+enterWpsState() {
+	# No onboarding available while WPS is active
+	/usr/bin/sam-systemd onboarding service off
+
+	if wps_start wps_$METHOD $PIN; then
+		/usr/bin/orbPlayer notify WPS_Initiated
+	else
+		logger "statemgr ($$): wps_start failed: $?"
+		/usr/bin/sam-systemd wps fail
+	fi
+}
+
+exitWpsState() {
+	wps_cancel
+}
+
+enterDirectMode() {
+	# No onboarding available in direct mode
+	/usr/bin/sam-systemd onboarding service off
+
+	# TODO
+	# # Make sure the softap will use the friendly name as its SSID (if the name
+	# # has been changed)
+	# local defaultFriendlyName="$(cat /proc/device-tree/friendly-name)"
+	# local currentFriendlyName=$(configRead system.friendlyName "$SYSTEM_CONF")
+	# local oldSsid
+	# local newSsid
+	# if [ "$currentFriendlyName" != "$defaultFriendlyName" ]; then
+	# 	oldSsid=$(configRead softap.ssid "$WIRELESS_CONF")
+	# 	newSsid="${currentFriendlyName:0:32}"
+	# 	if [ "$newSsid" != "$oldSsid" ]; then
+	# 		configWriteString softap.ssid "$newSsid" "$WIRELESS_CONF"
+	# 	fi
+	# fi
+
+	# Make sure Elan is down (can't rely on exitElanState since we could
+	# have done something like Elan->Wlan->Directmode)
+	# TODO
+	# ifdown elan
+
+	qcmapctl <<-EOF
+		wlan ap
+		wlan enable
+	EOF
+
+	systemctl stop websetup
+	systemctl restart nflc.service &
+
+	#setLEDsOperational
+
+	# Save current system state and go to directmode
+	local currentState=$(configRead system.state "$SYSTEM_CONF")
+	configWriteString system.preDirectmodeState "$currentState" "$SYSTEM_CONF"
+	setStateCommitSystem "directmode"
+}
+
+exitDirectMode() {
+	qcmapctl wlan disable
+
+	systemctl start websetup
+
+	# Restore previous system state
+	local previousState=$(configRead system.preDirectmodeState "$SYSTEM_CONF")
+	configDel system.preDirectmodeState "$SYSTEM_CONF"
+	setStateCommitSystem "$previousState"
+}
+
+enterOnboarding() {
+	setSsid "$SSID" /data/network/wpa_supplicant.onboard.conf
+	# TODO
+	logger "[enterOnboarding] Not implemented"
+	# ifup -i /data/network/onboard.conf wlan0
+}
+
+exitOnboarding() {
+	# TODO
+	logger "[exitOnboarding] Not implemented"
+	# ifdown -i /data/network/onboard.conf wlan0
+}
+
+prepareScanInterface() {
+	iw phy "$WIFI_DEV" interface add "$SCAN_IFACE" type managed
+
+	# Set U/L bit in the MAC address to avoid conflict if Wi-Fi is already enabled
+	local mac=$(cat "/sys/class/ieee80211/$WIFI_DEV/macaddress")
+	local mac1=${mac:0:2}
+	mac1=$((0x$mac1 | 0x2))
+	mac=$(printf "%x:%s" $mac1 "${mac:3:14}")
+	ifconfig "$SCAN_IFACE" hw ether $mac
+
+	ifconfig "$SCAN_IFACE" up
+}
+
+deleteScanInterface() {
+	iw dev "$SCAN_IFACE" del
+}
+
+convPassphraseToPsk() {
+	local ssid="$1"
+	local passphrase="$2"
+
+	wpa_passphrase "$ssid" "$passphrase" | grep '^\s*psk=' | sed 's/^\s*psk=//'
+}
+
+setSsid() {
+	local ssid="$1"
+	local file="$2"
+	local tmpFile="$(mktemp)"
+	local param
+	local hexSSid
+
+	# Name of the entry for hostapd vs wpa_supplicant
+	[ -z "${file/*hostapd*.conf/}" ] && param=ssid2 || param=ssid
+
+	# Use hex format so we don't need to care about escaping the string
+	hexSsid=$(echo -n "$ssid" | hexdump -v -n 32 -e '/1 "%02x"')
+
+	sed "s/^$param=.*/$param=$hexSsid/" "$file" > "$tmpFile" \
+		&& cp "$tmpFile" "$file" \
+		&& rm "$tmpFile"
+}
+
+setSsidPsk() {
+	local ssid="$1"
+	local password="$2"
+	local file="$3"
+	local param
+	local psk
+
+	# Name of the entry for hostapd vs wpa_supplicant
+	[ -z "${file/hostapd.*.conf/}" ] && param=wpa_passphrase || param=psk
+
+	setSsid "$ssid" "$file"
+
+	local key_mgmt
+	if [ -z "$password" ]; then
+		key_mgmt="NONE"
+		password="password"             # Use 8-char string to generate valid passphrase
+	else
+		key_mgmt="WPA-PSK"
+	fi
+
+	psk=$(convPassphraseToPsk "$ssid" "$password")
+	sed -i "s/\\b$param=.*/$param=$psk/" "$file"
+	sed -i "s/\\bkey_mgmt=.*/key_mgmt=$key_mgmt/" "$file"
+}
+
+configure_wifi() {
+	local ssid="$SSID"
+	local key="$PASSWORD"
+
+	local hexSsid="$(echo -n "$ssid" | hexdump -v -n 32 -e '/1 "%02x"')"
+	local key_mgmt
+	local psk
+
+	if [ -z "$key" ]; then
+		key_mgmt="NONE"
+	else
+		key_mgmt="WPA-PSK"
+		psk="$(convPassphraseToPsk "$ssid" "$key")"
+	fi
+
+	cat > /etc/misc/wifi/wpa_supplicant.conf <<-EOF
+	ctrl_interface=/var/run/wpa_supplicant
+	network={
+		scan_ssid=1
+		key_mgmt=$key_mgmt
+		ssid=$hexSsid
+		${psk:+psk=$psk}
+	}
+	EOF
+}
+
+wifi_configured() {
+	configWriteString system.wifiConfigured Yes "$SYSTEM_CONF"
+	/usr/bin/sam-systemd wifi configured
+	/usr/bin/orbPlayer notify Onboarding_Success
+
+	# Now that we won't go to softap state anymore, we can update the SSID
+	if isWifiConfigured; then
+		setSsid "$(configRead system.friendlyName "$SYSTEM_CONF")" /etc/misc/wifi/hostapd.conf
+	fi
+}
+
+reloadFriendlyName() {
+	# Send hangup signal to refresh friendly name from UCI
+	killall -HUP orbPlayer
+	killall -HUP sam-systemd
+	systemctl restart nflc.service &
+	# Restart mDNS for httpd
+	if [ -e /etc/init.d/httpd_mdns ]
+	then
+		/etc/init.d/httpd_mdns namechange &
+	fi
+}
+
+updateFriendlyName() {
+	configWriteString system.friendlyName "$NAME" "$SYSTEM_CONF"
+
+	# Don't update the SSID until after Wi-Fi is configured so we don't
+	# confuse the user if he reboots device before finishing the setup
+	if isWifiConfigured; then
+		setSsid "$NAME" /etc/misc/wifi/hostapd.conf
+	fi
+
+	reloadFriendlyName
+}
+
+[ -z "$EVENT" ] && { \
+	echo "Please set the \"EVENT\" variable"
+	return 1
+}
+
+# enable for debugging event sequences
+# $(configWriteString system.event "$EVENT" "$SYSTEM_CONF")
+
+logger "statemgr ($$): entered $EVENT"
+
+case "$EVENT" in
+	event_factory_reset)
+		#setLEDsStateChange
+		userfs-reset y
+	;;
+	event_shutdown)
+		case "${ACTION:-reboot}" in
+			halt) halt;;
+			reboot) reboot;;
+			*) reboot;;
+		esac
+	;;
+	event_friendly_name)
+		updateFriendlyName "$NAME"
+	;;
+	event_reload_friendly_name)
+		reloadFriendlyName
+	;;
+	event_configuration_complete)
+		stateConfigured
+		(sleep 15; killall wacserverd) &
+	;;
+	event_onboarding_ethernet_configured)
+		/usr/bin/sam-systemd ethernet restart
+		configWriteString system.ethernetConfigured Yes "$SYSTEM_CONF"
+	;;
+	event_onboarding_wifi_configured)
+		wifi_configured
+	;;
+	event_onboarding_wifi_failed)
+		/usr/bin/orbPlayer notify Onboarding_Fail
+	;;
+	directmode_btn|event_directmode) # event_directmode for backward compatibility
+		/usr/bin/sam-systemd directMode toggle
+	;;
+	wps_btn|event_start_wps_pbc) # event_start_wps_pbc for backward compatibility
+		/usr/bin/sam-systemd wps toggle
+	;;
+	event_airplay_password)
+		local oldpw=$(configRead airplay.password "$ALLPLAY_CONF")
+		if [ "x${OLDPIN}" != "x$oldpw" ]; then
+			exit $EXIT_BAD_PASSWD
+		fi
+		configWriteString airplay.password "${NEWPIN}" "$ALLPLAY_CONF"
+		# Send hangup signal to refresh airplay password from UCI
+		killall -HUP orbPlayer
+	;;
+	transition)
+		logger "statemgr ($$): transitioning from $SOURCE_STATE to $TARGET_STATE"
+
+		# for wifi on, don't do anything, this will (re)start wifi correctly as-is
+		# for wifi off, unset TARGET_STATE so we don't start wifi after stopping it
+		if [ "$SOURCE_STATE" = "$TARGET_STATE" ] && [ "$WIFI" = "off" ]; then
+			TARGET_STATE="";
+		fi
+
+		logger "statemgr ($$): exiting state $SOURCE_STATE"
+		case "$SOURCE_STATE" in
+			init)
+				exitInitState
+			;;
+			elan)
+				exitElanState
+			;;
+			softap)
+				exitSoftApState
+			;;
+			wlan)
+				exitWlanState
+			;;
+			mlanap)
+				exitMlanApState
+			;;
+			mlansta)
+				exitMlanStaState
+			;;
+			wps)
+				exitWpsState
+			;;
+			directmode)
+				exitDirectMode
+			;;
+			onboarding|onboardingmlan)
+				exitOnboarding
+			;;
+		esac
+		logger "statemgr ($$): entering state $TARGET_STATE"
+		case "$TARGET_STATE" in
+			elan)
+				enterElanState
+			;;
+			softap)
+				enterSoftApState
+			;;
+			wlan)
+				enterWlanState
+			;;
+			mlanap)
+				enterMlanApState
+			;;
+			mlansta)
+				enterMlanStaState
+			;;
+			wps)
+				enterWpsState
+			;;
+			directmode)
+				enterDirectMode
+			;;
+			onboarding|onboardingmlan)
+				enterOnboarding
+			;;
+		esac
+	;;
+	prepare_scan_interface)
+		prepareScanInterface
+		;;
+	delete_scan_interface)
+		deleteScanInterface
+		;;
+	multichannel_init)
+		#TODO
+		logger "[multichannel_init] Not implemented"
+		# setSsidPsk "$SSID" "$PASSWORD" /data/network/wpa_supplicant.mlansta.conf
+	;;
+	configure_wifi)
+		configure_wifi
+	;;
+	connect_wifi)
+		configure_wifi && wifi_configured
+	;;
+	multichannel_lead|multichannel_slave|multichannel_none)
+		/usr/bin/sam-systemd multichannel ${EVENT#multichannel_}
+	;;
+	multichannel_onboarding_start)
+		/usr/bin/sam-systemd onboarding mlan start "$SSID"
+	;;
+	multichannel_onboarding_stop)
+		/usr/bin/sam-systemd onboarding mlan stop
+	;;
+	*)
+		logger "statemgr ($$): Unknown event $event"
+	;;
+esac
+logger "statemgr ($$): exiting $EVENT"

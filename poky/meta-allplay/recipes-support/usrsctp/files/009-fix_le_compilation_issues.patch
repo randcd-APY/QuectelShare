@@ -1,0 +1,25 @@
+diff -Naur a/configure.ac b/configure.ac
+--- a/configure.ac	2016-10-18 14:04:32.039778000 +0530
++++ b/configure.ac	2016-10-18 16:26:55.711627098 +0530
+@@ -29,7 +29,7 @@
+ dnl
+ 
+ AC_INIT([libusrsctp], [0.9.2.1])
+-AM_INIT_AUTOMAKE
++AM_INIT_AUTOMAKE([foreign])
+ 
+ AC_PROG_CC_C99
+ AC_PROG_LIBTOOL
+diff -Naur a/usrsctplib/netinet/sctputil.h b/usrsctplib/netinet/sctputil.h
+--- a/usrsctplib/netinet/sctputil.h	2016-10-18 14:04:32.083780000 +0530
++++ b/usrsctplib/netinet/sctputil.h	2016-10-19 08:36:43.358392048 +0530
+@@ -62,6 +62,9 @@
+ 
+ #define sctp_get_associd(stcb) ((sctp_assoc_t)stcb->asoc.assoc_id)
+ 
++#if __GNUC__ > 4
++#define __FUNCTION__	__func__
++#endif
+ 
+ /*
+  * Function prototypes

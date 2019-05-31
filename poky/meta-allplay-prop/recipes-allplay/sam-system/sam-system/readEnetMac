@@ -1,0 +1,5 @@
+#!/bin/sh
+
+
+# Fetch enet MAC Addr
+cat /sys/class/net/eth0/address 

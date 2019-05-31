@@ -1,0 +1,26 @@
+###############################################################################
+#
+# Copyright (c) 2016 Qualcomm Technologies International, Ltd.
+# All Rights Reserved. 
+# Qualcomm Technologies International, Ltd. Confidential and Proprietary.
+#
+# REVISION:      $Revision: #1 $
+###############################################################################
+
+# HCI Reset
+03 0c 00
+
+# HCI Enable_Device_Under_Test_Mode
+03 18 00
+
+# HCI Write_Authentication_Enable  { Authentication: Disabled }
+20 0c 01 00
+
+# HCI Write_Encryption_Mode { Encryption Mode: Disabled }
+22 0c 01 00
+
+# HCI Write_Scan_Enable { Scan Enable: Inquiry Scan enabled, Page Scan enabled }
+1a 0c 01 03
+
+# HCI Set_Event_Filter { Filter Type: Connection Setup, Connection_Setup_Filter_Condition_Type: Allow Connections from all devices, Auto Accept Flag: Do Auto accept the connection }
+05 0c 03 02 00 02

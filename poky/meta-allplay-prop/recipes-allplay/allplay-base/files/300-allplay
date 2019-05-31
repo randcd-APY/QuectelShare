@@ -1,0 +1,57 @@
+#!/bin/sh
+
+FRIENDLY_ID_SUFFIX="_AJ"
+DEV_CONF="/persist/device.conf"
+
+SYSTEM_CONF="/etc/allplay/system.json"
+SYSTEM_CONF_TMP="/tmp/system.json"
+
+ALLPLAY_CONF="/etc/allplay/allplay.json"
+ALLPLAY_CONF_TMP="/tmp/allplay.json"
+
+OEM_CONF="/etc/allplay/oem.json"
+
+HOSTAPD_CONF="/etc/misc/wifi/hostapd.conf"
+HOSTAPD_CONF_TMP="/tmp/hostapd.conf"
+
+# Update the friendly ID if it doesn't have the prefix
+friendlyId="$(jq -r ".friendlyId" "$DEV_CONF")"
+if [ "$friendlyId" == "${friendlyId%$FRIENDLY_ID_SUFFIX}" ]; then
+	prevFriendlyId="$friendlyId"
+	friendlyId="$friendlyId$FRIENDLY_ID_SUFFIX"
+	jq '. + { "friendlyId": '"$(echo -n "$friendlyId" | jq '.' -Rs)"'}' "$DEV_CONF" > "$DEV_CONF.tmp" \
+		&& mv "$DEV_CONF.tmp" "$DEV_CONF"
+
+	# Update the SSID if it has the old non-prefixed ID
+	if grep -q "ssid2=\"$prevFriendlyId\"" "$HOSTAPD_CONF"; then
+		sed  -r -e "s/^ssid2?=.*$/ssid2=\"$friendlyId\"/" "$HOSTAPD_CONF" > "$HOSTAPD_CONF_TMP" \
+			&& cp "$HOSTAPD_CONF_TMP" "$HOSTAPD_CONF" \
+			&& rm "$HOSTAPD_CONF_TMP"
+	fi
+fi
+
+if ! jq -e .system.deviceId "$SYSTEM_CONF" >/dev/null; then
+	serial="$(jq -r .serial "$DEV_CONF")"
+
+	deviceId="$(echo "allplayDevId$serial" \
+		| md5sum \
+		| sed -r "s/^(.{8})(.{4})(.{4})(.{4})(.{12}).*/\\1-\\2-\\3-\\4-\\5/")"
+	defaultFriendlyName=$(jq '.system.defaultFriendlyName // "Allplay Speaker"' $OEM_CONF)
+	jq '.system += {
+			"deviceId" : '"$(echo -n "$deviceId" | jq '.' -Rs)"',
+			"friendlyName" : '"$defaultFriendlyName"'
+		}' "$SYSTEM_CONF" > "$SYSTEM_CONF_TMP" \
+		&& cp "$SYSTEM_CONF_TMP" "$SYSTEM_CONF" \
+		&& rm "$SYSTEM_CONF_TMP"
+fi
+
+
+if ! jq -e .appId "$ALLPLAY_CONF" >/dev/null; then
+	serial="$(jq -r .serial "$DEV_CONF")"
+	appId="$(echo "orbPlayer$serial" \
+		| md5sum \
+		| sed -r "s/^(.{8})(.{4})(.{4})(.{4})(.{12}).*/\\1-\\2-\\3-\\4-\\5/")"
+	jq ".appId=$(echo -n "$appId" | jq "." -Rs)" "$ALLPLAY_CONF" > "$ALLPLAY_CONF_TMP" \
+		&& cp "$ALLPLAY_CONF_TMP" "$ALLPLAY_CONF" \
+		&& rm "$ALLPLAY_CONF_TMP"
+fi

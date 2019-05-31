@@ -1,0 +1,30 @@
+#!/bin/sh
+#
+# time_daemon        init.d script to start the time services daemon
+#
+set -e
+
+case "$1" in
+  start)
+        echo -n "Starting time services daemon: "
+        chmod 0666 /dev/rtc0
+        chmod 0666 /dev/alarm
+        /usr/bin/time_daemon &
+        echo "done"
+        ;;
+  stop)
+        echo -n "Stoping time services daemon: "
+        /usr/bin/killall time_daemon
+        echo "done"
+        ;;
+  restart)
+        $0 stop
+        $0 start
+        ;;
+  *)
+        echo "Usage time-daemon { start | stop | restart}" >&2
+        exit 1
+        ;;
+esac
+
+exit 0

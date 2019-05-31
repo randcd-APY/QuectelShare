@@ -1,0 +1,23 @@
+Index: alljoyn-15.04.00b-src/common/os/posix/IfConfigLinux.cc
+===================================================================
+--- alljoyn-15.04.00b-src.orig/common/os/posix/IfConfigLinux.cc	2015-08-04 14:52:41.000000000 -0700
++++ alljoyn-15.04.00b-src/common/os/posix/IfConfigLinux.cc	2016-08-23 14:51:06.824936981 -0700
+@@ -701,7 +701,8 @@
+         if (sizeof(struct nlmsghdr) <= nBytes && networkEvent->nlmsg_len <= nBytes) {
+             if (networkEvent->nlmsg_type == RTM_DELADDR) {
+                 newEventType = QCC_RTM_DELADDR;
+-            } else if (networkEvent->nlmsg_type == RTM_NEWADDR) {
++            } else if (networkEvent->nlmsg_type == RTM_NEWADDR ||
++                        networkEvent->nlmsg_type == RTM_NEWLINK) {
+                 newEventType = QCC_RTM_NEWADDR;
+                 struct ifaddrmsg* ifa = (struct ifaddrmsg*)NLMSG_DATA(networkEvent);
+                 uint32_t indexFamily = 0;
+@@ -740,7 +741,7 @@
+     fcntl(sockFd, F_SETFL, O_NONBLOCK);
+     memset(&addr, 0, sizeof(addr));
+     addr.nl_family = AF_NETLINK;
+-    addr.nl_groups = RTMGRP_IPV6_IFADDR | RTMGRP_IPV4_IFADDR;
++    addr.nl_groups = RTMGRP_IPV6_IFADDR | RTMGRP_IPV4_IFADDR | RTMGRP_LINK;
+ 
+     if (bind(sockFd, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr)) < 0) {
+         QCC_LogError(ER_FAIL, ("NetworkChangeEventSocket(): Error binding to NETLINK_ROUTE socket: %s", strerror(errno)));

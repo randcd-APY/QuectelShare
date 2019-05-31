@@ -1,0 +1,1329 @@
+/*****************************************************************************
+  @FILE     mcm_data_v01.idl
+
+  @BRIEF    MCM DATA API
+
+  @DESCRIPTION
+
+    Mobile Connection Manager Data Connection API (MCM_DATA)
+
+    This API provides Data Structures for managing Data Connections
+
+  MCM API Major Version 0
+  MCM API Minor Version 1
+
+  @COPYRIGHT Copyright (c) 2013 Qualcomm Technologies, Inc.
+  All rights reserved.
+  Confidential and Proprietary - Qualcomm Technologies, Inc.
+*****************************************************************************/
+
+include "mcm_common_v01.idl";
+
+revision 1;
+
+//=============================================================================
+// EVENT ID CONSTANTS
+//=============================================================================
+
+const MCM_DATA_NET_UP_EV             =  0x00005001;  //!< Event ID indicating that a data call is connected.
+const MCM_DATA_NET_DOWN_EV           =  0x00005002;  //!< Event ID indicating that a data call is disconnected.
+const MCM_DATA_NET_NEW_ADDR_EV       =  0x00005003;  //!< Event ID indicating that a new IP address is configured for the interface.
+const MCM_DATA_NET_DEL_ADDR_EV       =  0x00005004;  //!< Event ID indicating that one of the IP addresses is lost.
+const MCM_DATA_REG_SRVC_STATUS_EV    =  0x00005005;  //!< Event ID indicating the current service status of the modem.
+const MCM_DATA_BEARER_TECH_STATUS_EV =  0x00005006;  //!< Event ID indicating the current bearer technology of the call.
+const MCM_DATA_DORMANCY_STATUS_EV    =  0x00005007;  //!< Event ID indicating the dormancy state of the call.
+
+//=============================================================================
+// CONSTANTS
+//=============================================================================
+const MCM_DATA_MAX_APN_LEN           = 150;         //!< Maximum length of the APN.
+const MCM_DATA_MAX_USERNAME_LEN      = 127;         //!< Maximum length of the profile user name.
+const MCM_DATA_MAX_PASSWORD_LEN      = 127;         //!< Maximum length of the password.
+const MCM_DATA_MAX_ADDR_LEN          = 128;         //!< Maximum address length.
+
+const MCM_DATA_MAX_DEVICE_NAME_LEN   = 13;          //!< Maximum lenth of the device name.
+const MCM_DATA_MAX_ADDR_COUNT        = 10;          //!< Maximum number of IP addresses.
+
+//=============================================================================
+// DATA TYPES
+//=============================================================================
+enum
+{
+  MCM_DATA_CALL_STATE_INVALID  = 0x01,
+  /**< Call state is invalid. */
+  MCM_DATA_CALL_STATE_CONNECTING,
+  /**< Call is connecting. */
+  MCM_DATA_CALL_STATE_CONNECTED,
+  /**< Call is connected. */
+  MCM_DATA_CALL_STATE_DISCONNECTING,
+  /**< Call is disconnecting. */
+  MCM_DATA_CALL_STATE_DISCONNECTED
+  /**< Call is disconnected. */
+} mcm_data_call_status_t; //!< Identifies the data call state.
+
+
+enum
+{
+  MCM_DATA_MODEM_STATE_OOS = 0x01,
+  /**< Modem is out of service. */
+  MCM_DATA_MODEM_STATE_IN_SERVICE
+  /**< Modem is in service. */
+} mcm_data_srv_status_t; //!< Identifies the service state of the modem.
+
+enum
+{
+  MCM_DATA_BEARER_TECH_TYPE_UNKNOWN = 0x00,
+    /**< Unknown technology */
+  MCM_DATA_BEARER_TECH_TYPE_CDMA_1X,
+    /**< 1X technology. */
+  MCM_DATA_BEARER_TECH_TYPE_EVDO_REV0,
+    /**< CDMA Rev 0. */
+  MCM_DATA_BEARER_TECH_TYPE_EVDO_REVA,
+    /**< CDMA Rev A. */
+  MCM_DATA_BEARER_TECH_TYPE_EVDO_REVB,
+    /**< CDMA Rev B. */
+  MCM_DATA_BEARER_TECH_TYPE_EHRPD,
+    /**< EHRPD. */
+  MCM_DATA_BEARER_TECH_TYPE_FMC,
+    /**< Fixed mobile convergence. */
+  MCM_DATA_BEARER_TECH_TYPE_HRPD,
+    /**< HRPD. */
+  MCM_DATA_BEARER_TECH_TYPE_3GPP2_WLAN,
+    /**< IWLAN. */
+  MCM_DATA_BEARER_TECH_TYPE_WCDMA,
+    /**< WCDMA. */
+  MCM_DATA_BEARER_TECH_TYPE_GPRS,
+    /**< GPRS. */
+  MCM_DATA_BEARER_TECH_TYPE_HSDPA,
+    /**< HSDPA. */
+  MCM_DATA_BEARER_TECH_TYPE_HSUPA,
+    /**< HSUPA. */
+  MCM_DATA_BEARER_TECH_TYPE_EDGE,
+    /**< EDGE. */
+  MCM_DATA_BEARER_TECH_TYPE_LTE,
+    /**< LTE. */
+  MCM_DATA_BEARER_TECH_TYPE_HSDPA_PLUS,
+    /**< HSDPA+. */
+  MCM_DATA_BEARER_TECH_TYPE_DC_HSDPA_PLUS,
+   /**< DC HSDPA+. */
+  MCM_DATA_BEARER_TECH_TYPE_HSPA,
+   /**< HSPA. */
+  MCM_DATA_BEARER_TECH_TYPE_64_QAM,
+   /**< 64 QAM. */
+  MCM_DATA_BEARER_TECH_TYPE_TDSCDMA,
+   /**< TD-SCDMA. */
+  MCM_DATA_BEARER_TECH_TYPE_GSM,
+   /**< GSM. */
+  MCM_DATA_BEARER_TECH_TYPE_3GPP_WLAN
+   /**< IWLAN. */
+} mcm_data_bearer_tech_info_t; //!< Identifies the bearer technology type.
+
+
+enum
+{
+  MCM_DATA_DORMANCY_STATE_PHYSLINK_ACTIVE,
+  /**< Call is not dormant. */
+  MCM_DATA_DORMANCY_STATE_PHYSLINK_DORMANT
+  /**< Call is dormant. */
+} mcm_data_dormancy_state_t; //!< Identifies whether the call is active or dormant.
+
+
+enum {
+  MCM_DATA_TYPE_UNSPECIFIED = 0x00,           /**< Unspecified. */
+  MCM_DATA_TYPE_MOBILE_IP = 0x01,             /**< Mobile IP. */
+  MCM_DATA_TYPE_INTERNAL = 0x02,              /**< Internal. */
+  MCM_DATA_TYPE_CALL_MANAGER_DEFINED = 0x03,  /**< Call manager-defined. */
+  MCM_DATA_TYPE_3GPP_SPEC_DEFINED = 0x06,     /**< 3GPP specification-defined. */
+  MCM_DATA_TYPE_PPP = 0x07,                   /**< Point-to-Point protocol. */
+  MCM_DATA_TYPE_EHRPD = 0x08,                 /**< EHRPD. */
+  MCM_DATA_TYPE_IPV6 = 0x09                   /**< IPV6. */
+} mcm_data_call_end_reason_type_t; //!< Enumeration for a Verbose Call End Reason (VCER) type.
+
+
+
+enum {
+  MCM_DATA_CE_INVALID                                                           = -1,
+  /**< Invalid call end reason. */
+  MCM_DATA_CE_MIP_FA_ERR_REASON_UNSPECIFIED,
+  /**< Mobile IP; unspecified error. */
+  MCM_DATA_CE_MIP_FA_ERR_ADMINISTRATIVELY_PROHIBITED,
+  /**< Mobile IP; administratively prohibited. */
+  MCM_DATA_CE_MIP_FA_ERR_INSUFFICIENT_RESOURCES,
+  /**< Mobile IP; insufficient resources. */
+  MCM_DATA_CE_MIP_FA_ERR_MOBILE_NODE_AUTHENTICATION_FAILURE,
+  /**< Mobile IP; mobile node authentication failure. */
+  MCM_DATA_CE_MIP_FA_ERR_HA_AUTHENTICATION_FAILURE,
+  /**< Mobile IP; HA authentication failure. */
+  MCM_DATA_CE_MIP_FA_ERR_REQUESTED_LIFETIME_TOO_LONG,
+  /**< Mobile IP; requested lifetime is too long. */
+  MCM_DATA_CE_MIP_FA_ERR_MALFORMED_REQUEST,
+  /**< Mobile IP; malformed request. */
+  MCM_DATA_CE_MIP_FA_ERR_MALFORMED_REPLY,
+  /**< Mobile IP; malformed reply. */
+  MCM_DATA_CE_MIP_FA_ERR_ENCAPSULATION_UNAVAILABLE,
+  /**< Mobile IP; encapsulation is unavailable. */
+  MCM_DATA_CE_MIP_FA_ERR_VJHC_UNAVAILABLE,
+  /**< Mobile IP; VJHC is unavailable. */
+  MCM_DATA_CE_MIP_FA_ERR_REVERSE_TUNNEL_UNAVAILABLE,
+  /**< Mobile IP; reverse tunnel is unavailable. */
+  MCM_DATA_CE_MIP_FA_ERR_REVERSE_TUNNEL_IS_MANDATORY_AND_T_BIT_NOT_SET,
+  /**< Mobile IP; reverse tunnel is mandatory and the T-bit is not set. */
+  MCM_DATA_CE_MIP_FA_ERR_DELIVERY_STYLE_NOT_SUPPORTED,
+  /**< Mobile IP; delivery style is not supported. */
+  MCM_DATA_CE_MIP_FA_ERR_MISSING_NAI,
+  /**< Mobile IP; missing NAI. */
+  MCM_DATA_CE_MIP_FA_ERR_MISSING_HA,
+  /**< Mobile IP; missing HA. */
+  MCM_DATA_CE_MIP_FA_ERR_MISSING_HOME_ADDR,
+  /**< Mobile IP; missing home address. */
+  MCM_DATA_CE_MIP_FA_ERR_UNKNOWN_CHALLENGE,
+  /**< Mobile IP; unknown challenge. */
+  MCM_DATA_CE_MIP_FA_ERR_MISSING_CHALLENGE,
+  /**< Mobile IP; missing challenge. */
+  MCM_DATA_CE_MIP_FA_ERR_STALE_CHALLENGE,
+  /**< Mobile IP; stale challenge. */
+  MCM_DATA_CE_MIP_HA_ERR_REASON_UNSPECIFIED,
+  /**< Mobile IP; reason is unspecified. */
+  MCM_DATA_CE_MIP_HA_ERR_ADMINISTRATIVELY_PROHIBITED,
+  /**< Mobile IP; administratively prohibited. */
+  MCM_DATA_CE_MIP_HA_ERR_INSUFFICIENT_RESOURCES,
+  /**< Mobile IP; insufficient resources. */
+  MCM_DATA_CE_MIP_HA_ERR_MOBILE_NODE_AUTHENTICATION_FAILURE,
+  /**< Mobile IP; mobile node authentication failure. */
+  MCM_DATA_CE_MIP_HA_ERR_FA_AUTHENTICATION_FAILURE,
+  /**< Mobile IP; FA authentication failure. */
+  MCM_DATA_CE_MIP_HA_ERR_REGISTRATION_ID_MISMATCH,
+  /**< Mobile IP; registration ID mismatch. */
+  MCM_DATA_CE_MIP_HA_ERR_MALFORMED_REQUEST,
+  /**< Mobile IP; malformed request. */
+  MCM_DATA_CE_MIP_HA_ERR_UNKNOWN_HA_ADDR,
+  /**< Mobile IP; unknown HA address. */
+  MCM_DATA_CE_MIP_HA_ERR_REVERSE_TUNNEL_UNAVAILABLE,
+  /**< Mobile IP; reverse tunnel is unavailable. */
+  MCM_DATA_CE_MIP_HA_ERR_REVERSE_TUNNEL_IS_MANDATORY_AND_T_BIT_NOT_SET,
+  /**< Mobile IP; reverse tunnel is mandatory and the T-bit is not set. */
+  MCM_DATA_CE_MIP_HA_ERR_ENCAPSULATION_UNAVAILABLE,
+  /**< Mobile IP; encapsulation is unavailable. */
+  MCM_DATA_CE_MIP_ERR_REASON_UNKNOWN,
+  /**< Mobile IP; reason is unknown. */
+  MCM_DATA_CE_INTERNAL_ERROR,
+  /**< Internal error. */
+  MCM_DATA_CE_CALL_ENDED,
+  /**< Internal error; call ended. */
+  MCM_DATA_CE_INTERNAL_UNKNOWN_CAUSE_CODE,
+  /**< Internal error; internal unknown cause code. */
+  MCM_DATA_CE_UNKNOWN_CAUSE_CODE,
+  /**< Internal error; unknown cause code. */
+  MCM_DATA_CE_CLOSE_IN_PROGRESS,
+  /**< Internal error; close is in progress. */
+  MCM_DATA_CE_NW_INITIATED_TERMINATION,
+  /**< Internal error; NW-initiated termination. */
+  MCM_DATA_CE_APP_PREEMPTED,
+  /**< Internal error; application was preempted. */
+  MCM_DATA_CE_CDMA_LOCK,
+  /**< CDMA; CDMA lock. */
+  MCM_DATA_CE_INTERCEPT,
+  /**< CDMA; intercept. */
+  MCM_DATA_CE_REORDER,
+  /**< CDMA; reorder. */
+  MCM_DATA_CE_REL_SO_REJ,
+  /**< CDMA; release SO was rejected. */
+  MCM_DATA_CE_INCOM_CALL,
+  /**< CDMA; incoming call. */
+  MCM_DATA_CE_ALERT_STOP,
+  /**< CDMA; alert stop. */
+  MCM_DATA_CE_ACTIVATION,
+  /**< CDMA; activation. */
+  MCM_DATA_CE_MAX_ACCESS_PROBE,
+  /**< CDMA; maximum access probe. */
+  MCM_DATA_CE_CCS_NOT_SUPPORTED_BY_BS,
+  /**< CDMA; CCS is not supported by the base station. */
+  MCM_DATA_CE_NO_RESPONSE_FROM_BS,
+  /**< CDMA; no response from the base station. */
+  MCM_DATA_CE_REJECTED_BY_BS,
+  /**< CDMA; rejected by the base station. */
+  MCM_DATA_CE_INCOMPATIBLE,
+  /**< CDMA; incompatible. */
+  MCM_DATA_CE_ALREADY_IN_TC,
+  /**< CDMA; already in TC. */
+  MCM_DATA_CE_USER_CALL_ORIG_DURING_GPS,
+  /**< CDMA; user call originated during GPS. */
+  MCM_DATA_CE_USER_CALL_ORIG_DURING_SMS,
+  /**< CDMA; user call originated during SMS. */
+  MCM_DATA_CE_NO_CDMA_SRV,
+  /**< CDMA; no CDMA service. */
+  MCM_DATA_CE_CONF_FAILED,
+  /**< CDMA; confirmation failed. */
+  MCM_DATA_CE_INCOM_REJ,
+  /**< CDMA; incoming call was rejected. */
+  MCM_DATA_CE_NO_GW_SRV,
+  /**< CDMA; no GW service. */
+  MCM_DATA_CE_NO_GPRS_CONTEXT,
+  /**< CDMA; no GPRS context. */
+  MCM_DATA_CE_ILLEGAL_MS,
+  /**< CDMA; illegal MS. */
+  MCM_DATA_CE_ILLEGAL_ME,
+  /**< CDMA; illegal ME. */
+  MCM_DATA_CE_GPRS_SERVICES_AND_NON_GPRS_SERVICES_NOT_ALLOWED,
+  /**< CDMA; GPRS services and non-GPRS services are not allowed. */
+  MCM_DATA_CE_GPRS_SERVICES_NOT_ALLOWED,
+  /**< CDMA; GPRS services are not allowed. */
+  MCM_DATA_CE_MS_IDENTITY_CANNOT_BE_DERIVED_BY_THE_NETWORK,
+  /**< CDMA; MS identity cannot be derived by the network. */
+  MCM_DATA_CE_IMPLICITLY_DETACHED,
+  /**< CDMA; implicitly detached. */
+  MCM_DATA_CE_PLMN_NOT_ALLOWED,
+  /**< CDMA; PLMN is not allowed. */
+  MCM_DATA_CE_LA_NOT_ALLOWED,
+  /**< CDMA; LA is not allowed. */
+  MCM_DATA_CE_GPRS_SERVICES_NOT_ALLOWED_IN_THIS_PLMN,
+  /**< CDMA; GPRS services are not allowed in this PLMN. */
+  MCM_DATA_CE_PDP_DUPLICATE,
+  /**< CDMA; PDP duplicate. */
+  MCM_DATA_CE_UE_RAT_CHANGE,
+  /**< CDMA; UE RAT change. */
+  MCM_DATA_CE_CONGESTION,
+  /**< CDMA; congestion. */
+  MCM_DATA_CE_NO_PDP_CONTEXT_ACTIVATED,
+  /**< CDMA; no PDP context is activated. */
+  MCM_DATA_CE_ACCESS_CLASS_DSAC_REJECTION,
+  /**< CDMA; access class DSAC rejection. */
+  MCM_DATA_CE_CD_GEN_OR_BUSY,
+  /**< CDMA; CD is generating or busy. */
+  MCM_DATA_CE_CD_BILL_OR_AUTH,
+  /**< CDMA; CD bill or authorization. */
+  MCM_DATA_CE_CHG_HDR,
+  /**< CDMA; change HDR. */
+  MCM_DATA_CE_EXIT_HDR,
+  /**< CDMA; exit HDR. */
+  MCM_DATA_CE_HDR_NO_SESSION,
+  /**< CDMA; HDR no session. */
+  MCM_DATA_CE_HDR_ORIG_DURING_GPS_FIX,
+  /**< CDMA; HDR originated during a GPS fix. */
+  MCM_DATA_CE_HDR_CS_TIMEOUT,
+  /**< CDMA; HDR CS timeout. */
+  MCM_DATA_CE_HDR_RELEASED_BY_CM,
+  /**< CDMA; HDR released by the CM. */
+  MCM_DATA_CE_CLIENT_END,
+  /**< CDMA; client end. */
+  MCM_DATA_CE_NO_SRV,
+  /**< CDMA; no service. */
+  MCM_DATA_CE_FADE,
+  /**< CDMA; fade. */
+  MCM_DATA_CE_REL_NORMAL,
+  /**< CDMA; release is normal. */
+  MCM_DATA_CE_ACC_IN_PROG,
+  /**< CDMA; access is in progress. */
+  MCM_DATA_CE_ACC_FAIL,
+  /**< CDMA; access failed. */
+  MCM_DATA_CE_REDIR_OR_HANDOFF,
+  /**< CDMA; redirect or handoff. */
+  MCM_DATA_CE_OPERATOR_DETERMINED_BARRING,
+  /**< 3GPP Spec defined; operator determined barring. */
+  MCM_DATA_CE_LLC_SNDCP_FAILURE,
+  /**< 3GPP Spec defined; LLC SNDCP failure. */
+  MCM_DATA_CE_INSUFFICIENT_RESOURCES,
+  /**< 3GPP Spec defined; insufficient resources. */
+  MCM_DATA_CE_UNKNOWN_APN,
+  /**< 3GPP Spec defined; unknown APN. */
+  MCM_DATA_CE_UNKNOWN_PDP,
+  /**< 3GPP Spec defined; unknown PDP. */
+  MCM_DATA_CE_AUTH_FAILED,
+  /**< 3GPP Spec defined; authorization failed. */
+  MCM_DATA_CE_GGSN_REJECT,
+  /**< 3GPP Spec defined; GGSN was rejected. */
+  MCM_DATA_CE_ACTIVATION_REJECT,
+  /**< 3GPP Spec defined; activation was rejected. */
+  MCM_DATA_CE_OPTION_NOT_SUPPORTED,
+  /**< 3GPP Spec defined; option is not supported. */
+  MCM_DATA_CE_OPTION_UNSUBSCRIBED,
+  /**< 3GPP Spec defined; option is unsubscribed. */
+  MCM_DATA_CE_OPTION_TEMP_OOO,
+  /**< 3GPP Spec defined; option is temporarily out of operation. */
+  MCM_DATA_CE_NSAPI_ALREADY_USED,
+  /**< 3GPP Spec defined; NSAPI was already used. */
+  MCM_DATA_CE_REGULAR_DEACTIVATION,
+  /**< 3GPP Spec defined; regular deactivation. */
+  MCM_DATA_CE_QOS_NOT_ACCEPTED,
+  /**< 3GPP Spec defined; QoS was not accepted. */
+  MCM_DATA_CE_NETWORK_FAILURE,
+  /**< 3GPP Spec defined; network failure. */
+  MCM_DATA_CE_UMTS_REACTIVATION_REQ,
+  /**< 3GPP Spec defined; UMTS reactivation is required. */
+  MCM_DATA_CE_FEATURE_NOT_SUPPORTED,
+  /**< 3GPP Spec defined; feature is not supported. */
+  MCM_DATA_CE_TFT_SEMANTIC_ERROR,
+  /**< 3GPP Spec defined; TFT semantic error. */
+  MCM_DATA_CE_TFT_SYNTAX_ERROR,
+  /**< 3GPP Spec defined; TFT syntax error. */
+  MCM_DATA_CE_UNKNOWN_PDP_CONTEXT,
+  /**< 3GPP Spec defined; unknown PDP context. */
+  MCM_DATA_CE_FILTER_SEMANTIC_ERROR,
+  /**< 3GPP Spec defined; filter semantic error. */
+  MCM_DATA_CE_FILTER_SYNTAX_ERROR,
+  /**< 3GPP Spec defined; filter syntax error. */
+  MCM_DATA_CE_PDP_WITHOUT_ACTIVE_TFT,
+  /**< 3GPP Spec defined; PDP is without an active TFT. */
+  MCM_DATA_CE_IP_V4_ONLY_ALLOWED,
+  /**< 3GPP Spec defined; only IPv4 is allowed. */
+  MCM_DATA_CE_IP_V6_ONLY_ALLOWED,
+  /**< 3GPP Spec defined; only IPv6 is allowed. */
+  MCM_DATA_CE_SINGLE_ADDR_BEARER_ONLY,
+  /**< 3GPP Spec defined; single address bearer only. */
+  MCM_DATA_CE_INVALID_TRANSACTION_ID,
+  /**< 3GPP Spec defined; invalid transaction ID. */
+  MCM_DATA_CE_MESSAGE_INCORRECT_SEMANTIC,
+  /**< 3GPP Spec defined; message has incorrect semantic. */
+  MCM_DATA_CE_INVALID_MANDATORY_INFO,
+  /**< 3GPP Spec defined; invalid mandatory information. */
+  MCM_DATA_CE_MESSAGE_TYPE_UNSUPPORTED,
+  /**< 3GPP Spec defined; message type is unsupported. */
+  MCM_DATA_CE_MSG_TYPE_NONCOMPATIBLE_STATE,
+  /**< 3GPP Spec defined; message type is in a noncompatible state. */
+  MCM_DATA_CE_UNKNOWN_INFO_ELEMENT,
+  /**< 3GPP Spec defined; unknown information element. */
+  MCM_DATA_CE_CONDITIONAL_IE_ERROR,
+  /**< 3GPP Spec defined; conditional IE error. */
+  MCM_DATA_CE_MSG_AND_PROTOCOL_STATE_UNCOMPATIBLE,
+  /**< 3GPP Spec defined; message and protocol state are incompatible. */
+  MCM_DATA_CE_PROTOCOL_ERROR,
+  /**< 3GPP Spec defined; protocol error. */
+  MCM_DATA_CE_APN_TYPE_CONFLICT,
+  /**< 3GPP Spec defined; APN type conflict. */
+  MCM_DATA_CE_PPP_TIMEOUT,
+  /**< PPP; timeout. */
+  MCM_DATA_CE_PPP_AUTH_FAILURE,
+  /**< PPP; authorization failure. */
+  MCM_DATA_CE_PPP_OPTION_MISMATCH,
+  /**< PPP; option mismatch. */
+  MCM_DATA_CE_PPP_PAP_FAILURE,
+  /**< PPP; PAP failure. */
+  MCM_DATA_CE_PPP_CHAP_FAILURE,
+  /**< PPP; CHAP failure. */
+  MCM_DATA_CE_PPP_UNKNOWN,
+  /**< PPP; unknown. */
+  MCM_DATA_CE_EHRPD_SUBS_LIMITED_TO_V4,
+  /**< EHRPD; subscription is limited to v4. */
+  MCM_DATA_CE_EHRPD_SUBS_LIMITED_TO_V6,
+  /**< EHRPD; subscription is limited to v6. */
+  MCM_DATA_CE_EHRPD_VSNCP_TIMEOUT,
+  /**< EHRPD VSNCP; timeout. */
+  MCM_DATA_CE_EHRPD_VSNCP_FAILURE,
+  /**< EHRPD VSNCP; failure. */
+  MCM_DATA_CE_EHRPD_VSNCP_3GPP2I_GEN_ERROR,
+  /**< EHRPD VSNCP 3GPP2I; generation error. */
+  MCM_DATA_CE_EHRPD_VSNCP_3GPP2I_UNAUTH_APN,
+  /**< EHRPD VSNCP 3GPP2I; unauthorized APN. */
+  MCM_DATA_CE_EHRPD_VSNCP_3GPP2I_PDN_LIMIT_EXCEED,
+  /**< EHRPD VSNCP 3GPP2I; PDN limit was exceed. */
+  MCM_DATA_CE_EHRPD_VSNCP_3GPP2I_NO_PDN_GW,
+  /**< EHRPD VSNCP 3GPP2I; no PDN GW. */
+  MCM_DATA_CE_EHRPD_VSNCP_3GPP2I_PDN_GW_UNREACH,
+  /**< EHRPD VSNCP 3GPP2I; PDN GW is unreachable. */
+  MCM_DATA_CE_EHRPD_VSNCP_3GPP2I_PDN_GW_REJ,
+  /**< EHRPD VSNCP 3GPP2I; PDN GW was rejected. */
+  MCM_DATA_CE_EHRPD_VSNCP_3GPP2I_INSUFF_PARAM,
+  /**< EHRPD VSNCP 3GPP2I; insufficient parameters. */
+  MCM_DATA_CE_EHRPD_VSNCP_3GPP2I_RESOURCE_UNAVAIL,
+  /**< EHRPD VSNCP 3GPP2I; resource is unavailable. */
+  MCM_DATA_CE_EHRPD_VSNCP_3GPP2I_ADMIN_PROHIBIT,
+  /**< EHRPD VSNCP 3GPP2I; administratively prohibited. */
+  MCM_DATA_CE_EHRPD_VSNCP_3GPP2I_PDN_ID_IN_USE,
+  /**< EHRPD VSNCP 3GPP2I; PDN ID is in use. */
+  MCM_DATA_CE_EHRPD_VSNCP_3GPP2I_SUBSCR_LIMITATION,
+  /**< EHRPD VSNCP 3GPP2I; subscriber limitation. */
+  MCM_DATA_CE_EHRPD_VSNCP_3GPP2I_PDN_EXISTS_FOR_THIS_APN,
+  /**< EHRPD VSNCP 3GPP2I; PDN exists for this APN. */
+  MCM_DATA_CE_PREFIX_UNAVAILABLE,
+  /**< IPv6; prefix is unavailable. */
+  MCM_DATA_CE_IPV6_ERR_HRPD_IPV6_DISABLED
+  /**< IPv6; HRPD IPv6 is disabled. */
+}mcm_data_call_end_reason_code_t; //!< Enumeration for a Verbose Call End Reason (VCER) code.
+
+
+
+struct
+{
+  mcm_data_srv_status_t srv_status;
+  /**< Identifies the service state of the modem. */
+
+  mcm_data_bearer_tech_info_t tech_info;
+  /**< Identifies the preferred technology type. */
+}mcm_data_reg_status_t; /**< Data structure used to convey the modem registration
+                             status to clients. */
+
+
+struct
+{
+  uint32 pkts_tx;
+  /**< Number of packets transmitted. */
+  uint32 pkts_rx;
+  /**< Number of packets received. */
+  uint64 bytes_tx;
+  /**< Number of bytes transmitted. */
+  uint64 bytes_rx;
+  /**< Number of bytes received. */
+  uint32 pkts_dropped_tx;
+  /**< Number of transmit packets dropped. */
+  uint32 pkts_dropped_rx;
+  /**< Number of receive packets dropped. */
+} mcm_data_pkt_stats_t; /**< Data structure used to convey packet statistics to clients. */
+
+
+struct
+{
+  uint32 current_tx_rate;
+  /**< Current Tx data rate for the channel. */
+  uint32 current_rx_rate;
+  /**< Current Rx data rate for the channel. */
+  uint32 max_tx_rate;
+  /**< Maximum Tx data rate for the channel. */
+  uint32 max_rx_rate;
+  /**< Maximum Rx data rate for the channel. */
+} mcm_data_channel_rate_t; /**< Data structure used to convey the channel rate. */
+
+
+struct
+{
+  char valid_addr;
+  /**< Indicates whether a valid address is available. */
+  uint8 addr<MCM_DATA_MAX_ADDR_LEN>;
+  /**< Stores the IP address. */
+} mcm_data_addr_t; /**< Data structure used to store an IP address. */
+
+
+struct
+{
+  mcm_data_addr_t iface_addr_s;
+  /**< Network interface address. */
+  uint32 iface_mask;
+  /**< Subnet mask. */
+
+  mcm_data_addr_t gtwy_addr_s;
+  /**< Gateway server address. */
+
+  uint32 gtwy_mask;
+  /**< Gateway mask. */
+
+  mcm_data_addr_t dnsp_addr_s;
+  /**< Primary DNS server address. */
+
+  mcm_data_addr_t dnss_addr_s;
+  /**< Secondary DNS server address. */
+} mcm_data_addr_t_info;
+
+
+struct {
+  mcm_data_call_end_reason_type_t call_end_reason_type;
+  /**< Call end reason type. Values:
+       - 0 -- Unspecified
+       - 1 -- Mobile IP
+       - 2 -- Internal
+       - 3 -- Call manager-defined
+       - 6 -- 3GPP specification-defined
+       - 7 -- PPP
+       - 8 -- EHRPD
+       - 9 -- IPv6
+  */
+   mcm_data_call_end_reason_code_t call_end_reason_code;
+  /**< Verbose data call end reason.
+  */
+
+} mcm_data_verbose_call_end_reason_t;
+
+//============================================================================
+// MESSAGES
+//============================================================================
+//============================================================================
+/** @COMMAND MCM_DATA_START_DATA_CALL
+    @BRIEF Sends a request to start a data call for the connection
+           associated with the specified call ID.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+
+//! @MSG      MCM_DATA_START_DATA_CALL_REQ
+//! @TYPE    Request
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+
+message
+{
+
+
+  //! MCM Data IP Family
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional int8 ip_family;
+  /**< IP family requested:
+     - 4 -- IPv4
+     - 6 --IPv6
+     - 10 -- IPv4/v6
+  */
+
+  //! MCM Data APN Name
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional char apn_name[MCM_DATA_MAX_APN_LEN];
+  /**< APN name requested.
+    A character string that identifies a PDN, as defined by the operator.
+  */
+
+  //! MCM Data Username for APN
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional char user_name[MCM_DATA_MAX_USERNAME_LEN];
+  /**< Username for APN. */
+
+  //! MCM Data Password for APN
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional char password[MCM_DATA_MAX_PASSWORD_LEN];
+  /**< Password for the APN */
+
+  //! MCM Data Tech Preference
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional int8 tech_pref;
+  /**< Technology preference:
+     - 0 -- CDMA
+     - 1 -- UMTS
+  */
+
+  //! MCM Data UMTS/LTE Profile
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional int8 umts_profile;
+  /**< UMTS/LTE profile ID. */
+
+  //! MCM Data CDMA Profile
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional int8 cmda_profile;
+  /**< CDMA profile ID. */
+} mcm_data_start_data_call_req_msg;
+
+
+//! @MSG      MCM_DATA_START_DATA_CALL_RSP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+
+message
+{
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+  //! MCM Data Call Status
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory  mcm_data_call_status_t call_status;  //!< Call status.
+
+  //! MCM Data Call ID
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional int32 call_id;
+  /**< Call ID that gets generated for a successful call. */
+
+  //! MCM Data Call End Reason
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional mcm_data_verbose_call_end_reason_t vce_reason;
+  /**< Call end reason in verbose. */
+
+} mcm_data_start_data_call_rsp_msg;
+
+//============================================================================
+/** @COMMAND MCM_DATA_STOP_DATA_CALL
+    @BRIEF Sends a request to stop a data call for the connection
+           associated with the specified call ID.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+
+//! @MSG     MCM_DATA_STOP_DATA_CALL_REQ
+//! @TYPE    Request
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+
+message
+{
+
+  //! MCM DATA Call ID
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory int32 call_id;
+  /**< Call ID of the call to be stopped. */
+
+} mcm_data_stop_data_call_req_msg;
+
+
+//! @MSG     MCM_DATA_STOP_DATA_CALL_RSP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+
+message
+{
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+
+} mcm_data_stop_data_call_rsp_msg;
+
+//============================================================================
+/** @COMMAND MCM_DATA_GET_PKT_STATS
+    @BRIEF Gets packet statistics for the connection associated with the
+           specified call ID.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+
+//! @MSG     MCM_DATA_GET_PKT_STATS_REQ
+//! @TYPE    Request
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+
+message
+{
+  //! MCM Data Call ID
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory int32 call_id;
+  /**< Call ID of the connection for which to get the packet statistics. */
+
+} mcm_data_get_pkt_stats_req_msg;
+
+
+//! @MSG     MCM_DATA_GET_PKT_STATS_RSP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+
+message
+{
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+  //! Packet Statistics
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional mcm_data_pkt_stats_t pkt_stats;  //!< Packet statistics.
+
+} mcm_data_get_pkt_stats_rsp_msg;
+
+//============================================================================
+/** @COMMAND MCM_DATA_RESET_PKT_STATS
+    @BRIEF Resets packet statistics for the connection associated with the
+           specified call ID.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+
+//! @MSG     MCM_DATA_RESET_PKT_STATS_REQ
+//! @TYPE    Request
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+
+message
+{
+  //! MCM Data Call ID
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory int32 call_id;
+  /**< Call ID of the connection for which to reset the packet statistics. */
+
+} mcm_data_reset_pkt_stats_req_msg;
+
+
+//! @MSG     MCM_DATA_RESET_PKT_STATS_RSP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+
+message
+{
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+} mcm_data_reset_pkt_stats_rsp_msg;
+
+//============================================================================
+/** @COMMAND MCM_DATA_GET_DEVICE_NAME
+    @BRIEF Gets routing information for the connection associated with the
+           specified call ID.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+
+//! @MSG     MCM_DATA_RESET_GET_DEVICE_NAME_REQ
+//! @TYPE    Request
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+
+message
+{
+  //! MCM Data Call ID
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory int32 call_id;
+  /**< Call ID of the connection for which to get the routing information. */
+
+} mcm_data_get_device_name_req_msg;
+
+
+//! @MSG     MCM_DATA_RESET_GET_DEVICE_NAME_RSP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+
+message
+{
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+  //! MCM Data Device name
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional char device_name<MCM_DATA_MAX_DEVICE_NAME_LEN>;  //!< Device name.
+
+} mcm_data_get_device_name_rsp_msg;
+
+
+//============================================================================
+/** @COMMAND MCM_DATA_GET_DEVICE_ADDR_COUNT
+    @BRIEF Gets the number of IP addresses available for the connection
+           associated with the specified call ID.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+
+//! @MSG     MCM_DATA_GET_DEVICE_ADDR_COUNT_REQ
+//! @TYPE    Request
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+
+message
+{
+  //! MCM Data Call ID
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory int32 call_id;
+  /**< Call ID of the connection for which to get the address count. */
+
+} mcm_data_get_device_addr_count_req_msg;
+
+
+//! @MSG     MCM_DATA_GET_DEVICE_ADDR_COUNT_RSP
+//! @TYPE    Request
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+
+message
+{
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+  //! MCM Data Device Addr Count
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional int8 addr_count;  //!< Data device address count.
+
+} mcm_data_get_device_addr_count_rsp_msg;
+
+//============================================================================
+/** @COMMAND MCM_DATA_GET_CALL_TECH
+    @BRIEF Gets underlying technology available for the connection associated
+           with the specified call ID.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+
+//! @MSG     MCM_DATA_GET_CALL_TECH_REQ
+//! @TYPE    Request
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+
+message
+{
+  //! MCM Data Call ID
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory int32 call_id;
+  /**< Call ID of the connection for which to get the call technology. */
+
+} mcm_data_get_call_tech_req_msg;
+
+
+//! @MSG     MCM_DATA_GET_CALL_TECH_RSP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+
+message
+{
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+  //! MCM Data Call Bearer Tech
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional mcm_data_bearer_tech_info_t call_tech;  //!< Data call bearer technology.
+
+} mcm_data_get_call_tech_rsp_msg;
+
+
+//============================================================================
+/** @COMMAND MCM_DATA_GET_CALL_STATUS
+    @BRIEF Gets the current status of the connection associated with the
+           specified call ID.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+
+//! @MSG     MCM_DATA_GET_CALL_STATUS_REQ
+//! @TYPE    Request
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+
+message
+{
+  //! MCM Data Call ID
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory int32 call_id;
+  /**< Call ID of the connection for which to get the call status. */
+
+} mcm_data_get_call_status_req_msg;
+
+
+//! @MSG     MCM_DATA_GET_CALL_STATUS_RSP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+
+message
+{
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+  //! MCM Data Call Status
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional mcm_data_call_status_t call_status;  //!< Data call status.
+
+} mcm_data_get_call_status_rsp_msg;
+
+//============================================================================
+/** @COMMAND MCM_DATA_GET_REG_STATUS
+
+    @BRIEF Gets the current data registration status.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+
+//! @MSG     MCM_DATA_GET_REG_STATUS_REQ
+//! @TYPE    Request
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+
+message {
+} mcm_data_get_reg_status_req_msg;
+
+
+//! @MSG     MCM_DATA_GET_REG_STATUS_RSP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+
+message
+{
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+  //! MCM Data Reg Status
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional mcm_data_reg_status_t reg_status;  //!< Data modem registration status.
+
+} mcm_data_get_reg_status_rsp_msg;
+
+//============================================================================
+/** @COMMAND MCM_DATA_GET_DEVICE_ADDR
+    @BRIEF Gets a list of IP address for the connection associated with the
+           specified call ID.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+
+//! @MSG     MCM_DATA_GET_DEVICE_ADDR_REQ
+//! @TYPE    Request
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+
+message
+{
+
+  //! MCM Data Call ID
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory int32 call_id;
+  /**< Call ID of the connection for which to get the IP address. */
+
+} mcm_data_get_device_addr_req_msg;
+
+
+//! @MSG     MCM_DATA_GET_DEVICE_ADDR_RSP
+//! @TYPE    Request
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+
+message
+{
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+  //! MCM Data Device Addr
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional mcm_data_addr_t_info addr_info<MCM_DATA_MAX_ADDR_COUNT>;  //!< Data device address.
+
+} mcm_data_get_device_addr_rsp_msg;
+
+
+//============================================================================
+/** @COMMAND MCM_DATA_GET_CHANNEL_RATE
+    @BRIEF  Gets the current and maximum channel rate of the connection associated
+            with the specified call ID.
+
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_DATA_GET_CHANNEL_RATE_REQ_MSG
+//! @TYPE    Request
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+
+message
+{
+  //! MCM Data Call ID
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory int32 call_id;
+  /**< Call ID of the connection for which to get the channel rate. */
+}mcm_data_get_channel_rate_req_msg;
+
+
+//! @MSG     MCM_DATA_GET_CHANNEL_RATE_RSP_MSG
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+
+message
+{
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+  //! MCM Data Channel Rate
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional mcm_data_channel_rate_t channel_rate;  //!< Data channel rate.
+
+}mcm_data_get_channel_rate_rsp_msg;
+
+//=============================================================================
+// EVENT REGISTER
+//=============================================================================
+//=============================================================================
+/** @COMMAND MCM_DATA_EVENT_REGISTER
+    @CMD_VERSION 1.0
+    @BRIEF Registers for an indication of events
+    @DESCRIPTION
+     Corresponding Events:
+          MCM_DATA_NET_UP_EV
+          MCM_DATA_NET_DOWN_EV
+          MCM_DATA_NET_NEW_ADDR_EV
+          MCM_DATA_NET_DEL_ADDR_EV
+          MCM_DATA_REG_SRVC_STATUS_EV
+          MCM_DATA_BEARER_TECH_STATUS_EV
+          MCM_DATA_DORMANCY_STATUS_EV
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+
+//! @MSG  MCM_DATA_EVENT_REGISTER_REQ
+//! @TYPE Request
+//! @SENDER Control point
+//----------------------------------------------------------------------------
+message {
+    optional boolean register_net_up_event;              /**< Network up event. */
+    optional boolean register_net_down_event;            /**< Network down event. */
+    optional boolean register_net_new_addr_event;        /**< New address
+                                                              event. */
+    optional boolean register_net_del_addr_event;        /**< Network deleted
+                                                              address event. */
+    optional boolean register_reg_srvc_status_event;     /**< Registration
+                                                              service status
+                                                              event. */
+    optional boolean register_bearer_tech_status_event;  /**< Bearer technology
+                                                              status event. */
+    optional boolean register_dormancy_status_event;     /**< Dormancy status
+                                                              event. */
+} mcm_data_event_register_req_msg; //!< Event registration request message.
+
+//! @MSG  MCM_DATA_EVENT_REGISTER_RESP
+//! @TYPE Response
+//! @SENDER Service
+//----------------------------------------------------------------------------
+message {
+    mandatory mcm_response_t response;  //!< Result code.
+} mcm_data_event_register_resp_msg;
+/** @ERROR
+    MCM_SUCCESS
+    MCM_ERROR_GENERIC
+    MCM_ERROR_BADPARM
+    MCM_ERROR_MEMORY
+    MCM_ERROR_INVALID_STATE
+*/
+//============================================================================
+// UNSOLICITED EVENT INDICATION
+//============================================================================
+//============================================================================
+/** @COMMAND MCM_DATA_UNSOL_EVENT_IND
+    @BRIEF Indication corresponding to an unsolicited event.
+     @DESCRIPTION
+     Corresponding events:
+        - MCM_DATA_NET_UP_EV
+        - MCM_DATA_NET_DOWN_EV
+        - MCM_DATA_NET_NEW_ADDR_EV
+        - MCM_DATA_NET_DEL_ADDR_EV
+        - MCM_DATA_REG_SRVC_STATUS_EV
+        - MCM_DATA_BEARER_TECH_STATUS_EV
+        - MCM_DATA_DORMANCY_STATUS_EV
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG      MCM_DATA_UNSOL_EVENT_IND
+//! @TYPE    Indication
+//! @SENDER  Service
+//! @SCOPE   Unicast
+//----------------------------------------------------------------------------
+message
+{
+  //! MCM Data Event ID
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory int32 event_id;
+  /**< Event ID:
+  - 0x00005001 -- MCM_DATA_NET_UP_EV
+  - 0x00005002 -- MCM_DATA_NET_DOWN_EV
+  - 0x00005003 -- MCM_DATA_NET_NEW_ADDR_EV
+  - 0x00005004 -- MCM_DATA_NET_DEL_ADDR_EV
+  - 0x00005005 -- MCM_DATA_REG_SRVC_STATUS_EV
+  - 0x00005006 -- MCM_DATA_BEARER_TECH_STATUS_EV
+  - 0x00005007 -- MCM_DATA_DORMANCY_STATUS_EV
+  */
+
+  //! MCM Data Call ID
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional int32 call_id;
+  /** Call ID that gets generated for a succesful call. */
+
+  //! MCM Data Call status
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional mcm_data_call_status_t call_status;
+  /**< Data call status. */
+
+  //! MCM Data Device Call Bearer State
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional mcm_data_bearer_tech_info_t call_tech;
+  /**< Data bearer technology corresponding to the call ID. */
+
+  //! MCM Data Reg Status
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional mcm_data_reg_status_t reg_status;
+  /**< Data modem registration status. */
+
+  //! MCM Data Dormant Status
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional mcm_data_dormancy_state_t dorm_status;
+  /**< Data dormancy status. */
+
+  //! MCM Data Device Addr Count
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional int8 addr_count;
+  /**< Data device address count. */
+
+  //! MCM Data Device Addr
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional mcm_data_addr_t_info addr_info<MCM_DATA_MAX_ADDR_COUNT>;
+  /**< Data device address. */
+
+  //! MCM Data Call End Reason
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional mcm_data_verbose_call_end_reason_t vce_reason;
+  /**< Data call end reason in verbose. */
+
+} mcm_data_unsol_event_ind_msg;
+
+//============================================================================
+// File footer
+//============================================================================
+/*
+@FOOTER
+*/
+
+//============================================================================
+// Service Definition
+//============================================================================
+service mcm_data {
+
+  // 0x0100
+  //! @ID MCM_DATA_START_DATA_CALL
+  mcm_data_start_data_call_req_msg   MCM_DATA_START_DATA_CALL_REQ,
+  mcm_data_start_data_call_rsp_msg   MCM_DATA_START_DATA_CALL_RSP = 0x0100;
+
+  // 0x0101
+  //! @ID MCM_DATA_STOP_DATA_CALL
+  mcm_data_stop_data_call_req_msg   MCM_DATA_STOP_DATA_CALL_REQ,
+  mcm_data_stop_data_call_rsp_msg   MCM_DATA_STOP_DATA_CALL_RSP;
+
+  // 0x0102
+  //! @ID MCM_DATA_GET_PKT_STATS
+  mcm_data_get_pkt_stats_req_msg   MCM_DATA_GET_PKT_STATS_REQ,
+  mcm_data_get_pkt_stats_rsp_msg   MCM_DATA_GET_PKT_STATS_RSP;
+
+  // 0x0103
+  //! @ID MCM_DATA_RESET_PKT_STATS
+  mcm_data_reset_pkt_stats_req_msg   MCM_DATA_RESET_PKT_STATS_REQ,
+  mcm_data_reset_pkt_stats_rsp_msg   MCM_DATA_RESET_PKT_STATS_RSP;
+
+  // 0x0104
+  //! @ID MCM_DATA_GET_DEVICE_NAME
+  mcm_data_get_device_name_req_msg   MCM_DATA_GET_DEVICE_NAME_REQ,
+  mcm_data_get_device_name_rsp_msg   MCM_DATA_GET_DEVICE_NAME_RSP;
+
+  // 0x0105
+  //! @ID MCM_DATA_GET_DEVICE_ADDR_COUNT
+  mcm_data_get_device_addr_count_req_msg    MCM_DATA_GET_DEVICE_ADDR_COUNT_REQ,
+  mcm_data_get_device_addr_count_rsp_msg    MCM_DATA_GET_DEVICE_ADDR_COUNT_RSP;
+
+  // 0x0106
+  //! @ID MCM_DATA_GET_CALL_TECH
+  mcm_data_get_call_tech_req_msg    MCM_DATA_GET_CALL_TECH_REQ,
+  mcm_data_get_call_tech_rsp_msg    MCM_DATA_GET_CALL_TECH_RSP;
+
+  // 0x0107
+  //! @ID MCM_DATA_GET_CALL_STATUS
+  mcm_data_get_call_status_req_msg    MCM_DATA_GET_CALL_STATUS_REQ,
+  mcm_data_get_call_status_rsp_msg    MCM_DATA_GET_CALL_STATUS_RSP;
+
+  // 0x0108
+  //! @ID MCM_DATA_GET_DEVICE_ADDR
+  mcm_data_get_device_addr_req_msg    MCM_DATA_GET_DEVICE_ADDR_REQ,
+  mcm_data_get_device_addr_rsp_msg    MCM_DATA_GET_DEVICE_ADDR_RSP;
+
+  // 0x0109
+  //! @ID MCM_DATA_GET_CHANNEL_RATE
+  mcm_data_get_channel_rate_req_msg     MCM_DATA_GET_CHANNEL_RATE_REQ_MSG,
+  mcm_data_get_channel_rate_rsp_msg     MCM_DATA_GET_CHANNEL_RATE_RSP_MSG;
+
+  // 0x010A
+  //! @ID MCM_DATA_EVENT_REGISTER
+  mcm_data_event_register_req_msg   MCM_DATA_EVENT_REGISTER_REQ,
+  mcm_data_event_register_resp_msg   MCM_DATA_EVENT_REGISTER_RESP;
+
+  // 0x010B
+  //! @ID MCM_DATA_GET_REG_STATUS
+  mcm_data_get_reg_status_req_msg     MCM_DATA_GET_REG_STATUS_REQ_MSG,
+  mcm_data_get_reg_status_rsp_msg     MCM_DATA_GET_REG_STATUS_RSP_MSG;
+
+  // 0x010C
+  //! @ID MCM_DATA_UNSOL_EVENT_IND
+  mcm_data_unsol_event_ind_msg  MCM_DATA_UNSOL_EVENT_IND;
+
+} = 0x0404;
+
+//============================================================================
+// End of Module
+//============================================================================
+

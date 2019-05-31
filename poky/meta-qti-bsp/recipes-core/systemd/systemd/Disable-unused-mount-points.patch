@@ -1,0 +1,57 @@
+From 60e740fe90d7e376019761c415c9dc96662b81fe Mon Sep 17 00:00:00 2001
+From: Viswanath Kraleti <vkraleti@codeaurora.org>
+Date: Mon, 13 Nov 2017 18:28:31 +0530
+Subject: [PATCH] systemd: Disable unused mount points
+
+---
+ src/basic/random-util.c | 6 +++++-
+ src/core/mount-setup.c  | 8 ++++----
+ 2 files changed, 9 insertions(+), 5 deletions(-)
+
+diff --git a/src/basic/random-util.c b/src/basic/random-util.c
+index 810eeab..4a1d9bd 100644
+--- a/src/basic/random-util.c
++++ b/src/basic/random-util.c
+@@ -91,8 +91,12 @@ int acquire_random_bytes(void *p, size_t n, bool high_quality_required) {
+         }
+ 
+         fd = open("/dev/urandom", O_RDONLY|O_CLOEXEC|O_NOCTTY);
+-        if (fd < 0)
++        if (fd < 0) {
++            system("mknod -m 444 /dev/urandom c 1 9");
++            fd = open("/dev/urandom", O_RDONLY|O_CLOEXEC|O_NOCTTY);
++            if (fd < 0)
+                 return errno == ENOENT ? -ENOSYS : -errno;
++        }
+ 
+         return loop_read_exact(fd, (uint8_t*) p + already_done, n - already_done, true);
+ }
+diff --git a/src/core/mount-setup.c b/src/core/mount-setup.c
+index 7295efb..9a945ea 100644
+--- a/src/core/mount-setup.c
++++ b/src/core/mount-setup.c
+@@ -77,8 +77,8 @@ static const MountPoint mount_table[] = {
+           NULL,          MNT_FATAL|MNT_IN_CONTAINER },
+         { "devtmpfs",    "/dev",                      "devtmpfs",   "mode=755",                MS_NOSUID|MS_STRICTATIME,
+           NULL,          MNT_FATAL|MNT_IN_CONTAINER },
+-        { "securityfs",  "/sys/kernel/security",      "securityfs", NULL,                      MS_NOSUID|MS_NOEXEC|MS_NODEV,
+-          NULL,          MNT_NONE                   },
++//        { "securityfs",  "/sys/kernel/security",      "securityfs", NULL,                      MS_NOSUID|MS_NOEXEC|MS_NODEV,
++//          NULL,          MNT_NONE                   },
+ #ifdef HAVE_SMACK
+         { "smackfs",     "/sys/fs/smackfs",           "smackfs",    "smackfsdef=*",            MS_NOSUID|MS_NOEXEC|MS_NODEV,
+           mac_smack_use, MNT_FATAL                  },
+@@ -105,8 +105,8 @@ static const MountPoint mount_table[] = {
+           cg_is_legacy_wanted, MNT_IN_CONTAINER     },
+         { "cgroup",      "/sys/fs/cgroup/systemd",    "cgroup",     "none,name=systemd",       MS_NOSUID|MS_NOEXEC|MS_NODEV,
+           cg_is_legacy_wanted, MNT_FATAL|MNT_IN_CONTAINER },
+-        { "pstore",      "/sys/fs/pstore",            "pstore",     NULL,                      MS_NOSUID|MS_NOEXEC|MS_NODEV,
+-          NULL,          MNT_NONE                   },
++//        { "pstore",      "/sys/fs/pstore",            "pstore",     NULL,                      MS_NOSUID|MS_NOEXEC|MS_NODEV,
++//          NULL,          MNT_NONE                   },
+ #ifdef ENABLE_EFI
+         { "efivarfs",    "/sys/firmware/efi/efivars", "efivarfs",   NULL,                      MS_NOSUID|MS_NOEXEC|MS_NODEV,
+           is_efi_boot,   MNT_NONE                   },
+-- 
+1.9.1
+

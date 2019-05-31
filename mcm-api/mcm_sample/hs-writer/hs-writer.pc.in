@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: home-security
+Description: MCM Home Security Sample App
+Version: @VERSION@
+Libs: -L${libdir} -lhome-security
+Cflags: -I${includedir}/home-security

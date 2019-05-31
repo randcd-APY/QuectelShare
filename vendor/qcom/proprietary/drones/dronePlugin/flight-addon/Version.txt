@@ -1,0 +1,2 @@
+Flight-Addon: FC_DEVICE_DRIVERS_ADDON_06.23.2017
+GNSS: /source/qcom/qct/platform/adsp/proj/gnss_test_slpi qctp406:1666 P4

@@ -1,0 +1,150 @@
+SectionVerb {
+        EnableSequence [
+                cdev "hw:0"
+                cset "name='MultiMedia1 Mixer QUAT_MI2S_TX' 1"
+        ]
+        DisableSequence [
+                cdev "hw:0"
+                cset "name='MultiMedia1 Mixer QUAT_MI2S_TX' 0"
+        ]
+}
+
+#DMIC0
+SectionDevice."PrimaryMIC" {
+        EnableSequence [
+                cdev "hw:0"
+                cset "name='AIF1_CAP Mixer SLIM TX6' 1"
+                cset "name='MI2S_TX Channels' 0"
+                cset "name='SLIM TX6 MUX' 2"
+                cset "name='ADC MUX6' 0"
+                cset "name='DMIC MUX6' 1"
+                cset "name='IIR0 INP0 MUX' 7"
+        ]
+        DisableSequence [
+                cdev "hw:0"
+                cset "name='AIF1_CAP Mixer SLIM TX6' 0"
+                cset "name='MI2S_TX Channels' 0"
+                cset "name='SLIM TX6 MUX' 0"
+                cset "name='ADC MUX6' 0"
+                cset "name='DMIC MUX6' 0"
+                cset "name='IIR0 INP0 MUX' 0"
+        ]
+}
+
+SectionDevice."DMIC1" {
+        EnableSequence [
+                cdev "hw:0"
+                cset "name='AIF1_CAP Mixer SLIM TX6' 1"
+                cset "name='MI2S_TX Channels' 0"
+                cset "name='SLIM TX6 MUX' 2"
+                cset "name='ADC MUX6' 0"
+                cset "name='DMIC MUX6' 2"
+                cset "name='IIR0 INP0 MUX' 7"
+        ]
+        DisableSequence [
+                cdev "hw:0"
+                cset "name='AIF1_CAP Mixer SLIM TX6' 0"
+                cset "name='MI2S_TX Channels' 0"
+                cset "name='SLIM TX6 MUX' 0"
+                cset "name='ADC MUX6' 0"
+                cset "name='DMIC MUX6' 0"
+                cset "name='IIR0 INP0 MUX' 0"
+        ]
+}
+
+SectionDevice."DMIC2" {
+        EnableSequence [
+                cdev "hw:0"
+                cset "name='AIF1_CAP Mixer SLIM TX6' 1"
+                cset "name='MI2S_TX Channels' 0"
+                cset "name='SLIM TX6 MUX' 2"
+                cset "name='ADC MUX6' 0"
+                cset "name='DMIC MUX6' 3"
+                cset "name='IIR0 INP0 MUX' 7"
+        ]
+        DisableSequence [
+                cdev "hw:0"
+                cset "name='AIF1_CAP Mixer SLIM TX6' 0"
+                cset "name='MI2S_TX Channels' 0"
+                cset "name='SLIM TX6 MUX' 0"
+                cset "name='ADC MUX6' 0"
+                cset "name='DMIC MUX6' 0"
+                cset "name='IIR0 INP0 MUX' 0"
+        ]
+}
+
+SectionDevice."DMIC3" {
+        EnableSequence [
+                cdev "hw:0"
+                cset "name='AIF1_CAP Mixer SLIM TX6' 1"
+                cset "name='MI2S_TX Channels' 0"
+                cset "name='SLIM TX6 MUX' 2"
+                cset "name='ADC MUX6' 0"
+                cset "name='DMIC MUX6' 4"
+                cset "name='IIR0 INP0 MUX' 7"
+        ]
+        DisableSequence [
+                cdev "hw:0"
+                cset "name='AIF1_CAP Mixer SLIM TX6' 0"
+                cset "name='MI2S_TX Channels' 0"
+                cset "name='SLIM TX6 MUX' 0"
+                cset "name='ADC MUX6' 0"
+                cset "name='DMIC MUX6' 0"
+                cset "name='IIR0 INP0 MUX' 0"
+        ]
+}
+
+SectionDevice."QuadMIC" {
+        EnableSequence [
+                cdev "hw:0"
+                cset "name='AIF1_CAP Mixer SLIM TX6' 1"
+                cset "name='AIF1_CAP Mixer SLIM TX7' 1"
+                cset "name='AIF1_CAP Mixer SLIM TX8' 1"
+                cset "name='MI2S_TX Channels' 2"
+                cset "name='SLIM TX6 MUX' 2"
+                cset "name='ADC MUX6' 0"
+                cset "name='DMIC MUX6' 4"
+                cset "name='SLIM TX7 MUX' 2"
+                cset "name='ADC MUX7' 0"
+                cset "name='DMIC MUX7' 1"
+                cset "name='SLIM TX8 MUX' 2"
+                cset "name='ADC MUX8' 0"
+                cset "name='DMIC MUX8' 3"
+        ]
+        DisableSequence [
+                cdev "hw:0"
+                cset "name='AIF1_CAP Mixer SLIM TX6' 0"
+                cset "name='AIF1_CAP Mixer SLIM TX7' 0"
+                cset "name='AIF1_CAP Mixer SLIM TX8' 0"
+                cset "name='MI2S_TX Channels' 0"
+                cset "name='SLIM TX6 MUX' 0"
+                cset "name='ADC MUX6' 0"
+                cset "name='DMIC MUX6' 0"
+                cset "name='SLIM TX7 MUX' 0"
+                cset "name='ADC MUX7' 0"
+                cset "name='DMIC MUX7' 0"
+                cset "name='SLIM TX8 MUX' 0"
+                cset "name='ADC MUX8' 0"
+                cset "name='DMIC MUX8' 0"
+        ]
+}
+SectionDevice."Headset" {
+        EnableSequence [
+                cdev "hw:0"
+                cset "name='MI2S_TX Channels' 0"
+                cset "name='AIF1_CAP Mixer SLIM TX6' 1"
+                cset "name='SLIM TX6 MUX' 2"
+                cset "name='ADC MUX6' 1"
+                cset "name='AMIC MUX6' 2"
+                cset "name='DEC6 Volume' 84"
+        ]
+        DisableSequence [
+                cdev "hw:0"
+                cset "name='MI2S_TX Channels' 1"
+                cset "name='AIF1_CAP Mixer SLIM TX6' 0"
+                cset "name='SLIM TX6 MUX' 0"
+                cset "name='ADC MUX6' 0"
+                cset "name='AMIC MUX6' 0"
+                cset "name='DEC6 Volume' 84"
+        ]
+}

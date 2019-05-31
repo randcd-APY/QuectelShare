@@ -1,0 +1,30 @@
+diff -Nurd libcryptopp2/GNUmakefile libcryptopp/GNUmakefile
+--- libcryptopp2/GNUmakefile	2013-02-20 15:30:52.000000000 +0100
++++ libcryptopp/GNUmakefile	2013-12-01 20:58:53.774735203 +0100
+@@ -148,17 +148,17 @@
+ 	-$(RM) cryptest.exe libcryptopp.a libcryptopp.so $(LIBOBJS) $(TESTOBJS) cryptopp.dll libcryptopp.dll.a libcryptopp.import.a cryptest.import.exe dlltest.exe $(DLLOBJS) $(LIBIMPORTOBJS) $(TESTI MPORTOBJS) $(DLLTESTOBJS)
+ 
+ install:
+-	$(MKDIR) -p $(PREFIX)/include/cryptopp $(PREFIX)/lib $(PREFIX)/bin
+-	-$(CP) *.h $(PREFIX)/include/cryptopp
+-	-$(CP) *.a $(PREFIX)/lib
+-	-$(CP) *.so $(PREFIX)/lib
+-	-$(CP) *.exe $(PREFIX)/bin
++	$(MKDIR) -p $(DESTDIR)$(PREFIX)/include/cryptopp $(DESTDIR)$(PREFIX)/lib $(DESTDIR)$(PREFIX)/bin
++	-$(CP) *.h $(DESTDIR)$(PREFIX)/include/cryptopp
++	-$(CP) *.a $(DESTDIR)$(PREFIX)/lib
++	-$(CP) *.so $(DESTDIR)$(PREFIX)/lib
++	-$(CP) *.exe $(DESTDIR)$(PREFIX)/bin
+ 
+ remove:
+-	-$(RM) -rf $(PREFIX)/include/cryptopp
+-	-$(RM) $(PREFIX)/lib/libcryptopp.a
+-	-$(RM) $(PREFIX)/lib/libcryptopp.so
+-	-$(RM) $(PREFIX)/bin/cryptest.exe
++	-$(RM) -rf $(DESTDIR)$(PREFIX)/include/cryptopp
++	-$(RM) $(DESTDIR)$(PREFIX)/lib/libcryptopp.a
++	-$(RM) $(DESTDIR)$(PREFIX)/lib/libcryptopp.so
++	-$(RM) $(DESTDIR)$(PREFIX)/bin/cryptest.exe
+ 
+ libcryptopp.a: $(LIBOBJS)
+ 	$(AR) $(ARFLAGS) $@ $(LIBOBJS)

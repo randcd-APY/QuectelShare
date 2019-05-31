@@ -1,0 +1,135 @@
+diff -ur a/common/inc/qcc/Debug.h b/common/inc/qcc/Debug.h
+--- a/common/inc/qcc/Debug.h	2014-05-15 17:31:12.746629580 -0700
++++ b/common/inc/qcc/Debug.h	2015-01-28 18:23:57.762561903 -0800
+@@ -33,6 +33,14 @@
+ #define QCC_MODULE "DEBUG"
+ /** @endcond */
+ 
++#ifndef QCC_DEBUG_NOFILENAME
++#define _QCC_FILE_ __FILE__
++#define _QCC_LINE_ __LINE__
++#else
++#define _QCC_FILE_ ""
++#define _QCC_LINE_ 0
++#endif
++
+ /**
+  * Macro for printing out error messagages.
+  *
+@@ -45,14 +53,14 @@
+ #define QCC_LogError(_status, _msg)                                     \
+     do {                                                                \
+         void* _ctx = _QCC_DbgPrintContext(" 0x%04x", _status);          \
+-        _QCC_DbgPrintProcess(_ctx, DBG_LOCAL_ERROR, QCC_MODULE, __FILE__, __LINE__); \
++        _QCC_DbgPrintProcess(_ctx, DBG_LOCAL_ERROR, QCC_MODULE, _QCC_FILE_, _QCC_LINE_); \
+     } while (0)
+ #else
+ #define QCC_LogError(_status, _msg)                                     \
+     do {                                                                \
+         void* _ctx = _QCC_DbgPrintContext _msg;                         \
+         _QCC_DbgPrintAppend(_ctx, ": %s", QCC_StatusText(_status));     \
+-        _QCC_DbgPrintProcess(_ctx, DBG_LOCAL_ERROR, QCC_MODULE, __FILE__, __LINE__); \
++        _QCC_DbgPrintProcess(_ctx, DBG_LOCAL_ERROR, QCC_MODULE, _QCC_FILE_, _QCC_LINE_); \
+     } while (0)
+ #endif
+ 
+@@ -138,7 +146,7 @@
+     do {                                                               \
+         if (_QCC_DbgPrintCheck((_msgType), QCC_MODULE)) {              \
+             void* _ctx = _QCC_DbgPrintContext _msg;                    \
+-            _QCC_DbgPrintProcess(_ctx, (_msgType), QCC_MODULE, __FILE__, __LINE__); \
++            _QCC_DbgPrintProcess(_ctx, (_msgType), QCC_MODULE, _QCC_FILE_, _QCC_LINE_); \
+         }                                                               \
+     } while (0)
+ #endif
+@@ -158,7 +166,7 @@
+ #define _QCC_DbgDumpData(_msgType, _data, _len) do { } while (0)
+ #else
+ #define _QCC_DbgDumpData(_msgType, _data, _len)                         \
+-    _QCC_DbgDumpHex((_msgType), QCC_MODULE, __FILE__, __LINE__, # _data, (_data), (_len))
++    _QCC_DbgDumpHex((_msgType), QCC_MODULE, _QCC_FILE_, _QCC_LINE_, # _data, (_data), (_len))
+ #endif
+ /** @endcond */
+ 
+diff -ur a/common/src/Debug.cc b/common/src/Debug.cc
+--- a/common/src/Debug.cc	2015-01-28 18:30:00.738561860 -0800
++++ b/common/src/Debug.cc	2015-01-28 18:35:10.534561823 -0800
+@@ -31,6 +31,8 @@
+ #include <stdio.h>
+ #include <stdarg.h>
+ 
++#include <sys/time.h>
++
+ #include <qcc/Debug.h>
+ #include <qcc/Logger.h>
+ #include <qcc/Environ.h>
+@@ -267,7 +269,7 @@
+ 
+ static void GenPrefix(qcc::String& oss, DbgMsgType type, const char* module, const char* filename, int lineno, bool printThread, bool useEpoch)
+ {
+-    static const size_t timeTypeWidth = 18;
++    static const size_t timeTypeWidth = 34;
+     static const size_t moduleWidth = 12;
+     static const size_t threadWidth = 18;
+     static const size_t bonusWidth = 8;
+@@ -290,10 +292,17 @@
+     oss.reserve(colStop + moduleWidth + threadWidth + fileLineWidth + oss.capacity());
+ 
+     // Timestamp - col 0
+-    oss.append(logTimeSecond);
+-    oss.push_back('.');
+-    oss.append(logTimeMS);
+-    oss.push_back(' ');
++    struct timeval tv1;
++    gettimeofday(&tv1, NULL);
++    time_t t1 = tv1.tv_sec;
++    struct tm tm1;
++    localtime_r(&t1, &tm1);
++    char date[25];
++    snprintf(date, sizeof(date),
++        "%04d/%02d/%02d %02d:%02d:%02d.%03d ",
++        tm1.tm_year + 1900, tm1.tm_mon + 1, tm1.tm_mday,
++        tm1.tm_hour, tm1.tm_min, tm1.tm_sec, (int) (tv1.tv_usec) / 1000);
++    oss.append(date);
+ 
+     // Output type - col 9
+     oss.append(Type2Str(type));
+@@ -321,22 +330,24 @@
+     }
+ 
+     // File name - col 30 or 48
+-    colStop += fileLineWidth;
+     size_t fnSize = strlen(filename);
+-    qcc::String line = U32ToString(lineno, 10);
+-    size_t fileWidth = colStop - (oss.size() + line.size() + 4);  // Figure out how much room for filename
+-    if (fnSize > fileWidth) {
+-        // Filename is too long so chop off the first part (which should just be leading directories).
+-        oss.append("...");
+-        oss.append(filename + (fnSize - (fileWidth - 3)));
+-    } else {
+-        oss.append(filename);
++    if (fnSize > 0) {
++        colStop += fileLineWidth;
++        qcc::String line = U32ToString(lineno, 10);
++        size_t fileWidth = colStop - (oss.size() + line.size() + 4);  // Figure out how much room for filename
++        if (fnSize > fileWidth) {
++            // Filename is too long so chop off the first part (which should just be leading directories).
++            oss.append("...");
++            oss.append(filename + (fnSize - (fileWidth - 3)));
++        } else {
++            oss.append(filename);
++        }
++        oss.push_back(':');
++        oss.append(line);
++        do {
++            oss.push_back(' ');
++        } while (oss.size() < (colStop - 2));
+     }
+-    oss.push_back(':');
+-    oss.append(line);
+-    do {
+-        oss.push_back(' ');
+-    } while (oss.size() < (colStop - 2));
+ 
+     oss.append("| ");
+ 

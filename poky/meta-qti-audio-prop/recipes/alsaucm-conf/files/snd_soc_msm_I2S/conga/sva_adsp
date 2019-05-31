@@ -1,0 +1,30 @@
+SectionVerb {
+        EnableSequence [
+                exec "echo enabling adsp sva"
+                cdev "hw:0"
+                cset "name='TERT_MI2S_TX LSM Function' 4" #SWAUDIO
+                cset "name='LSM1 MUX' 7" #TERT_MI2S_TX LSM
+        ]
+        DisableSequence [
+                exec "echo disabling adsp sva"
+                cdev "hw:0"
+                cset "name='LSM1 MUX' 0" #NONE
+                cset "name='TERT_MI2S_TX LSM Function' 0" #NONE
+        ]
+}
+
+SectionDevice."HandsetMic" {
+        EnableSequence [
+                exec "echo enabling adsp handset mic"
+                cdev "hw:0"
+                cset "name='LOOPBACK Mode' 1" #ENABLE
+                cset "name='DEC1 MUX' 1" #ADC1
+                cset "name='ADC1 volume' 8"
+        ]
+        DisableSequence [
+                exec "echo disabling adsp handset mic"
+                cdev "hw:0"
+                cset "name='DEC1 MUX' 0" #ZERO
+                cset "name='ADC1 volume' 0"
+        ]
+}

@@ -1,0 +1,14 @@
+[Unit]
+SourcePath=/usr/bin/AlexaClientApp
+Description=alexaclient Service
+Requires=systemrw-alexa.service
+After=systemrw-alexa.service
+After=qti_audio_server_daemon.service
+After=label-data.service
+
+[Service]
+Restart=always
+ExecStart=/usr/bin/AlexaClientApp
+
+[Install]
+WantedBy=multi-user.target

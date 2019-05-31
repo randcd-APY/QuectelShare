@@ -1,0 +1,106 @@
+diff -urp a/alljoyn_core/inc/alljoyn/AllJoynStd.h b/alljoyn_core/inc/alljoyn/AllJoynStd.h
+--- a/alljoyn_core/inc/alljoyn/AllJoynStd.h	2015-01-28 18:30:00.310561860 -0800
++++ b/alljoyn_core/inc/alljoyn/AllJoynStd.h	2015-01-28 18:49:43.734561719 -0800
+@@ -518,6 +518,18 @@ extern const char* InterfaceName;
+ #define ALLJOYN_SETIDLETIMEOUTS_REPLY_FAILED           3   /**< SetIdleTimeouts reply: Failed */
+ // @}
+ 
++/**
++ * @name org.alljoyn.Bus.GetAliases
++ *  Interface: org.alljoyn.Bus
++ *  Method: GetAliases(String prefix)
++ *
++ *  Input params:
++ *     prefix - Prefix of the aliases to return
++ *
++ *  Output params:
++ *     names  - Dictionary of <alias, owner>
++ *
++ */
+ }
+ 
+ #undef QCC_MODULE
+diff -urp a/alljoyn_core/router/AllJoynObj.cc b/alljoyn_core/router/AllJoynObj.cc
+--- a/alljoyn_core/router/AllJoynObj.cc	2015-01-28 18:30:00.390561860 -0800
++++ b/alljoyn_core/router/AllJoynObj.cc	2015-01-28 18:45:30.690561749 -0800
+@@ -162,6 +162,7 @@ QStatus AllJoynObj::Init()
+         { alljoynIntf->GetMember("CancelSessionlessMessage"), static_cast<MessageReceiver::MethodHandler>(&AllJoynObj::CancelSessionlessMessage) },
+         { alljoynIntf->GetMember("RemoveSessionMember"),      static_cast<MessageReceiver::MethodHandler>(&AllJoynObj::RemoveSessionMember) },
+         { alljoynIntf->GetMember("GetHostInfo"),              static_cast<MessageReceiver::MethodHandler>(&AllJoynObj::GetHostInfo) },
++        { alljoynIntf->GetMember("GetAliases"),               static_cast<MessageReceiver::MethodHandler>(&AllJoynObj::GetAliases) },
+         { alljoynIntf->GetMember("ReloadConfig"),             static_cast<MessageReceiver::MethodHandler>(&AllJoynObj::ReloadConfig) },
+         { alljoynIntf->GetMember("Ping"),                     static_cast<MessageReceiver::MethodHandler>(&AllJoynObj::Ping) },
+         { alljoynIntf->GetMember("FindAdvertisementByTransport"),        static_cast<MessageReceiver::MethodHandler>(&AllJoynObj::FindAdvertisementByTransport) },
+@@ -1604,6 +1605,42 @@ void AllJoynObj::ReloadConfig(const Inte
+     }
+ }
+ 
++void AllJoynObj::GetAliases(const InterfaceDescription::Member* member, Message& msg)
++{
++    size_t numArgs;
++    const MsgArg* args;
++
++    /* Parse the message args */
++    msg->GetArgs(numArgs, args);
++    assert(numArgs == 1);
++    const char *prefix = args[0].v_string.str;
++    size_t prefixLen = args[0].v_string.len;
++
++    QCC_DbgPrintf(("AllJoynObj::GetAliases(%s)", prefix));
++
++    /* Find the aliases */
++    std::vector<std::pair<qcc::String, std::vector<qcc::String> > > nameVec;
++    AcquireLocks();
++    router.GetUniqueNamesAndAliases(nameVec);
++    ReleaseLocks();
++
++    vector<MsgArg> nameList;
++    for (size_t i = 0; i < nameVec.size(); i++) {
++        const std::vector<qcc::String> & aliases = nameVec[i].second;
++        for (size_t j = 0; j < aliases.size(); j++) {
++            if (strncmp(aliases[j].c_str(), prefix, prefixLen) == 0) {
++                MsgArg arg("{ss}", aliases[j].c_str(), nameVec[i].first.c_str());
++                nameList.push_back(arg);
++            }
++        }
++    }
++
++    /* Reply to request */
++    MsgArg replyArgs[1];
++    replyArgs[0].Set("a{ss}", nameList.size(), &nameList[0]);
++    QStatus status = MethodReply(msg, replyArgs, ArraySize(replyArgs));
++}
++
+ qcc::ThreadReturn STDCALL AllJoynObj::JoinSessionThread::RunAttach()
+ {
+     QCC_DbgTrace(("JoinSessionThread::RunAttach()"));
+diff -urp a/alljoyn_core/router/AllJoynObj.h b/alljoyn_core/router/AllJoynObj.h
+--- a/alljoyn_core/router/AllJoynObj.h	2015-01-28 18:30:00.390561860 -0800
++++ b/alljoyn_core/router/AllJoynObj.h	2015-01-28 18:45:30.690561749 -0800
+@@ -498,6 +498,15 @@ class AllJoynObj : public BusObject, pub
+     void GetHostInfo(const InterfaceDescription::Member* member, Message& msg);
+ 
+     /**
++     * Method handler for org.alljoyn.Bus.GetAliases
++     *
++     * @param member    Interface member.
++     * @param msg       The incoming method call message.
++     *
++     */
++    void GetAliases(const InterfaceDescription::Member* member, Message& msg);
++
++    /**
+      * Method handler for org.alljoyn.Bus.ReloadConfig
+      *
+      * @param member    Interface member.
+diff -urp a/alljoyn_core/src/AllJoynStd.cc b/alljoyn_core/src/AllJoynStd.cc
+--- a/alljoyn_core/src/AllJoynStd.cc	2015-01-28 18:30:00.510561860 -0800
++++ b/alljoyn_core/src/AllJoynStd.cc	2015-01-28 18:45:30.690561749 -0800
+@@ -138,6 +138,7 @@ QStatus org::alljoyn::CreateInterfaces(B
+         ifc->AddMethod("CancelSessionlessMessage", "u",                 "u",                 "serialNum,disposition",                      0);
+         ifc->AddMethod("RemoveSessionMember",      "us",                "u",                 "sessionId,name,disposition",                 0);
+         ifc->AddMethod("GetHostInfo",              "u",                 "uss",               "sessionId,disposition,localipaddr,remoteipaddr", 0);
++        ifc->AddMethod("GetAliases",               "s",                 "a{ss}",             "prefix,names",                               0);
+         ifc->AddMethod("ReloadConfig",             "",                  "b",                 "loaded",                                     0);
+         ifc->AddMethod("Ping",                     "su",                "u",                 "name,timeout,disposition",                   0);
+         ifc->AddMethod("FindAdvertisementByTransport",       "sq",                "u",                 "matching,transports,disposition",     0);

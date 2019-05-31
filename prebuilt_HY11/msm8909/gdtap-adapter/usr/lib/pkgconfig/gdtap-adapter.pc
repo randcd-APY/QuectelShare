@@ -1,0 +1,9 @@
+prefix=/usr
+exec_prefix=/usr
+libdir=/usr/lib
+includedir=/usr/include
+
+Name: gdtap-adapter
+Description: QTI GPS GDTAP Adapter
+Version: @VERSION
+Libs: -L${libdir} -lgdtap_adapter

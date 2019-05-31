@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: mm-video-utils
+Description: mm-video-utils library
+Version: @VERSION@
+Libs: -L${libdir} -lOmxVenc -lOmxVdec
+Cflags: -I${includedir}/mm-video-utils

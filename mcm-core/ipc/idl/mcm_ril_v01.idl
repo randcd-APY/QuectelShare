@@ -1,0 +1,300 @@
+include "mcm_voice_v01.idl";
+include "mcm_sms_v01.idl";
+include "mcm_nw_v01.idl";
+include "mcm_dm_v01.idl";
+
+service mcm_ril_service{
+//============================================================================
+// Service Definition
+//============================================================================
+
+  //0x0201
+  //! @ID MCM_DM_GET_RADIO_MODE
+  mcm_dm_get_radio_mode_req_msg   MCM_DM_GET_RADIO_MODE_REQ,
+  mcm_dm_get_radio_mode_resp_msg  MCM_DM_GET_RADIO_MODE_RESP = 0x0201;
+
+  //0x0202
+  //! @ID MCM_DM_SET_RADIO_MODE
+  mcm_dm_set_radio_mode_req_msg   MCM_DM_SET_RADIO_MODE_REQ,
+  mcm_dm_set_radio_mode_resp_msg  MCM_DM_SET_RADIO_MODE_RESP;
+
+
+  //0x0203
+  //! @ID MCM_DM_EVENT_REGISTER
+  mcm_dm_event_register_req_msg   MCM_DM_EVENT_REGISTER_REQ,
+  mcm_dm_event_register_resp_msg  MCM_DM_EVENT_REGISTER_RESP;
+
+  //0x0204
+  //! @ID MCM_DM_RADIO_MODE_CHANGED_EVENT_IND
+  mcm_dm_radio_mode_changed_event_ind_msg  MCM_DM_RADIO_MODE_CHANGED_EVENT_IND;
+
+    // 0x0500
+    //! @ID MCM_NW_SET_CONFIG
+  mcm_nw_set_config_req_msg MCM_NW_SET_CONFIG_REQ,
+  mcm_nw_set_config_resp_msg MCM_NW_SET_CONFIG_RESP =0x0500;
+
+   //0x0501
+  //! @ID MCM_NW_GET_CONFIG
+  mcm_nw_get_config_req_msg MCM_NW_GET_CONFIG_REQ,
+  mcm_nw_get_config_resp_msg MCM_NW_GET_CONFIG_RESP;
+
+  // 0x0502
+  //! @ID MCM_NW_GET_STATUS
+  mcm_nw_get_registration_status_req_msg MCM_NW_GET_REGISTRATION_STATUS_REQ,
+  mcm_nw_get_registration_status_resp_msg MCM_NW_GET_REGISTRATION_STATUS_RESP;
+
+  // 0x0503
+  //! @ID MCM_NW_SCAN
+  mcm_nw_scan_req_msg MCM_NW_SCAN_REQ,
+  mcm_nw_scan_resp_msg MCM_NW_SCAN_RESP;
+
+  // 0x0504
+  //! @ID MCM_NW_OPERATOR_NAME
+  mcm_nw_get_operator_name_req_msg MCM_NW_GET_OPERATOR_NAME_REQ,
+  mcm_nw_get_operator_name_resp_msg MCM_NW_GET_OPERATOR_NAME_RESP;
+
+  // 0x0505
+  //! @ID MCM_NW_SCREEN_ON_OFF
+  mcm_nw_screen_on_off_req_msg MCM_NW_SCREEN_ON_OFF_REQ,
+  mcm_nw_screen_on_off_resp_msg MCM_NW_SCREEN_ON_OFF_RESP;
+
+  // 0x0506
+  //! @ID MCM_NW_SELECTION
+  mcm_nw_selection_req_msg MCM_NW_SELECTION_REQ,
+  mcm_nw_selection_resp_msg MCM_NW_SELECTION_RESP;
+
+  // 0x0507
+  //! @ID MCM_NW_GET_SIGNAL_STRENGTH
+  mcm_nw_get_signal_strength_req_msg MCM_NW_GET_SIGNAL_STRENGTH_REQ,
+  mcm_nw_get_signal_strength_resp_msg MCM_NW_GET_SIGNAL_STRENGTH_RESP;
+
+  // 0x0508
+  //! @ID MCM_NW_GET_CELL_ACCESS_STATE
+  mcm_nw_get_cell_access_state_req_msg MCM_NW_GET_CELL_ACCESS_STATE_REQ,
+  mcm_nw_get_cell_access_state_resp_msg MCM_NW_GET_CELL_ACCESS_STATE_RESP;
+
+  // 0x0509
+  //! @ID MCM_NW_GET_NITZ_TIME_INFO
+   mcm_nw_get_nitz_time_info_req_msg             MCM_NW_GET_NITZ_TIME_INFO_REQ;
+   mcm_nw_get_nitz_time_info_resp_msg            MCM_NW_GET_NITZ_TIME_INFO_RESP;
+
+  // 0x050A
+  //! @ID MCM_NW_EVENT_REGISTER
+  mcm_nw_event_register_req_msg MCM_NW_EVENT_REGISTER_REQ,
+  mcm_nw_event_register_resp_msg MCM_NW_EVENT_REGISTER_RESP;
+
+  // 0x050B
+  //! @ID MCM_NW_VOICE_REGISTRATION_EVENT_IND
+   mcm_nw_voice_registration_event_ind_msg MCM_NW_VOICE_REGISTRATION_EVENT_IND;
+
+  // 0x050C
+  //! @ID MCM_NW_DATA_REGISTRATION_EVENT_IND
+   mcm_nw_data_registration_event_ind_msg MCM_NW_DATA_REGISTRATION_EVENT_IND;
+
+  // 0x050D
+  //! @ID MCM_NW_SIGNAL_STRENGTH_EVENT_IND
+   mcm_nw_signal_strength_event_ind_msg MCM_NW_SIGNAL_STRENGTH_EVENT_IND;
+
+  // 0x050E
+  //! @ID MCM_NW_CELL_ACCESS_STATE_CHANGE_EVENT_IND
+   mcm_nw_cell_access_state_change_event_ind_msg MCM_NW_CELL_ACCESS_STATE_CHANGE_EVENT_IND;
+
+  // 0x050F
+  //! @ID MCM_NW_NITZ_TIME_IND
+   mcm_nw_nitz_time_ind_msg             MCM_NW_NITZ_TIME_IND;
+
+  //0x0700
+ //!@ID MCM_SMS_SET_SERVICE_CENTER_CFG_TYPE
+ mcm_sms_set_service_center_cfg_type_req_msg MCM_SMS_SET_SERVICE_CENTER_CFG_TYPE_REQ,
+ mcm_sms_set_service_center_cfg_type_resp_msg MCM_SMS_SET_SERVICE_CENTER_CFG_TYPE_RESP = 0x0700;
+
+  //0x0701
+ //!@ID MCM_SMS_GET_SERVICE_CENTER_CFG_TYPE
+ mcm_sms_get_service_center_cfg_type_req_msg MCM_SMS_GET_SERVICE_CENTER_CFG_TYPE_REQ,
+ mcm_sms_get_service_center_cfg_type_resp_msg MCM_SMS_GET_SERVICE_CENTER_CFG_TYPE_RESP;
+
+  //0x0702
+ //!@ID MCM_SMS_SEND_MO_MSG
+ mcm_sms_send_mo_msg_req_msg MCM_SMS_SEND_MO_MSG_REQ,
+ mcm_sms_send_mo_msg_resp_msg MCM_SMS_SEND_MO_MSG_RESP;
+
+  //0x0703
+ //!@ID MCM_SMS_SET_MSG_CONFIG
+ mcm_sms_set_msg_config_req_msg MCM_SMS_SET_MSG_CONFIG_REQ,
+ mcm_sms_set_msg_config_resp_msg MCM_SMS_SET_MSG_CONFIG_RESP;
+
+ //0x0704
+ //!@ID MCM_SMS_GET_MSG_CONFIG
+ mcm_sms_get_msg_config_req_msg MCM_SMS_GET_MSG_CONFIG_REQ,
+ mcm_sms_get_msg_config_resp_msg MCM_SMS_GET_MSG_CONFIG_RESP;
+
+ //0x0705
+ //!@ID MCM_SMS_SET_RECEPTION_MODE
+ mcm_sms_set_reception_mode_req_msg MCM_SMS_SET_RECEPTION_MODE_REQ,
+ mcm_sms_set_reception_mode_resp_msg MCM_SMS_SET_RECEPTION_MODE_RESP;
+
+//0x0706
+ //!@ID MCM_SMS_EVENT_REGISTER
+ mcm_sms_event_register_req_msg MCM_SMS_EVENT_REGISTER_REQ,
+ mcm_sms_event_register_resp_msg MCM_SMS_EVENT_REGISTER_RESP;
+
+ //0x0707
+ //!@ID MCM_SMS_PP_IND
+ mcm_sms_pp_ind_msg MCM_SMS_PP_IND;
+
+ //0x0708
+ //!@ID MCM_SMS_CB_IND
+ mcm_sms_cb_ind_msg MCM_SMS_CB_IND;
+
+ //0x0709
+ //!@ID MCM_SMS_CB_CMAS_IND
+ mcm_sms_cb_cmas_ind_msg MCM_SMS_CB_CMAS_IND;
+
+ //0x1000
+ //!@ID MCM_VOICE_GET_CALLS
+ mcm_voice_get_calls_req_msg  MCM_VOICE_GET_CALLS_REQ,
+ mcm_voice_get_calls_resp_msg MCM_VOICE_GET_CALLS_RESP = 0x1000;
+
+
+ //0x1001
+ //!@ID MCM_VOICE_DIAL
+ mcm_voice_dial_req_msg     MCM_VOICE_DIAL_REQ,
+ mcm_voice_dial_resp_msg    MCM_VOICE_DIAL_RESP;
+
+
+ //0x1002
+ //!@ID MCM_VOICE_GET_CALL_STATUS
+ mcm_voice_get_call_status_req_msg    MCM_VOICE_GET_CALL_STATUS_REQ,
+ mcm_voice_get_call_status_resp_msg   MCM_VOICE_GET_CALL_STATUS_RESP;
+
+ //0x1003
+ //!@ID MCM_VOICE_DTMF
+ mcm_voice_dtmf_req_msg       MCM_VOICE_DTMF_REQ,
+ mcm_voice_dtmf_resp_msg      MCM_VOICE_DTMF_RESP;
+
+ //0x1004
+ mcm_voice_start_dtmf_req_msg    MCM_VOICE_START_DTMF_REQ,
+ mcm_voice_start_dtmf_resp_msg   MCM_VOICE_START_DTMF_RESP;
+
+ //0x1005
+ mcm_voice_stop_dtmf_req_msg     MCM_VOICE_STOP_DTMF_REQ,
+ mcm_voice_stop_dtmf_resp_msg    MCM_VOICE_STOP_DTMF_RESP;
+
+ //0x1006
+ //!@ID MCM_VOICE_MUTE
+ mcm_voice_mute_req_msg       MCM_VOICE_MUTE_REQ,
+ mcm_voice_mute_resp_msg      MCM_VOICE_MUTE_RESP;
+
+ //0x1007
+ //!@ID MCM_VOICE_FLASH
+ mcm_voice_flash_req_msg      MCM_VOICE_FLASH_REQ,
+ mcm_voice_flash_resp_msg     MCM_VOICE_FLASH_RESP;
+
+ //0x1008
+ //!@ID MCM_VOICE_HANGUP
+ mcm_voice_hangup_req_msg     MCM_VOICE_HANGUP_REQ,
+ mcm_voice_hangup_resp_msg    MCM_VOICE_HANGUP_RESP;
+
+ //0x1009
+ //!@ID MCM_VOICE_COMMAND
+ mcm_voice_command_req_msg          MCM_VOICE_COMMAND_REQ,
+ mcm_voice_command_resp_msg         MCM_VOICE_COMMAND_RESP;
+
+ //0x100A
+ //!ID MCM_VOICE_AUTO_ANSWER
+ mcm_voice_auto_answer_req_msg     MCM_VOICE_AUTO_ANSWER_REQ,
+ mcm_voice_auto_answer_resp_msg    MCM_VOICE_AUTO_ANSWER_RESP;
+
+ //0x100B
+ //!@ID MCM_VOICE_EVENT_REGISTER
+ mcm_voice_event_register_req_msg   MCM_VOICE_EVENT_REGISTER_REQ,
+ mcm_voice_event_register_resp_msg  MCM_VOICE_EVENT_REGISTER_RESP;
+
+ //0x100C
+ //!@ID MCM_VOICE_GET_CALL_FORWARDING_STATUS
+ mcm_voice_get_call_forwarding_status_req_msg  MCM_VOICE_GET_CALL_FORWARDING_STATUS_REQ,
+ mcm_voice_get_call_forwarding_status_resp_msg  MCM_VOICE_GET_CALL_FORWARDING_STATUS_RESP;
+
+ //0x100D
+ //!@ID MCM_VOICE_SET_CALL_FORWARDING
+ mcm_voice_set_call_forwarding_req_msg  MCM_VOICE_SET_CALL_FORWARDING_REQ,
+ mcm_voice_set_call_forwarding_resp_msg  MCM_VOICE_SET_CALL_FORWARDING_RESP;
+
+ //0x100E
+ //!@ID MCM_VOICE_GET_CALL_WAITING_STATUS
+ mcm_voice_get_call_waiting_status_req_msg  MCM_VOICE_GET_CALL_WAITING_STATUS_REQ,
+ mcm_voice_get_call_waiting_status_resp_msg  MCM_VOICE_GET_CALL_WAITING_STATUS_RESP;
+
+ //0x100F
+ //!@ID MCM_VOICE_SET_CALL_WAITING
+ mcm_voice_set_call_waiting_req_msg  MCM_VOICE_SET_CALL_WAITING_REQ,
+ mcm_voice_set_call_waiting_resp_msg  MCM_VOICE_SET_CALL_WAITING_RESP;
+
+ //0x1010
+ //!@ID MCM_VOICE_GET_CLIR
+ mcm_voice_get_clir_req_msg  MCM_VOICE_GET_CLIR_REQ,
+ mcm_voice_get_clir_resp_msg  MCM_VOICE_GET_CLIR_RESP;
+
+ //0x1011
+//!@ID MCM_VOICE_SET_CLIT
+mcm_voice_set_clir_req_msg   MCM_VOICE_SET_CLIR_REQ,
+mcm_voice_set_clir_resp_msg  MCM_VOICE_SET_CLIR_RESP;
+
+ //0x1012
+ //!@ID MCM_VOICE_SET_FACILITY_LOCK
+ mcm_voice_set_facility_lock_req_msg  MCM_VOICE_SET_FACILITY_LOCK_REQ,
+ mcm_voice_set_facility_lock_resp_msg  MCM_VOICE_SET_FACILITY_LOCK_RESP;
+
+ //0x1013
+ //!@ID MCM_VOICE_CHANGE_CALL_BARRING_PASSWORD
+ mcm_voice_change_call_barring_password_req_msg  MCM_VOICE_CHANGE_CALL_BARRING_PASSWORD_REQ,
+ mcm_voice_change_call_barring_password_resp_msg  MCM_VOICE_CHANGE_CALL_BARRING_PASSWORD_RESP;
+
+ //0x1014
+ //!@ID MCM_VOICE_SEND_USSD_REQ
+ mcm_voice_send_ussd_req_msg  MCM_VOICE_SEND_USSD_REQ,
+ mcm_voice_send_ussd_resp_msg  MCM_VOICE_SEND_USSD_RESP;
+
+ //0x1015
+ //!@ID MCM_VOICE_CANCEL_USSD_REQ
+ mcm_voice_cancel_ussd_req_msg  MCM_VOICE_CANCEL_USSD_REQ,
+ mcm_voice_cancel_ussd_resp_msg  MCM_VOICE_CANCEL_USSD_RESP;
+
+ //0x1016
+ //!@ID MCM_VOICE_COMMON_DIAL
+ mcm_voice_common_dial_req_msg  MCM_VOICE_COMMON_DIAL_REQ,
+ mcm_voice_common_dial_resp_msg  MCM_VOICE_COMMON_DIAL_RESP;
+
+ //0x1017
+ //!@ID MCM_VOICE_CALL_IND
+ mcm_voice_call_ind_msg             MCM_VOICE_CALL_IND;
+
+ //0x1018
+ //!@ID MCM_VOICE_MUTE_IND
+ mcm_voice_mute_ind_msg             MCM_VOICE_MUTE_IND;
+
+ //0x1019
+ //!@ID MCM_VOICE_DTMF_IND
+ mcm_voice_dtmf_ind_msg             MCM_VOICE_DTMF_IND;
+
+ //0x101A
+ //!@ID MCM_VOICE_USSD_INDICATION
+ mcm_voice_receive_ussd_ind_msg     MCM_VOICE_RECEIVE_USSD_IND;
+
+ //0x101B
+ //!@ID MCM_VOICE_UPDATE_ECALL_MSD
+ mcm_voice_update_msd_req_msg     MCM_VOICE_UPDATE_ECALL_MSD_REQ,
+ mcm_voice_update_msd_resp_msg     MCM_VOICE_UPDATE_ECALL_MSD_RESP;
+
+ //0x101C
+ //!@ID MCM_VOICE_E911_STATE_IND
+ mcm_voice_e911_state_ind_msg             MCM_VOICE_E911_STATE_IND;
+
+ //0x101D
+ //!@ID MCM_VOICE_GET_E911_STATE
+ mcm_voice_get_e911_state_req_msg             MCM_VOICE_GET_E911_STATE_REQ;
+ mcm_voice_get_e911_state_resp_msg            MCM_VOICE_GET_E911_STATE_RESP;
+
+} = 0x401;
+
+

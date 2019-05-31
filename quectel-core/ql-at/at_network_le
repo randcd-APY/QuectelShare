@@ -1,0 +1,26 @@
+#! /bin/sh
+
+set -e
+
+case "(" in
+    start)
+        echo -n "Starting at_network: "
+        start-stop-daemon -S -b -a /usr/bin/AT_Network
+        echo "done"
+        ;;
+    stop)
+        echo -n "Stopping at_network: "
+        #start-stop-daemon -K -n AT_Network
+        echo "done"
+        ;;
+    restart)
+        $0 stop
+        $0 start
+        ;;
+    *)
+        echo "Usage at_network_le{ start | stop | restart }" >&2
+        exit 1
+        ;;
+esac
+
+exit 0)

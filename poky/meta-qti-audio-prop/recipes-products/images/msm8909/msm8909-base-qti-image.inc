@@ -1,0 +1,17 @@
+# Packages installed to the root file system
+
+IMAGE_INSTALL += "audio-ftm"
+IMAGE_INSTALL += "soundtrigger"
+IMAGE_INSTALL += "audio-generic-effect-framework"
+IMAGE_INSTALL += "omx"
+IMAGE_INSTALL += "smwrapper"
+IMAGE_INSTALL += "qsthw-api"
+IMAGE_INSTALL += "audio-codecs-ms11"
+IMAGE_INSTALL += "audio-effects-noship"
+IMAGE_INSTALL += "omx-noship"
+IMAGE_INSTALL += "qti-audio-server"
+IMAGE_INSTALL += "ffv"
+IMAGE_INSTALL += "esp"
+IMAGE_INSTALL += "qsthw"
+IMAGE_INSTALL += "lms"
+IMAGE_INSTALL += "ql-audio"

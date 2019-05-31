@@ -1,0 +1,73 @@
+#!/bin/sh
+
+WIFI_ANT_TEST_GEN_FAIL=254
+WIFI_ANT_TEST_CH_INV=255
+WIFI_ANT_TEST_CH_INV_RSSI=-128
+chain=-1
+ret_val=
+
+usage() {
+	cat << EOF
+$0 [-c <chain>]
+
+	Reads ths SNR value of the control channel of the specified antenna
+	NOTE: SNR value of -128 indicates an invalid chain was specified
+
+	Parameters:
+	-c <chain>: Specify the chain to read.  For cus227 vaild values are {0, 1}
+
+	Example: wifi_ant_read -c 0 (Read SNR from chain 0)
+
+	Return Values:
+	x: Returns positive integer of the RSSI for the specified chain
+	$WIFI_ANT_TEST_GEN_FAIL: General failure
+	$WIFI_ANT_TEST_CH_INV: Specified chain is invalid (For cus227 this should occur with value
+		greater than 1
+EOF
+}
+
+#Parse command line
+while [ "$#" -gt 0 ]; do
+	case "$1" in
+	-c|--chain) chain=$2; shift
+		;;
+	*) echo "Invalid option specified"
+		usage
+		exit $WIFI_ANT_TEST_GEN_FAIL
+		;;
+	esac
+	shift
+done
+
+if [ "$chain" -lt 0 ]; then
+	printf "Must specify a chain!\n"
+	usage
+	exit $WIFI_ANT_TEST_GEN_FAIL
+fi
+
+#Get antenna readings from driver
+ant_data=$(cat /sys/kernel/debug/ieee80211/phy0/ath9k/recv | grep CTL)
+
+#This indicates a bad problem... perhaps driver is not loaded
+if [ -z "${ant_data}" ]; then
+	echo "Chain receive information not available!"
+	exit $WIFI_ANT_TEST_GEN_FAIL
+fi
+
+rssi=$(echo "${ant_data}" | grep CTL${chain} | cut -f2 -d':' | sed -e 's/^[ \t]*//')
+
+ret_val=$rssi
+
+#If true here specified a chain beyond reach
+if [ -z "${rssi}" ]; then
+	rssi=$WIFI_ANT_TEST_CH_INV_RSSI
+	ret_val=$WIFI_ANT_TEST_CH_INV
+fi
+if [ "${rssi}" -eq "$WIFI_ANT_TEST_CH_INV_RSSI" ]; then
+	ret_val=$WIFI_ANT_TEST_CH_INV
+fi
+
+#Display friendly information
+echo "RSSI Chain $chain=${rssi}"
+
+exit ${ret_val}

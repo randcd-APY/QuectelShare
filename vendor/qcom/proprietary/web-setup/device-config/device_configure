@@ -1,0 +1,76 @@
+#!/bin/sh
+
+DEV_CONF="/persist/device.conf"
+
+json_escape() {
+	if [ $# -gt 0 ]; then
+		printf "%s" "$*" | jq '.' -Rs
+	else
+		jq '.' -Rs
+	fi
+}
+
+get_serial() {
+	local value="$(grep -o 'androidboot.serialno[^ ]*' </proc/cmdline | cut -d '=' -f 2)"
+	echo -n "APQ8017_$value" | md5sum | sed -r "s/^(.{8})(.{4})(.{4})(.{4})(.{12}).*/\\1-\\2-\\3-\\4-\\5/" | tr -d '\n'
+}
+
+get_productId() {
+	echo -n "QCReference"
+}
+
+get_model() {
+	echo -n "Smart Audio Device"
+}
+
+get_manufacturer() {
+	echo -n "QTI"
+}
+
+get_friendlyId_prefix() {
+	echo -n "AVS_"
+}
+
+get_avsClientSecret() {
+	echo -n "fd2df5a06ca05f0c627954e188f3b2b2762e3f5f174b8c0b081372ac49fecde4"
+}
+
+[ -s "$DEV_CONF" ] || echo '{}' > "$DEV_CONF"
+
+if ! jq -e '. | has("serial")' "$DEV_CONF" >/dev/null; then
+	jq '. + { "serial": '"$(get_serial | json_escape)"'}' "$DEV_CONF" > "$DEV_CONF.tmp" \
+		&& mv "$DEV_CONF.tmp" "$DEV_CONF"
+fi
+
+if ! jq -e '. | has("productId")' "$DEV_CONF" >/dev/null; then
+	jq '. + { "productId": '"$(get_productId | json_escape)"'}' "$DEV_CONF" > "$DEV_CONF.tmp" \
+		&& mv "$DEV_CONF.tmp" "$DEV_CONF"
+fi
+
+if ! jq -e '. | has("model")' "$DEV_CONF" >/dev/null; then
+	jq '. + { "model": '"$(get_model | json_escape)"'}' "$DEV_CONF" > "$DEV_CONF.tmp" \
+		&& mv "$DEV_CONF.tmp" "$DEV_CONF"
+fi
+
+if ! jq -e '. | has("manufacturer")' "$DEV_CONF" >/dev/null; then
+	jq '. + { "manufacturer": '"$(get_manufacturer | json_escape)"'}' "$DEV_CONF" > "$DEV_CONF.tmp" \
+		&& mv "$DEV_CONF.tmp" "$DEV_CONF"
+fi
+
+if ! jq -e '. | has("friendlyId")' "$DEV_CONF" >/dev/null; then
+	[ -f /sys/class/net/wlan0/address ] || /etc/init.d/wlan start
+	id=$(cat /sys/class/net/wlan0/address | cut -d ":" -f 4-6 | tr -d ":")
+	jq '. + { "friendlyId": '"$({ get_friendlyId_prefix; echo -n "$id"; } | json_escape)"'}' "$DEV_CONF" > "$DEV_CONF.tmp" \
+		&& mv "$DEV_CONF.tmp" "$DEV_CONF"
+fi
+
+if ! jq -e '. | has("avsClientSecret")' "$DEV_CONF" >/dev/null; then
+	jq '. + { "avsClientSecret": '"$(get_avsClientSecret | json_escape)"'}' "$DEV_CONF" > "$DEV_CONF.tmp" \
+		&& mv "$DEV_CONF.tmp" "$DEV_CONF"
+fi
+
+if [ -d /etc/device_configure.d ]; then
+	for i in /etc/device_configure.d/*; do
+		( . "$i" )
+	done
+fi

@@ -1,0 +1,65 @@
+#!/bin/sh
+
+ant_thresh=$1
+
+usage() {
+	cat << EOF
+$0 [pass_threshold]
+
+	pass_threshold: SNR (in units of db), must be positive integer
+
+	Reads ths SNR value of both antennas on the control channel and compares it
+	against the "pass_threshold".  Recommended for factory testing of antenna 
+	connections
+
+	Return Values:
+	0: Successful (read RSSI values for both chain 0 & 1 exceeded pass criteria)
+	1: Failed (antenna/chain 0 below specified threshold)
+	2: Failed (antenna/chain 1 below specified threshold)
+	3: Failed (antenna/chains 0 & 1 below specified threshold)
+	4: User error problem (likely did not specify pass criteria)
+EOF
+}
+
+if [ -z "$1" ]; then
+	echo "Pass criteria not specified!!!"
+	usage
+	exit 4
+fi
+
+ret_val=0
+
+# Get antenna readings from driver
+ant_data=$(cat /sys/kernel/debug/ieee80211/phy0/ath9k/recv | grep CTL[01])
+
+#This should not happen!!!
+if [ -z "${ant_data}" ]; then
+	echo "Chain receive information not available!"
+	exit 4
+fi
+
+# Get rssi for control channel chain 0
+rssi_ch0=$(echo "${ant_data}" | grep CTL0 | cut -f2 -d':' | sed -e 's/^[ \t]*//')
+# Get rssi for control channel chain 1
+rssi_ch1=$(echo "${ant_data}" | grep CTL1 | cut -f2 -d':' | sed -e 's/^[ \t]*//')
+
+#Display friendly information
+echo SNR values read:
+echo rssi_ch0=${rssi_ch0}
+echo rssi_ch1=${rssi_ch1}
+
+# Test rssi of chains against pass criteria
+if [ "${rssi_ch0}" -lt "${ant_thresh}" ]; then
+	echo "Chain 0 Failed!"
+	ret_val=$((${ret_val}+1))
+fi
+if [ "${rssi_ch1}" -lt "${ant_thresh}" ]; then
+	echo "Chain 1 Failed!"
+	ret_val=$((${ret_val}+2))
+fi
+
+if [ ${ret_val} -eq 0 ]; then
+	echo "Test passed!"
+fi
+
+exit ${ret_val}

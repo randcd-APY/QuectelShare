@@ -1,0 +1,27 @@
+SectionVerb {
+        EnableSequence [
+                exec "echo setting playback "
+                cdev "hw:0"
+                cset "name='PRI_MI2S_RX Audio Mixer MultiMedia1' 1"
+        ]
+        DisableSequence [
+                cdev "hw:0"
+                cset "name='PRI_MI2S_RX Audio Mixer MultiMedia1' 0"
+        ]
+        # ALSA PCMs
+        CapturePCM 0
+        PlaybackPCM 0
+}
+
+SectionDevice."Speaker".0{
+        EnableSequence [
+                cdev "hw:0"
+                cset "name='RX3 MIX1 INP1' 3"
+                cset "name='SPK DAC Switch' 1"
+        ]
+        DisableSequence [
+                cdev "hw:0"
+                cset "name='RX3 MIX1 INP1' 0"
+                cset "name='SPK DAC Switch' 0"
+        ]
+}

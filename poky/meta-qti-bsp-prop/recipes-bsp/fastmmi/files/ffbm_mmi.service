@@ -1,0 +1,15 @@
+# Copyright (c) 2017 Qualcomm Technologies, Inc.
+# All Rights Reserved.
+# Confidential and Proprietary - Qualcomm Technologies, Inc.
+
+[Unit]
+Description=ffbm mmi Service
+SourcePath=/usr/bin/mmi
+After=qti_system_daemon.service leprop.service
+
+[Service]
+Restart=always
+ExecStart=/usr/bin/mmi
+
+[Install]
+WantedBy=ffbm.target

@@ -1,0 +1,120 @@
+lib_LTLIBRARIES = libbtapp.la
+
+#libbtapp_includedir=$(includedir)/
+#libbtapp_include_HEADERS = $(top_srcdir)/main/include/btheader.hpp
+
+AM_CPPFLAGS = -O2 \
+            -D_GNU_SOURCE
+
+AM_CFLAGS = -Wall \
+            -Wundef \
+            -Wstrict-prototypes \
+            -Wno-trigraphs \
+            -std=c99
+
+if USE_BT_OBEX
+AM_CFLAGS += -DOI_CPU_TYPE=19
+endif
+ACLOCAL_AMFLAGS = -I m4
+AM_CPPFLAGS += -I${WORKSPACE}/poky/meta-qti-qsap/recipes/bt-app/files/bt-app \
+               -I${WORKSPACE}/poky/meta-qti-qsap/recipes/bt-app/files/bt-app/utils/include \
+               -I${WORKSPACE}/poky/meta-qti-qsap/recipes/bt-app/files/bt-app/audio_manager/include \
+               -I${WORKSPACE}/poky/meta-qti-qsap/recipes/bt-app/files/bt-app/a2dp_sink/include \
+               -I${WORKSPACE}/poky/meta-qti-qsap/recipes/bt-app/files/bt-app/avrcp/include \
+               -I${WORKSPACE}/poky/meta-qti-qsap/recipes/bt-app/files/bt-app/osi/include \
+               -I${WORKSPACE}/poky/meta-qti-qsap/recipes/bt-app/files/bt-app/gap/include \
+               -I${WORKSPACE}/poky/meta-qti-qsap/recipes/bt-app/files/bt-app/main/include \
+               -I${WORKSPACE}/poky/meta-qti-qsap/recipes/bt-app/files/bt-app/include \
+               -I${WORKSPACE}/poky/meta-qti-qsap/recipes/bt-app/files/gatt/include \
+               -I${WORKSPACE}/system/media/audio/include \
+               -I${WORKSPACE}/hardware/qcom/audio/qahw_api/inc \
+               -I${WORKSPACE}/vendor/qcom/opensource/bluetooth/hal/include \
+               -I${WORKSPACE}/vendor/qcom/opensource/bluetooth/vhal/include \
+               -I${WORKSPACE}/mcm-api/api
+
+if USE_BT_OBEX
+AM_CPPFLAGS += -DOI_CPU_TYPE=19 \
+               -I${WORKSPACE}/poky/meta-qti-qsap/recipes/bt-app/files/obex_profiles/include \
+               -I${WORKSPACE}/poky/meta-qti-qsap/recipes/bt-app/files/obex_profiles/include/profiles \
+               -I${WORKSPACE}/poky/meta-qti-qsap/recipes/bt-app/files/obex_profiles/profiles/obex \
+               -I${WORKSPACE}/poky/meta-qti-qsap/recipes/bt-app/files/obex_profiles/sdk/include \
+               -I${WORKSPACE}/poky/meta-qti-qsap/recipes/bt-app/files/obex_profiles/sdk/include/profiles \
+               -I${WORKSPACE}/poky/meta-qti-qsap/recipes/bt-app/files/obex_profiles/sdk/oem
+
+endif
+
+if AUDIO_HAL_SUPPORTED
+AM_CPPFLAGS += -DBT_AUDIO_HAL_INTEGRATION
+endif
+
+c_sources = ../utils/src/utils.c \
+            src/Main.cpp \
+            src/ipc.c \
+            ../gap/src/Gap.cpp \
+            ../gap/src/AdapterProperties.cpp \
+            ../gap/src/RemoteDevices.cpp \
+            ../audio_manager/src/Audio_Manager.cpp \
+            ../a2dp_sink/src/A2dp_Sink.cpp \
+            ../a2dp_sink/src/A2dp_Sink_Streaming.cpp \
+            ../avrcp/src/Avrcp.cpp
+
+if USE_BT_OBEX
+endif
+
+if USE_GST
+requiredlibs = ../osi/libgstbtapposi.la -lpthread -lm -ldl -lrt -lhardware
+else
+requiredlibs = ../osi/libbtapposi.la -lpthread -lm -ldl -lrt -lhardware
+endif
+
+requiredlibs += -lgengatt -lcutils
+if AUDIO_HAL_SUPPORTED
+requiredlibs += -lqahw
+endif
+
+if USE_BT_OBEX
+requiredlibs += -lbtobex
+endif
+
+if USE_GLIB
+
+if USE_GST
+ gstbtapp_CFLAGS  = $(AM_CFLAGS) -DUSE_GLIB @GLIB_CFLAGS@
+ gstbtapp_CPPFLAGS  = $(AM_CPPFLAGS) -DUSE_GLIB @GLIB_CFLAGS@
+ gstbtapp_LDFLAGS = $(requiredlibs) @GLIB_LIBS@
+ gstbtapp_CPPFLAGS += $(GSTREAMER_CFLAGS) -DUSE_GST
+else
+ libbtapp_la_CFLAGS  = $(AM_CFLAGS) -DUSE_GLIB @GLIB_CFLAGS@
+ libbtapp_la_CPPFLAGS  = $(AM_CPPFLAGS) -DUSE_GLIB @GLIB_CFLAGS@
+ libbtapp_la_LIBADD = $(requiredlibs) @GLIB_LIBS@
+endif
+
+else
+
+if USE_GST
+ gstbtapp_CFLAGS = $(AM_CFLAGS)
+ gstbtapp_LDFLAGS = $(requiredlibs)
+else
+ libbtapp_la_CFLAGS = $(AM_CFLAGS)
+ libbtapp_la_LIBADD = $(requiredlibs)
+endif
+
+endif
+
+if USE_GST
+gstbtapp_CFLAGS += $(GSTREAMER_CFLAGS)
+gstbtapp_LDFLAGS += $(GSTREAMER_LIBS) -lgstaudio-1.0 -lgstapp-1.0 -lgstbthelper
+endif
+
+AM_LDFLAGS = $(LDFLAFGS)
+
+if USE_GST
+bin_PROGRAMS = gstbtapp
+gstbtapp_CC = @CC@
+gstbtapp_SOURCES = $(c_sources)
+else
+#bin_PROGRAMS = btapp
+libbtapp_CC = @CC@
+libbtapp_la_SOURCES = $(c_sources)
+endif
+pkgconfigdir = $(libdir)/pkgconfig

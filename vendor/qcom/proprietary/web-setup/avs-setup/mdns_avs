@@ -1,0 +1,12 @@
+#!/bin/sh
+
+PROPERTIES="/persist/device.conf"
+. /usr/share/mdns_avs_functions.sh
+
+isAvsConfigured && return 0
+
+pid="$(jq -r ".productId" "$PROPERTIES")"
+serial="$(jq -r ".serial" "$PROPERTIES")"
+friendlyId="$(jq -r ".friendlyId" "$PROPERTIES")"
+
+exec /usr/bin/dns-sd -R "$friendlyId" _avs-setup._tcp local. 443 pid="$pid" dsn="$serial"

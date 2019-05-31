@@ -1,0 +1,1503 @@
+/*****************************************************************************
+  @FILE     mcm_loc_v01.idl
+
+  @BRIEF    MCM Location API
+
+  @DESCRIPTION
+
+    IoE Mobile Connection Manager Location API (MCM_LOC)
+
+    This API Provides Data Structures for Location services.
+
+  @COPYRIGHT Copyright (c) 2013 Qualcomm Technologies, Inc.
+  All rights reserved.
+  Confidential and Proprietary - Qualcomm Technologies, Inc.
+*****************************************************************************/
+
+include "mcm_common_v01.idl";
+
+revision 2;
+
+//=============================================================================
+// CONSTANTS
+//=============================================================================
+const MCM_LOC_MAX_SEVER_ADDR_LENGTH_CONST = 255; //!< Maximum generic server address length for the host name.
+const MCM_LOC_MAX_GENERIC_STR_LENGTH_CONST = 255; //!< Maximum generic string length.
+const MCM_LOC_MAX_APN_NAME_LENGTH_CONST = 100; //!< APN name maximum length.
+const MCM_LOC_MAX_XTRA_DATA_LENGTH_CONST = 64512; //!< Maximum length of XTRA data injected.
+const MCM_LOC_GPS_LOCATION_MAP_URL_SIZE_CONST = 399; //!< Location map URL maximum size
+                                                     //!< (used for indoor positioning).
+const MCM_LOC_GPS_LOCATION_MAP_INDEX_SIZE_CONST = 16; //!< Location map index maximum size
+                                                      //!< (used for indoor positioning).
+const MCM_LOC_GPS_MAX_SVS_CONST = 32; //!< Maximum number of satellites in view.
+const MCM_LOC_GPS_SSID_BUF_SIZE_CONST = 32; //!< Maximum SSID (Service Set Identifier) buffer size.
+const MCM_LOC_IPV6_ADDR_LEN_CONST = 16; //!< IPv6 address length.
+const MCM_LOC_GPS_NI_SHORT_STRING_MAXLEN_CONST = 255; //!< NI short string maximum length.
+const MCM_LOC_GPS_NI_LONG_STRING_MAXLEN_CONST = 2047; //!< NI long string maximum length.
+const MCM_LOC_GPS_RAW_DATA_MAX_SIZE_CONST = 256; //!< Raw data maximum size.
+const MCM_LOC_GPS_NMEA_MAX_LENGTH_CONST = 255; //!< NMEA string maximum length.
+
+//=============================================================================
+// DATA TYPES
+//=============================================================================
+enum {
+    MCM_LOC_POSITION_MODE_STANDALONE  = 0, /**< Mode for running GPS standalone (no assistance). */
+    MCM_LOC_POSITION_MODE_MS_BASED    = 1, /**< AGPS MS-Based mode. */
+    MCM_LOC_POSITION_MODE_MS_ASSISTED = 2 /**< AGPS MS-Assisted mode. */
+} mcm_gps_position_mode_t; //!< Enum of position modes.
+
+
+
+enum {
+    MCM_LOC_POSITION_RECURRENCE_PERIODIC = 0, /**< Receive GPS fixes on a recurring basis at a specified period. */
+    MCM_LOC_POSITION_RECURRENCE_SINGLE   = 1 /**< Request a single-shot GPS fix. */
+} mcm_gps_position_recurrence_t; //!< Enum of position recurrence.
+
+
+
+enum {
+    MCM_LOC_DELETE_EPHEMERIS        = 0x00000001,  /**< Delete ephemeris data. */
+    MCM_LOC_DELETE_ALMANAC          = 0x00000002,  /**< Delete almanac data. */
+    MCM_LOC_DELETE_POSITION         = 0x00000004,  /**< Delete position data. */
+    MCM_LOC_DELETE_TIME             = 0x00000008,  /**< Delete time data. */
+    MCM_LOC_DELETE_IONO             = 0x00000010,  /**< Delete IONO data. */
+    MCM_LOC_DELETE_UTC              = 0x00000020,  /**< Delete UTC data. */
+    MCM_LOC_DELETE_HEALTH           = 0x00000040,  /**< Delete health data. */
+    MCM_LOC_DELETE_SVDIR            = 0x00000080,  /**< Delete SVDIR data. */
+    MCM_LOC_DELETE_SVSTEER          = 0x00000100,  /**< Delete SVSTEER data. */
+    MCM_LOC_DELETE_SADATA           = 0x00000200,  /**< Delete SA data. */
+    MCM_LOC_DELETE_RTI              = 0x00000400,  /**< Delete RTI data. */
+    MCM_LOC_DELETE_CELLDB_INFO      = 0x00000800,  /**< Delete cell DB information. */
+    MCM_LOC_DELETE_ALMANAC_CORR     = 0x00001000,  /**< Delete almanac correction data. */
+    MCM_LOC_DELETE_FREQ_BIAS_EST    = 0x00002000,  /**< Delete frequency bias estimate. */
+    MCM_LOC_DELETE_EPHEMERIS_GLO    = 0x00004000,  /**< Delete ephemeris GLO data. */
+    MCM_LOC_DELETE_ALMANAC_GLO      = 0x00008000,  /**< Delete almanac GLO data. */
+    MCM_LOC_DELETE_SVDIR_GLO        = 0x00010000,  /**< Delete SVDIR GLO data. */
+    MCM_LOC_DELETE_SVSTEER_GLO      = 0x00020000,  /**< Delete SVSTEER GLO data. */
+    MCM_LOC_DELETE_ALMANAC_CORR_GLO = 0x00040000,  /**< Delete almanac correction GLO data. */
+    MCM_LOC_DELETE_TIME_GPS         = 0x00080000,  /**< Delete time GPS data. */
+    MCM_LOC_DELETE_TIME_GLO         = 0x00100000,  /**< Delete time GLO data. */
+    MCM_LOC_DELETE_ALL              = 0xFFFFFFFF   /**< Delete all location data. */
+} mcm_gps_aiding_data_t; //!< Enum of types of location data that can be deleted from the cache.
+
+
+
+enum {
+    MCM_LOC_AGPS_TYPE_INVALID  = -1,  /**< Invalid. */
+    MCM_LOC_AGPS_TYPE_ANY      =  0,  /**< Any. */
+    MCM_LOC_AGPS_TYPE_SUPL     =  1,  /**< SUPL. */
+    MCM_LOC_AGPS_TYPE_C2K      =  2,  /**< C2K. */
+    MCM_LOC_AGPS_TYPE_WWAN_ANY =  3,  /**< WWAN any. */
+    MCM_LOC_AGPS_TYPE_WIFI     =  4,  /**< Wi-Fi. */
+    MCM_LOC_AGPS_TYPE_SUPL_ES  =  5   /**< SUPL_ES. */
+} mcm_agps_t; //!< Enum of AGPS types.
+
+
+
+enum {
+    MCM_LOC_AGPS_APN_BEARER_INVALID = -1,  /**< Invalid. */
+    MCM_LOC_AGPS_APN_BEARER_IPV4    =  0,  /**< IPv4. */
+    MCM_LOC_AGPS_APN_BEARER_IPV6    =  1,  /**< IPv6. */
+    MCM_LOC_AGPS_APN_BEARER_IPV4V6  =  2   /**< IPv4/v6. */
+} mcm_agps_bearer_t; //!< Enum of AGPS bearer types.
+
+
+
+enum {
+    MCM_LOC_NI_RESPONSE_ACCEPT = 1,  /**< Accept. */
+    MCM_LOC_NI_RESPONSE_DENY   = 2,  /**< Deny. */
+    MCM_LOC_NI_RESPONSE_NORESP = 3   /**< No response. */
+} mcm_gps_user_response_t; //!< Enum of user response types.
+
+
+
+enum {
+    MCM_LOC_GPS_LOCATION_HAS_LAT_LONG     = 0x0001,
+    /**< GPS location has valid latitude and longitude. */
+    MCM_LOC_GPS_LOCATION_HAS_ALTITUDE     = 0x0002,
+    /**< GPS location has a valid altitude. */
+    MCM_LOC_GPS_LOCATION_HAS_SPEED        = 0x0004,
+    /**< GPS location has a valid speed. */
+    MCM_LOC_GPS_LOCATION_HAS_BEARING      = 0x0008,
+    /**< GPS location has a valid bearing. */
+    MCM_LOC_GPS_LOCATION_HAS_ACCURACY     = 0x0010,
+    /**< GPS location has valid accuracy. */
+    MCM_LOC_GPS_LOCATION_HAS_SOURCE_INFO  = 0x0020,
+    /**< GPS location has valid source information. */
+    MCM_LOC_GPS_LOCATION_HAS_IS_INDOOR    = 0x0040,
+    /**< GPS location has a valid "is indoor?" flag. */
+    MCM_LOC_GPS_LOCATION_HAS_FLOOR_NUMBE  = 0x0080,
+    /**< GPS location has a valid floor number. */
+    MCM_LOC_GPS_LOCATION_HAS_MAP_URL      = 0x0100,
+    /**< GPS location has a valid map URL. */
+    MCM_LOC_GPS_LOCATION_HAS_MAP_INDEX    = 0x0200
+    /**< GPS location has a valid map index. */
+} mcm_gps_location_flag_t; //!< Enum for GPS location flags.
+
+
+enum {
+    MCM_LOC_GPS_STATUS_NONE          = 0,
+    /**< GPS status unknown. */
+    MCM_LOC_GPS_STATUS_SESSION_BEGIN = 1,
+     /**< GPS has begun navigating. */
+    MCM_LOC_GPS_STATUS_SESSION_END   = 2,
+    /**< GPS has stopped navigating. */
+    MCM_LOC_GPS_STATUS_ENGINE_ON     = 3,
+    /**< GPS has powered on but is not navigating. */
+    MCM_LOC_GPS_STATUS_ENGINE_OFF    = 4
+    /**< GPS is powered off. */
+} mcm_gps_status_value_t;  //!< Enum for the GPS status value.
+
+
+enum {
+    MCM_LOC_GPS_CAPABILITY_SCHEDULING     = 0x0000001,
+    /**< GPS HAL schedules fixes for GPS_POSITION_RECURRENCE_PERIODIC mode.
+         If this is not set, the framework uses \n 1000 ms for min_interval
+         and will call start() and stop() to schedule the GPS.
+     */
+    MCM_LOC_GPS_CAPABILITY_MSB            = 0x0000002,
+    /**< GPS supports MS-Based AGPS mode. */
+    MCM_LOC_GPS_CAPABILITY_MSA            = 0x0000004,
+    /**< GPS supports MS-Assisted AGPS mode. */
+    MCM_LOC_GPS_CAPABILITY_SINGLE_SHOT    = 0x0000008,
+    /**< GPS supports single-shot fixes. */
+    MCM_LOC_GPS_CAPABILITY_ON_DEMAND_TIME = 0x0000010
+    /**< GPS supports on-demand time injection. */
+} mcm_gps_capabilities_t; //!< Enum for GPS capabilities.
+
+
+
+enum {
+    MCM_LOC_GPS_REQUEST_AGPS_DATA_CONN = 1,
+    /**< GPS requests a data connection for AGPS. */
+    MCM_LOC_GPS_RELEASE_AGPS_DATA_CONN = 2,
+    /**< GPS releases the AGPS data connection. */
+    MCM_LOC_GPS_AGPS_DATA_CONNECTED    = 3,
+    /**< AGPS data connection is initiated */
+    MCM_LOC_GPS_AGPS_DATA_CONN_DONE    = 4,
+    /**< AGPS data connection is completed. */
+    MCM_LOC_GPS_AGPS_DATA_CONN_FAILED  = 5
+    /**< AGPS data connection failed. */
+} mcm_agps_status_value_t; //!< Enum for AGPS status values.
+
+
+enum {
+    MCM_LOC_GPS_NI_TYPE_VOICE           = 1,  /**< Voice. */
+    MCM_LOC_GPS_NI_TYPE_UMTS_SUPL       = 2,  /**< UMTS SUPL. */
+    MCM_LOC_GPS_NI_TYPE_UMTS_CTRL_PLANE = 3   /**< UMTS control plane. */
+} mcm_gps_ni_t; //!< Enum for the GPS NI type.
+
+
+enum {
+    MCM_LOC_GPS_NI_NEED_NOTIFY      = 0x0001,
+    /**< NI requires notification. */
+    MCM_LOC_GPS_NI_NEED_VERIFY      = 0x0002,
+    /**< NI requires verification. */
+    MCM_LOC_GPS_NI_PRIVACY_OVERRIDE = 0x0004
+    /**< NI requires privacy override; no notification/minimal trace. */
+} mcm_gps_ni_notify_flags_t; //!< Enum for GPS NI notify flags.
+
+
+
+enum {
+    MCM_LOC_GPS_ENC_NONE             = 0,  /**< None. */
+    MCM_LOC_GPS_ENC_SUPL_GSM_DEFAULT = 1,  /**< SUPL GSM default. */
+    MCM_LOC_GPS_ENC_SUPL_UTF8        = 2,  /**< SUPL UTF8. */
+    MCM_LOC_GPS_ENC_SUPL_UCS2        = 3,  /**< SUPL UCS2. */
+    MCM_LOC_GPS_ENC_UNKNOWN          = -1  /**< Unknown. */
+} mcm_gps_ni_encoding_t; //!< Enum for the GPS NI encoding type.
+
+
+enum {
+
+    MCM_LOC_ULP_LOCATION_IS_FROM_HYBRID = 0x0001,
+    /**< Position source is ULP. */
+    MCM_LOC_ULP_LOCATION_IS_FROM_GNSS   = 0x0002
+    /**< Position source is GNSS only. */
+} mcm_gps_position_source_t; //!< Enum for indicating the position source.
+
+
+
+struct {
+    uint32 size;
+    /**< Set to the size of mcm_gps_location_t. */
+    mcm_gps_location_flag_t flags;
+    /**< Contains GPS location flags bits. */
+    mcm_gps_position_source_t position_source;
+    /**< Provider indicator for HYBRID or GPS. */
+    double latitude;
+    /**< Latitude in degrees. */
+    double longitude;
+    /**< Longitude in degrees. */
+    double altitude;
+    /**< Altitude in meters above the WGS 84 reference
+         ellipsoid. */
+    float speed;
+    /**< Speed in meters per second. */
+    float bearing;
+    /**< Heading in degrees. */
+    float accuracy;
+    /**< Expected accuracy in meters. */
+    int64 timestamp;
+    /**< Timestamp for the location fix. */
+    uint8 raw_data <MCM_LOC_GPS_RAW_DATA_MAX_SIZE_CONST>;
+    /**< Allows the HAL to pass additional information related to the location. */
+    int32 is_indoor;
+    /**< Location is indoors. */
+    float floor_number;
+    /**< Indicates the floor number. */
+    string map_url <MCM_LOC_GPS_LOCATION_MAP_URL_SIZE_CONST>;
+    /**< Map URL. */
+    uint8 map_index [MCM_LOC_GPS_LOCATION_MAP_INDEX_SIZE_CONST];
+    /**< Map index. */
+} mcm_gps_location_t; /**< Data structure for the GPS location. */
+
+
+
+struct {
+    uint32 size; /**< Set to the size of mcm_gps_status_t. */
+    mcm_gps_status_value_t status;  /**< Status. */
+} mcm_gps_status_t; /**< Represents the status. */
+
+
+
+
+struct {
+    uint32 size; /**< Set to the size of mcm_gps_sv_info_t. */
+    int32 prn; /**< Pseudo-random number for the SV. */
+    float snr; /**< Signal-to-noise ratio. */
+    float elevation; /**< Elevation of the SV in degrees. */
+    float azimuth; /**< Azimuth of the SV in degrees. */
+} mcm_gps_sv_info_t; /**< Represents SV information. */
+
+
+struct {
+    uint32 size; /**< Set to the size of mcm_gps_sv_status_t. */
+    int32 num_svs; /**< Number of SVs currently visible. */
+    mcm_gps_sv_info_t   sv_list [MCM_LOC_GPS_MAX_SVS_CONST];
+    /**< Contains an array of SV information. */
+    uint32 ephemeris_mask;
+    /**< Bitmask indicating which SVs
+         have ephemeris data.
+     */
+    uint32 almanac_mask;
+    /**< Bitmask indicating which SVs
+         have almanac data.
+     */
+    uint32 used_in_fix_mask;
+    /**< Bitmask indicating which SVs
+         were used for computing the most recent position fix.
+     */
+} mcm_gps_sv_status_t; /**< Represents the SV status. */
+
+
+
+struct {
+    uint32          size; /**< Set to the size of mcm_agps_status_t. */
+    mcm_agps_t       type;  /**< Type. */
+    mcm_agps_status_value_t status;  /**< Status. */
+    int32           ipv4_addr;  /**< IPv4 address. */
+    string          ipv6_addr <MCM_LOC_IPV6_ADDR_LEN_CONST>; /**< IPv6 address. */
+    string          ssid <MCM_LOC_GPS_SSID_BUF_SIZE_CONST>;  /**< SSID. */
+    string          password <MCM_LOC_GPS_SSID_BUF_SIZE_CONST>;  /**< Password. */
+} mcm_agps_status_t; /**< Represents the status of AGPS. */
+
+
+struct {
+    uint32          size; /**< Set to the size of mcm_gps_ni_notification_t. */
+    int32          notification_id;
+    /**< An ID generated by the HAL to associate NI notifications and UI
+         responses.  */
+    mcm_gps_ni_t   ni_type;
+    /**< An NI type used to distinguish different categories of NI
+         events, such as GPS_NI_TYPE_VOICE, GPS_NI_TYPE_UMTS_SUPL, etc.  */
+    mcm_gps_ni_notify_flags_t notify_flags;
+    /**< Notification/verification options; combinations of GpsNiNotifyFlags
+         constants.  */
+    int32           timeout;
+    /**< Timeout period to wait for a user response.
+         Set to 0 for no timeout limit.  */
+    mcm_gps_user_response_t default_response;
+    /**< Default response when the response times out.  */
+    string          requestor_id <MCM_LOC_GPS_NI_SHORT_STRING_MAXLEN_CONST>;
+    /**< Requestor ID.  */
+    string          text <MCM_LOC_GPS_NI_LONG_STRING_MAXLEN_CONST>;
+    /**< Notification message. It can also be used to store the client ID in some cases.  */
+    mcm_gps_ni_encoding_t requestor_id_encoding;
+    /**< Client ID encoding scheme.  */
+    mcm_gps_ni_encoding_t text_encoding;
+    /**< Client name encoding scheme.  */
+    string     extras <MCM_LOC_GPS_NI_LONG_STRING_MAXLEN_CONST>;
+    /**< Pointer to extra data. Format:\n
+     - key_1 = value_1
+     - key_2 = value_2 @tablebulletend
+     */
+} mcm_gps_ni_notification_t; /**< Represents an NI request. */
+
+
+//=============================================================================
+// MESSAGES
+//=============================================================================
+
+
+//=============================================================================
+// EVENT REGISTER
+//=============================================================================
+//============================================================================+
+/** @COMMAND MCM_LOC_SET_INDICATIONS
+    @BRIEF Registers for location indications.
+    @DESCRIPTION
+        Corresponding indications to register for or deregister from: \n
+        location_info, status_info, sv_info, nmea_info, capabilities_info,
+        utc_time_req, xtra_data_req, agps_data_conn_cmd_req,
+        ni_notify_user_response_req, xtra_report_server.
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+
+//! @MSG     MCM_LOC_SET_INDICATIONS_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+    mandatory boolean register_location_info_ind;  //!< Register for location information indications.
+    mandatory boolean register_status_info_ind;  //!< Register for status information indications.
+    mandatory boolean register_sv_info_ind;  //!< Register for SV information indications.
+    mandatory boolean register_nmea_info_ind;  //!< Register for NMEA information indications.
+    mandatory boolean register_capabilities_info_ind;  //!< Register for capabilities information indications.
+    mandatory boolean register_utc_time_req_ind;  //!< Register for UTC time request indications.
+    mandatory boolean register_xtra_data_req_ind;  //!< Register for XTRA data request indications.
+    mandatory boolean register_agps_data_conn_cmd_req_ind;  //!< Register for AGPS data connection command request indications.
+    mandatory boolean register_ni_notify_user_response_req_ind;  //!< Register for NI notify user response request indications.
+    optional boolean register_xtra_report_server_ind;  //!< Register for XTRA report server indications.
+} mcm_loc_set_indications_req_msg;
+
+
+//! @MSG     MCM_LOC_SET_INDICATIONS_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+} mcm_loc_set_indications_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+//============================================================================
+/** @COMMAND MCM_LOC_SET_POSITION_MODE
+    @BRIEF Sets the position mode.
+
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_LOC_SET_POSITION_MODE_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+    //! Mode
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    mandatory mcm_gps_position_mode_t mode;  //!< Position mode.
+    //! Recurrence
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    mandatory mcm_gps_position_recurrence_t recurrence;  //!< Recurrence.
+    //! Minimum Interval
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    mandatory uint32 min_interval;  //!< Minimum interval.
+    //! Preferred Accuracy
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    mandatory uint32 preferred_accuracy;  //!< Preferred accuracy.
+    //! Preferred Time
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    mandatory uint32 preferred_time;  //!< Preferred time.
+} mcm_loc_set_position_mode_req_msg;
+
+
+//! @MSG     MCM_LOC_SET_POSITION_MODE_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+} mcm_loc_set_position_mode_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+
+//============================================================================
+/** @COMMAND MCM_LOC_START_NAV
+    @BRIEF Starts navigation.
+
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_LOC_START_NAV_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+} mcm_loc_start_nav_req_msg;
+
+
+//! @MSG     MCM_LOC_START_NAV_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+
+} mcm_loc_start_nav_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+
+//============================================================================
+/** @COMMAND MCM_LOC_STOP_NAV
+    @BRIEF Stops navigation.
+
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_LOC_STOP_NAV_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+} mcm_loc_stop_nav_req_msg;
+
+
+//! @MSG     MCM_LOC_STOP_NAV_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+
+} mcm_loc_stop_nav_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+
+//============================================================================
+/** @COMMAND MCM_LOC_DELETE_AIDING_DATA
+    @BRIEF Deletes location-aiding data.
+
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_LOC_DELETE_AIDING_DATA_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+    //! Aiding Data Flags
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    mandatory mcm_gps_aiding_data_t flags;  //!< Aiding data flags.
+} mcm_loc_delete_aiding_data_req_msg;
+
+
+//! @MSG     MCM_LOC_DELETE_AIDING_DATA_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+
+} mcm_loc_delete_aiding_data_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+
+//============================================================================
+/** @COMMAND MCM_LOC_INJECT_TIME
+    @BRIEF Injects time.
+
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_LOC_INJECT_TIME_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+    //! Time
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    mandatory int64 time;  //!< Inject time.
+    //! Time Reference
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    mandatory int64 time_reference;  //!< Time reference.
+    //! Uncertainty
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    mandatory int32 uncertainty;  //!< Uncertainty.
+} mcm_loc_inject_time_req_msg;
+
+
+//! @MSG     MCM_LOC_INJECT_TIME_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+
+} mcm_loc_inject_time_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+
+//============================================================================
+/** @COMMAND MCM_LOC_INJECT_LOCATION
+    @BRIEF Injects a location.
+
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_LOC_INJECT_LOCATION_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+    //! Latitude
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    mandatory double latitude;  //!< Latitude.
+    //! Longitude
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    mandatory double longitude;  //!< Longitude.
+    //! Accuracy
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    mandatory float accuracy;  //!< Accuracy.
+} mcm_loc_inject_location_req_msg;
+
+
+//! @MSG     MCM_LOC_INJECT_LOCATION_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+
+} mcm_loc_inject_location_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+//============================================================================
+/** @COMMAND MCM_LOC_XTRA_INJECT_DATA
+    @BRIEF Injects XTRA data.
+           Since the IPC mechanism puts a limit on the size of the data
+           transferable in one message at 64 KB, the application using this
+           command must break the data down into chunks of a smaller
+           size and repeatedly call this API until all the data has
+           been injected.
+
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_LOC_XTRA_INJECT_DATA_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+    //! Xtra Data
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    mandatory uint8 data <MCM_LOC_MAX_XTRA_DATA_LENGTH_CONST>;  //!< XTRA data.
+} mcm_loc_xtra_inject_data_req_msg;
+
+
+//! @MSG     MCM_LOC_XTRA_INJECT_DATA_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+
+} mcm_loc_xtra_inject_data_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+//============================================================================
+/** @COMMAND MCM_LOC_AGPS_DATA_CONN_OPEN
+    @BRIEF Indicates that the AGPS data connection is open.
+
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_LOC_AGPS_DATA_CONN_OPEN_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+    //! AGPS Type
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    mandatory mcm_agps_t agps_type;  //!< AGPS type.
+    //! APN
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    mandatory string apn <MCM_LOC_MAX_APN_NAME_LENGTH_CONST>;  //!< APN.
+    //! AGPS Bearer Type
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    mandatory mcm_agps_bearer_t bearer_type;  //!< Bearer type.
+} mcm_loc_agps_data_conn_open_req_msg;
+
+
+//! @MSG     MCM_LOC_AGPS_DATA_CONN_OPEN_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+
+} mcm_loc_agps_data_conn_open_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+
+//============================================================================
+/** @COMMAND MCM_LOC_AGPS_DATA_CONN_CLOSED
+    @BRIEF Indicates that the AGPS data connection is closed.
+
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_LOC_AGPS_DATA_CONN_CLOSED_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+    //! AGPS Type
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    mandatory mcm_agps_t agps_type;  //!< AGPS type.
+} mcm_loc_agps_data_conn_closed_req_msg;
+
+
+//! @MSG     MCM_LOC_AGPS_DATA_CONN_CLOSED_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+
+} mcm_loc_agps_data_conn_closed_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+//============================================================================
+/** @COMMAND MCM_LOC_AGPS_DATA_CONN_FAILED
+    @BRIEF Indicates that the AGPS data connection failed to start.
+
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_LOC_AGPS_DATA_CONN_FAILED_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+    //! AGPS Type
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    mandatory mcm_agps_t agps_type;  //!< AGPS type.
+} mcm_loc_agps_data_conn_failed_req_msg;
+
+
+//! @MSG     MCM_LOC_AGPS_DATA_CONN_FAILED_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+
+} mcm_loc_agps_data_conn_failed_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+
+//============================================================================
+/** @COMMAND MCM_LOC_AGPS_SET_SERVER
+    @BRIEF Sets the AGPS server.
+
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_LOC_AGPS_SET_SERVER_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+    //! AGPS Type
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    mandatory mcm_agps_t agps_type;  //!< AGPS type.
+    //! Host Name
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    mandatory string host_name <MCM_LOC_MAX_SEVER_ADDR_LENGTH_CONST>;  //!< Host name.
+    //! Port
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    mandatory uint32 port;  //!< Port.
+
+} mcm_loc_agps_set_server_req_msg;
+
+
+//! @MSG     MCM_LOC_AGPS_SET_SERVER_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+
+} mcm_loc_agps_set_server_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+
+//============================================================================
+/** @COMMAND MCM_LOC_NI_RESPOND
+    @BRIEF Sends a user response for NI.
+
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_LOC_NI_RESPOND_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+    //! Notification ID
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    mandatory int32 notif_id;  //!< Notification ID.
+    //! User Response
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    mandatory mcm_gps_user_response_t user_response;  //!< User response.
+} mcm_loc_ni_respond_req_msg;
+
+
+//! @MSG     MCM_LOC_NI_RESPOND_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+} mcm_loc_ni_respond_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+
+//============================================================================
+/** @COMMAND MCM_LOC_AGPS_RIL_UPDATE_NETWORK_AVAILABILITY
+    @BRIEF Updates the network availability status.
+
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+
+//! @MSG     MCM_LOC_AGPS_RIL_UPDATE_NETWORK_AVAILABILITY_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//----------------------------------------------------------------------------
+message {
+    //! Available
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    mandatory int32 available;  //!< Available.
+    //! APN
+    //! @VERSION_INTRODUCED 1.0
+    //! @VERSION 1.0
+    mandatory string apn <MCM_LOC_MAX_APN_NAME_LENGTH_CONST>;  //!< APN.
+} mcm_loc_agps_ril_update_network_availability_req_msg;
+
+
+//! @MSG     MCM_LOC_AGPS_RIL_UPDATE_NETWORK_AVAILABILITY_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;  //!< Result code.
+
+} mcm_loc_agps_ril_update_network_availability_resp_msg;
+
+/** @ERROR
+    -MCM_ERROR_NONE              No error in the request
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_MALFORMED_MSG     Message was not formulated correctly by the
+                               control point or the message was corrupted
+                               during transmission
+    -MCM_ERROR_MISSING_ARG       One or more required TLVs were missing in the request
+    -MCM_ERROR_INVALID_HANDLE    Handle provided in the request
+                               is not valid, i.e., it is not assigned to the
+                               control point
+    -MCM_ERROR_INVALID_ARG       Argument is not correct
+    -MCM_ERROR_NOT_SUPPORTED     Operation is not supported
+*/
+
+
+//============================================================================
+// EVENT INDICATIONS
+//============================================================================
+//=============================================================================
+//============================================================================
+/** @COMMAND MCM_LOC_LOCATION_INFO_IND
+    @BRIEF Indication with the location payload.
+
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_LOC_LOCATION_INFO_IND
+//! @TYPE    Indication
+//! @SENDER  Service
+//! @SCOPE   Unicast
+//----------------------------------------------------------------------------
+
+message {
+  //! Location Info
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_gps_location_t location;  //!< Location information.
+} mcm_loc_location_info_ind_msg;
+
+
+//============================================================================
+/** @COMMAND MCM_LOC_STATUS_INFO_IND
+    @BRIEF Indication with the location status payload.
+
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_LOC_STATUS_INFO_IND
+//! @TYPE    Indication
+//! @SENDER  Service
+//! @SCOPE   Unicast
+//----------------------------------------------------------------------------
+
+message {
+  //! Gps Status
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_gps_status_t status;  //!< GPS status.
+} mcm_loc_status_info_ind_msg;
+
+
+//============================================================================
+/** @COMMAND MCM_LOC_SV_INFO_IND
+    @BRIEF Indication with the satellites in view payload.
+
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_LOC_SV_INFO_IND
+//! @TYPE    Indication
+//! @SENDER  Service
+//! @SCOPE   Unicast
+//----------------------------------------------------------------------------
+
+message {
+  //! Gps SV status
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_gps_sv_status_t sv_info;  //!< GPS SV status.
+} mcm_loc_sv_info_ind_msg;
+
+
+//============================================================================
+/** @COMMAND MCM_LOC_NMEA_INFO_IND
+    @BRIEF Indication with the NMEA string payload.
+
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_LOC_NMEA_INFO_IND
+//! @TYPE    Indication
+//! @SENDER  Service
+//! @SCOPE   Unicast
+//----------------------------------------------------------------------------
+
+message {
+  //! Timestamp
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory int64 timestamp;  //!< Timestamp.
+
+  //! NMEA String
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory string nmea <MCM_LOC_GPS_NMEA_MAX_LENGTH_CONST>;  //!< NMEA string.
+
+  //! Length
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory int32 length;  //!< NMEA string length. @newpagetable
+
+
+
+} mcm_loc_nmea_info_ind_msg;
+
+
+//============================================================================
+/** @COMMAND MCM_LOC_CAPABILITIES_INFO_IND
+    @BRIEF Indication with the location capabilities.
+
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_LOC_CAPABILITIES_INFO_IND
+//! @TYPE    Indication
+//! @SENDER  Service
+//! @SCOPE   Unicast
+//----------------------------------------------------------------------------
+
+message {
+
+  //! Capabilities
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory  mcm_gps_capabilities_t capabilities;  //!< Capabilities.
+} mcm_loc_capabilities_info_ind_msg;
+
+//============================================================================
+/** @COMMAND MCM_LOC_UTC_TIME_REQ_IND
+    @BRIEF Indication request for SNTP time.
+
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_LOC_UTC_TIME_REQ_IND
+//! @TYPE    Indication
+//! @SENDER  Service
+//! @SCOPE   Unicast
+//----------------------------------------------------------------------------
+
+message {
+} mcm_loc_utc_time_req_ind_msg;
+
+
+//============================================================================
+/** @COMMAND MCM_LOC_XTRA_DATA_REQ_IND
+    @BRIEF Indication request to download XTRA data.
+
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_LOC_XTRA_DATA_REQ_IND
+//! @TYPE    Indication
+//! @SENDER  Service
+//! @SCOPE   Unicast
+//----------------------------------------------------------------------------
+
+message {
+} mcm_loc_xtra_data_req_ind_msg;
+
+//============================================================================
+/** @COMMAND MCM_LOC_AGPS_STATUS_IND
+    @BRIEF Indication with the AGPS status.
+
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_LOC_AGPS_STATUS_IND
+//! @TYPE    Indication
+//! @SENDER  Service
+//! @SCOPE   Unicast
+//----------------------------------------------------------------------------
+
+message {
+
+  //! AGPS Status
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_agps_status_t status;  //!< AGPS status.
+
+} mcm_loc_agps_status_ind_msg;
+
+
+//============================================================================
+/** @COMMAND MCM_LOC_NI_NOTIFICATION_IND
+    @BRIEF Indication with the NI notification payload.
+
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_LOC_NI_NOTIFICATION_IND
+//! @TYPE    Indication
+//! @SENDER  Service
+//! @SCOPE   Unicast
+//----------------------------------------------------------------------------
+message {
+
+  //! NI Notification
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_gps_ni_notification_t notification;  //!< NI notification.
+} mcm_loc_ni_notification_ind_msg;
+
+//============================================================================
+/** @COMMAND MCM_LOC_XTRA_REPORT_SERVER_IND
+    @BRIEF Indication with the reported XTRA server URLs.
+
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_LOC_XTRA_REPORT_SERVER_IND
+//! @TYPE    Indication
+//! @SENDER  Service
+//! @SCOPE   Unicast
+//----------------------------------------------------------------------------
+
+message {
+
+  //! Server1
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory string server1 <MCM_LOC_MAX_SEVER_ADDR_LENGTH_CONST>;  //!< server1.
+
+  //! Server2
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory string server2 <MCM_LOC_MAX_SEVER_ADDR_LENGTH_CONST>;  //!< server2.
+
+  //! Server3
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory string server3 <MCM_LOC_MAX_SEVER_ADDR_LENGTH_CONST>;  //!< server3.
+
+} mcm_loc_xtra_report_server_ind_msg;
+
+//============================================================================
+// File footer
+//============================================================================
+/*
+@FOOTER
+*/
+
+//============================================================================
+// Service Definition
+//============================================================================
+
+service mcm_loc{
+
+    //! @ID MCM_LOC_SET_INDICATIONS
+    mcm_loc_set_indications_req_msg  MCM_LOC_SET_INDICATIONS_REQ,
+    mcm_loc_set_indications_resp_msg MCM_LOC_SET_INDICATIONS_RESP = 0x0300;
+
+    //! @ID MCM_LOC_SET_POSITION_MODE
+    mcm_loc_set_position_mode_req_msg   MCM_LOC_SET_POSITION_MODE_REQ,
+    mcm_loc_set_position_mode_resp_msg  MCM_LOC_SET_POSITION_MODE_RESP;
+
+
+    //! @ID MCM_LOC_START_NAV
+    mcm_loc_start_nav_req_msg   MCM_LOC_START_NAV_REQ,
+    mcm_loc_start_nav_resp_msg  MCM_LOC_START_NAV_RESP;
+
+
+    //! @ID MCM_LOC_STOP_NAV
+    mcm_loc_stop_nav_req_msg   MCM_LOC_STOP_NAV_REQ,
+    mcm_loc_stop_nav_resp_msg  MCM_LOC_STOP_NAV_RESP;
+
+
+    //! @ID MCM_LOC_DELETE_AIDING_DATA
+    mcm_loc_delete_aiding_data_req_msg   MCM_LOC_DELETE_AIDING_DATA_REQ,
+    mcm_loc_delete_aiding_data_resp_msg  MCM_LOC_DELETE_AIDING_DATA_RESP;
+
+
+    //! @ID MCM_LOC_INJECT_TIME
+    mcm_loc_inject_time_req_msg   MCM_LOC_INJECT_TIME_REQ,
+    mcm_loc_inject_time_resp_msg  MCM_LOC_INJECT_TIME_RESP;
+
+
+    //! @ID MCM_LOC_INJECT_LOCATION
+    mcm_loc_inject_location_req_msg   MCM_LOC_INJECT_LOCATION_REQ,
+    mcm_loc_inject_location_resp_msg  MCM_LOC_INJECT_LOCATION_RESP;
+
+
+    //! @ID MCM_LOC_XTRA_INJECT_DATA
+    mcm_loc_xtra_inject_data_req_msg   MCM_LOC_XTRA_INJECT_DATA_REQ,
+    mcm_loc_xtra_inject_data_resp_msg  MCM_LOC_XTRA_INJECT_DATA_RESP;
+
+
+    //! @ID MCM_LOC_AGPS_DATA_CONN_OPEN
+    mcm_loc_agps_data_conn_open_req_msg   MCM_LOC_AGPS_DATA_CONN_OPEN_REQ,
+    mcm_loc_agps_data_conn_open_resp_msg  MCM_LOC_AGPS_DATA_CONN_OPEN_RESP;
+
+
+    //! @ID MCM_LOC_AGPS_DATA_CONN_CLOSED
+    mcm_loc_agps_data_conn_closed_req_msg   MCM_LOC_AGPS_DATA_CONN_CLOSED_REQ,
+    mcm_loc_agps_data_conn_closed_resp_msg  MCM_LOC_AGPS_DATA_CONN_CLOSED_RESP;
+
+
+    //! @ID MCM_LOC_AGPS_DATA_CONN_FAILED
+    mcm_loc_agps_data_conn_failed_req_msg   MCM_LOC_AGPS_DATA_CONN_FAILED_REQ,
+    mcm_loc_agps_data_conn_failed_resp_msg  MCM_LOC_AGPS_DATA_CONN_FAILED_RESP;
+
+
+    //! @ID MCM_LOC_AGPS_SET_SERVER
+    mcm_loc_agps_set_server_req_msg   MCM_LOC_AGPS_SET_SERVER_REQ,
+    mcm_loc_agps_set_server_resp_msg  MCM_LOC_AGPS_SET_SERVER_RESP;
+
+
+    //! @ID MCM_LOC_NI_RESPOND
+    mcm_loc_ni_respond_req_msg   MCM_LOC_NI_RESPOND_REQ,
+    mcm_loc_ni_respond_resp_msg  MCM_LOC_NI_RESPOND_RESP;
+
+
+    //! @ID MCM_LOC_AGPS_RIL_UPDATE_NETWORK_AVAILABILITY
+    mcm_loc_agps_ril_update_network_availability_req_msg   MCM_LOC_AGPS_RIL_UPDATE_NETWORK_AVAILABILITY_REQ,
+    mcm_loc_agps_ril_update_network_availability_resp_msg  MCM_LOC_AGPS_RIL_UPDATE_NETWORK_AVAILABILITY_RESP;
+
+    //! @ID MCM_LOC_LOCATION_INFO_IND
+    mcm_loc_location_info_ind_msg   MCM_LOC_LOCATION_INFO_IND;
+
+    //! @ID MCM_LOC_STATUS_INFO_IND
+    mcm_loc_status_info_ind_msg   MCM_LOC_STATUS_INFO_IND;
+
+    //! @ID MCM_LOC_SV_INFO_IND
+    mcm_loc_sv_info_ind_msg   MCM_LOC_SV_INFO_IND;
+
+    //! @ID MCM_LOC_NMEA_INFO_IND
+    mcm_loc_nmea_info_ind_msg   MCM_LOC_NMEA_INFO_IND;
+
+    //! @ID MCM_LOC_CAPABILITIES_INFO_IND
+    mcm_loc_capabilities_info_ind_msg   MCM_LOC_CAPABILITIES_INFO_IND;
+
+    //! @ID MCM_LOC_UTC_TIME_REQ_IND
+    mcm_loc_utc_time_req_ind_msg   MCM_LOC_UTC_TIME_REQ_IND;
+
+    //! @ID MCM_LOC_XTRA_DATA_REQ_IND
+    mcm_loc_xtra_data_req_ind_msg   MCM_LOC_XTRA_DATA_REQ_IND;
+
+    //! @ID MCM_LOC_AGPS_STATUS_IND
+    mcm_loc_agps_status_ind_msg   MCM_LOC_AGPS_STATUS_IND;
+
+    //! @ID MCM_LOC_NI_NOTIFICATION_IND
+    mcm_loc_ni_notification_ind_msg   MCM_LOC_NI_NOTIFICATION_IND;
+
+    //! @ID MCM_LOC_XTRA_REPORT_SERVER_IND
+    mcm_loc_xtra_report_server_ind_msg   MCM_LOC_XTRA_REPORT_SERVER_IND;
+} = 0x0405;
+
+//============================================================================
+// End of Module
+//============================================================================
+
+

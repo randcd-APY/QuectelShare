@@ -1,0 +1,30 @@
+#! /bin/sh
+#
+#Copyright (c) 2011 Qualcomm Technologies, Inc.  All Rights Reserved.
+#Qualcomm Technologies Proprietary and Confidential.
+
+set -e
+
+case "$1" in
+  start)
+        echo -n "Starting qcmapctl: "
+        start-stop-daemon -S -b -a /usr/bin/qcmapctl -- -d
+        echo "done"
+        ;;
+  stop)
+        echo -n "Stopping qcmapctl: "
+        start-stop-daemon -K -n qcmapctl
+        echo "done"
+        ;;
+  restart)
+        $0 stop
+        $0 start
+        ;;
+  *)
+        echo "Usage qcmapctl { start | stop | restart}" >&2
+        exit 1
+        ;;
+esac
+
+
+exit 0

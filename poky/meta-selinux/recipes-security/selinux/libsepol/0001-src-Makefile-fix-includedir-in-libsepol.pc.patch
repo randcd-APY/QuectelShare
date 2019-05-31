@@ -1,0 +1,28 @@
+From 05907644755048f9335e05dc540f810bb580477f Mon Sep 17 00:00:00 2001
+From: Robert Yang <liezhi.yang@windriver.com>
+Date: Thu, 18 Feb 2016 02:04:59 +0000
+Subject: [PATCH] src/Makefile: fix includedir in libsepol.pc
+
+Upstream-Status: Pending
+
+Signed-off-by: Robert Yang <liezhi.yang@windriver.com>
+---
+ src/Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/Makefile b/src/Makefile
+index db6c2ba..c03ee92 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -43,7 +43,7 @@ $(LIBSO): $(LOBJS) $(LIBMAP)
+ 	ln -sf $@ $(TARGET) 
+ 
+ $(LIBPC): $(LIBPC).in ../VERSION
+-	sed -e 's/@VERSION@/$(VERSION)/; s:@prefix@:$(PREFIX):; s:@libdir@:$(LIBBASE):; s:@includedir@:$(INCLUDEDIR):' < $< > $@
++	sed -e 's/@VERSION@/$(VERSION)/; s:@prefix@:$(PREFIX):; s:@libdir@:$(LIBBASE):; s:@includedir@:${prefix}/include:' < $< > $@
+ 
+ $(LIBMAP): $(LIBMAP).in
+ ifneq ($(DISABLE_CIL),y)
+-- 
+2.5.0
+

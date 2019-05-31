@@ -1,0 +1,345 @@
+#!/bin/sh
+
+# Copyright (C) 2017-2018 Qualcomm Technologies, Inc.
+# 2013, 2016, Qualcomm Atheros, Inc.
+# 2014 Qualcomm Connected Experiences, Inc.
+# All rights reserved
+# Confidential and Proprietary - Qualcomm Technologies, Inc.
+
+SUCCESS=0
+FAIL_UNREACHABLE=1
+FAIL_PROTOCOL=2
+FAIL_UNAUTHORIZED=3
+FAIL_GENERAL=4
+ERROR=128
+
+DEBUG=
+
+DEBUG_LOG() {
+	if [ -n "${DEBUG}" ]; then
+		echo "$1" >> /tmp/wifi_try_log
+	fi
+}
+
+cleanup_and_exit() {
+	local pid=$(pidof wpa_supplicant)
+	if [ -n "$pid" ]; then
+		kill -TERM $pid;
+		sleep 1
+		kill -KILL $pid
+		wait $pid
+	fi
+	ifconfig ${iface} down
+	iw dev ${iface} del
+	exit "$1"
+}
+
+WPA_CLI() {
+	local iface=$1;shift
+	local opt
+	case ${iface} in
+		global) opt="-g /run/wpa_supplicant-global" ;;
+		*) opt="-p /run/wpa_supplicant-${iface} -i ${iface}";;
+	esac
+	if [ -n "${DEBUG}" ]; then
+		echo wpa_cli ${opt} "$@" >&2
+		wpa_cli ${opt} "$@" || cleanup_and_exit $ERROR
+		return 0
+	fi
+	wpa_cli ${opt} "$@" >/dev/null 2>&1 || cleanup_and_exit $ERROR
+}
+
+showhelp() {
+	cat << EOF
+  $0 -s <ssid> -a <auth>
+     [-p <passphrase>] [ -c <chan>] [-k key] [-i index] [ -t timeout ] [ -d ]
+
+  Mandatory parameters:
+    -s <ssid>: Connect to SSID <ssid>
+    -a <auth>: Use authentication <auth>, where <auth> can be one of:
+        "open": No authentication
+        "wep": WEP authentication
+        "wpa": WPA/WPA2 authentication
+        "psk2": WPA2 Only authentication
+
+  Optional parameters:
+    -c <chan>: Search on channel <chan> NOTE: specified as IEEE channel
+    -p <passphrase>: (WEP or WPA only) Set the WEP (string) or WPA passphrase
+    -k <key>: (WEP only) Set the key (hex key only, either 5 or 13 bytes len)
+    -i <index>: (WEP only) Set the key index (0-3)
+    -t <timeout>: Set the connection timeout (in .25 seconds) - default=8
+    -d : enable debug
+    -f <iface>: specify connection test interface name, default is wtry
+    -w <iface>: use the same PHY as the specified interface (default: wlan0)
+        If both -w and -y are specified, -y will be used.
+    -y <phy>: use this PHY to create the test interface (default: PHY of wlan0)
+        If both -w and -y are specified, -y will be used.
+    -h : print this help
+
+  Return value:
+    0: Connection Success
+    1: Connection Failed - Unreachable
+    2: Connection Failed - Protocol Error (key incompatible with chosen auth)
+    3: Connection Failed - Unauthorized
+    4: Connection Failed - General
+    128: Error
+EOF
+}
+
+#Convert IEEE channel to frequency in Mhz
+conv_to_freq() {
+	local chan=$1
+	local freq=
+	if [ $chan -le 14 ]; then
+		freq=$((2407+$chan*5))
+	else
+		freq=$((5000+$chan*5))
+	fi
+	echo ${freq}
+}
+
+#MAC address assignment for the test interface
+mac_addr_test_intf() {
+	local _mac=$1
+	lower_mac=$(echo $_mac | cut -d ':' -f2-6)
+	# Flag LAA bit
+	upper_mac="$((0x$(echo $_mac | cut -d ':' -f1) | 0x2))"
+	# upper_mac is a decimal, so needs to be converted to hex
+	echo "$(printf "%x" "$upper_mac"):$lower_mac"
+}
+
+check_params() {
+	local chan="$1"
+	local auth="$2"
+	local psk="$3"
+	local key="$4"
+	local index="$5"
+
+	if [ -z "${auth}" ] || [ -z "${ssid}" ]; then
+		echo "Error: ssid or authentication not found" >&2
+		return $ERROR
+	fi
+
+	if [ -n "${chan}" ]; then
+		if [ ! ${chan} -ge 1 ] && [ ! ${chan} -le 13 ] || \
+		[ ! ${chan} -ge 36 ] && [ ! ${chan} -le 64 ] && [ ! $((${chan}%4)) -eq 0 ] || \
+		[ ! ${chan} -ge 100 ] && [ ! ${chan} -le 165 ] && [ ! $((${chan}%4)) -eq 0 ]; then
+			echo "Invalid channel \"${chan}\"" >&2
+			echo "Please specify a valid channel in the following range:" >&2
+			echo " *1-13" >&2
+			echo " *36-64 (HT20 aligned) " >&2
+			echo " *100-165 (HT20 aligned) " >&2
+			return $ERROR
+		fi
+	fi
+
+	# Using passphrase and/or key and/or index in Open mode is inconsistent
+	if [ "${auth}" = "open" ]; then
+		if [ -n "${key}" -o -n "${index}" -o -n "${psk}" ]; then
+			echo "Open mode can not be used with passphrase/key/index" >&2
+			return $FAIL_PROTOCOL
+		fi
+	fi
+
+	# If wep is used, make sure we also got a key & its index
+	if [ "${auth}" = "wep" ]; then
+		if [ -z "${key}" ] || [ -z "${index}" ]; then
+			echo "In WEP, please specify the key and index" >&2
+			return $FAIL_PROTOCOL
+		fi
+		local keylength=${#key}
+		# Verify wep key length, for both ascii and hex
+		if [ ${keylength} != 5 ] && [ ${keylength} != 13 ] && [ ${keylength} != 16 ] && \
+		[ ${keylength} != 10 ] && [ ${keylength} != 26 ] && [ ${keylength} != 32 ]; then
+			echo "Incorrect WEP key length " >&2
+			return $FAIL_PROTOCOL
+		fi
+	fi
+
+	# Having a key and/or index with non-WEP encryption is inconsistent
+	if [ "${auth}" != "wep" ]; then
+		if [ -n "${key}" -o -n "${index}" ]; then
+			echo "Index/Key can not be used with non-WEP authentication " >&2
+			return $FAIL_PROTOCOL
+		fi
+	fi
+
+	# If wpa is used, make sure we also got a passphrase
+	if [ "${auth}" = "wpa" ] || [ "${auth}" = "psk2" ]; then
+		#Check key here for valid length
+		case ${#psk} in
+			( 64 )
+				case "$psk" in
+					( *[!0-9A-Fa-f]* )
+						DEBUG_LOG "Invalid PSK specified!"
+						return $FAIL_PROTOCOL ;;
+				esac
+				;;
+			( * )
+				if [ "${#psk}" -lt 8 ] || [ "${#psk}" -gt 63 ]; then
+					echo "Invalid passphrase specified" >&2
+					return $FAIL_PROTOCOL
+				fi
+				;;
+		esac
+	fi
+
+	return $SUCCESS
+}
+
+# Process arguments
+timeout=32
+ref_iface="wlan0"
+iface="wtry"
+
+while [ -n "$1" ];do
+	case "$1" in
+	-c) chan="$2"; shift;;
+	-s) ssid=$2; shift;;
+	-a) auth=$2; shift
+		[ "${auth}" = "open" ] || [ "${auth}" = "wep" ] || [ "${auth}" = "wpa" ] || [ "${auth}" = "psk2" ] || {
+			echo "Invalid authentication \"${auth}\"" >&2
+			echo "Valid authentication values are \"open\", \"wep\", \"wpa\" \"psk2\"" >&2
+			showhelp
+			exit $ERROR
+		};;
+	-f) iface=$2; shift;;
+	-p) psk=$2; shift;;
+	-k) key=$2; shift;;
+	-i) index=$2; shift
+		if [ ! ${index} -ge 0 ] && [ ! ${index} -le 3 ]; then
+			echo "Invalid index \"${index}\"" >&2
+			echo "Valid index values are \"0\", \"1\", \"2\", \"3\"" >&2
+			showhelp
+			exit $ERROR
+		fi;;
+	-t) timeout=$2; shift;;
+	-d) DEBUG=1;;
+	-w) ref_iface="$2"; shift;;
+	-y) wdev="$2"; shift;;
+	-h) showhelp; exit $SUCCESS;;
+	*)
+		echo "Invalid option: -${OPTARG}" >&2
+		showhelp
+		exit $ERROR
+		;;
+	esac
+	shift
+done
+wdev="${wdev:-$(cat "/sys/class/net/$ref_iface/phy80211/name")}"
+[ -n "$wdev" ] || { echo "Unable to discover PHY"; exit $ERROR; }
+
+# Perform sanity checks on the script arguments
+check_params "${chan}" "${auth}" "${psk}" "${key}" "${index}"
+result=$?
+[ $result -ne $SUCCESS ] && {
+	showhelp
+	exit $result
+}
+
+#Do some logging
+DEBUG_LOG "SSID=$ssid"
+DEBUG_LOG "AUTH=$auth"
+DEBUG_LOG "CHAN=$chan"
+DEBUG_LOG "Password=$psk"
+
+# WEP key sanitization
+if [ ${auth} = "wep" ]; then
+	local keylength=${#key}
+	# If ASCII, convert to HEX
+	if [ ${keylength} = 5 ] || [ ${keylength} = 13 ] || [ ${keylength} = 16 ]; then
+		key=$(echo -n "${key}" | hexdump -v -e '/1 "%02X"')
+	fi
+fi
+
+
+# Ok, we're ready. Let's perform the WiFi operations now
+
+# Step 1: we create the interface and launch the right wpa daemons
+# XXX: figure out how to better dynamically do this, perhaps
+# use wpla_cli for it all
+
+#Bring up test interface
+iw phy $wdev interface add $iface type managed
+# The script doesn't work if we change the MAC address on 8017
+#ifconfig $iface hw ether $(mac_addr_test_intf $(cat /sys/class/ieee80211/$wdev/macaddress))
+ifconfig $iface up
+
+# Make sure wpa_supplicant control interface doesn't already exist. It
+# can crash wpa_supplicant.
+rm -rf "/run/wpa_supplicant-${iface}"
+
+wpa_supplicant -C /run/wpa_supplicant-${iface} -i ${iface} -B > /dev/null
+nid=$(wpa_cli -p /run/wpa_supplicant-${iface} -i ${iface} add_network)
+
+# Step 2: we set the network parameters
+wpa_cli -p /run/wpa_supplicant-${iface} -i ${iface} set_network $nid ssid \""${ssid}"\"
+WPA_CLI ${iface} set_network ${nid} scan_ssid 1
+
+# passphrases must be quoted, passkeys (64 hex digit) must not
+local quoted_psk
+if [ ${#psk} -eq 64 ]; then
+	quoted_psk="${psk}"
+else
+	quoted_psk=\""${psk}"\"
+fi
+
+case ${auth} in
+	"open")
+		WPA_CLI ${iface} set_network ${nid} key_mgmt NONE
+		;;
+	"wep")
+		WPA_CLI ${iface} set_network ${nid} key_mgmt NONE
+		# send WEP key as HEX
+		WPA_CLI ${iface} set_network ${nid} wep_key${index} ${key}
+		WPA_CLI ${iface} set_network ${nid} wep_tx_keyidx ${index}
+		;;
+	"wpa"|"psk2")
+		WPA_CLI ${iface} set_network ${nid} key_mgmt WPA-PSK
+		[ "${auth}" = "psk2" ] && WPA_CLI ${iface} set_network ${nid} proto RSN
+		wpa_cli -p /run/wpa_supplicant-${iface} -i ${iface} set_network ${nid} psk "${quoted_psk}"
+		;;
+esac
+
+# Set scan freq. if given
+[ -z "${chan}" ] || WPA_CLI ${iface} set_network ${nid} scan_freq "$(conv_to_freq $chan)"
+WPA_CLI ${iface} enable_network ${nid}
+
+# Check connection state
+cnt_down=$timeout
+while [ ${cnt_down} -gt 0 ]; do
+	sleep .25
+	conn_state=$(wpa_cli -p /run/wpa_supplicant-${iface} -i ${iface} status 2>/dev/null | grep wpa_state | cut -d= -f2)
+	if [ -z "$conn_state" ] || [ "$conn_state" = "COMPLETED" ]; then
+		break;
+	fi
+	cnt_down=$((--cnt_down))
+done
+
+result=$FAIL_GENERAL
+case ${conn_state} in
+	COMPLETED)
+		result=$SUCCESS
+		;;
+	SCANNING)
+		result=$FAIL_UNREACHABLE
+		;;
+	ASSOCIATING)
+		result=$FAIL_UNREACHABLE
+		;;
+	4WAY_HANDSHAKE)
+		result=$FAIL_UNAUTHORIZED
+		;;
+	GROUP_HANDSHAKE)
+		result=$FAIL_UNAUTHORIZED
+		;;
+	AUTHENTICATING)
+		result=$FAIL_UNAUTHORIZED
+		;;
+	*)  # ASSOCIATED, DISCONNECTED, INACTIVE, INTERFACE_DISABLED
+		result=$FAIL_GENERAL
+		;;
+esac
+[ "$result" = "$SUCCESS" ] && echo "Connection success" ||  echo "Timeout --> connection failed - ${conn_state}"
+
+cleanup_and_exit $result

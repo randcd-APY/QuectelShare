@@ -1,0 +1,33 @@
+#! /bin/sh
+#
+# mm-qcamera-daemon        init.d script to start the MM Camera server daemon
+#
+
+set -e
+
+case "$1" in
+  start)
+        echo -n "Starting mm-qcamera-daemon: "
+        if [ ! -e /dev/media0 ]; then
+           /bin/mknod -m 660 /dev/media0 c 251 0
+        fi
+        start-stop-daemon -S -b -a /system/bin/mm-qcamera-daemon
+        echo "done"
+        ;;
+  stop)
+        echo -n "Stopping mm-qcamera-daemon: "
+        start-stop-daemon -K -n mm-qcamera-daemon
+        echo "done"
+        ;;
+  restart)
+        $0 stop
+        $0 start
+        ;;
+  *)
+        echo "Usage mm-qcamera-daemon { start | stop | restart}" >&2
+        exit 1
+        ;;
+esac
+
+exit 0
+

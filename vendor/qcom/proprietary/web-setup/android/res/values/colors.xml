@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ Copyright (C) 2017 Qualcomm Technologies, Inc.
+ All rights reserved
+ Confidential and Proprietary - Qualcomm Technologies, Inc.
+-->
+<resources>
+	<color name="colorPrimary">#00A4d1</color>
+	<color name="colorPrimaryDark">#005268</color>
+	<color name="colorAccent">#00A4d1</color>
+	<color name="things_to_do_dark">#3A4F51</color>
+
+	<color name="empty_view_text">@android:color/black</color>
+
+	<color name="main_footer_text">@android:color/white</color>
+
+	<color name="divider">@android:color/black</color>
+
+	<color name="dialog_title_text">@android:color/black</color>
+	<color name="dialog_message_text">@android:color/black</color>
+	<color name="dialog_checkbox">@android:color/black</color>
+	<color name="dialog_edit_text">@android:color/black</color>
+
+	<color name="list_item_text">@android:color/black</color>
+	<color name="list_item_search_text">@android:color/black</color>
+	<color name="list_item_section_text">#7A7C84</color>
+
+	<color name="list_divider">#E1E1E1</color>
+	<color name="list_view_background">#E9EBEC</color>
+	<color name="list_item_pressed_background">#CECECE</color>
+	<color name="list_item_normal_background">@android:color/white</color>
+
+	<color name="setup_fragment_button_text">@android:color/white</color>
+	<color name="setup_instruction_fragment_instruction_text">@android:color/white</color>
+	<color name="setup_added_fragment_great_text">#212120</color>
+	<color name="setup_added_fragment_regular_added_text">#7A7C84</color>
+	<color name="setup_added_fragment_special_added_text">#6D6E72</color>
+
+	<color name="alexa_intro_text">@android:color/black</color>
+	<color name="alexa_detail_text">#6D6E72</color>
+	<color name="alexa_bubble_text">@android:color/white</color>
+</resources>

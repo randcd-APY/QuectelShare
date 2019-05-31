@@ -1,0 +1,15 @@
+[Unit]
+Description= QTI Audio Server Deamon Service
+SourcePath=/usr/bin/qti_audio_server_daemon
+Requires=servicemanager.service
+After=servicemanager.service
+After=persist-prop.service
+
+[Service]
+User=system
+Group=audio
+Restart=always
+ExecStart=/usr/bin/qti_audio_server_daemon
+
+[Install]
+WantedBy=multi-user.target

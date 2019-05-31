@@ -1,0 +1,1177 @@
+/* ar1335_lib.h
+ *
+ * DESCRIPTION
+ *
+ * Copyright (c) 2017 Qualcomm Technologies, Inc.
+ * All Rights Reserved.
+ * Confidential and Proprietary - Qualcomm Technologies, Inc.
+ */
+
+#ifndef __AR1335_LIB_H__
+#define __AR1335_LIB_H__
+
+#include "sensor_lib.h"
+#define SENSOR_MODEL "ar1335"
+
+#define AR1335_MAX_ANALOG_GAIN   7.75
+#define AR1335_MIN_ANALOG_GAIN   1.0
+#define AR1335_MAX_DIGITAL_GAIN  3.09375
+#define AR1335_MIN_DIGITAL_GAIN  1.0
+#define AR1335_MIN_GAIN  AR1335_MIN_ANALOG_GAIN * AR1335_MIN_DIGITAL_GAIN
+#define AR1335_MAX_GAIN  AR1335_MAX_ANALOG_GAIN * AR1335_MIN_DIGITAL_GAIN
+
+#define STOP_REG_ARRAY \
+{ \
+  {0x3F3C, 0x0002, 0x00}, \
+  {0x3FE0, 0x0001, 0x00}, \
+  {0x0100, 0x0000, 0x00}, \
+  {0x3FE0, 0x0000, 0x00}, \
+}
+
+#define START_REG_ARRAY \
+{ \
+  {0x3F3C, 0x0003, 0x00}, \
+  {0x30BC, 0x0000, 0x00}, \
+  {0x0100, 0x0100, 0x00}, \
+}
+
+#define GROUPON_REG_ARRAY \
+{ \
+  {0x0104, 0x01, 0x00}, \
+}
+
+#define GROUPOFF_REG_ARRAY \
+{ \
+  {0x0104, 0x00, 0x00},  \
+}
+
+#define INIT0_REG_ARRAY \
+{ \
+  /* Corrections Recommended*/ \
+  {0x3042, 0x1004, 0x00}, \
+  {0x30D2, 0x0120, 0x00}, \
+  {0x30D4, 0x0000, 0x00}, \
+  {0x3090, 0x0000, 0x00}, \
+  {0x30FC, 0x0060, 0x00}, \
+  {0x30FE, 0x0060, 0x00}, \
+  {0x31E0, 0x0781, 0x00}, \
+  {0x3180, 0x9434, 0x00}, \
+  {0x317C, 0xEFF4, 0x00}, \
+  {0x30EE, 0x613E, 0x00}, \
+  {0x3F2C, 0x4428, 0x00}, \
+  /*Pixel timing Recommended*/ \
+  {0x3D00, 0x0446, 0x00}, \
+  {0x3D02, 0x4C66, 0x00}, \
+  {0x3D04, 0xFFFF, 0x00}, \
+  {0x3D06, 0xFFFF, 0x00}, \
+  {0x3D08, 0x5E40, 0x00}, \
+  {0x3D0A, 0x1146, 0x00}, \
+  {0x3D0C, 0x5D41, 0x00}, \
+  {0x3D0E, 0x1088, 0x00}, \
+  {0x3D10, 0x8342, 0x00}, \
+  {0x3D12, 0x00C0, 0x00}, \
+  {0x3D14, 0x5580, 0x00}, \
+  {0x3D16, 0x5B83, 0x00}, \
+  {0x3D18, 0x6084, 0x00}, \
+  {0x3D1A, 0x5A8D, 0x00}, \
+  {0x3D1C, 0x00C0, 0x00}, \
+  {0x3D1E, 0x8342, 0x00}, \
+  {0x3D20, 0x925A, 0x00}, \
+  {0x3D22, 0x8664, 0x00}, \
+  {0x3D24, 0x1030, 0x00}, \
+  {0x3D26, 0x801C, 0x00}, \
+  {0x3D28, 0x00A0, 0x00}, \
+  {0x3D2A, 0x56B0, 0x00}, \
+  {0x3D2C, 0x5788, 0x00}, \
+  {0x3D2E, 0x5150, 0x00}, \
+  {0x3D30, 0x824D, 0x00}, \
+  {0x3D32, 0x8D58, 0x00}, \
+  {0x3D34, 0x58D2, 0x00}, \
+  {0x3D36, 0x438A, 0x00}, \
+  {0x3D38, 0x4592, 0x00}, \
+  {0x3D3A, 0x458A, 0x00}, \
+  {0x3D3C, 0x4389, 0x00}, \
+  {0x3D3E, 0x51FF, 0x00}, \
+  {0x3D40, 0x8451, 0x00}, \
+  {0x3D42, 0x8410, 0x00}, \
+  {0x3D44, 0x0C88, 0x00}, \
+  {0x3D46, 0x5959, 0x00}, \
+  {0x3D48, 0x8A5F, 0x00}, \
+  {0x3D4A, 0xDA42, 0x00}, \
+  {0x3D4C, 0x9361, 0x00}, \
+  {0x3D4E, 0x8262, 0x00}, \
+  {0x3D50, 0x8342, 0x00}, \
+  {0x3D52, 0x8010, 0x00}, \
+  {0x3D54, 0xC041, 0x00}, \
+  {0x3D56, 0x64FF, 0x00}, \
+  {0x3D58, 0xFFB7, 0x00}, \
+  {0x3D5A, 0x4081, 0x00}, \
+  {0x3D5C, 0x4080, 0x00}, \
+  {0x3D5E, 0x4180, 0x00}, \
+  {0x3D60, 0x4280, 0x00}, \
+  {0x3D62, 0x438D, 0x00}, \
+  {0x3D64, 0x44BA, 0x00}, \
+  {0x3D66, 0x4488, 0x00}, \
+  {0x3D68, 0x4380, 0x00}, \
+  {0x3D6A, 0x4241, 0x00}, \
+  {0x3D6C, 0x8140, 0x00}, \
+  {0x3D6E, 0x8240, 0x00}, \
+  {0x3D70, 0x8041, 0x00}, \
+  {0x3D72, 0x8042, 0x00}, \
+  {0x3D74, 0x8043, 0x00}, \
+  {0x3D76, 0x8D44, 0x00}, \
+  {0x3D78, 0xBA44, 0x00}, \
+  {0x3D7A, 0x875E, 0x00}, \
+  {0x3D7C, 0x4354, 0x00}, \
+  {0x3D7E, 0x4241, 0x00}, \
+  {0x3D80, 0x8140, 0x00}, \
+  {0x3D82, 0x8120, 0x00}, \
+  {0x3D84, 0x2881, 0x00}, \
+  {0x3D86, 0x6026, 0x00}, \
+  {0x3D88, 0x8055, 0x00}, \
+  {0x3D8A, 0x8070, 0x00}, \
+  {0x3D8C, 0x8040, 0x00}, \
+  {0x3D8E, 0x4C81, 0x00}, \
+  {0x3D90, 0x45C3, 0x00}, \
+  {0x3D92, 0x4581, 0x00}, \
+  {0x3D94, 0x4C40, 0x00}, \
+  {0x3D96, 0x8070, 0x00}, \
+  {0x3D98, 0x8040, 0x00}, \
+  {0x3D9A, 0x4C85, 0x00}, \
+  {0x3D9C, 0x6CA8, 0x00}, \
+  {0x3D9E, 0x6C8C, 0x00}, \
+  {0x3DA0, 0x000E, 0x00}, \
+  {0x3DA2, 0xBE44, 0x00}, \
+  {0x3DA4, 0x8844, 0x00}, \
+  {0x3DA6, 0xBC78, 0x00}, \
+  {0x3DA8, 0x0900, 0x00}, \
+  {0x3DAA, 0x8904, 0x00}, \
+  {0x3DAC, 0x8080, 0x00}, \
+  {0x3DAE, 0x0240, 0x00}, \
+  {0x3DB0, 0x8609, 0x00}, \
+  {0x3DB2, 0x008E, 0x00}, \
+  {0x3DB4, 0x0900, 0x00}, \
+  {0x3DB6, 0x8002, 0x00}, \
+  {0x3DB8, 0x4080, 0x00}, \
+  {0x3DBA, 0x0480, 0x00}, \
+  {0x3DBC, 0x887C, 0x00}, \
+  {0x3DBE, 0xAA86, 0x00}, \
+  {0x3DC0, 0x0900, 0x00}, \
+  {0x3DC2, 0x877A, 0x00}, \
+  {0x3DC4, 0x000E, 0x00}, \
+  {0x3DC6, 0xC379, 0x00}, \
+  {0x3DC8, 0x4C40, 0x00}, \
+  {0x3DCA, 0xBF70, 0x00}, \
+  {0x3DCC, 0x5E40, 0x00}, \
+  {0x3DCE, 0x114E, 0x00}, \
+  {0x3DD0, 0x5D41, 0x00}, \
+  {0x3DD2, 0x5383, 0x00}, \
+  {0x3DD4, 0x4200, 0x00}, \
+  {0x3DD6, 0xC055, 0x00}, \
+  {0x3DD8, 0xA400, 0x00}, \
+  {0x3DDA, 0xC083, 0x00}, \
+  {0x3DDC, 0x4288, 0x00}, \
+  {0x3DDE, 0x6083, 0x00}, \
+  {0x3DE0, 0x5B80, 0x00}, \
+  {0x3DE2, 0x5A64, 0x00}, \
+  {0x3DE4, 0x1030, 0x00}, \
+  {0x3DE6, 0x801C, 0x00}, \
+  {0x3DE8, 0x00A5, 0x00}, \
+  {0x3DEA, 0x5697, 0x00}, \
+  {0x3DEC, 0x57A5, 0x00}, \
+  {0x3DEE, 0x5180, 0x00}, \
+  {0x3DF0, 0x505A, 0x00}, \
+  {0x3DF2, 0x814D, 0x00}, \
+  {0x3DF4, 0x8358, 0x00}, \
+  {0x3DF6, 0x8058, 0x00}, \
+  {0x3DF8, 0xA943, 0x00}, \
+  {0x3DFA, 0x8345, 0x00}, \
+  {0x3DFC, 0xB045, 0x00}, \
+  {0x3DFE, 0x8343, 0x00}, \
+  {0x3E00, 0xA351, 0x00}, \
+  {0x3E02, 0xE251, 0x00}, \
+  {0x3E04, 0x8C59, 0x00}, \
+  {0x3E06, 0x8059, 0x00}, \
+  {0x3E08, 0x8A5F, 0x00}, \
+  {0x3E0A, 0xEC7C, 0x00}, \
+  {0x3E0C, 0xCC84, 0x00}, \
+  {0x3E0E, 0x6182, 0x00}, \
+  {0x3E10, 0x6283, 0x00}, \
+  {0x3E12, 0x4283, 0x00}, \
+  {0x3E14, 0x10CC, 0x00}, \
+  {0x3E16, 0x6496, 0x00}, \
+  {0x3E18, 0x4281, 0x00}, \
+  {0x3E1A, 0x41BB, 0x00}, \
+  {0x3E1C, 0x4082, 0x00}, \
+  {0x3E1E, 0x407E, 0x00}, \
+  {0x3E20, 0xCC41, 0x00}, \
+  {0x3E22, 0x8042, 0x00}, \
+  {0x3E24, 0x8043, 0x00}, \
+  {0x3E26, 0x8300, 0x00}, \
+  {0x3E28, 0xC088, 0x00}, \
+  {0x3E2A, 0x44BA, 0x00}, \
+  {0x3E2C, 0x4488, 0x00}, \
+  {0x3E2E, 0x00C8, 0x00}, \
+  {0x3E30, 0x8042, 0x00}, \
+  {0x3E32, 0x4181, 0x00}, \
+  {0x3E34, 0x4082, 0x00}, \
+  {0x3E36, 0x4080, 0x00}, \
+  {0x3E38, 0x4180, 0x00}, \
+  {0x3E3A, 0x4280, 0x00}, \
+  {0x3E3C, 0x4383, 0x00}, \
+  {0x3E3E, 0x00C0, 0x00}, \
+  {0x3E40, 0x8844, 0x00}, \
+  {0x3E42, 0xBA44, 0x00}, \
+  {0x3E44, 0x8800, 0x00}, \
+  {0x3E46, 0xC880, 0x00}, \
+  {0x3E48, 0x4241, 0x00}, \
+  {0x3E4A, 0x8240, 0x00}, \
+  {0x3E4C, 0x8140, 0x00}, \
+  {0x3E4E, 0x8041, 0x00}, \
+  {0x3E50, 0x8042, 0x00}, \
+  {0x3E52, 0x8043, 0x00}, \
+  {0x3E54, 0x8300, 0x00}, \
+  {0x3E56, 0xC088, 0x00}, \
+  {0x3E58, 0x44BA, 0x00}, \
+  {0x3E5A, 0x4488, 0x00}, \
+  {0x3E5C, 0x00C8, 0x00}, \
+  {0x3E5E, 0x8042, 0x00}, \
+  {0x3E60, 0x4181, 0x00}, \
+  {0x3E62, 0x4082, 0x00}, \
+  {0x3E64, 0x4080, 0x00}, \
+  {0x3E66, 0x4180, 0x00}, \
+  {0x3E68, 0x4280, 0x00}, \
+  {0x3E6A, 0x4383, 0x00}, \
+  {0x3E6C, 0x00C0, 0x00}, \
+  {0x3E6E, 0x8844, 0x00}, \
+  {0x3E70, 0xBA44, 0x00}, \
+  {0x3E72, 0x8800, 0x00}, \
+  {0x3E74, 0xC880, 0x00}, \
+  {0x3E76, 0x4241, 0x00}, \
+  {0x3E78, 0x8140, 0x00}, \
+  {0x3E7A, 0x9F5E, 0x00}, \
+  {0x3E7C, 0x8A54, 0x00}, \
+  {0x3E7E, 0x8620, 0x00}, \
+  {0x3E80, 0x2881, 0x00}, \
+  {0x3E82, 0x6026, 0x00}, \
+  {0x3E84, 0x8055, 0x00}, \
+  {0x3E86, 0x8070, 0x00}, \
+  {0x3E88, 0x0000, 0x00}, \
+  {0x3E8A, 0x0000, 0x00}, \
+  {0x3E8C, 0x0000, 0x00}, \
+  {0x3E8E, 0x0000, 0x00}, \
+  {0x3E90, 0x0000, 0x00}, \
+  {0x3E92, 0x0000, 0x00}, \
+  {0x3E94, 0x0000, 0x00}, \
+  {0x3E96, 0x0000, 0x00}, \
+  {0x3E98, 0x0000, 0x00}, \
+  {0x3E9A, 0x0000, 0x00}, \
+  {0x3E9C, 0x0000, 0x00}, \
+  {0x3E9E, 0x0000, 0x00}, \
+  {0x3EA0, 0x0000, 0x00}, \
+  {0x3EA2, 0x0000, 0x00}, \
+  {0x3EA4, 0x0000, 0x00}, \
+  {0x3EA6, 0x0000, 0x00}, \
+  {0x3EA8, 0x0000, 0x00}, \
+  {0x3EAA, 0x0000, 0x00}, \
+  {0x3EAC, 0x0000, 0x00}, \
+  {0x3EAE, 0x0000, 0x00}, \
+  {0x3EB0, 0x0000, 0x00}, \
+  {0x3EB2, 0x0000, 0x00}, \
+  {0x3EB4, 0x0000, 0x00}, \
+  /*Analog setup recommended*/\
+  {0x3EB6, 0x004D, 0x00}, \
+  {0x3EBC, 0xAA06, 0x00}, \
+  {0x3EC0, 0x2E02, 0x00}, \
+  {0x3EC2, 0x7700, 0x00}, \
+  {0x3EC4, 0x1C08, 0x00}, \
+  {0x3EC6, 0xEA44, 0x00}, \
+  {0x3EC8, 0x0F0F, 0x00}, \
+  {0x3ECA, 0x0F4A, 0x00}, \
+  {0x3ECC, 0x0706, 0x00}, \
+  {0x3ECE, 0x443B, 0x00}, \
+  {0x3ED0, 0x12F0, 0x00}, \
+  {0x3ED2, 0x0039, 0x00}, \
+  {0x3ED4, 0x862F, 0x00}, \
+  {0x3ED6, 0x4080, 0x00}, \
+  {0x3ED8, 0x0523, 0x00}, \
+  {0x3EDA, 0xF8A0, 0x00}, \
+  {0x3EDC, 0x5078, 0x00}, \
+  {0x3EDE, 0x5005, 0x00}, \
+  /*Context switching*/\
+  {0x316A, 0x8200 , 0x00}, \
+  {0x316E, 0x8200 , 0x00}, \
+  {0x316C, 0x8200 , 0x00}, \
+  {0x3EF0, 0x414D , 0x00}, \
+  {0x3EF2, 0x0101 , 0x00}, \
+  {0x3EF6, 0x0307 , 0x00}, \
+  {0x3EFA, 0x0F0F , 0x00}, \
+  {0x3EFC, 0x0F0F , 0x00}, \
+  {0x3EFE, 0x0F0F , 0x00}, \
+  /*Defect Correction*/\
+  {0x31E0, 0x0781, 0x00}, \
+  {0x3F00, 0x004F, 0x00}, \
+  {0x3F02, 0x0125, 0x00}, \
+  {0x3F04, 0x0020, 0x00}, \
+  {0x3F06, 0x0040, 0x00}, \
+  {0x3F08, 0x0070, 0x00}, \
+  {0x3F0A, 0x0101, 0x00}, \
+  {0x3F0C, 0x0302, 0x00}, \
+  {0x3F1E, 0x0022, 0x00}, \
+  {0x3F1A, 0x01FF, 0x00}, \
+  {0x3F14, 0x0101, 0x00}, \
+  {0x3F44, 0x0707, 0x00}, \
+  {0x3F18, 0x011E, 0x00}, \
+  {0x3F12, 0x0303, 0x00}, \
+  {0x3F42, 0x1511, 0x00}, \
+  {0x3F16, 0x011E, 0x00}, \
+  {0x3F10, 0x0505, 0x00}, \
+  {0x0600, 0x0000, 0x00}, \
+  {0x3F40, 0x1511, 0x00}, \
+}
+
+#define RES0_REG_ARRAY \
+{ \
+  /*PLL_30fps_60fps_1098Mbps_36.6MHz*/ \
+  {0x0300, 0x0005, 0x00}, \
+  {0x0302, 0x0001, 0x00}, \
+  {0x0304, 0x0202, 0x00}, \
+  {0x0306, 0x3C3C, 0x00}, \
+  {0x0308, 0x000A, 0x00}, \
+  {0x030A, 0x0001, 0x00}, \
+  {0x0112, 0x0A0A, 0x00}, \
+  {0x3016, 0x0101, 0x00}, \
+  /*[Hidden: mipi_timing_1104Mbps]*/ \
+  {0x31B0, 0x0064, 0x00}, \
+  {0x31B2, 0x002D, 0x00}, \
+  {0x31B4, 0x5392, 0x00}, \
+  {0x31B6, 0x53CA, 0x00}, \
+  {0x31B8, 0x2423, 0x00}, \
+  {0x31BA, 0x1C70, 0x00}, \
+  {0x31BC, 0x868B, 0x00}, \
+  /*Mode setting 4160x3120@30fps*/ \
+  {0x0344, 0x0028, 0x00}, \
+  {0x0348, 0x1067, 0x00}, \
+  {0x0346, 0x0010, 0x00}, \
+  {0x034A, 0x0C3F, 0x00}, \
+  {0x034C, 0x1040, 0x00}, \
+  {0x034E, 0x0C30, 0x00}, \
+  {0x3040, 0x0041, 0x00}, \
+  {0x3172, 0x0206, 0x00}, \
+  {0x317A, 0x416E, 0x00}, \
+  {0x3F3C, 0x0003, 0x00}, \
+  {0x0400, 0x0000, 0x00}, \
+  {0x0404, 0x0010, 0x00}, \
+  {0x0342, 0x120C, 0x00}, \
+  {0x0340, 0x0C64, 0x00}, \
+  {0x0202, 0x0C63, 0x00}, \
+  {0x306E, 0x9090, 0x00}, \
+}
+
+#define RES1_REG_ARRAY \
+{ \
+  {0x0300, 0x0005, 0x00}, \
+  {0x0302, 0x0001, 0x00}, \
+  {0x0304, 0x0202, 0x00}, \
+  {0x0306, 0x3C3C, 0x00}, \
+  {0x0308, 0x000A, 0x00}, \
+  {0x030A, 0x0001, 0x00}, \
+  {0x0112, 0x0A0A, 0x00}, \
+  {0x3016, 0x0101, 0x00}, \
+  /*[Hidden: mipi_timing_1104Mbps]*/ \
+  {0x31B0, 0x0064, 0x00}, \
+  {0x31B2, 0x002D, 0x00}, \
+  {0x31B4, 0x5392, 0x00}, \
+  {0x31B6, 0x53CA, 0x00}, \
+  {0x31B8, 0x2423, 0x00}, \
+  {0x31BA, 0x1C70, 0x00}, \
+  {0x31BC, 0x868B, 0x00}, \
+  /*Mode setting 4160x3120@4fps*/ \
+  {0x0344, 0x0028, 0x00}, \
+  {0x0348, 0x1067, 0x00}, \
+  {0x0346, 0x0010, 0x00}, \
+  {0x034A, 0x0C3F, 0x00}, \
+  {0x034C, 0x1040, 0x00}, \
+  {0x034E, 0x0C30, 0x00}, \
+  {0x3040, 0x0041, 0x00}, \
+  {0x3172, 0x0206, 0x00}, \
+  {0x317A, 0x416E, 0x00}, \
+  {0x3F3C, 0x0003, 0x00}, \
+  {0x0400, 0x0000, 0x00}, \
+  {0x0404, 0x0010, 0x00}, \
+  {0x0342, 0x120C, 0x00}, \
+  {0x0340, 0x5CEE, 0x00}, \
+  {0x0202, 0x5CED, 0x00}, \
+  {0x306E, 0x9090, 0x00}, \
+}
+
+#define RES2_REG_ARRAY \
+{ \
+  /*PLL_Preview_329Mbps_36.6MHz*/ \
+  {0x0300, 0x0005, 0x00}, \
+  {0x0302, 0x0001, 0x00}, \
+  {0x0304, 0x0404, 0x00}, \
+  {0x0306, 0x243C, 0x00}, \
+  {0x0308, 0x000A, 0x00}, \
+  {0x030A, 0x0001, 0x00}, \
+  {0x0112, 0x0A0A, 0x00}, \
+  {0x3016, 0x0101, 0x00}, \
+  /*[Hidden: mipi_timing_320Mbps]*/ \
+  {0x31B0, 0x0025, 0x00}, \
+  {0x31B2, 0x000F, 0x00}, \
+  {0x31B4, 0x1106, 0x00}, \
+  {0x31B6, 0x1124, 0x00}, \
+  {0x31B8, 0x0C32, 0x00}, \
+  {0x31BA, 0x0C20, 0x00}, \
+  {0x31BC, 0x8204, 0x00}, \
+  /*Mode setting 1040x780@30fps*/ \
+  {0x0344, 0x0028, 0x00}, \
+  {0x0348, 0x1067, 0x00}, \
+  {0x0346, 0x0010, 0x00}, \
+  {0x034A, 0x0C41, 0x00}, \
+  {0x034C, 0x0410, 0x00}, \
+  {0x034E, 0x030C, 0x00}, \
+  {0x3040, 0x0047, 0x00}, \
+  {0x3172, 0x0206, 0x00}, \
+  {0x317A, 0x416E, 0x00}, \
+  {0x3F3C, 0x000B, 0x00}, \
+  {0x0400, 0x0001, 0x00}, \
+  {0x0404, 0x0040, 0x00}, \
+  {0x0342, 0x120C, 0x00}, \
+  {0x0340, 0x0632, 0x00}, \
+  {0x0202, 0x0319, 0x00}, \
+  {0x306E, 0x9080, 0x00}, \
+}
+
+#define RES3_REG_ARRAY \
+{\
+  /*PLL_30fps_60fps_1098Mbps_36.6MHz*/ \
+  {0x0300, 0x0005, 0x00}, \
+  {0x0302, 0x0001, 0x00}, \
+  {0x0304, 0x0202, 0x00}, \
+  {0x0306, 0x3C3C, 0x00}, \
+  {0x0308, 0x000A, 0x00}, \
+  {0x030A, 0x0001, 0x00}, \
+  {0x0112, 0x0A0A, 0x00}, \
+  {0x3016, 0x0101, 0x00}, \
+  /*[Hidden: mipi_timing_1104Mbps]*/ \
+  {0x31B0, 0x0064, 0x00}, \
+  {0x31B2, 0x002D, 0x00}, \
+  {0x31B4, 0x5392, 0x00}, \
+  {0x31B6, 0x53CA, 0x00}, \
+  {0x31B8, 0x2423, 0x00}, \
+  {0x31BA, 0x1C70, 0x00}, \
+  {0x31BC, 0x868B, 0x00}, \
+  /*Mode setting 4000x1124@60fps*/ \
+  {0x0344, 0x0078, 0x00}, \
+  {0x0348, 0x1017, 0x00}, \
+  {0x0346, 0x01C2, 0x00}, \
+  {0x034A, 0x0A89, 0x00}, \
+  {0x034C, 0x0FA0, 0x00}, \
+  {0x034E, 0x0464, 0x00}, \
+  {0x3040, 0x0043, 0x00}, \
+  {0x3172, 0x0206, 0x00}, \
+  {0x317A, 0x516E, 0x00}, \
+  {0x3F3C, 0x0003, 0x00}, \
+  {0x0400, 0x0000, 0x00}, \
+  {0x0404, 0x0010, 0x00}, \
+  {0x0342, 0x120C, 0x00}, \
+  {0x0340, 0x0664, 0x00}, \
+  {0x0202, 0x0663, 0x00}, \
+  {0x306E, 0x9090, 0x00}, \
+}
+
+#define RES4_REG_ARRAY \
+{\
+  /*PLL_60fps_1152Mbps_36.6MHz*/ \
+  {0x0300, 0x0005, 0x00}, \
+  {0x0302, 0x0001, 0x00}, \
+  {0x0304, 0x0202, 0x00}, \
+  {0x0306, 0x3C3E, 0x00}, \
+  {0x0308, 0x000A, 0x00}, \
+  {0x030A, 0x0001, 0x00}, \
+  {0x0112, 0x0A0A, 0x00}, \
+  {0x3016, 0x0101, 0x00}, \
+  /*[Hidden: mipi_timing_1104Mbps]*/ \
+  {0x31B0, 0x0064, 0x00}, \
+  {0x31B2, 0x002D, 0x00}, \
+  {0x31B4, 0x5392, 0x00}, \
+  {0x31B6, 0x53CA, 0x00}, \
+  {0x31B8, 0x2423, 0x00}, \
+  {0x31BA, 0x1C70, 0x00}, \
+  {0x31BC, 0x868B, 0x00}, \
+  /*Mode setting 2208x1560@60fps*/ \
+  {0x0344, 0x0028, 0x00}, \
+  {0x0348, 0x1067, 0x00}, \
+  {0x0346, 0x0010, 0x00}, \
+  {0x034A, 0x0C3D, 0x00}, \
+  {0x034C, 0x08A0, 0x00}, \
+  {0x034E, 0x0618, 0x00}, \
+  {0x3040, 0x0043, 0x00}, \
+  {0x3172, 0x0206, 0x00}, \
+  {0x317A, 0x516E, 0x00}, \
+  {0x3F3C, 0x0003, 0x00}, \
+  {0x0400, 0x0001, 0x00}, \
+  {0x0404, 0x001E, 0x00}, \
+  {0x0342, 0x120C, 0x00}, \
+  {0x0340, 0x0664, 0x00}, \
+  {0x0202, 0x0663, 0x00}, \
+  {0x306E, 0x9090, 0x00}, \
+}
+
+#define RES5_REG_ARRAY \
+{\
+  /*PLL_30fps_50fps_1098Mbps_36.6MHz*/ \
+  {0x0300, 0x0005, 0x00}, \
+  {0x0302, 0x0001, 0x00}, \
+  {0x0304, 0x0202, 0x00}, \
+  {0x0306, 0x3C3C, 0x00}, \
+  {0x0308, 0x000A, 0x00}, \
+  {0x030A, 0x0001, 0x00}, \
+  {0x0112, 0x0A0A, 0x00}, \
+  {0x3016, 0x0101, 0x00}, \
+  /*[Hidden: mipi_timing_1104Mbps]*/ \
+  {0x31B0, 0x0064, 0x00}, \
+  {0x31B2, 0x002D, 0x00}, \
+  {0x31B4, 0x5392, 0x00}, \
+  {0x31B6, 0x53CA, 0x00}, \
+  {0x31B8, 0x2423, 0x00}, \
+  {0x31BA, 0x1C70, 0x00}, \
+  {0x31BC, 0x868B, 0x00}, \
+  /*Mode setting 3696x1560@60fps*/ \
+  {0x0344, 0x0028, 0x00}, \
+  {0x0348, 0x1067, 0x00}, \
+  {0x0346, 0x0010, 0x00}, \
+  {0x034A, 0x0C3D, 0x00}, \
+  {0x034C, 0x1040, 0x00}, \
+  {0x034E, 0x0618, 0x00}, \
+  {0x3040, 0x0043, 0x00}, \
+  {0x3172, 0x0206, 0x00}, \
+  {0x317A, 0x516E, 0x00}, \
+  {0x3F3C, 0x0003, 0x00}, \
+  {0x0400, 0x0000, 0x00}, \
+  {0x0404, 0x0010, 0x00}, \
+  {0x0342, 0x12C0, 0x00}, \
+  {0x0340, 0x0726, 0x00}, \
+  {0x0202, 0x0725, 0x00}, \
+  {0x306E, 0x9090, 0x00}, \
+}
+
+static sensor_lib_t sensor_lib_ptr =
+{
+  .sensor_slave_info =
+  {
+  .sensor_name = SENSOR_MODEL,
+  .slave_addr = 0x6C,
+  .i2c_freq_mode = SENSOR_I2C_MODE_FAST,
+  .addr_type = CAMERA_I2C_WORD_ADDR,
+  .sensor_id_info =
+  {
+    .sensor_id_reg_addr = 0x3000,
+    .sensor_id = 0x0153,
+  },
+  .power_setting_array =
+  {
+      .power_setting_a =
+      {
+        {
+          .seq_type = CAMERA_POW_SEQ_GPIO,
+          .seq_val = CAMERA_GPIO_RESET,
+          .config_val = GPIO_OUT_LOW,
+          .delay = 1,
+        },
+        {
+          .seq_type = CAMERA_POW_SEQ_GPIO,
+          .seq_val = CAMERA_GPIO_VANA,
+          .config_val = GPIO_OUT_HIGH,
+          .delay = 1,
+        },
+        {
+          .seq_type = CAMERA_POW_SEQ_VREG,
+          .seq_val = CAMERA_VANA,
+          .config_val = 0,
+          .delay = 0,
+        },
+        {
+          .seq_type = CAMERA_POW_SEQ_GPIO,
+          .seq_val = CAMERA_GPIO_VDIG,
+          .config_val = GPIO_OUT_HIGH,
+          .delay = 1,
+        },
+        {
+          .seq_type = CAMERA_POW_SEQ_VREG,
+          .seq_val = CAMERA_VDIG,
+          .config_val = 0,
+          .delay = 0,
+        },
+        {
+          .seq_type = CAMERA_POW_SEQ_VREG,
+          .seq_val = CAMERA_VIO,
+          .config_val = 0,
+          .delay = 0,
+        },
+        {
+          .seq_type = CAMERA_POW_SEQ_CLK,
+          .seq_val = CAMERA_MCLK,
+          .config_val = 36600000,
+          .delay = 1,
+        },
+        {
+          .seq_type = CAMERA_POW_SEQ_GPIO,
+          .seq_val = CAMERA_GPIO_RESET,
+          .config_val = GPIO_OUT_HIGH,
+          .delay = 11,
+        },
+      },
+      .size = 8,
+      .power_down_setting_a =
+      {
+        {
+          .seq_type = CAMERA_POW_SEQ_CLK,
+          .seq_val = CAMERA_MCLK,
+          .config_val = 0,
+          .delay = 1,
+        },
+        {
+          .seq_type = CAMERA_POW_SEQ_GPIO,
+          .seq_val = CAMERA_GPIO_RESET,
+          .config_val = GPIO_OUT_LOW,
+          .delay = 1,
+        },
+        {
+          .seq_type = CAMERA_POW_SEQ_VREG,
+          .seq_val = CAMERA_VIO,
+          .config_val = 0,
+          .delay = 0,
+        },
+        {
+          .seq_type = CAMERA_POW_SEQ_VREG,
+          .seq_val = CAMERA_VDIG,
+          .config_val = 0,
+          .delay = 0,
+        },
+        {
+          .seq_type = CAMERA_POW_SEQ_GPIO,
+          .seq_val = CAMERA_GPIO_VDIG,
+          .config_val = GPIO_OUT_LOW,
+          .delay = 1,
+        },
+        {
+          .seq_type = CAMERA_POW_SEQ_VREG,
+          .seq_val = CAMERA_VANA,
+          .config_val = 0,
+          .delay = 0,
+        },
+        {
+          .seq_type = CAMERA_POW_SEQ_GPIO,
+          .seq_val = CAMERA_GPIO_VANA,
+          .config_val = GPIO_OUT_LOW,
+          .delay = 1,
+        },
+      },
+      .size_down = 7,
+    },
+  },
+  .sensor_output =
+  {
+  .output_format = SENSOR_BAYER,
+  .connection_mode = SENSOR_MIPI_CSI,
+  .raw_output = SENSOR_10_BIT_DIRECT,
+  .filter_arrangement = SENSOR_GRBG,
+  },
+  .output_reg_addr =
+  {
+    .x_output = 0x034C,
+    .y_output = 0x034E,
+    .line_length_pclk = 0x0342,
+    .frame_length_lines = 0x0340,
+  },
+  .exp_gain_info =
+  {
+  .coarse_int_time_addr = 0x0202,
+  .global_gain_addr = 0x305E,
+  .vert_offset = 12,
+  },
+  .aec_info =
+  {
+  .min_gain = 1,
+  .max_gain = 24,
+  .max_analog_gain = 7.75,
+  .max_linecount = 65535 - 12,
+  },
+  .sensor_num_frame_skip = 2,
+  .sensor_num_HDR_frame_skip = 2,
+  .sensor_max_pipeline_frame_delay = 2,
+  .sensor_property =
+  {
+    .pix_size = 1.1, /* um */
+    .sensing_method = SENSOR_SMETHOD_ONE_CHIP_COLOR_AREA_SENSOR,
+    .crop_factor = 1.0,
+  },
+  .pixel_array_size_info =
+  {
+  .active_array_size =
+  {
+    .width = 4160,
+    .height = 3120,
+  },
+  .left_dummy = 0,
+  .right_dummy = 0,
+  .top_dummy = 0,
+  .bottom_dummy = 0,
+  },
+  .color_level_info =
+  {
+  .white_level = 1023,
+  .r_pedestal = 64,
+  .gr_pedestal = 64,
+  .gb_pedestal = 64,
+  .b_pedestal = 64,
+  },
+  .sensor_stream_info_array =
+  {
+  .sensor_stream_info =
+  {
+    {
+      .vc_cfg_size = 2,
+      .vc_cfg =
+      {
+        {
+          .cid = 0,
+          .dt = CSI_RAW10,
+          .decode_format = CSI_DECODE_10BIT
+        },
+        {
+          .cid = 0,
+          .dt = CSI_RAW10,
+          .decode_format = CSI_DECODE_10BIT_PLAIN16_LSB
+        },
+      },
+      .pix_data_fmt =
+      {
+        SENSOR_BAYER,
+      },
+    },
+  },
+  .size = 1,
+  },
+  .start_settings =
+  {
+  .reg_setting_a = START_REG_ARRAY,
+  .addr_type = CAMERA_I2C_WORD_ADDR,
+  .data_type = CAMERA_I2C_WORD_DATA,
+  .delay = 0,
+  },
+  .stop_settings =
+  {
+  .reg_setting_a = STOP_REG_ARRAY,
+  .addr_type = CAMERA_I2C_WORD_ADDR,
+  .data_type = CAMERA_I2C_WORD_DATA,
+  .delay = 0,
+  },
+  .groupon_settings =
+  {
+  .reg_setting_a = GROUPON_REG_ARRAY,
+  .addr_type = CAMERA_I2C_WORD_ADDR,
+  .data_type = CAMERA_I2C_BYTE_DATA,
+  .delay = 0,
+  },
+  .groupoff_settings =
+  {
+  .reg_setting_a = GROUPOFF_REG_ARRAY,
+  .addr_type = CAMERA_I2C_WORD_ADDR,
+  .data_type = CAMERA_I2C_BYTE_DATA,
+  .delay = 0,
+  },
+  .test_pattern_info =
+  {
+  .test_pattern_settings =
+  {
+    {
+      .mode = SENSOR_TEST_PATTERN_OFF,
+      .settings =
+      {
+        .reg_setting_a =
+         {
+           {0x0600, 0x00, 0x00},
+         },
+        .size = 1,
+        .addr_type = CAMERA_I2C_WORD_ADDR,
+        .data_type = CAMERA_I2C_BYTE_DATA,
+        .delay = 0,
+      },
+    },
+    {
+      .mode = SENSOR_TEST_PATTERN_SOLID_COLOR,
+      .settings =
+      {
+        .reg_setting_a = {{0x0600, 0x01, 0x00}},
+        .size = 1,
+        .addr_type = CAMERA_I2C_WORD_ADDR,
+        .data_type = CAMERA_I2C_BYTE_DATA,
+        .delay = 0,
+      },
+    },
+    {
+      .mode = SENSOR_TEST_PATTERN_COLOR_BARS,
+      .settings =
+      {
+        .reg_setting_a = {{0x0600, 0x02, 0x00}},
+        .size = 1,
+        .addr_type = CAMERA_I2C_WORD_ADDR,
+        .data_type = CAMERA_I2C_BYTE_DATA,
+        .delay = 0,
+      },
+    },
+    {
+      .mode = SENSOR_TEST_PATTERN_PN9,
+      .settings =
+      {
+        .reg_setting_a = {{0x0600, 0x03, 0x00}},
+        .size = 1,
+        .addr_type = CAMERA_I2C_WORD_ADDR,
+        .data_type = CAMERA_I2C_BYTE_DATA,
+        .delay = 0,
+      },
+    },
+  },
+  .size = 0,
+  .solid_mode_addr =
+  {
+    .r_addr = 0x8006,
+    .gr_addr = 0x8004,
+    .gb_addr = 0x8002,
+    .b_addr = 0x8000,
+  },
+  },
+  .init_settings_array =
+  {
+  .reg_settings =
+  {
+    {
+      .reg_setting_a = INIT0_REG_ARRAY,
+      .addr_type = CAMERA_I2C_WORD_ADDR,
+      .data_type = CAMERA_I2C_WORD_DATA,
+      .delay = 15,
+    },
+  },
+  .size = 1,
+  },
+  .res_settings_array =
+  {
+  .reg_settings =
+  {
+    /* Res 0 */
+    {
+      .reg_setting_a = RES0_REG_ARRAY,
+      .addr_type = CAMERA_I2C_WORD_ADDR,
+      .data_type = CAMERA_I2C_WORD_DATA,
+      .delay = 10,
+    },
+    /* Res 1 */
+    {
+      .reg_setting_a = RES1_REG_ARRAY,
+      .addr_type = CAMERA_I2C_WORD_ADDR,
+      .data_type = CAMERA_I2C_WORD_DATA,
+      .delay = 10,
+    },
+    /* Res 2 */
+    {
+      .reg_setting_a = RES2_REG_ARRAY,
+      .addr_type = CAMERA_I2C_WORD_ADDR,
+      .data_type = CAMERA_I2C_WORD_DATA,
+      .delay = 10,
+    },
+    /* Res 3 */
+    {
+      .reg_setting_a = RES3_REG_ARRAY,
+      .addr_type = CAMERA_I2C_WORD_ADDR,
+      .data_type = CAMERA_I2C_WORD_DATA,
+      .delay = 10,
+    },
+    /* Res 4 */
+    {
+      .reg_setting_a = RES4_REG_ARRAY,
+      .addr_type = CAMERA_I2C_WORD_ADDR,
+      .data_type = CAMERA_I2C_WORD_DATA,
+      .delay = 10,
+    },
+    /* Res 5 */
+    {
+      .reg_setting_a = RES5_REG_ARRAY,
+      .addr_type = CAMERA_I2C_WORD_ADDR,
+      .data_type = CAMERA_I2C_WORD_DATA,
+      .delay = 10,
+    },
+   },
+  .size = 6,
+  },
+
+  .out_info_array =
+  {
+  .out_info =
+  {
+    /* Res 0 */
+    {
+      .x_output = 4160,
+      .y_output = 3120,
+      .line_length_pclk = 4620,
+      .frame_length_lines = 3172,
+      .vt_pixel_clk = 440000000,
+      .op_pixel_clk = 460000000,
+      .binning_factor = 1,
+      .min_fps = 15.0,
+      .max_fps = 30.0,
+      .mode = SENSOR_DEFAULT_MODE,
+      .offset_x = 0,
+      .offset_y = 0,
+      .scale_factor = 0,
+    },
+    /* Res 1 */
+    {
+      .x_output = 4160,
+      .y_output = 3120,
+      .line_length_pclk = 4620,
+      .frame_length_lines = 23790,
+      .vt_pixel_clk = 439639200,
+      .op_pixel_clk = 460000000,
+      .binning_factor = 1,
+      .min_fps = 4.0,
+      .max_fps = 4.0,
+      .mode = SENSOR_DEFAULT_MODE,
+      .offset_x = 0,
+      .offset_y = 0,
+      .scale_factor = 0,
+    },
+    /* Res 2 */
+    {
+      .x_output = 1040,
+      .y_output = 780,
+      .line_length_pclk = 4620,
+      .frame_length_lines = 1586,
+      .vt_pixel_clk = 219819600,
+      .op_pixel_clk = 460000000,
+      .binning_factor = 4,
+      .min_fps = 7.0,
+      .max_fps = 30.0,
+      .mode = SENSOR_DEFAULT_MODE,
+      .offset_x = 0,
+      .offset_y = 0,
+      .scale_factor = 0,
+    },
+    /* Res 3 */
+    {
+      .x_output = 4000,
+      .y_output = 1124,
+      .line_length_pclk = 4620,
+      .frame_length_lines = 1586,
+      .vt_pixel_clk = 439639200,
+      .op_pixel_clk = 460000000,
+      .binning_factor = 2,
+      .min_fps = 7.0,
+      .max_fps = 60.0,
+      .mode = SENSOR_HFR_MODE | SENSOR_DEFAULT_MODE,
+      .offset_x = 0,
+      .offset_y = 0,
+      .scale_factor = 0,
+    },
+    /* Res 4 */
+    {
+      .x_output = 2208,
+      .y_output = 1560,
+      .line_length_pclk = 4620,
+      .frame_length_lines = 1665,
+      .vt_pixel_clk = 461538000,
+      .op_pixel_clk = 460000000,
+      .binning_factor = 2,
+      .min_fps = 7.0,
+      .max_fps = 60.0,
+      .mode = SENSOR_HFR_MODE | SENSOR_DEFAULT_MODE,
+      .offset_x = 0,
+      .offset_y = 0,
+      .scale_factor = 0,
+    },
+    /* Res 5 */
+    {
+      .x_output = 4160,
+      .y_output = 1560,
+      .line_length_pclk = 4800,
+      .frame_length_lines = 1830,
+      .vt_pixel_clk = 439200000,
+      .op_pixel_clk = 460000000,
+      .binning_factor = 2,
+      .min_fps = 7.0,
+      .max_fps = 50.0,
+      .mode = SENSOR_HFR_MODE | SENSOR_DEFAULT_MODE,
+      .offset_x = 0,
+      .offset_y = 0,
+      .scale_factor = 0,
+    },
+  },
+  .size = 6,
+  },
+  .csi_params =
+  {
+  .lane_cnt = 4,
+  .settle_cnt = 0xE,
+  .is_csi_3phase = 0,
+  },
+  .csid_lut_params_array =
+  {
+  .lut_params =
+    {
+      {
+        .num_cid = 1,
+          .vc_cfg_a =
+          {
+            {
+              .cid = 0,
+              .dt = CSI_RAW10,
+              .decode_format = CSI_DECODE_10BIT
+            },
+          },
+       },
+       /* Res 1 */
+       {
+         .num_cid = 1,
+          .vc_cfg_a =
+           {
+             {
+               .cid = 0,
+               .dt = CSI_RAW10,
+               .decode_format = CSI_DECODE_10BIT
+             },
+           },
+       },
+       /* Res 2 */
+       {
+         .num_cid = 1,
+          .vc_cfg_a =
+           {
+             {
+               .cid = 0,
+               .dt = CSI_RAW10,
+               .decode_format = CSI_DECODE_10BIT
+             },
+           },
+       },
+       /* Res 3 */
+       {
+         .num_cid = 1,
+          .vc_cfg_a =
+           {
+             {
+               .cid = 0,
+               .dt = CSI_RAW10,
+               .decode_format = CSI_DECODE_10BIT
+             },
+           },
+       },
+       /* Res 4 */
+       {
+         .num_cid = 1,
+          .vc_cfg_a =
+           {
+             {
+               .cid = 0,
+               .dt = CSI_RAW10,
+               .decode_format = CSI_DECODE_10BIT
+             },
+           },
+       },
+       /* Res 5 */
+       {
+         .num_cid = 1,
+          .vc_cfg_a =
+           {
+             {
+               .cid = 0,
+               .dt = CSI_RAW10,
+               .decode_format = CSI_DECODE_10BIT
+             },
+           },
+       },
+    },
+    .size = 6,
+  },
+
+  .crop_params_array =
+  {
+  .crop_params =
+  {
+    /* Res 0 */
+    {
+      .top_crop = 0,
+      .bottom_crop = 0,
+      .left_crop = 0,
+      .right_crop = 0,
+    },
+    /* Res 1 */
+    {
+      .top_crop = 0,
+      .bottom_crop = 0,
+      .left_crop = 0,
+      .right_crop = 0,
+    },
+    /* Res 2 */
+    {
+      .top_crop = 0,
+      .bottom_crop = 0,
+      .left_crop = 0,
+      .right_crop = 0,
+    },
+    /* Res 3 */
+    {
+      .top_crop = 0,
+      .bottom_crop = 0,
+      .left_crop = 0,
+      .right_crop = 0,
+    },
+    /* Res 4 */
+    {
+      .top_crop = 0,
+      .bottom_crop = 0,
+      .left_crop = 0,
+      .right_crop = 0,
+    },
+    /* Res 5 */
+    {
+      .top_crop = 0,
+      .bottom_crop = 0,
+      .left_crop = 0,
+      .right_crop = 0,
+    },
+  },
+  .size = 6,
+  },
+  .exposure_func_table =
+  {
+  .sensor_calculate_exposure = sensor_calculate_exposure,
+  .sensor_fill_exposure_array = sensor_fill_exposure_array,
+  },
+  .sensor_capability = 0,
+  .awb_func_table =
+  {
+  .sensor_fill_awb_array = 0,
+  .awb_table_size = 0,
+  },
+  .rolloff_config =
+  {
+  .enable = FALSE,
+  .full_size_info =
+  {
+    .full_size_width = 0,
+    .full_size_height = 0,
+    .full_size_left_crop = 0,
+    .full_size_top_crop = 0,
+  },
+  },
+  .adc_readout_time = 0,
+  .noise_coeff = {
+  .gradient_S = 3.738032e-06,
+  .offset_S = 3.651935e-04,
+  .gradient_O = 4.499952e-07,
+  .offset_O = -2.968624e-04,
+  },
+};
+#endif

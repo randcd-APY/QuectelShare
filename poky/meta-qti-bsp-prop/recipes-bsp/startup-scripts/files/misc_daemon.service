@@ -1,0 +1,17 @@
+# Copyright (c) 2017 Qualcomm Technologies, Inc.
+# All Rights Reserved.
+# Confidential and Proprietary - Qualcomm Technologies, Inc.
+#
+
+[Unit]
+Description=set_core_pattern Service
+SourcePath=/etc/initscripts/misc-daemon
+
+[Service]
+Restart=no
+RemainAfterExit=yes
+ExecStart=/etc/initscripts/misc-daemon start
+ExecStop=/etc/initscripts/misc-daemon stop
+
+[Install]
+WantedBy=multi-user.target

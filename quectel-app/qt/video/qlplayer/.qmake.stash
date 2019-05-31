@@ -1,0 +1,38 @@
+QMAKE_CXX.INCDIRS = \
+    /home/smart1/code/bak/SC20_Android8.1_R07_r00043_linux/bionic/libc/arch-arm/include \
+    /home/smart1/code/bak/SC20_Android8.1_R07_r00043_linux/bionic/libc/include \
+    /home/smart1/code/bak/SC20_Android8.1_R07_r00043_linux/bionic/libc/kernel/android/uapi \
+    /home/smart1/code/bak/SC20_Android8.1_R07_r00043_linux/bionic/libc/kernel/uapi \
+    /home/smart1/code/bak/SC20_Android8.1_R07_r00043_linux/bionic/libc/kernel/uapi/asm-arm \
+    /home/smart1/code/bak/SC20_Android8.1_R07_r00043_linux/prebuilts/ndk/current/sources/cxx-stl/gnu-libstdc++/4.9/include \
+    /home/smart1/code/bak/SC20_Android8.1_R07_r00043_linux/prebuilts/ndk/current/sources/cxx-stl/gnu-libstdc++/4.9/libs/armeabi-v7a/include \
+    /home/smart1/code/bak/SC20_Android8.1_R07_r00043_linux/system/core/include \
+    /home/smart1/code/bak/SC20_Android8.1_R07_r00043_linux/frameworks/native/opengl/include \
+    /usr/local/include \
+    /home/smart1/code/bak/SC20_Android8.1_R07_r00043_linux/prebuilts/clang/host/linux-x86/clang-4053586/lib64/clang/5.0.300080/include \
+    /usr/include
+QMAKE_CXX.LIBDIRS = \
+    /home/smart1/code/bak/SC20_Android8.1_R07_r00043_linux/prebuilts/clang/host/linux-x86/clang-4053586/lib64/clang/5.0.300080 \
+    /home/smart1/code/bak/SC20_Android8.1_R07_r00043_linux/prebuilts/clang/host/linux-x86/clang-4053586/lib64/clang/5.0.300080/lib/linux/x86_64 \
+    /usr/lib/gcc/x86_64-linux-gnu/4.8 \
+    /usr/lib/x86_64-linux-gnu \
+    /home/smart1/code/bak/SC20_Android8.1_R07_r00043_linux/prebuilts/clang/host/linux-x86/clang-4053586/lib64 \
+    /lib/x86_64-linux-gnu \
+    /lib64 \
+    /usr/lib \
+    /lib
+QMAKE_CXX.QT_COMPILER_STDCXX = 199711L
+QMAKE_CXX.QMAKE_CLANG_MAJOR_VERSION = 5
+QMAKE_CXX.QMAKE_CLANG_MINOR_VERSION = 0
+QMAKE_CXX.QMAKE_CLANG_PATCH_VERSION = 300080
+QMAKE_CXX.QMAKE_GCC_MAJOR_VERSION = 4
+QMAKE_CXX.QMAKE_GCC_MINOR_VERSION = 2
+QMAKE_CXX.QMAKE_GCC_PATCH_VERSION = 1
+QMAKE_CXX.COMPILER_MACROS = \
+    QT_COMPILER_STDCXX \
+    QMAKE_CLANG_MAJOR_VERSION \
+    QMAKE_CLANG_MINOR_VERSION \
+    QMAKE_CLANG_PATCH_VERSION \
+    QMAKE_GCC_MAJOR_VERSION \
+    QMAKE_GCC_MINOR_VERSION \
+    QMAKE_GCC_PATCH_VERSION

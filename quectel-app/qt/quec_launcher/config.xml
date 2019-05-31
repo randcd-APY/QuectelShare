@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<demolauncher>
+  <demos>
+    <example filename="/usr/bin/camerademo" name="Camera" image="screenshots/QuecCam.jpg"/>
+    <example filename="/usr/bin/PhoneApp" name="Network" image="screenshots/Data.jpg"/>
+   <example filename="/usr/bin/qlplayer" name="Video" image="screenshots/Video.jpg"/>
+   <example filename="/usr/bin/MusicDemo" name="Audio" image="screenshots/Audio.jpg"/>
+   <example filename="/usr/bin/Gallery" name="Photo" image="screenshots/Photo.jpg"/>
+  <example filename="/usr/bin/Call" name="Call" image="screenshots/Call.jpg"/>
+  <example filename="/usr/bin/Msg" name="Msg" image="screenshots/Msg.jpg"/>
+  <example filename="/usr/bin/SensorTest" name="Sensor" image="screenshots/Sensor.jpg"/>
+  <example filename="/usr/bin/wifiApp" name="Wifi" image="screenshots/Wifi.jpg"/>
+  <example filename="/usr/bin/btdemo" name="BlueTooth" image="screenshots/BT.jpg"/>
+  <example filename="/usr/bin/GpsDemo" name="Gps" image="screenshots/Gps.jpg"/>
+ <example filename="/usr/bin/settings" name="Setting" image="screenshots/Setting.jpg"/>
+  </demos>
+  <slideshow timeout="60000" interval="10000">
+    <imagedir dir="slides"/>
+  </slideshow>
+</demolauncher>

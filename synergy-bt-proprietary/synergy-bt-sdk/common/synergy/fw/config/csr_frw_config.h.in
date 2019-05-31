@@ -1,0 +1,302 @@
+#ifndef _CSR_FRW_CONFIG_DEFAULT_H
+#define _CSR_FRW_CONFIG_DEFAULT_H
+/***********s*****************************************************************
+ *
+ *    Copyright (c) 2010-2015 Qualcomm Technologies International, Ltd.
+ *    All Rights Reserved. 
+ *    Qualcomm Technologies International, Ltd. Confidential and Proprietary.
+ ****************************************************************************/
+
+/*--------------------------------------------------------------------------
+ * Version info
+ *--------------------------------------------------------------------------*/
+#define CSR_FRW_VERSION_MAJOR    ${CSR_FRW_VERSION_MAJOR}
+#define CSR_FRW_VERSION_MINOR    ${CSR_FRW_VERSION_MINOR}
+#define CSR_FRW_VERSION_FIXLEVEL ${CSR_FRW_VERSION_FIXLEVEL}
+#define CSR_FRW_VERSION_BUILD    ${CSR_FRW_VERSION_BUILD}
+#cmakedefine CSR_FRW_RELEASE_TYPE_ENG
+#ifdef CSR_FRW_RELEASE_TYPE_ENG
+#define CSR_FRW_VERSION "${CSR_FRW_VERSION_MAJOR}.${CSR_FRW_VERSION_MINOR}.${CSR_FRW_VERSION_FIXLEVEL}.${CSR_FRW_VERSION_BUILD}"
+#else
+#define CSR_FRW_VERSION "${CSR_FRW_VERSION_MAJOR}.${CSR_FRW_VERSION_MINOR}.${CSR_FRW_VERSION_FIXLEVEL}"
+#endif
+#define CSR_FRW_VERSION_NUMBER CSR_VERSION_NUMBER(${CSR_FRW_VERSION_MAJOR}, ${CSR_FRW_VERSION_MINOR}, ${CSR_FRW_VERSION_FIXLEVEL})
+#define CSR_FRW_VERSION_CHECK(major,minor,fix) (CSR_FRW_VERSION_NUMBER >= CSR_VERSION_NUMBER(major,minor,fix))
+
+/*--------------------------------------------------------------------------
+ * Misc defines for the framework
+ *--------------------------------------------------------------------------*/
+#cmakedefine CSR_DSPM_FORCE_PATCH_ENABLE
+#cmakedefine CSR_MASK_ERROR_REASON_VALUES
+#cmakedefine CSR_HYDRA_SSD
+#cmakedefine CSR_USE_BCSP_HTRANS 
+#cmakedefine CSR_SDIO_USE_SDIO
+#cmakedefine CSR_SDIO_USE_CSPI
+#cmakedefine CSR_SDIO_ASYNC_ENABLE
+#cmakedefine CSR_HCI_SOCKET_TRANSPORT
+#cmakedefine CSR_IP_SUPPORT_FLOWCONTROL
+#cmakedefine CSR_IP_SUPPORT_ETHER
+#cmakedefine CSR_IP_SUPPORT_IFCONFIG
+#cmakedefine CSR_IP_SUPPORT_TLS
+#cmakedefine CSR_TLS_SUPPORT_PSK
+#cmakedefine CSR_USE_STDC_LIB
+#cmakedefine CSR_MEMALLOC_PROFILING
+#cmakedefine CSR_PMEM_DEBUG
+
+/*--------------------------------------------------------------------------
+ * Defines for the IP and TLS interfaces
+ *--------------------------------------------------------------------------*/
+#define CSR_IP_MAX_ETHERS ${CSR_IP_MAX_ETHERS}
+#define CSR_IP_MAX_SOCKETS ${CSR_IP_MAX_SOCKETS}
+#define CSR_TLS_MAX_SOCKETS ${CSR_TLS_MAX_SOCKETS}
+
+/*--------------------------------------------------------------------------
+ * Defines for the application framework
+ *--------------------------------------------------------------------------*/
+#define CSR_SCHEDULER_INSTANCES ${CSR_SCHEDULER_INSTANCES}
+
+/*--------------------------------------------------------------------------
+ * Defines for the generic scheduler
+ *--------------------------------------------------------------------------*/
+/*
+ * The maximum number of messages to store in the
+ * per-scheduler instance message container free list.
+ * Helps reducing allocations in the message put path.
+ */
+#define CSR_SCHED_MESSAGE_POOL_LIMIT ${CSR_SCHED_MESSAGE_POOL_LIMIT}
+
+/*
+ * The maximum number of timers per scheduler instance
+ */
+#define CSR_SCHED_TIMER_POOL_LIMIT ${CSR_SCHED_TIMER_POOL_LIMIT}
+
+/*--------------------------------------------------------------------------
+ * Defines for the BlueCore bootstrap procedure
+ *--------------------------------------------------------------------------*/
+/*
+ * The fixed time (in us) to wait after a reset command, before the transport
+ * is restarted.
+ */
+#define CSR_BLUECORE_RESET_TIMER ${CSR_BLUECORE_RESET_TIMER}
+
+/*
+ * Enable this option to enable an application to control the activation and
+ * deactivation of the BlueCore.
+ */
+#cmakedefine CSR_BLUECORE_ONOFF
+
+/*
+ * The maximum time (in us) to wait for the BlueCore to come alive after
+ * sending a reset command. Only applicable when CSR_BLUECORE_ONOFF is defined.
+ */
+#ifdef CSR_BLUECORE_ONOFF
+#define CSR_BLUECORE_RESET_TIMEOUT ${CSR_BLUECORE_RESET_TIMEOUT}
+#endif
+
+/*
+ * Enable this to periodically send a command to the BlueCore to monitor the
+ * state of the communication link. If the BlueCore communication is lost, a
+ * CSR_TM_BLUECORE_TRANSPORT_DEACTIVATE_IND will be sent to the application
+ * that activated the BlueCore transport, requesting it to deactivate the
+ * transport. Leave undefined to disable this functionality. Only applicable
+ * when CSR_BLUECORE_ONOFF is defined.
+ */
+#ifdef CSR_BLUECORE_ONOFF
+#define CSR_BLUECORE_PING_INTERVAL ${CSR_BLUECORE_PING_INTERVAL}
+#endif
+
+/*
+ * The maximum time (in us) to wait for the response to a BlueCore command.
+ * If no response is received within this time limit, the communication link
+ * will be considered lost, and a CSR_TM_BLUECORE_TRANSPORT_DEACTIVATE_IND
+ * will be sent to the application that activated the BlueCore transport,
+ * requesting it to deactivate the transport. Only applicable when
+ * CSR_BLUECORE_ONOFF is defined.
+ */
+#define CSR_BCCMD_CMD_TIMEOUT ${CSR_BCCMD_CMD_TIMEOUT}
+
+/*--------------------------------------------------------------------------
+ * Defines for Type-A
+ *--------------------------------------------------------------------------*/
+/*
+ * Type-A deep sleep enable timeout in ms.
+ * If 0, deep sleep is disabled.
+ */
+#define CSR_TYPE_A_SLEEP_TIMEOUT ${CSR_TYPE_A_SLEEP_TIMEOUT}
+
+/*
+ * The maximum bus speed to set during
+ * normal operation.
+ */
+#define CSR_TYPE_A_BUSSPEED_AWAKE ${CSR_TYPE_A_BUSSPEED_AWAKE}
+
+/*
+ * Type-A deep sleep wakeup delay in ms.
+ */
+#define CSR_TYPE_A_WAKEUP_TIMEOUT ${CSR_TYPE_A_WAKEUP_TIMEOUT}
+
+/* Type-A initialisation delay in ms */
+#define CSR_TYPE_A_ENABLE_DELAY ${CSR_TYPE_A_ENABLE_DELAY}
+
+/* Time to wait for chip wakeup in ms */
+#define CSR_TYPE_A_WAKEUP_DELAY ${CSR_TYPE_A_WAKEUP_DELAY}
+
+#define CSR_TYPE_A_RXBUF_POOLSIZE ${CSR_TYPE_A_RXBUF_POOLSIZE}
+
+#define CSR_TYPE_A_RXBUF_ELMSIZE (${CSR_TYPE_A_RXBUF_ELMSIZE})
+
+/* Maximum Type-A buffer size. */
+#define CSR_TYPE_A_TXBUF_SIZE (${CSR_TYPE_A_TXBUF_SIZE})
+
+/*--------------------------------------------------------------------------
+ * Defines for BCSP
+ *--------------------------------------------------------------------------*/
+/* If CSR_ABCSP_TXCRC is #defined then the optional CRC field is appended to each
+BCSP message transmitted, else the CRC is not appended. Do NOT define in this
+file, must be a global definition, i.e. give it as argument to the compiler */
+
+#cmakedefine CSR_ABCSP_TXCRC
+
+/* The CRC field is optional on BCSP messages.  If CSR_ABCSP_RXCRC is #defined
+then the CRC fields found on all received BCSP messages are checked.  If
+CSR_ABCSP_RXCRC is not #defined then no received CRC field is checked; this means
+that packets with invalid CRCs may be accepted as good messages. Please also note
+that if this is undefined it should also be undefined on the BC which will send
+two unnecessary CRC bytes on every reliable BCSP packet to the host */
+
+#cmakedefine CSR_ABCSP_RXCRC
+
+/*
+ * BCSP retransmission timer and BCSP timer jitter.
+ *
+ * The BCSP retransmission timer is used to control for how
+ * long the host waits for a response from the chip before
+ * retransmitting a message.
+ * If CSR_BCSP_RETRANSMISSION_TIMER is defined, its value is
+ * used as the BCSP retransmission timer period value.
+ * If not, the value is derived from the currently configured
+ * (i.e. at runtime) UART speed.
+ * By default, a 250ms timer is used.
+ *
+ * The retransmission timer is jittered to avoid scenarios
+ * where the chip may keep missing the retransmission due to
+ * unfortunate timing.  The jitter value controls the limits for
+ * the random offset applied to the base retransmission timer value.
+ * A value of 10ms is used by default which together with a 250ms
+ * baseline of retransmission timer base gives a retransmission
+ * timer in the interval [240ms; 260ms].
+ *
+ * CSR_BCSP_RETRANSMISSION_MINIMUM specifies the minimum period
+ * used when jittering is enabled.
+ */
+
+/*
+ */
+#cmakedefine CSR_BCSP_AUTO_TIMER
+
+#ifndef CSR_BCSP_AUTO_TIMER
+#define CSR_BCSP_RETRANSMISSION_TIMER ${CSR_BCSP_RETRANSMISSION_TIMER}
+#endif
+
+#define CSR_BCSP_RETRANSMISSION_JITTER ${CSR_BCSP_RETRANSMISSION_JITTER}
+
+#define CSR_BCSP_RETRANSMISSION_MINIMUM ${CSR_BCSP_RETRANSMISSION_MINIMUM}
+
+#define CSR_BCSP_TSHY_TIMER ${CSR_BCSP_TSHY_TIMER}
+
+#define CSR_BCSP_TCONF_TIMER ${CSR_BCSP_TCONF_TIMER}
+
+/* The size of the BCSP transmit window.  This must be between 1 and 7.  This
+is normally set to 4.  This is called "winsiz" in the BCSP protocol
+specification.
+
+This determines the number of BCSP messages that can be handled by the abcsp
+library's transmit path at a time, so it affects the storage requirements for
+ABCSP_TXMSG messages. */
+
+#define CSR_ABCSP_TXWINSIZE ${CSR_ABCSP_TXWINSIZE}
+
+/*--------------------------------------------------------------------------
+ * Defines for FastPipe
+ *--------------------------------------------------------------------------*/
+
+#define CSR_FP_CONTROLER_CREDIT_MAX ${CSR_FP_CONTROLER_CREDIT_MAX}
+#define CSR_FP_CONTROLLER_PACKET_SIZE_MAX ${CSR_FP_CONTROLLER_PACKET_SIZE_MAX}
+#define CSR_FP_HOST_PACKET_SIZE_MAX ${CSR_FP_HOST_PACKET_SIZE_MAX}
+#define CSR_FP_PACEKTS_MAX ${CSR_FP_PACEKTS_MAX}
+
+
+/*--------------------------------------------------------------------------
+ * Defines for Csr Log
+ *--------------------------------------------------------------------------*/
+/* Defines the maximum string length that will be written to the log transport
+ * in one call to the CSR_LOG_TEXT_XXX() functions found in csr_log_text.h.
+ * NB: This limit does not apply to the CSR_LOG_TEXT() macro. */
+#define CSR_LOG_TEXT_MAX_STRING_LEN ${CSR_LOG_TEXT_MAX_STRING_LEN}
+
+/* Defines an upper limit in bytes on the amount of primitive data to write in
+ * a put/get/pop/save message entry. NB: This limit only applies if the log
+ * level define CSR_LOG_LEVEL_TASK_PRIM_APPLY_LIMIT is set for a task.
+ *
+ * WARNING: Using this will seriusly affect the readability of the wireshark
+ * logs, but it might help as a measure to reduce the amount of log info
+ * generated on a platform */
+#define CSR_LOG_PRIM_SIZE_UPPER_LIMIT ${CSR_LOG_PRIM_SIZE_UPPER_LIMIT}
+
+/* Specify the output template format for the cleartext logger
+ * (see csr_log_cleartext.h) for a description of all possible templates */
+#define CSR_LOG_CLEARTEXT_FORMAT ${CSR_LOG_CLEARTEXT_FORMAT}
+
+/*--------------------------------------------------------------------------
+ * Defines for the IP stack
+ *--------------------------------------------------------------------------*/
+/* By default the IP stack assumes that the host architecture is little endian
+ * if this is not the case the define below should be defined to force the IP
+ * stack to use big endian */
+#cmakedefine CSR_IP_USE_BIG_ENDIAN
+
+/*--------------------------------------------------------------------------
+ * Defines for the CSR_DATA_STORE
+ *--------------------------------------------------------------------------*/
+/* This define specifies the directory where the CSR_DATA_STORE task places
+ * its database files current default is in the directory "data_store" relative
+ * to where the executable is started.
+ * NB: It is important that this path ends with a trailing '/' */
+#define CSR_DATA_STORE_ROOT_DIR "${CSR_DATA_STORE_ROOT_DIR}"
+
+#define CSR_DATA_STORE_DEFAULT_ENTRY_NAME "${CSR_DATA_STORE_DEFAULT_ENTRY_NAME}"
+
+/*--------------------------------------------------------------------------
+ * Defines for Chip Manager
+ *--------------------------------------------------------------------------*/
+/* Default number of microseconds between sending PING request */
+#define CSR_BLUECORE_DEFAULT_PING_INTERVAL ${CSR_BLUECORE_DEFAULT_PING_INTERVAL}
+
+/*--------------------------------------------------------------------------
+ * Defines for DSPM
+ *--------------------------------------------------------------------------*/
+/* If support for downloading capabilities in DSPM is not required, this
+   definition can be removed to reduce the code size. */
+#cmakedefine CSR_DSPM_SUPPORT_CAPABILITY_DOWNLOAD
+
+#cmakedefine CSR_DSPM_SUPPORT_ACCMD
+
+/*--------------------------------------------------------------------------
+ * Defines for pclin DHCP client configuration
+ *--------------------------------------------------------------------------*/
+/* Full path to dhcpcd (used on Android) and dhclient. */
+#define DHCPCD_PATH "${DHCPCD_PATH}"
+
+#define DHCLIENT_PATH "${DHCLIENT_PATH}"
+
+/*--------------------------------------------------------------------------
+ * Defines for DHCP_SERVER
+ *--------------------------------------------------------------------------*/
+#cmakedefine CSR_DHCP_SERVER_USE_IFCONFIG_ARP
+
+/*-------------------------------------------------------------------------
+ * Defines for BTM
+ *--------------------------------------------------------------------------*/
+#cmakedefine CSR_BTM_TASK
+
+#endif /* _CSR_FRW_CONFIG_DEFAULT_H */

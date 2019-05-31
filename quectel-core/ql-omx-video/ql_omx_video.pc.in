@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: ql_omx_video
+Description: Quectel GPS Location API
+Version: @VERSION@
+Libs: -L${libdir} -lqcamera-omx
+Cflags: -I${includedir} -I${includedir}/ql-omx-video

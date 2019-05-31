@@ -1,0 +1,22 @@
+# Copyright (c) 2017 Qualcomm Technologies, Inc.
+# All Rights Reserved.
+# Confidential and Proprietary - Qualcomm Technologies, Inc.
+#
+
+[Unit]
+Description=Snapdragon Navigator
+SourcePath=/usr/bin/snav
+After=sdsprpcd.service
+Requires=sdsprpcd.service
+
+[Service]
+User=root
+Type=simple
+Restart=always
+RemainAfterExit=no
+ExecStart=/usr/bin/snav
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
+

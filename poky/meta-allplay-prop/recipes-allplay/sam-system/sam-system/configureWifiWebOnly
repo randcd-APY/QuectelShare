@@ -1,0 +1,12 @@
+# Copyright (C) 2018 Qualcomm Technologies, Inc.
+# All rights reserved
+# Confidential and Proprietary - Qualcomm Technologies, Inc.
+
+ssid="$1"
+key="$2"
+(
+	sleep 1
+	EVENT=connect_wifi SSID="$ssid" PASSWORD="$key" /etc/statemgr
+	EVENT=event_configuration_complete /etc/statemgr
+) 1>/dev/null &
+

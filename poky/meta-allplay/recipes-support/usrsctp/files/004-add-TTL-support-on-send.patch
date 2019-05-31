@@ -1,0 +1,36 @@
+diff --git a/usrsctplib/netinet/sctp_output.c b/usrsctplib/netinet/sctp_output.c
+index 59102e7..b6857ab 100755
+--- a/usrsctplib/netinet/sctp_output.c
++++ b/usrsctplib/netinet/sctp_output.c
+@@ -7655,6 +7655,23 @@ one_more_time:
+ 		}
+ 		goto out_of;
+ 	}
++
++
++	if ((asoc->prsctp_supported) && (PR_SCTP_TTL_ENABLED(sp->sinfo_flags))) {
++		struct timeval now;
++
++		(void)SCTP_GETTIME_TIMEVAL(&now);
++
++		/* Is it expired? */
++#ifndef __FreeBSD__
++		if (timercmp(&now, &sp->ts, >)) {
++#else
++		if (timevalcmp(&now, &sp->ts, >)) {
++#endif
++			goto remove_from_queue;
++		}
++	}
++
+ 	if ((sp->msg_is_complete) && (sp->length == 0)) {
+ 		if (sp->sender_all_done) {
+ 			/* We are doing differed cleanup. Last
+@@ -7670,6 +7687,7 @@ one_more_time:
+ 				            sp->put_last_out,
+ 				            send_lock_up);
+ 			}
++remove_from_queue:
+ 			if ((TAILQ_NEXT(sp, next) == NULL) && (send_lock_up  == 0)) {
+ 				SCTP_TCB_SEND_LOCK(stcb);
+ 				send_lock_up = 1;

@@ -1,0 +1,22 @@
+/**
+@page intro_overview Overview
+
+Dedicated Short Range Communication (DSRC) is an IEEE 802.11 based platform for
+vehicle to vehicle and vehicle to roadside infrastructure communications.
+A variant of 802.11, 802.11p is defined that makes use of designated spectrum,
+with some minor adaptations to the basic 802.11 WLAN standards to handle the
+particular challenges of short range communications in the vehicular environment.
+In addition to the low level wireless communications platform defined by 802.11p,
+additional standards define higher-level protocols for short messaging and
+message content, including the IEEE 1609.x family and SAE J2735 and J2945.1.
+
+802.11p specifies an additional mode of operation called OCB (Outside Context of
+BSS) mode that allows stations to communicate in a broadcast mode without having
+an established connection to an access point (BSS) or another station (peer-to-peer).
+This mode of operation could be used on any spectrum available to 802.11 transmissions,
+although some spectrum in the 5.9 GHz range has been allocated for 802.11p use in
+DSRC communications.
+
+This document describes the messaging API additions for DSRC support in the QCACLD
+wlan software.
+*/

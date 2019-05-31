@@ -1,0 +1,213 @@
+# Copyright (c) 2018, The Linux Foundation. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
+# met:
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above
+#       copyright notice, this list of conditions and the following
+#       disclaimer in the documentation and/or other materials provided
+#       with the distribution.
+#     * Neither the name of The Linux Foundation nor the names of its
+#       contributors may be used to endorse or promote products derived
+#       from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED
+# WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+policy_module(qcmap_cm, 1.0)
+
+type qcmap_cm_t;
+type qcmap_cm_exec_t;
+type qcmap_etc_data_t;
+init_daemon_domain(qcmap_cm_t, qcmap_cm_exec_t)
+system_data_files_type(qcmap_etc_data_t);
+
+wlan_start_stop(qcmap_cm_t)
+dontaudit qcmap_cm_t domain:lnk_file read;
+dontaudit qcmap_cm_t domain:dir search_dir_perms;
+dontaudit qcmap_cm_t domain:file read_file_perms;
+dontaudit qcmap_cm_t self:capability sys_module;
+
+gen_require(`
+  type lib_t;
+  type node_t;
+  type var_t;
+  type init_var_run_t;
+  type wpa_cli_exec_t;
+  type sysfs_t;
+  type kmod_t;
+  type NetworkManager_t;
+  type ifconfig_t;
+  type dhcpc_t;
+  type initrc_exec_t;
+  type socket_device_t;
+')
+
+userdebug_or_eng(`
+  rw_diag_dev(qcmap_cm_t);
+  allow qcmap_cm_t self:capability { mknod };
+')
+
+rw_shared_memory_dev(qcmap_cm_t);
+dev_rw_sysfs(qcmap_cm_t);
+read_system_data_files(NetworkManager_t, qcmap_etc_data_t)
+ps_process_pattern(qcmap_cm_t, NetworkManager_t)
+
+corecmd_exec_shell(qcmap_cm_t)
+corecmd_exec_bin(qcmap_cm_t)
+
+allow qcmap_cm_t self:{ netlink_route_socket netlink_generic_socket netlink_socket } create_socket_perms;
+allow qcmap_cm_t lib_t:file { execute_no_trans };
+allow qcmap_cm_t self:tcp_socket { create ioctl listen accept };
+allow qcmap_cm_t self:socket { create ioctl bind read write getattr };
+allow qcmap_cm_t self:unix_dgram_socket { sendto create_socket_perms };
+allow qcmap_cm_t var_t:file { create write open read getattr unlink append };
+allow qcmap_cm_t self:udp_socket { create ioctl setopt bind write read };
+allow qcmap_cm_t self:process { setcap sigkill signal setfscreate };
+allow qcmap_cm_t wpa_cli_exec_t:file { read getattr open execute execute_no_trans };
+allow qcmap_cm_t node_t:udp_socket node_bind;
+allow qcmap_cm_t var_t:dir { add_name remove_name };
+allow qcmap_cm_t self:rawip_socket { create setopt getopt write read ioctl };
+allow qcmap_cm_t init_var_run_t:sock_file { write };
+allow qcmap_cm_t self:packet_socket { create bind setopt read write ioctl };
+allow qcmap_cm_t self:capability { setuid net_bind_service setgid kill sys_ptrace net_admin net_raw chown };
+allow qcmap_cm_t node_t:tcp_socket { node_bind listen };
+allow qcmap_cm_t self:fifo_file rw_fifo_file_perms;
+allow qcmap_cm_t initrc_exec_t:file { read execute open execute_no_trans };
+allow qcmap_cm_t NetworkManager_t:unix_dgram_socket { sendto };
+allow qcmap_cm_t self:netlink_route_socket { nlmsg_write };
+
+allow qcmap_cm_t data_t:sock_file write;
+
+init_rw_utmp(qcmap_cm_t);
+sysnet_signal_dhcpc(qcmap_cm_t);
+sysnet_delete_dhcpc_pid(qcmap_cm_t);
+
+dev_write_kmsg(qcmap_cm_t)
+files_read_generic_tmp_symlinks(qcmap_cm_t)
+files_read_etc_files(qcmap_cm_t)
+dev_read_urand(qcmap_cm_t)
+sysnet_domtrans_ifconfig(qcmap_cm_t)
+kernel_getattr_proc(qcmap_cm_t)
+iptables_domtrans(qcmap_cm_t)
+corenet_udp_bind_dhcpd_port(qcmap_cm_t)
+kernel_read_network_state(qcmap_cm_t)
+sysnet_domtrans_dhcpc(qcmap_cm_t)
+
+kernel_read_device_sysctls(qcmap_cm_t)
+kernel_read_system_state(qcmap_cm_t)
+files_write_var_dirs(qcmap_cm_t)
+kernel_rw_net_sysctls(qcmap_cm_t)
+files_rw_qcmap_etc_data_files(qcmap_cm_t)
+
+sysnet_dns_name_resolve(qcmap_cm_t)
+kernel_read_rpc_sysctls(qcmap_cm_t)
+kernel_getattr_proc(qcmap_cm_t)
+
+networkmanager_domtrans(qcmap_cm_t)
+corenet_tcp_bind_dns_port(qcmap_cm_t)
+corenet_udp_bind_dns_port(qcmap_cm_t)
+dev_read_rand(qcmap_cm_t)
+qcmap_cm_rw_sock_files(qcmap_cm_t)
+
+read_write_qcmap_cm_socket_files(kmod_t)
+read_write_qcmap_cm_socket_files(dhcpc_t)
+dev_rw_wireless(qcmap_cm_t)
+read_write_qcmap_cm_socket_files(ifconfig_t)
+networkmanager_read_pid_files(qcmap_cm_t);
+qcmap_cm_rw_sock_files(qcmap_cm_t)
+qcmap_cm_sendto_unix_dgram_socket(qcmap_cm_t)
+sysnet_read_dhcpc_pid(qcmap_cm_t)
+sysnet_kill_dhcpc(qcmap_cm_t)
+networkmanager_signal(qcmap_cm_t)
+init_search_run(qcmap_cm_t)
+qnetmgr_write_data_sock_files(qcmap_cm_t)
+qnetmgr_use_unix_stream_sockets(qcmap_cm_t)
+
+# Manage private files inside /var/run
+type qcmap_var_run_t;
+files_pid_file(qcmap_var_run_t)
+allow qcmap_cm_t qcmap_var_run_t:file manage_file_perms;
+allow qcmap_cm_t qcmap_var_run_t:sock_file manage_sock_file_perms;
+manage_dirs_pattern(qcmap_cm_t, qcmap_var_run_t, qcmap_var_run_t)
+files_pid_filetrans(qcmap_cm_t, qcmap_var_run_t, { file sock_file dir })
+
+# Manage private files inside /data
+type qcmap_data_t;
+user_data_files_type(qcmap_data_t)
+manage_user_data_files(qcmap_cm_t, qcmap_data_t)
+data_filetrans(qcmap_cm_t, qcmap_data_t, file)
+
+# Manage private files inside /tmp
+type qcmap_tmp_t;
+files_tmp_file(qcmap_tmp_t)
+allow qcmap_cm_t qcmap_tmp_t:file { manage_file_perms execute relabelfrom relabelto };
+allow qcmap_cm_t qcmap_tmp_t:sock_file manage_sock_file_perms;
+files_tmp_filetrans(qcmap_cm_t, qcmap_tmp_t, { file sock_file })
+ifdef(`init_systemd', `
+    # /tmp is not always labeled correctly on systemd (TODO)
+    files_var_filetrans(qcmap_cm_t, qcmap_tmp_t, { file sock_file })
+')
+allow NetworkManager_t qcmap_tmp_t:sock_file { write };
+
+gen_require(`
+    type httpd_t;
+')
+type httpd_data_t;
+user_data_files_type(httpd_data_t)
+qcmap_manage_httpd_data_files(httpd_t)
+
+read_write_qcmap_cm_socket_files(ifconfig_t)
+# /run/resolve.conf
+sysnet_manage_config(qcmap_cm_t)
+
+init_read_utmp(qcmap_cm_t)
+logging_send_syslog_msg(qcmap_cm_t)
+corenet_udp_bind_all_unreserved_ports(qcmap_cm_t)
+kernel_request_load_module(qcmap_cm_t)
+files_read_kernel_modules(qcmap_cm_t)
+allow qcmap_cm_t self:netlink_route_socket nlmsg_write;
+networkmanager_read_wifi_sysdata_files(qcmap_cm_t)
+
+gen_require(`
+    type wlan_service_t;
+    type kmod_exec_t;
+    type ipacm_data_t;
+')
+allow qcmap_cm_t self:capability2 block_suspend;
+allow qcmap_cm_t wlan_service_t:process sigkill;
+modutils_domtrans_insmod(qcmap_cm_t)
+
+#Manage Socket Files
+corenet_tcp_bind_all_unreserved_ports(qcmap_cm_t)
+corenet_tcp_connect_http_port(qcmap_cm_t);
+
+#Mange VLAN/MPDN use cases
+kernel_read_vm_overcommit_sysctl(qcmap_cm_t);
+
+#Miscellaneous
+allow iptables_t shared_log_device_t:chr_file { read write };
+allow iptables_t qcmap_tmp_t:file { read };
+rw_ipacm_data_config_files(qcmap_cm_t)
+shutdown_domtrans(qcmap_cm_t)
+
+#added by peeta
+allow qcmap_cm_t initrc_t:unix_stream_socket connectto;
+allow qcmap_cm_t socket_device_t:dir { write remove_name add_name };
+allow qcmap_cm_t socket_device_t:sock_file { write create unlink };
+allow qcmap_cm_t var_run_t:file { read getattr open };
+
+allow NetworkManager_t initrc_t:unix_stream_socket connectto;
+allow NetworkManager_t socket_device_t:dir { write remove_name add_name };
+allow NetworkManager_t socket_device_t:sock_file { write create unlink };

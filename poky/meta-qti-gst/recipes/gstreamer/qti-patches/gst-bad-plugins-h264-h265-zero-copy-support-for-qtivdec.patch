@@ -1,0 +1,89 @@
+From 849fd13d8754d29f7088472e52a6ebae90681660 Mon Sep 17 00:00:00 2001
+From: Bert Kong <bert_kong@codeaurora.org>
+Date: Wed, 8 Nov 2017 11:58:37 -0800
+Subject: [PATCH] zero-copy added
+
+---
+ gst/videoparsers/gsth264parse.c | 10 +++++++++-
+ gst/videoparsers/gsth265parse.c | 10 +++++++++-
+ 2 files changed, 18 insertions(+), 2 deletions(-)
+
+diff --git a/gst/videoparsers/gsth264parse.c b/gst/videoparsers/gsth264parse.c
+index 3153c2b..e3d15e7 100644
+--- a/gst/videoparsers/gsth264parse.c
++++ b/gst/videoparsers/gsth264parse.c
+@@ -115,6 +115,8 @@ static gboolean gst_h264_parse_src_event (GstBaseParse * parse,
+ static void gst_h264_parse_update_src_caps (GstH264Parse * h264parse,
+     GstCaps * caps);
+
++static GstAllocator *_allocator = NULL;
++
+ static void
+ gst_h264_parse_class_init (GstH264ParseClass * klass)
+ {
+@@ -421,7 +423,7 @@ gst_h264_parse_wrap_nal (GstH264Parse * h264parse, guint format, guint8 * data,
+
+   GST_DEBUG_OBJECT (h264parse, "nal length %d", size);
+
+-  buf = gst_buffer_new_allocate (NULL, 4 + size, NULL);
++  buf = gst_buffer_new_allocate (_allocator, 4 + size, NULL);
+   if (format == GST_H264_PARSE_FORMAT_AVC
+       || format == GST_H264_PARSE_FORMAT_AVC3) {
+     tmp = GUINT32_TO_BE (size << (32 - 8 * nl));
+@@ -2325,9 +2327,15 @@ gst_h264_parse_pre_push_frame (GstBaseParse * parse, GstBaseParseFrame * frame)
+   GstH264Parse *h264parse;
+   GstBuffer *buffer;
+   GstEvent *event;
++  static gboolean negotiated_allocation = FALSE;
+
+   h264parse = GST_H264_PARSE (parse);
+
++  if (negotiated_allocation==FALSE) {
++    gst_base_parse_negotiate_allocation(parse, &_allocator, NULL);
++    negotiated_allocation=TRUE;
++  }
++
+   if (!h264parse->sent_codec_tag) {
+     GstTagList *taglist;
+     GstCaps *caps;
+diff --git a/gst/videoparsers/gsth265parse.c b/gst/videoparsers/gsth265parse.c
+index f965a4b..c643bf7 100644
+--- a/gst/videoparsers/gsth265parse.c
++++ b/gst/videoparsers/gsth265parse.c
+@@ -93,6 +93,8 @@ static gboolean gst_h265_parse_event (GstBaseParse * parse, GstEvent * event);
+ static gboolean gst_h265_parse_src_event (GstBaseParse * parse,
+     GstEvent * event);
+
++static GstAllocator *_allocator = NULL;
++
+ static void
+ gst_h265_parse_class_init (GstH265ParseClass * klass)
+ {
+@@ -370,7 +372,7 @@ gst_h265_parse_wrap_nal (GstH265Parse * h265parse, guint format, guint8 * data,
+
+   GST_DEBUG_OBJECT (h265parse, "nal length %d", size);
+
+-  buf = gst_buffer_new_allocate (NULL, 4 + size, NULL);
++  buf = gst_buffer_new_allocate (_allocator, 4 + size, NULL);
+   if (format == GST_H265_PARSE_FORMAT_HVC1
+       || format == GST_H265_PARSE_FORMAT_HEV1) {
+     tmp = GUINT32_TO_BE (size << (32 - 8 * nl));
+@@ -1788,9 +1790,15 @@ gst_h265_parse_pre_push_frame (GstBaseParse * parse, GstBaseParseFrame * frame)
+   GstH265Parse *h265parse;
+   GstBuffer *buffer;
+   GstEvent *event;
++  static gboolean negotiated_allocation = FALSE;
+
+   h265parse = GST_H265_PARSE (parse);
+
++  if (negotiated_allocation==FALSE) {
++    gst_base_parse_negotiate_allocation(parse, &_allocator, NULL);
++    negotiated_allocation=TRUE;
++  }
++
+   if (!h265parse->sent_codec_tag) {
+     GstTagList *taglist;
+     GstCaps *caps;
+--
+1.9.1
+

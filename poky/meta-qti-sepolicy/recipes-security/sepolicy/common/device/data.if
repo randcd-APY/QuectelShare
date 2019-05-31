@@ -1,0 +1,362 @@
+# Copyright (c) 2018, The Linux Foundation. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
+# met:
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above
+#       copyright notice, this list of conditions and the following
+#       disclaimer in the documentation and/or other materials provided
+#       with the distribution.
+#     * Neither the name of The Linux Foundation nor the names of its
+#       contributors may be used to endorse or promote products derived
+#       from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED
+# WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+## <summary>data mount</summary>
+
+########################################
+## <summary>
+##       Declare type as a user data file
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`user_data_files_type',`
+    gen_require(`
+        attribute user_data;
+    ')
+
+    typeattribute $1 user_data;
+    fs_associate($1)
+')
+
+########################################
+## <summary>
+##       Search user data directory
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`search_user_data_dir',`
+    gen_require(`
+        attribute user_data;
+        attribute domain_can_read_userdata;
+    ')
+
+    typeattribute $1 domain_can_read_userdata;
+    allow $1 user_data:dir search_dir_perms;
+')
+
+########################################
+## <summary>
+##       Read user data files
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+## <param name="type">
+##      <summary>
+##      File type allowed to read
+##      </summary>
+## </param>
+#
+interface(`read_user_data_files',`
+    gen_require(`
+        attribute user_data;
+    ')
+
+    search_user_data_dir($1)
+    read_files_pattern($1, user_data, $2)
+    read_lnk_files_pattern($1, user_data, $2)
+')
+
+########################################
+## <summary>
+##      Create data files in custom context
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain creating file.
+##      </summary>
+## </param>
+## <param name="type">
+##      <summary>
+##      File type to transition to.
+##      </summary>
+## </param>
+## <param name="class">
+##      <summary>
+##      The class of file being created
+##      </summary>
+## </param>
+## <param name="type">
+##      <summary>
+##      (optional): Name of the file being created
+##      </summary>
+## </param>
+#
+interface(`data_filetrans',`
+    gen_require(`
+        type data_t;
+    ')
+    filetrans_pattern($1, data_t, $2, $3, $4)
+')
+
+########################################
+## <summary>
+##      Manage user data files
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+## <param name="type">
+##      <summary>
+##      File type allowed access.
+##      </summary>
+## </param>
+#
+interface(`manage_user_data_files',`
+    gen_require(`
+        type data_t;
+        attribute user_data;
+        attribute domain_can_write_userdata;
+    ')
+
+    read_user_data_files($1, $2)
+
+    typeattribute $1 domain_can_write_userdata;
+    allow $1 data_t:dir create;
+    manage_dirs_pattern($1, user_data, $2)
+    manage_files_pattern($1, user_data, $2)
+    manage_lnk_files_pattern($1, user_data, $2)
+    manage_sock_files_pattern($1, user_data, $2)
+')
+
+########################################
+## <summary>
+##      Manage default user data files
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`data_manage_generic_user_files',`
+    gen_require(`
+        attribute user_data;
+    ')
+
+    manage_user_data_files($1, user_data)
+')
+
+########################################
+## <summary>
+##      Create and mount /data
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`data_mount_user',`
+    gen_require(`
+        type data_t;
+    ')
+
+    manage_dirs_pattern($1, data_t, data_t)
+    allow $1 data_t:dir mounton;
+')
+
+########################################
+## <summary>
+##       Declare type as a system data file
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`system_data_files_type',`
+    gen_require(`
+        attribute system_data;
+    ')
+
+    typeattribute $1 system_data;
+    fs_associate($1)
+')
+
+########################################
+## <summary>
+##       Search system data directory
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`search_system_data_dir',`
+    gen_require(`
+        attribute system_data;
+        attribute domain_can_read_systemdata;
+    ')
+
+    typeattribute $1 domain_can_read_systemdata;
+    allow $1 system_data:dir search_dir_perms;
+')
+
+########################################
+## <summary>
+##      Read system data files
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+## <param name="type">
+##      <summary>
+##      File type allowed access.
+##      </summary>
+## </param>
+#
+interface(`read_system_data_files',`
+    gen_require(`
+        attribute system_data;
+    ')
+
+    search_system_data_dir($1)
+    read_files_pattern($1, system_data, $2)
+    read_lnk_files_pattern($1, system_data, $2)
+')
+
+########################################
+## <summary>
+##      Manage system data files
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+## <param name="type">
+##      <summary>
+##      File type allowed access.
+##      </summary>
+## </param>
+#
+interface(`manage_system_data_files',`
+    gen_require(`
+        type system_data_t;
+        attribute system_data;
+        attribute domain_can_write_systemdata;
+    ')
+
+    read_system_data_files($1, $2)
+
+    typeattribute $1 domain_can_write_systemdata;
+    allow $1 system_data_t:dir create;
+    manage_dirs_pattern($1, system_data, $2)
+    manage_files_pattern($1, system_data, $2)
+    manage_sock_files_pattern($1, system_data, $2)
+    manage_lnk_files_pattern($1, system_data, $2)
+')
+
+########################################
+## <summary>
+##      Manage generic system data files. Intended for usage
+##      by mount-copybind before the proper label is assigned.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`data_manage_generic_system_files',`
+    gen_require(`
+        attribute system_data;
+    ')
+
+    manage_system_data_files($1, system_data)
+')
+
+########################################
+## <summary>
+##      Perform bind mounts on files within /systemrw
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`data_mount_volatile_bind',`
+    gen_require(`
+        attribute system_data;
+    ')
+
+    manage_dirs_pattern($1, system_data, system_data)
+    allow $1 system_data:{ dir file } mounton;
+    allow $1 system_data:file getattr;
+')
+
+########################################
+## <summary>
+##      Relabel all data files
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`relabel_all_data_files',`
+    gen_require(`
+        attribute user_data;
+        attribute system_data;
+    ')
+
+    search_user_data_dir($1)
+    allow $1 user_data:dir { read setattr };
+    relabel_dirs_pattern($1, user_data, user_data)
+    relabel_files_pattern($1, user_data, user_data)
+    relabel_lnk_files_pattern($1, user_data, user_data)
+    relabel_fifo_files_pattern($1, user_data, user_data)
+    relabel_sock_files_pattern($1, user_data, user_data)
+
+    search_system_data_dir($1)
+    allow $1 system_data:dir { read setattr };
+    relabel_dirs_pattern($1, system_data, system_data)
+    relabel_files_pattern($1, system_data, system_data)
+    relabel_lnk_files_pattern($1, system_data, system_data)
+    relabel_fifo_files_pattern($1, system_data, system_data)
+    relabel_sock_files_pattern($1, system_data, system_data)
+')
+

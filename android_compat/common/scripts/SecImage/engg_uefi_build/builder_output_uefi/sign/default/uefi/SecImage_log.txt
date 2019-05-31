@@ -1,0 +1,42 @@
+l1_file_name = /local/mnt/workspace/jshriram/SDX24_Sign/Temp_SecTools_v5.0/resources/data_prov_assets/Encryption/Unified/default/l1_key.bin
+l2_file_name = /local/mnt/workspace/jshriram/SDX24_Sign/Temp_SecTools_v5.0/resources/data_prov_assets/Encryption/Unified/default/l2_key.bin
+l3_file_name = /local/mnt/workspace/jshriram/SDX24_Sign/Temp_SecTools_v5.0/resources/data_prov_assets/Encryption/Unified/default/l3_key.bin
+Clear L1 key, clear L2 key, and clear L3 keys were provided locally.
+Clear L1 key, clear L2 key, and clear L3 keys were provided locally.
+Performing OEM sign on image: /local/mnt/workspace/jshriram/SDX24_Sign/Temp_SecTools_v5.0/engg_uefi_build/unsigned_input/uefi.elf
+attestation_certificate_extensions = /local/mnt/workspace/jshriram/SDX24_Sign/Temp_SecTools_v5.0/resources/data_prov_assets/General_Assets/Signing/openssl/v3_attest.ext
+ca_certificate_extensions = /local/mnt/workspace/jshriram/SDX24_Sign/Temp_SecTools_v5.0/resources/data_prov_assets/General_Assets/Signing/openssl/v3.ext
+openssl_configfile = /local/mnt/workspace/jshriram/SDX24_Sign/Temp_SecTools_v5.0/resources/data_prov_assets/General_Assets/Signing/openssl/opensslroot.cfg
+Using SHA (sha384)
+Using ECDSA with secp384r1 curve
+Initialization with dataprov. These fields might not be used in final output if overridden
+Using a predefined Root private key from: /local/mnt/workspace/jshriram/SDX24_Sign/Temp_SecTools_v5.0/resources/data_prov_assets/Signing/Local/qti_presigned_certs-secp384r1/qpsa_rootca.key
+Using a predefined Root certificate from: /local/mnt/workspace/jshriram/SDX24_Sign/Temp_SecTools_v5.0/resources/data_prov_assets/Signing/Local/qti_presigned_certs-secp384r1/qpsa_rootca.cer
+Initialization with dataprov. These fields might not be used in final output if overridden
+Using a predefined CA private key from: /local/mnt/workspace/jshriram/SDX24_Sign/Temp_SecTools_v5.0/resources/data_prov_assets/Signing/Local/qti_presigned_certs-secp384r1/qpsa_attestca.key
+Using a predefined CA certificate from: /local/mnt/workspace/jshriram/SDX24_Sign/Temp_SecTools_v5.0/resources/data_prov_assets/Signing/Local/qti_presigned_certs-secp384r1/qpsa_attestca.cer
+Initialization with dataprov. These fields might not be used in final output if overridden
+Generating new certificate Attest
+Skipping adding OU fields to attest certificate.
+Generating new private/public key pair for Attest
+Creating certificate request for Attest
+Signing certificate request for Attest
+Creating signature
+image is stored at /local/mnt/workspace/jshriram/SDX24_Sign/Temp_SecTools_v5.0/engg_uefi_build/builder_output_uefi/sign/default/uefi/uefi.elf
+Clear L1 key, clear L2 key, and clear L3 keys were provided locally.
+Image /local/mnt/workspace/jshriram/SDX24_Sign/Temp_SecTools_v5.0/engg_uefi_build/builder_output_uefi/sign/default/uefi/uefi.elf is not encrypted
+Clear L1 key, clear L2 key, and clear L3 keys were provided locally.
+OEM signed image with ECDSA
+Image /tmp/elfamhfvf signature is valid
+
+| Integrity Check                 | False  |
+| Signed                          | False  |
+| Encrypted                       | False  |
+| Size of signature               | 104    |
+| Size of one cert                | 2048   |
+| Num of certs in cert chain      | 3      |
+| Number of root certs            | 1      |
+| Maximum number of root certs    | 1      |
+| Hash Page Segments as segments  | False  |
+| Cert chain size                 | 6144   |
+

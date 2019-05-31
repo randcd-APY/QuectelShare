@@ -1,0 +1,74 @@
+#!/bin/sh
+
+
+found=0
+wps_iface="wpslan"
+check=0
+
+EXIT_SUCCESS=0
+EXIT_NIP=1
+EXIT_ERROR=2
+EXIT_PENDING=3
+
+usage() {
+	cat << EOF
+$0: Cancel wps authetication that is in progress
+
+Syntax: wps_cancel [-r][-?|-h|--help]
+	-r:
+		Readiness check only. Do not actually cancel
+
+	-?, -h, --help:
+		Display this usage menu
+
+	Return values:
+	0: success (WPS was successfully cancelled or would be canceled if -r used)
+	1: WPS was not in progress
+	2: General error (includes usage)
+	3: WPS Cancellation is already pending
+EOF
+}
+
+while [ "$#" -gt 0 ];do
+	case "$1" in
+	-r) check=1;
+		;;
+	-?|-h|--help) usage; exit $EXIT_ERROR
+		;;
+	*) echo "Invalid option specified"
+		usage
+		exit $EXIT_ERROR
+		;;
+	esac
+	shift
+done
+
+# Check for wlan iface name is there
+if [ -z "${wps_iface}" ]; then
+	echo "Interface not specified!"
+	exit $EXIT_ERROR
+fi
+
+# If just checking readiness, return status
+if [ ${check} -eq 1 ]; then
+	echo "Ready to cancel"
+	exit $EXIT_SUCCESS
+fi
+
+# Determine if WPS is in progress
+pid_file="/var/run/wps-action-${wps_iface}.pid"
+[ -f "$pid_file" ] || {
+	# WPS not in progress, error out
+	echo 'WPS not in progress'
+	exit $EXIT_NIP
+}
+
+dir="/var/run/wpa_supplicant-${wps_iface}"
+wpa_cli -p "${dir}" -i ${wps_iface} wps_cancel > /dev/null
+wpa_cli -p "${dir}" -i ${wps_iface} terminate > /dev/null
+iw dev $wps_iface del
+
+rm -f "$pid_file" "/var/run/wpa_supplicant-${wps_iface}.conf"
+
+echo 'WPS was cancelled!'
+exit $EXIT_SUCCESS

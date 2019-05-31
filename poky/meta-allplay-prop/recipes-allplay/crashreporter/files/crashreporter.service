@@ -1,0 +1,10 @@
+[Unit]
+Description=Allplay crash reporter
+WantedBy=basic.target
+Before=basic.target
+DefaultDependencies=no
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/sh -c 'echo "|/sbin/submitCore.sh %%p %%e" > /proc/sys/kernel/core_pattern'

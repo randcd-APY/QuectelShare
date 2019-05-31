@@ -1,0 +1,27 @@
+From 541f92a75956007a821160adfd250747ef944db7 Mon Sep 17 00:00:00 2001
+From: Dennis Cagle <d-cagle@codeaurora.org>
+Date: Wed, 30 Nov 2016 15:55:19 -0800
+Subject: [PATCH] Assign proc_t to proc dir
+
+---
+ policy/modules/kernel/files.fc | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/policy/modules/kernel/files.fc b/policy/modules/kernel/files.fc
+index 3148da2..ff33faf 100644
+--- a/policy/modules/kernel/files.fc
++++ b/policy/modules/kernel/files.fc
+@@ -158,8 +158,8 @@ ifdef(`distro_debian',`
+ #
+ # /proc
+ #
+-/proc			-d	<<none>>
+-/proc/.*			<<none>>
++/proc			-d	gen_context(system_u:object_r:proc_t,s0)
++/proc/.*			gen_context(system_u:object_r:proc_t,s0)
+ 
+ #
+ # /run
+-- 
+1.9.1
+

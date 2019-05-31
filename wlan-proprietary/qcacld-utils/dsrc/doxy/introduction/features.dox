@@ -1,0 +1,34 @@
+/**
+@page intro_features Features
+
+- Outside of Context of BSS (OCB) Mode. This allows 802.11 devices to communicate
+without associating to a BSS.
+- 5.9 GHz band in addition to the 2.4 GHz band and 5 GHz band. The channels and bandwidths
+allowed by the regulatory domain are supported and enforced. In the 5.9 GHz band
+and in the US regulatory domain, the following channels in the 5.9 GHz band are allowed:
+
+| Channel number | Center frequency (MHz) | Maximum bandwidth (MHz) |
+| -------------- | ---------------------- | ----------------------- |
+| 170            | 5852.5                 | 5                       |
+| 172            | 5860                   | 10                      |
+| 174            | 5870                   | 10                      |
+| 175            | 5875                   | 20                      |
+| 176            | 5880                   | 10                      |
+| 178            | 5890                   | 10                      |
+| 180            | 5900                   | 10                      |
+| 181            | 5905                   | 20                      |
+| 182            | 5910                   | 10                      |
+| 184            | 5920                   | 10                      |
+
+- Two channel operation. Two channels (a control channel and a service channel)
+can be configured to alternate according to a schedule.
+- Timing advertisement frames. The device can transmit timing advertisement frames
+periodically.
+- Transmit packet control information. The user application can specify TX control information
+(channel, TX power, MCS, expiry time, etc.) for every packet that is transmitted.
+- Receive packet stats information. The user application can receive RX stats information
+(channel, RSSI, MCS, etc.) for every packet that is received.
+- Decentralized Congestion Control (DCC). If the channel becomes congested, the
+device can back off transmit parameters (transmit rate, power, etc.) to help reduce
+congestion.
+*/

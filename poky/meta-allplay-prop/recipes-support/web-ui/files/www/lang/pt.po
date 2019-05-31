@@ -1,0 +1,413 @@
+msid "lang"
+msgstr "pt"
+
+msgid "Content-Type: text/plain; charset=UTF-8"
+msgstr "Content-Type: text/plain; charset=UTF-8"
+
+msgid "(%s available)"
+msgstr "(%s disponível)"
+
+msgid "AllPlay Audio Module"
+msgstr "Módulo de áudio AllPlay"
+
+msgid "AllPlay Audio Module Configurator"
+msgstr "Configurador do módulo de áudio AllPlay"
+
+msgid "AllPlay Audio Module Firmware Upgrade"
+msgstr "Actualização do firmware do módulo de áudio AllPlay"
+
+msgid "Apply"
+msgstr "Aplicar"
+
+msgid "Automatic (DHCP)"
+msgstr "Automático (DHCP)"
+
+msgid "BSSID"
+msgstr "BSSID"
+
+msgid "Backup / Flash Firmware"
+msgstr "Cópia de segurança/actualizar firmware"
+
+msgid "Bit Rate"
+msgstr "Velocidade de bits"
+
+msgid "Bitrate"
+msgstr "Velocidade de bits"
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "Change"
+msgstr "Alterar"
+
+msgid "Changes applied."
+msgstr "Alterações aplicadas."
+
+msgid "Channel"
+msgstr "Canal"
+
+msgid "Checksum"
+msgstr "Soma de verificação"
+
+msgid "Choose file"
+msgstr "Choose file"
+
+msgid "Wireless Network Settings"
+msgstr "Configurações de rede sem fio"
+
+msgid "Wired Network Settings"
+msgstr "Configurações de rede com fio"
+
+msgid "Choose the wireless network you would like to use, and enter a password if one is required."
+msgstr "Escolha a rede sem fios que deseja utilizar e, caso seja necessária, introduza uma palavra-passe."
+
+msgid "Collecting data"
+msgstr "A recolher dados"
+
+msgid "Collecting data..."
+msgstr "A recolher dados..."
+
+msgid "Configuration files will be kept."
+msgstr "Os ficheiros de configuração serão mantidos."
+
+msgid "Connect"
+msgstr "Ligar"
+
+msgid "Connected"
+msgstr "Ligado"
+
+msgid "Connecting"
+msgstr "A ligar"
+
+msgid "Connecting, please wait..."
+msgstr "A ligar... Aguarde."
+
+msgid "Connection failure, unable to connect to network."
+msgstr "Falha na ligação. Não foi possível ligar à rede."
+
+msgid "Country"
+msgstr "País"
+
+msgid "DHCP"
+msgstr "DHCP"
+
+msgid "Default gateway"
+msgstr "Gateway predefinida"
+
+msgid "Device Name"
+msgstr "Nome do dispositivo"
+
+msgid "Device name update failed."
+msgstr "Falha na actualização do nome do dispositivo."
+
+msgid "Device name updated."
+msgstr "Nome do dispositivo actualizado."
+
+msgid "Disabled [Ethernet is connected]"
+msgstr "Desactivado [A Ethernet está ligada]"
+
+msgid "Encryption"
+msgstr "Encriptação"
+
+msgid "Erasing..."
+msgstr "A apagar..."
+
+msgid "Ethernet"
+msgstr "Ethernet"
+
+msgid "Firmware Version"
+msgstr "Versão do firmware"
+
+msgid "Flash Image..."
+msgstr "A actualizar imagem..."
+
+msgid "Flash a new firmware image"
+msgstr "Actualizar uma nova imagem de firmware"
+
+msgid "Flashing..."
+msgstr "A actualizar..."
+
+msgid "Gateway"
+msgstr "Gateway"
+
+msgid "General Information"
+msgstr "Informação geral"
+
+msgid "IP Address"
+msgstr "Endereço IP"
+
+msgid "It appears you are trying to flash an image that does not fit into memory. Please verify the image file."
+msgstr "Parece que está a tentar actualizar uma imagem que não cabe na memória. Verifique o ficheiro de imagem."
+
+msgid "JavaScript Disabled"
+msgstr "JavaScript desactivado"
+
+msgid "Join Network"
+msgstr "Entrar na rede"
+
+msgid "Loading"
+msgstr "A carregar..."
+
+msgid "MAC Address"
+msgstr "Endereço MAC"
+
+msgid "Manufacturer"
+msgstr "Fabricante"
+
+msgid "Mode"
+msgstr "Modo"
+
+msgid "Model"
+msgstr "Modelo"
+
+msgid "Network Name"
+msgstr "Nome da rede"
+
+msgid "Network Overview"
+msgstr "Perspectiva geral da rede"
+
+msgid "Next"
+msgstr "Seguinte"
+
+msgid "No file selected."
+msgstr "No file selected."
+
+msgid "No information available"
+msgstr "Sem informação disponível"
+
+msgid "Noise"
+msgstr "Ruído"
+
+msgid "None"
+msgstr "Nenhum"
+
+msgid "Not associated"
+msgstr "Não associado"
+
+msgid "Not connected"
+msgstr "Não ligado"
+
+msgid "OPEN"
+msgstr "ABRIR"
+
+msgid "Other Network..."
+msgstr "Outra rede..."
+
+msgid "Overview"
+msgstr "Perspectiva geral"
+
+msgid "Package libiwinfo required!"
+msgstr "É necessário o pacote libiwinfo!"
+
+msgid "Password"
+msgstr "Palavra-passe"
+
+msgid "Please choose settings for your Wired network."
+msgstr "Escolha as definições para a sua rede com fios."
+
+msgid "Please correct the following items:"
+msgstr "Por favor, corrija os seguintes itens:"
+
+msgid "Please enter a name for your device."
+msgstr "Introduza um nome para o seu dispositivo."
+
+msgid "Please enter a network name."
+msgstr "Introduza um nome da rede."
+
+msgid "Please enter the correct network password for $ssid."
+msgstr "Introduza a palavra de rede correcta para $ssid."
+
+msgid "Please enter the correct password for $ssid."
+msgstr "Introduza a palavra correcta para $ssid."
+
+msgid "Please enter the password for $ssid."
+msgstr "Por favor, digite a senha para $ssid."
+
+msgid "Note: AllPlay devices are not compatible with $netType security mode. $netType is an outdated mode which is known to be vulnerable to attack.<br/><br/>In order to use an AllPlay device you will need to reconfigure your router to use WPA2-PSK security. Please refer to your router's user manual for more information."
+msgstr "Nota: Os dispositivos AllPlay não são compatíveis com o modo de segurança $netType. $netType é um modo ultrapassado que é conhecido por ser vulnerável a ataques. <br/><br/> Para utilizar um dispositivo AllPlay você precisará reconfigurar o roteador para usar a segurança WPA2-PSK. Por favor, consulte o manual do usuário do seu roteador para obter mais informações."
+
+msgid "The wireless network '$ssid' is not compatible with AllPlay devices because '$ssid' uses $netType security mode.<br/><br/>In order to use an AllPlay device with '$ssid' you will need to reconfigure your router to use WPA2-PSK security mode. Please refer to your router's user manual for more information."
+msgstr "A rede '$ssid' wireless não é compatível com dispositivos AllPlay porque '$ssid' usa o modo de segurança $ netType. <br/><br/> Para utilizar um dispositivo AllPlay com '$ssid' você precisará reconfigurar o roteador para usar o modo de segurança WPA2-PSK. Por favor, consulte o manual do usuário do seu roteador para obter mais informações."
+
+msgid "Please give your device a name to identify it on the network. Examples: Kitchen, Bedroom."
+msgstr "Atribua um nome ao seu dispositivo para identificá-lo na rede. Exemplos: cozinha, quarto."
+
+msgid "Please make sure that you have the Qualcomm<sup>&#174;</sup> AllPlay<sup>&#8482;</sup> Jukebox app installed on your mobile device to begin streaming music."
+msgstr "Certifique-se de que tem a aplicação Qualcomm<sup>&#174;</sup> AllPlay<sup>&#8482;</sup> Jukebox instalada no seu dispositivo para iniciar a transmissão de música."
+
+msgid "Please select a compatible firmware image."
+msgstr "Seleccione uma imagem de firmware compatível."
+
+msgid "Please use a JavaScript-enabled browser to configure this product."
+msgstr "Utilize um browser compatível com JavaScript para configurar este produto."
+
+msgid "Please wait..."
+msgstr "Aguarde..."
+
+msgid "Primary DNS"
+msgstr "DNS principal"
+
+msgid "Proceed"
+msgstr "Continuar"
+
+msgid "Reboot"
+msgstr "Reiniciar"
+
+msgid "Rebooting..."
+msgstr "A reiniciar..."
+
+msgid "Reconnecting interface"
+msgstr "A ligar interface novamente"
+
+msgid "Refresh list"
+msgstr "Atualizar lista"
+
+msgid "SSID"
+msgstr "SSID"
+
+msgid "Secondary DNS"
+msgstr "DNS secundário"
+
+msgid "Security Mode"
+msgstr "Modo de segurança"
+
+msgid "Select '.sam', '.samu' or '.same' firmware images only."
+msgstr "Seleccione apenas imagens de firmware '.sam', '.samu' ou '.same'."
+
+msgid "Show Password"
+msgstr "Mostrar a palavra-passe"
+
+msgid "Signal"
+msgstr "Sinal"
+
+msgid "Size"
+msgstr "Tamanho"
+
+msgid "Static"
+msgstr "Estático"
+
+msgid "Subnet"
+msgstr "Sub-rede"
+
+msgid "Subnet mask"
+msgstr "Máscara de sub-rede"
+
+msgid "System"
+msgstr "Sistema"
+
+msgid "The <em>libiwinfo-lua</em> package is not installed.<br/>You must install this component for your wireless configuration to work."
+msgstr "O pacote <em>libiwinfo-lua</em> não está instalado.<br/>Tem de instalar este componente para que a sua configuração sem fios funcione."
+
+msgid "The device requires a manual restart."
+msgstr "O dispositivo requer um reinício manual."
+
+msgid "The firmware is flashing now.<br /> DO NOT POWER OFF THE DEVICE!<br /> Wait a few minutes before you try to reconnect. It might be necessary to renew the address of your computer to connect to the device again, depending on your settings."
+msgstr "O firmware está a ser actualizado agora.<br /> NÃO DESLIGUE O DISPOSITIVO!<br /> Aguarde alguns minutos até voltar a tentar ligar novamente. Poderá ser necessário renovar o endereço do seu computador para se ligar novamente ao dispositivo, dependendo das suas definições."
+
+msgid "The flash image was uploaded. The checksum and file size are listed below. Compare them with the original file to ensure data integrity.<br /> Click \"Proceed\" below to start the flash procedure."
+msgstr "A imagem de actualização foi carregada. A soma de verificação e o tamanho do ficheiro estão indicados em baixo. Compare-os com o ficheiro original para garantir a integridade dos dados. <br />Clique em \"Continuar\" em baixo para iniciar a actualização."
+
+msgid "The network is slow and it is taking a long time to upload the new firmware file. Please try again, or connect to a faster network to perform the update."
+msgstr "The network is slow and it is taking a long time to upload the new firmware file. Please try again, or connect to a faster network to perform the update."
+
+msgid "The system is erasing the configuration partition now and will reboot itself when finished."
+msgstr "O sistema está agora a eliminar a partição de configuração e irá reiniciar quando tiver concluído."
+
+msgid "Tx-Power"
+msgstr "Potência-Tx"
+
+msgid "Type"
+msgstr "Tipo"
+
+msgid "Upgrade Firmware"
+msgstr "Actualizar firmware"
+
+msgid "Upload a compatible image here to replace the running firmware."
+msgstr "Carregue aqui uma imagem compatível para substituir o firmware em execução."
+
+msgid "WEP"
+msgstr "WEP"
+
+msgid "WPA-PSK"
+msgstr "WPA-PSK"
+
+msgid "WPA2-PSK"
+msgstr "WPA2-PSK"
+
+msgid "Waiting for changes to be applied..."
+msgstr "A aguardar que as alterações sejam aplicadas..."
+
+msgid "Wi-Fi"
+msgstr "Wi-Fi"
+
+msgid "Wireless is disabled or not associated"
+msgstr "Sem fios desactivado ou não associado"
+
+msgid "Wireless is restarting..."
+msgstr "Sem fios a reiniciar..."
+
+msgid "You're connected!"
+msgstr "Está ligado!"
+
+msgid "Your network connection may be lost shortly."
+msgstr "A ligação à rede poderá ser perdida dentro de momentos."
+
+msgid "must be completed"
+msgstr "tem de ser concluído"
+
+msgid "AirPlay Password"
+msgstr "Palavra-passe do AirPlay"
+
+msgid "AirPlay password"
+msgstr "Palavra-passe do AirPlay"
+
+msgid "AirPlay password?"
+msgstr "Palavra-passe do AirPlay?"
+
+msgid "AirPlay password updated."
+msgstr "Palavra-passe do AirPlay atualizada."
+
+msgid "Choose your security options for the device."
+msgstr "Escolha as suas opções de segurança para o dispositivo."
+
+msgid "Confirm password"
+msgstr "Palavra-passe de confirmação"
+
+msgid "Failed to update the AirPlay password."
+msgstr "Falha ao atualizar a palavra-passe do AirPlay."
+
+msgid "Incorrect AirPlay password. Please try again."
+msgstr "Palavra-passe do AirPlay incorreta. Tente novamente."
+
+msgid "New password"
+msgstr "Nova palavra-passe"
+
+msgid "Old AirPlay password"
+msgstr "Palavra-passe antiga do AirPlay"
+
+msgid "Old password"
+msgstr "Palavra-passe antiga"
+
+msgid "Please enter a new password."
+msgstr "Introduza uma nova palavra-passe."
+
+msgid "Require password"
+msgstr "Palavra-passe necessária"
+
+msgid "Security"
+msgstr "Segurança"
+
+msgid "The AirPlay password does not match the confirm password."
+msgstr "A palavra-passe do AirPlay não corresponde à palavra-passe de confirmação."
+
+msgid "The new AirPlay password does not match the confirm password."
+msgstr "A nova palavra-passe do AirPlay não corresponde à palavra-passe de confirmação."
+
+msgid "Yes"
+msgstr "Sim"
+
+msgid "No"
+msgstr "Não"
+
+msgid "&#169; Qualcomm Connected Experiences | All rights reserved."
+msgstr "&#169; Qualcomm Connected Experiences | All rights reserved."

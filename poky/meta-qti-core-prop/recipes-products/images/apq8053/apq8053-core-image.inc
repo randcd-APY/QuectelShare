@@ -1,0 +1,5 @@
+# Core proprietary Packages
+IMAGE_INSTALL += "thermal-engine"
+IMAGE_INSTALL += "diag"
+IMAGE_INSTALL += "rmtstorage"
+IMAGE_INSTALL += "energy-awareness"

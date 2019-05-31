@@ -1,0 +1,13 @@
+#!/bin/sh
+
+
+# update firmware
+#
+# $1 is firmware file name
+# $2 is server IP address
+#
+
+
+tftp -g -l "$1" "$2"
+/sbin/update update -b "$1"
+

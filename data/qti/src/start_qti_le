@@ -1,0 +1,45 @@
+#! /bin/sh
+#
+#Copyright (c) 2012-2014 Qualcomm Technologies, Inc.  All Rights Reserved.
+#Qualcomm Technologies Proprietary and Confidential.
+
+# qti   init.d script to start the Data Software's qti daemon
+
+set -e
+
+case "$1" in
+  start)
+        echo -n  "Starting qti: " > /dev/kmsg
+        echo "QTI:start" > /dev/kmsg
+        TARGET_DIR=/target # default directory
+        if [ ! -f $TARGET_DIR ]; then
+            TARGET_DIR=/sys/devices/soc0/soc_id
+        fi
+        case `cat ${TARGET_DIR}` in
+            #DS_TARGET_SOC_ID_MSM8996_SGAU
+            315 )
+                #QTI is starting in embedded mode for LV PL's
+                start-stop-daemon -S -b --exec /usr/bin/qti em
+                ;;
+            * )
+                start-stop-daemon -S -b --exec /usr/bin/qti
+                ;;
+        esac
+        echo "done" > /dev/kmsg
+        ;;
+  stop)
+        echo -n "Stopping qti: " > /dev/kmsg
+        start-stop-daemon -K -n qti
+        echo "done" > /dev/kmsg
+        ;;
+  restart)
+        $0 stop
+        $0 start
+        ;;
+  *)
+        echo "Usage qti { start | stop | restart}" >&2
+        exit 1
+        ;;
+esac
+
+exit 0

@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: mcm-core
+Description: mcm-core packages
+Version: @VERSION@
+Libs: -L${libdir} -lmcm -lmcmipc
+Cflags: -I${includedir}/mcm-core

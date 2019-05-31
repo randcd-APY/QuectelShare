@@ -1,0 +1,70 @@
+diff --git a/Android.mk b/Android.mk
+index 2e7f2c4..457e487 100644
+--- a/Android.mk
++++ b/Android.mk
+@@ -3,7 +3,6 @@ QCOM_MEDIA_ROOT := $(call my-dir)
+ #Compile these for all targets under QCOM_BOARD_PLATFORMS list.
+ ifeq ($(call is-board-platform-in-list, $(QCOM_BOARD_PLATFORMS)),true)
+ include $(QCOM_MEDIA_ROOT)/mm-core/Android.mk
+-include $(QCOM_MEDIA_ROOT)/libstagefrighthw/Android.mk
+ endif
+ 
+ ifeq ($(call is-board-platform-in-list, $(MSM_VIDC_TARGET_LIST)),true)
+diff --git a/mm-video-v4l2/vidc/venc/src/omx_video_encoder.cpp b/mm-video-v4l2/vidc/venc/src/omx_video_encoder.cpp
+index f5f1f7c..7a7a674 100644
+--- a/mm-video-v4l2/vidc/venc/src/omx_video_encoder.cpp
++++ b/mm-video-v4l2/vidc/venc/src/omx_video_encoder.cpp
+@@ -93,6 +93,10 @@ void omx_venc::perf_control::send_hint_to_mpctl(bool state)
+ 
+ bool omx_venc::perf_control::load_lib()
+ {
++#ifdef VENC_PERF_NO_SUPPORT
++    m_perf_lib = NULL;
++    return true;
++#else
+     char perf_lib_path[PROPERTY_VALUE_MAX] = {0};
+     if (m_perf_lib)
+         return true;
+@@ -123,6 +127,7 @@ handle_err:
+         dlclose(m_perf_lib);
+     }
+     return false;
++#endif
+ }
+ 
+ //constructor
+@@ -155,13 +160,17 @@ omx_venc::omx_venc()
+     property_get("vidc.debug.lowlatency", property_value, "0");
+     lowlatency = atoi(property_value);
+     property_value[0] = '\0';
++#ifndef VENC_PERF_NO_SUPPORT
+     m_perf_control.send_hint_to_mpctl(true);
++#endif
+ }
+ 
+ omx_venc::~omx_venc()
+ {
+     get_syntaxhdr_enable = false;
++#ifndef VENC_PERF_NO_SUPPORT
+     m_perf_control.send_hint_to_mpctl(false);
++#endif
+     //nothing to do
+ }
+ 
+diff --git a/mm-video-v4l2/vidc/venc/src/video_encoder_device_v4l2.cpp b/mm-video-v4l2/vidc/venc/src/video_encoder_device_v4l2.cpp
+index d19afac..bd98dff 100644
+--- a/mm-video-v4l2/vidc/venc/src/video_encoder_device_v4l2.cpp
++++ b/mm-video-v4l2/vidc/venc/src/video_encoder_device_v4l2.cpp
+@@ -55,8 +55,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ #define ALIGN(x, to_align) ((((unsigned long) x) + (to_align - 1)) & ~(to_align - 1))
+ #define EXTRADATA_IDX(__num_planes) ((__num_planes) ? (__num_planes) - 1 : 0)
+ #define MAXDPB 16
++#ifndef MIN
+ #define MIN(x,y) (((x) < (y)) ? (x) : (y))
++#endif
++#ifndef MAX
+ #define MAX(x,y) (((x) > (y)) ? (x) : (y))
++#endif
+ #define ROUND(__sz, __align) (((__sz) + ((__align>>1))) & (~(__align-1)))
+ #define MAX_PROFILE_PARAMS 6
+ #define MPEG4_SP_START 0

@@ -1,0 +1,3 @@
+EXTRA_CFLAGS =
+AM_CFLAGS=
+SUBDIRS =  clf44 clf46

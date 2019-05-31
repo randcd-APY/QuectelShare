@@ -1,0 +1,48 @@
+Index: b/alljoyn_core/router/AllJoynObj.cc
+===================================================================
+--- a/alljoyn_core/router/AllJoynObj.cc	2016-05-26 15:46:52.359674847 -0700
++++ b/alljoyn_core/router/AllJoynObj.cc	2016-05-26 15:51:46.899674812 -0700
+@@ -1667,6 +1667,8 @@
+ 
+     QCC_DbgPrintf(("AllJoynObj::GetHostInfo(%u)", id));
+ 
++    String peer = "";
++
+     String remoteIpAddrStr = "";
+     String localIpAddrStr = "";
+     /* Find the session with that id */
+@@ -1674,15 +1676,18 @@
+     SessionMapEntry* smEntry = SessionMapFind(msg->GetSender(), id);
+     if (!smEntry || (id == 0)) {
+         replyCode = ALLJOYN_GETHOSTINFO_REPLY_NO_SESSION;
+-        ReleaseLocks();
+-    } else if (smEntry->sessionHost == msg->GetSender()) {
+-        replyCode = ALLJOYN_GETHOSTINFO_REPLY_IS_BINDER;
+-        ReleaseLocks();
++    } else if (smEntry->sessionHost != msg->GetSender()) {
++        peer = smEntry->sessionHost; // if not host, use it as the remote peer
++    } else if (smEntry->memberNames.size() == 1) {
++        peer = *smEntry->memberNames.begin(); // if host, use the joiner if there is only one
+     } else {
++        replyCode = ALLJOYN_GETHOSTINFO_REPLY_FAILED;
++    }
++    if (!peer.empty()) {
+         /* get the vep to the sessionhost.
+          */
+         VirtualEndpoint vep;
+-        FindEndpoint(smEntry->sessionHost, vep);
++        FindEndpoint(peer, vep);
+         if (vep->IsValid()) {
+             RemoteEndpoint rep = vep->GetBusToBusEndpoint(id);
+             QStatus status = rep->GetRemoteIp(remoteIpAddrStr);
+@@ -1696,9 +1701,8 @@
+         } else {
+             replyCode = ALLJOYN_GETHOSTINFO_REPLY_FAILED;
+         }
+-
+-        ReleaseLocks();
+     }
++    ReleaseLocks();
+ 
+     const char* remoteIpAddr = remoteIpAddrStr.c_str();
+     const char* localIpAddr = localIpAddrStr.c_str();

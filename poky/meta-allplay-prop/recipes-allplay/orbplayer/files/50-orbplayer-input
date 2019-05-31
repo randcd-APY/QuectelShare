@@ -1,0 +1,15 @@
+#!/bin/sh
+local pid=$(cat /var/run/orbPlayer.pid)
+
+case "$ACTION" in
+	add)
+		# Send USR1 signal to orbPlayer process on detecting input device
+		if [ "$DEVNAME" != "" ];then
+			kill -s USR1 $pid
+		fi
+	;;
+	remove)
+		#
+	;;
+esac
+

@@ -1,0 +1,43 @@
+#! /bin/sh
+#
+#Copyright (c) 2011-2013 Qualcomm Technologies, Inc.  All Rights Reserved.
+#Qualcomm Technologies Proprietary and Confidential.
+
+# QCMAP_ConnectionManager   init.d script to start the Data Software's QCMAP_ConnectionManager daemon
+# Sleep value for restart needs to be changed as per use case
+
+set -e
+
+case "$1" in
+  start)
+        echo -n  "Starting QCMAP_ConnectionManager: " > /dev/kmsg
+        echo "QCMAP:start" > /dev/kmsg
+        start-stop-daemon -S -b -a QCMAP_ConnectionManager /etc/data/mobileap_cfg.xml d
+        TARGET_DIR=/target # default directory
+        if [ ! -f $TARGET_DIR ]; then
+            TARGET_DIR=/sys/devices/soc0/soc_id
+        fi
+        TARGET=`cat ${TARGET_DIR}`
+        #DS_TARGET_SOC_ID_SDX24 = 334
+        if [ $TARGET == "sdxpoorwills" ] || [ $TARGET == "334" ]; then
+            usleep 800000
+        fi
+        echo "done" > /dev/kmsg
+        ;;
+  stop)
+        echo -n "Stopping QCMAP_ConnectionManager: " > /dev/kmsg
+        start-stop-daemon -K -x QCMAP_ConnectionManager
+        echo "done" > /dev/kmsg
+        ;;
+  restart)
+        $0 stop
+        sleep 1
+        $0 start
+        ;;
+  *)
+        echo "Usage QCMAP_ConnectionManager { start | stop | restart}" >&2
+        exit 1
+        ;;
+esac
+
+exit 0

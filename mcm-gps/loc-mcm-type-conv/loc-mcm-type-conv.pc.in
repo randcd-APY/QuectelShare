@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: loc-mcm-type-conv
+Description: MCM Location Type Conversion Library
+Version: @VERSION@
+Libs: -L${libdir} -lloc_mcm_type_conv
+Cflags: -I${includedir}/loc-mcm-type-conv

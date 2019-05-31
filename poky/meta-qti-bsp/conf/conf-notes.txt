@@ -1,0 +1,19 @@
+
+### Shell environment ready to run bitake commands. ###
+
+Ensure MACHINE, DISTRO & VARIANT are appropriately set before proceeding.
+Supported combinations are listed below.
+
+      +---------------+----------------+------------------+
+      | MACHINE       | DISTRO         |  VARIANT         |
+      +---------------+----------------+------------------+
+      |msm8909        | quec-smart     | debug perf user  |
+      +---------------+----------------+------------------+
+
+Once ready run 'bitbake <pkg-name>' to build required package or
+run 'bitbake machine-image' to build complete image.
+
+Alternatively you may also use convenience commands to build images.
+Run 'list-build-commands' to list these.
+
+

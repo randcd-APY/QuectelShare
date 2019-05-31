@@ -1,0 +1,121 @@
+diff --git a/alljoyn_core/router/ArdpProtocol.cc b/alljoyn_core/router/ArdpProtocol.cc
+index c836a5e..2224efb 100644
+--- a/alljoyn_core/router/ArdpProtocol.cc
++++ b/alljoyn_core/router/ArdpProtocol.cc
+@@ -430,6 +430,24 @@ static bool IsConnValid(ArdpHandle* handle, ArdpConnRecord* conn)
+     return false;
+ }
+ 
++static bool IsConnValid(ArdpHandle* handle, ArdpConnRecord* conn, uint32_t connId)
++{
++    if (conn == NULL) {
++        return false;
++    }
++
++    if (IsEmpty(&handle->conns)) {
++        return false;
++    }
++
++    for (ListNode* ln = &handle->conns; (ln = ln->fwd) != &handle->conns;) {
++        if (conn == (ArdpConnRecord*)ln && (conn->id == connId)) {
++            return true;
++        }
++    }
++    return false;
++}
++
+ static void moveAhead(ArdpHandle* handle, ArdpConnRecord* conn)
+ {
+     ListNode* head = &handle->conns;
+@@ -855,7 +873,7 @@ static void DisconnectTimerHandler(ArdpHandle* handle, ArdpConnRecord* conn, voi
+ 
+     /* Tricking the compiler */
+     QStatus reason = static_cast<QStatus>(reinterpret_cast<uintptr_t>(context));
+-    QCC_DbgPrintf(("DisconnectTimerHandler: handle=%p conn=%p reason=%p", handle, conn, QCC_StatusText(reason)));
++    QCC_DbgPrintf(("DisconnectTimerHandler: handle=%p conn=%p reason=%s", handle, conn, QCC_StatusText(reason)));
+     SetState(conn, CLOSED);
+ 
+     /*
+@@ -3138,10 +3156,10 @@ QStatus ARDP_Accept(ArdpHandle* handle, ArdpConnRecord* conn, uint16_t segmax, u
+     return status;
+ }
+ 
+-QStatus ARDP_Disconnect(ArdpHandle* handle, ArdpConnRecord* conn)
++QStatus ARDP_Disconnect(ArdpHandle* handle, ArdpConnRecord* conn, uint32_t connId)
+ {
+-    QCC_DbgTrace(("ARDP_Disconnect(handle=%p, conn=%p)", handle, conn));
+-    if (!IsConnValid(handle, conn)) {
++    QCC_DbgTrace(("ARDP_Disconnect(handle=%p, conn=%p)", handle, conn, connId));
++    if (!IsConnValid(handle, conn, connId)) {
+         return ER_ARDP_INVALID_CONNECTION;
+     }
+     return Disconnect(handle, conn, ER_OK);
+diff --git a/alljoyn_core/router/ArdpProtocol.h b/alljoyn_core/router/ArdpProtocol.h
+index d892d70..c5872aa 100644
+--- a/alljoyn_core/router/ArdpProtocol.h
++++ b/alljoyn_core/router/ArdpProtocol.h
+@@ -222,7 +222,7 @@ QStatus ARDP_Acknowledge(ArdpHandle* handle, ArdpConnRecord* conn, uint8_t* buf,
+ void ARDP_SetAcceptCb(ArdpHandle* handle, ARDP_ACCEPT_CB AcceptCb);
+ QStatus ARDP_Connect(ArdpHandle* handle, qcc::SocketFd sock, qcc::IPAddress ipAddr, uint16_t ipPort, uint16_t segmax, uint16_t segbmax, ArdpConnRecord** conn, uint8_t* buf, uint16_t len, void* context);
+ void ARDP_SetConnectCb(ArdpHandle* handle, ARDP_CONNECT_CB ConnectCb);
+-QStatus ARDP_Disconnect(ArdpHandle* handle, ArdpConnRecord* conn);
++QStatus ARDP_Disconnect(ArdpHandle* handle, ArdpConnRecord* conn, uint32_t connId);
+ void ARDP_SetDisconnectCb(ArdpHandle* handle, ARDP_DISCONNECT_CB DisconnectCb);
+ void ARDP_ReleaseConnection(ArdpHandle* handle, ArdpConnRecord* conn);
+ QStatus ARDP_RecvReady(ArdpHandle* handle, ArdpConnRecord* conn, ArdpRcvBuf* rcvbuf);
+diff --git a/alljoyn_core/router/UDPTransport.cc b/alljoyn_core/router/UDPTransport.cc
+index b312fbd..c464ef1 100644
+--- a/alljoyn_core/router/UDPTransport.cc
++++ b/alljoyn_core/router/UDPTransport.cc
+@@ -1312,7 +1312,7 @@ class ArdpStream : public qcc::Stream {
+ 
+                     m_transport->m_ardpLock.Lock();
+                     QCC_DbgPrintf(("ArdpStream::Disconnect(): ARDP_Disconnect()"));
+-                    status = ARDP_Disconnect(m_handle, m_conn);
++                    status = ARDP_Disconnect(m_handle, m_conn, m_connId);
+                     m_transport->m_ardpLock.Unlock();
+                     if (status == ER_OK) {
+                         m_discSent = true;
+@@ -3046,7 +3046,6 @@ class _UDPEndpoint : public _RemoteEndpoint {
+          */
+         m_transport->m_endpointListLock.Lock(MUTEX_CONTEXT);
+ 
+-#ifndef NDEBUG
+         /*
+          * The callback dispatcher looked to see if the endpoint was on the
+          * endpoint list before it made the call here, and it incremented the
+@@ -3063,8 +3062,16 @@ class _UDPEndpoint : public _RemoteEndpoint {
+                 ++found;
+             }
+         }
+-        assert(found == 1 && "_UDPEndpoint::DisconnectCb(): Endpoint is gone");
+-#endif
++
++        /*
++         * In case when there are simulataneous local and remote disconnect requests queued up for the came connection ID,
++         * we may find ourselves in a situation when the endpoint is not found. If this is the case, there is nothing for us to do, just return.
++         */
++        //assert(found == 1 && "_UDPEndpoint::DisconnectCb(): Endpoint is gone");
++        if (found == 0) {
++            QCC_DbgHLPrintf(("_UDPEndpoint::DisconnectCb(): endpoint with conn ID == %d. not found on on m_endpointList", connId));
++            return;
++        }
+ 
+         /*
+          * We need to figure out if this disconnect callback is due to an
+diff --git a/alljoyn_core/router/test/ardptest.cc b/alljoyn_core/router/test/ardptest.cc
+index 4aadd73..567bc34 100644
+--- a/alljoyn_core/router/test/ardptest.cc
++++ b/alljoyn_core/router/test/ardptest.cc
+@@ -457,7 +457,7 @@ int CDECL_CALL main(int argc, char** argv)
+             } else {
+                 uint32_t t_connno = StringToU32(connno, 0, 0);
+                 if (FindConn(t_connno)) {
+-                    status =  ARDP_Disconnect(handle, connList[t_connno]);
++                    status =  ARDP_Disconnect(handle, connList[t_connno], ARDP_GetConnId(handle, connList[t_connno]));
+                     if (status != ER_OK) {
+                         printf("Error while ARDP_Disconnect.. %s \n", QCC_StatusText(status));
+                     }
+-- 
+2.4.5
+

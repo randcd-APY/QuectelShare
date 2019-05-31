@@ -1,0 +1,39 @@
+###############################################################################
+#
+#      Copyright (c) 2011-2015 Qualcomm Technologies International, Ltd.
+#      All Rights Reserved. 
+#      Qualcomm Technologies International, Ltd. Confidential and Proprietary.
+#                
+###############################################################################
+
+#
+# NOTE: inc/platform/ is deliberately NOT in the default
+#       search list in order for people to explicitly
+#       prefix "platform/" to their platform dependant
+#       include files.  The goal is to prevent generic
+#       code (e.g. BT) from accidentally pulling in
+#       platform specific code.
+#       Do NOT readd it.
+# 
+
+BSP_INC := \
+    -I$(FW_SRC_ROOT)/bsp/inc \
+    -I$(BSP_ROOT)/inc 
+
+BSP_LIB := ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}
+
+BSP_LIBS := \
+    csr_util \
+    csr_pmem \
+    csr_time \
+    csr_eh \
+    csr_panic \
+    csr_ser_com \
+    csr_logtrans \
+    $(TARGET_LIBS)
+
+ifeq ($(MODE),user)
+BSP_LIBS += \
+    csr_framework_ext \
+    csr_fs
+endif

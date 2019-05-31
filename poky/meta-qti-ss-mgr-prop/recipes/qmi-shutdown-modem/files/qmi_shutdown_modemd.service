@@ -1,0 +1,11 @@
+[Unit]
+Description= Modem Shutdown Service
+SourcePath=/usr/bin/qmi_shutdown_modem
+After=init_sys_mss.service rmt_storage.service
+
+[Service]
+Restart=always
+ExecStart=/usr/bin/qmi_shutdown_modem
+
+[Install]
+WantedBy=multi-user.target

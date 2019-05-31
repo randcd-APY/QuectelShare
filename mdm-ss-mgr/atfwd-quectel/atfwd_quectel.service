@@ -1,0 +1,11 @@
+[Unit]
+Description=start_atfwd_daemon_quec
+
+[Service]
+Type=forking
+ExecStart=/etc/initscripts/start_atfwd_daemon_quec start
+ExecStop=/etc/initscripts/start_atfwd_daemon_quec stop	
+Restart=always
+RestartSec=2
+[Install]
+WantedBy=multi-user.target

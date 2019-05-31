@@ -1,0 +1,23 @@
+# Copyright (c) 2017 Qualcomm Technologies, Inc.
+# All Rights Reserved.
+# Confidential and Proprietary - Qualcomm Technologies, Inc.
+#
+
+[Unit]
+Description=Snapdragon Navigator
+SourcePath=/etc/init.d/snav_stereo_setup.sh
+Before=snav.service
+After=sdsprpcd.service
+Requires=sdsprpcd.service
+
+[Service]
+User=root
+Type=simple
+Restart=always
+RemainAfterExit=no
+ExecStart=/etc/init.d/snav_stereo_setup.sh
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
+

@@ -1,0 +1,11 @@
+# location proprietary packages
+IMAGE_INSTALL += "${@base_contains('DISTRO_FEATURES','location-services', 'garden-app', '', d)}"
+IMAGE_INSTALL += "${@base_contains('DISTRO_FEATURES','location-services', 'data-items', '', d)}"
+IMAGE_INSTALL += "${@base_contains('DISTRO_FEATURES','location-services', 'lbs-core', '', d)}"
+IMAGE_INSTALL += "${@base_contains('DISTRO_FEATURES','location-services', 'location-service', '', d)}"
+IMAGE_INSTALL += "${@base_contains('DISTRO_FEATURES','location-services', 'loc-mcm-test-shim', '', d)}"
+IMAGE_INSTALL += "${@base_contains('DISTRO_FEATURES','location-services', 'loc-mcm-type-conv', '', d)}"
+IMAGE_INSTALL += "${@base_contains('DISTRO_FEATURES','location-services', 'location-geofence', '', d)}"
+IMAGE_INSTALL += "${@base_contains('DISTRO_FEATURES','location-services', 'location-flp', '', d)}"
+IMAGE_INSTALL += "${@base_contains('DISTRO_FEATURES','location-services', 'loc-launcher', '', d)}"
+IMAGE_INSTALL += "${@base_contains('DISTRO_FEATURES','location-services', 'izat-core', '', d)}"

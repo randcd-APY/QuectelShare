@@ -1,0 +1,30 @@
+
+/****************************************************************************
+ @FILE mcm_loc_srv_mgr_v01.idl
+ @BRIEF MCM Location Service Manager API
+ @DESCRIPTION
+  IoE Mobile Connection Manager Location Service Manager API (MCM_LOC_SRV_MGR)
+
+  This API provides Data Structures for dynamic service loading for LOCATION service.
+
+ Copyright (c) 2014 Qualcomm Technologies, Inc.  All Rights Reserved.
+ Qualcomm Technologies Proprietary and Confidential.
+****************************************************************************/
+include "mcm_common_v01.idl";
+
+revision 1;
+
+
+message {
+} mcm_loc_srv_mgr_unload_req_msg;
+
+message {
+    mandatory mcm_response_t response;
+} mcm_loc_srv_mgr_unload_resp_msg;
+
+service mcm_loc_srv_mgr {
+
+    mcm_loc_srv_mgr_unload_req_msg        MCM_LOC_SRV_MGR_UNLODE_REQ,
+    mcm_loc_srv_mgr_unload_resp_msg       MCM_LOC_SRV_MGR_UNLODE_RESP;
+
+} = 0x409;

@@ -1,0 +1,18 @@
+<RCC>
+    <qresource prefix="/fluidlauncher">
+        <file>slides/demo_1.png</file>
+        <file>screenshots/QuecCam.jpg</file>
+        <file>screenshots/Data.jpg</file>
+        <file>screenshots/Video.jpg</file>
+		<file>screenshots/Audio.jpg</file>
+	<file>screenshots/Photo.jpg</file>
+	<file>screenshots/Call.jpg</file>
+	<file>screenshots/Msg.jpg</file>
+	<file>screenshots/Sensor.jpg</file>
+	<file>screenshots/Wifi.jpg</file>
+	<file>screenshots/Gps.jpg</file>
+	<file>screenshots/BT.jpg</file>
+	<file>screenshots/Setting.jpg</file>
+        <file>config.xml</file>
+    </qresource>
+</RCC>

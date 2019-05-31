@@ -1,0 +1,36 @@
+From 7da3d8fb5f5fa4099a28b1ec2177c2ed7e42cce9 Mon Sep 17 00:00:00 2001
+From: Prashanth Vadde <pvadde@codeaurora.org>
+Date: Fri, 29 Jun 2018 14:31:08 +0530
+Subject: [PATCH 1/1] Notify observers imm after onPlaybackStarted event
+
+---
+ CapabilityAgents/SpeechSynthesizer/src/SpeechSynthesizer.cpp | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/CapabilityAgents/SpeechSynthesizer/src/SpeechSynthesizer.cpp b/CapabilityAgents/SpeechSynthesizer/src/SpeechSynthesizer.cpp
+index 1b6bdaf..0da3756 100644
+--- a/CapabilityAgents/SpeechSynthesizer/src/SpeechSynthesizer.cpp
++++ b/CapabilityAgents/SpeechSynthesizer/src/SpeechSynthesizer.cpp
+@@ -740,6 +740,9 @@ void SpeechSynthesizer::stopPlaying() {
+ void SpeechSynthesizer::setCurrentStateLocked(SpeechSynthesizerObserverInterface::SpeechSynthesizerState newState) {
+     ACSDK_DEBUG9(LX("setCurrentStateLocked").d("state", newState));
+     m_currentState = newState;
++    for (auto observer : m_observers) {
++        observer->onStateChanged(m_currentState);
++    }
+     switch (newState) {
+         case SpeechSynthesizerObserverInterface::SpeechSynthesizerState::PLAYING:
+         case SpeechSynthesizerObserverInterface::SpeechSynthesizerState::FINISHED:
+@@ -749,9 +752,6 @@ void SpeechSynthesizer::setCurrentStateLocked(SpeechSynthesizerObserverInterface
+         case SpeechSynthesizerObserverInterface::SpeechSynthesizerState::GAINING_FOCUS:
+             break;
+     }
+-    for (auto observer : m_observers) {
+-        observer->onStateChanged(m_currentState);
+-    }
+ }
+ 
+ void SpeechSynthesizer::setDesiredStateLocked(FocusState newFocus) {
+-- 
+2.7.4
+

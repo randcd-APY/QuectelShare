@@ -1,0 +1,30 @@
+#! /bin/sh
+#
+# mpdecision        init.d script to start the MP decision daemon
+#
+
+set -e
+
+case "$1" in
+  start)
+        echo -n "Starting mpdecision daemon: "
+        /usr/bin/mpdecision --no_sleep --avg_comp --Nw=1.99 --Tw=140 --Ns=1.1 --Ts=190 --decision_ms=50 --poll_ms=9 &
+        echo "done"
+        ;;
+  stop)
+        echo -n "Stopping mpdecision daemon: "
+        /usr/bin/killall mpdecision
+        echo "done"
+        ;;
+  restart)
+        $0 stop
+        $0 start
+        ;;
+  *)
+        echo "Usage mpdecision { start | stop | restart}" >&2
+        exit 1
+        ;;
+esac
+
+exit 0
+

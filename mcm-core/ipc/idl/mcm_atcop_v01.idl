@@ -1,0 +1,118 @@
+/*****************************************************************************
+  @FILE     mcm_atcop_v01.idl
+
+  @BRIEF    MCM ATCOP API
+
+  @DESCRIPTION
+     ATCOP support for MCM
+
+    This file provides Mobile Connection Manager(mcm) ATCOP support API.
+
+  MCM API Major Version 0
+  MCM API Minor Version 1
+
+ Copyright (c) 2013-2014 Qualcomm Technologies, Inc.  All Rights Reserved.
+ Qualcomm Technologies Proprietary and Confidential.
+*****************************************************************************/
+
+include "mcm_common_v01.idl";
+
+revision 1;
+
+const MCM_ATCOP_MAX_REQ_MSG_SIZE  = 513;
+const MCM_ATCOP_MAX_RESP_MSG_SIZE = 4097;
+
+/* ATCOP Commands can take indefinite time. */
+const MCM_ATCOP_MSG_TIMEOUT_VALUE = 0;
+
+
+//=============================================================================
+// MESSAGES
+//=============================================================================
+//============================================================================
+/** @COMMAND MCM_ATCOP_MSG
+    @BRIEF Communicates ATCOP Message to the server.
+
+    @CMD_VERSION 1.0
+    @USAGE Production
+    @SECURITY_LEVEL  High risk
+    @REQUIRED_ACTION Default
+*/
+//============================================================================
+
+//! @MSG     MCM_ATCOP_MSG_REQ
+//! @TYPE    Request
+//! @SENDER  Control point
+//! @SYNC    Call
+//----------------------------------------------------------------------------
+message {
+  //! Request Message
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory char cmd_req[MCM_ATCOP_MAX_REQ_MSG_SIZE];
+  //! Request Command Length
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory uint32 cmd_len;
+
+} mcm_atcop_req_msg;
+
+//! @MSG     MCM_ATCOP_MSG_RESP
+//! @TYPE    Response
+//! @SENDER  Service
+//----------------------------------------------------------------------------
+message {
+  //! Result Code
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  mandatory mcm_response_t resp;
+  //! Response
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional char cmd_resp[MCM_ATCOP_MAX_RESP_MSG_SIZE];
+  //! Response Message Length
+  //! @VERSION_INTRODUCED 1.0
+  //! @VERSION 1.0
+  optional uint32 resp_len;
+
+  /* techpubs: spaces after _s for formatting.  */
+} mcm_atcop_resp_msg;
+
+
+/** @DESCRIPTION
+
+    This command sends an AT Command request to the server which in turn
+    passes it to the modem. Server once it receives a response from Modem
+    responds back to the client. MCM_ATCOP_MAX_RESP_MSG_SIZE is the maximum
+    length of the response that will be displayed to the client.
+*/
+/** @ERROR
+    -MCM_SUCCESS_V01             Successful execution of the command.
+    -MCM_ERROR_INTERNAL          Unexpected error occurred during processing
+    -MCM_ERROR_INSUFFICIENT_RESOURCES_V01  If the length of response is more than
+                                the maximum size of the buffer.
+    -MCM_ERROR_BADPARM_V01      Invalid AT-COP command is given as input
+    -MCM_ERROR_GENERIC_V01      Unsupported AT-COP command.
+*/
+//============================================================================
+// File footer
+//============================================================================
+/*
+@FOOTER
+*/
+
+//============================================================================
+// SERVICE DEFINITION
+//============================================================================
+service mcm_atcop {
+
+  // 0x600
+  //! @ID MCM_ATCOP_MSG
+  mcm_atcop_req_msg   MCM_ATCOP_REQ,
+  mcm_atcop_resp_msg  MCM_ATCOP_RESP = 0x600;
+
+} = 0x403;
+
+//============================================================================
+// End of Module
+//============================================================================

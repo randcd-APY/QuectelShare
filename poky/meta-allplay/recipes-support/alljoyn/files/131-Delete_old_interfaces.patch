@@ -1,0 +1,70 @@
+diff --git a/alljoyn_core/router/ns/IpNameServiceImpl.cc b/alljoyn_core/router/ns/IpNameServiceImpl.cc
+index 20e15a0..0635de0 100644
+--- a/alljoyn_core/router/ns/IpNameServiceImpl.cc
++++ b/alljoyn_core/router/ns/IpNameServiceImpl.cc
+@@ -943,6 +943,7 @@ void IpNameServiceImpl::ClearLiveInterfaces(void)
+                 qcc::Close(m_liveInterfaces[i].m_multicastsockFd);
+                 m_liveInterfaces[i].m_multicastsockFd = qcc::INVALID_SOCKET_FD;
+             }
++            m_deadInterfaces.insert(m_liveInterfaces[i].m_interfaceName);
+         }
+     }
+ 
+@@ -1494,6 +1495,7 @@ void IpNameServiceImpl::LazyUpdateInterfaces(const qcc::NetworkEventSet& network
+         // Lazy update is called with the mutex taken, so this is safe here.
+         //
+         m_liveInterfaces.push_back(live);
++        m_deadInterfaces.erase(live.m_interfaceName);
+     }
+     if (m_liveInterfaces.size() > 0) {
+         if (m_ipv4UnicastSockFd == qcc::INVALID_SOCKET_FD) {
+@@ -8694,6 +8696,11 @@ ThreadReturn STDCALL IpNameServiceImpl::PacketScheduler::Run(void* arg) {
+                     ifMap[m_impl.m_liveInterfaces[i].m_interfaceName] = m_impl.m_liveInterfaces[i].m_address;
+                 }
+             }
++            for (set<qcc::String>::const_iterator i = m_impl.m_deadInterfaces.begin(); (m_impl.m_state == IMPL_RUNNING) && (i != m_impl.m_deadInterfaces.end()); ++i) {
++                ifMap[*i] = qcc::IPAddress();
++            }
++            m_impl.m_deadInterfaces.clear();
++
+             if (!ifMap.empty()) {
+                 for (uint32_t transportIndex = 0; transportIndex < N_TRANSPORTS; transportIndex++) {
+                     if (m_impl.m_networkEventCallback[transportIndex] && m_impl.m_doNetworkCallback[transportIndex]) {
+@@ -8792,6 +8799,11 @@ ThreadReturn STDCALL IpNameServiceImpl::PacketScheduler::Run(void* arg) {
+                     }
+                 }
+ #endif
++                for (set<qcc::String>::const_iterator i = m_impl.m_deadInterfaces.begin(); (m_impl.m_state == IMPL_RUNNING) && (i != m_impl.m_deadInterfaces.end()); ++i) {
++                    ifMap[*i] = qcc::IPAddress();
++                }
++                m_impl.m_deadInterfaces.clear();
++
+                 if (!ifMap.empty()) {
+                     for (uint32_t transportIndex = 0; transportIndex < N_TRANSPORTS; transportIndex++) {
+                         if (m_impl.m_networkEventCallback[transportIndex]) {
+diff --git a/alljoyn_core/router/ns/IpNameServiceImpl.h b/alljoyn_core/router/ns/IpNameServiceImpl.h
+index f28a72b..793b1e0 100644
+--- a/alljoyn_core/router/ns/IpNameServiceImpl.h
++++ b/alljoyn_core/router/ns/IpNameServiceImpl.h
+@@ -28,6 +28,7 @@
+ 
+ #include <vector>
+ #include <list>
++#include <set>
+ 
+ #include <qcc/String.h>
+ #include <qcc/Thread.h>
+@@ -1055,6 +1056,13 @@ class IpNameServiceImpl : public qcc::Thread {
+ 
+     /**
+      * @internal
++     * @brief ALLPLAY: List of interface names that used to be live and need
++     * to be sent to m_networkEventCallback
++     */
++    std::set<qcc::String> m_deadInterfaces;
++
++    /**
++     * @internal
+      * @brief Mutex object used to protect various lists that may be accessed
+      * by multiple threads.
+      */

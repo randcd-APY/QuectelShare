@@ -1,0 +1,17 @@
+- this is a sample code to convert camera raw image to bmp file 
+- dependence: OpenCV 3.1.0 or above
+- this sample code was just verified on Ubuntu, it should be work 
+  for Windows as well.
+
+- steps to compile on Ubuntu:
+
+1) download OpenCV 3.1.0, see https://www.opencv.org/
+2) follow the guide to compile OpenCV, see https://docs.opencv.org/master/d7/d9f/tutorial_linux_install.html
+3) change the OpenCV_DIR in CMakeLists.txt, for example, "set(OpenCV_DIR "/usr/share/opencv/opencv-3.1.0/build")"
+4) cd raw2bmp
+5) mkdir build
+6) cmake ../
+7) make
+8) run the application: ./raw2bmp xxx.raw
+9) it will see a raw.bmp file is generated, that's the convert bmp file
+

@@ -1,0 +1,77 @@
+# Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
+# met:
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above
+#       copyright notice, this list of conditions and the following
+#       disclaimer in the documentation and/or other materials provided
+#       with the distribution.
+#     * Neither the name of The Linux Foundation nor the names of its
+#       contributors may be used to endorse or promote products derived
+#       from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED
+# WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+ifdef(`init_systemd',`
+    init_udgram_socket_set(systemd_cgroups_t)
+    init_use_script_ptys(systemd_passwd_agent_t)
+
+    allow systemd_passwd_agent_t init_var_run_t:dir { create open read add_name write getattr search };
+    allow systemd_passwd_agent_t proc_t:file { read open };
+
+    files_manage_var_dirs(systemd_tmpfiles_t)
+    files_read_generic_tmp_symlinks(systemd_tmpfiles_t)
+    allow daemon init_t:unix_dgram_socket sendto;
+    fs_getattr_cgroup(systemd_logind_t)
+    fs_read_cgroup_files(systemd_logind_t)
+    init_dgram_send(systemd_cgroups_t)
+    init_stream_connect(systemd_cgroups_t)
+    seutil_read_file_contexts(systemd_logind_t)
+    allow systemd_logind_t init_t:system { start status stop };
+    allow systemd_logind_t self:process { getcap setfscreate };
+    userdebug_or_eng(`
+        gen_require(`
+                attribute unconfined_domain_type;
+                class service { start status stop } ;
+        ')
+        allow unconfined_domain_type power_unit_t:service { start status stop };
+    ')
+
+    gen_require(`
+        type init_var_run_t;
+        type udev_var_run_t;
+        type etc_t;
+    ')
+    # init_write_pid_socket
+    read_sock_files_pattern(systemd_logind_t, init_var_run_t, init_var_run_t)
+    # init_create_pid_dirs
+    create_dirs_pattern(systemd_logind_t, init_var_run_t, init_var_run_t)
+    # udev_list_pids
+    allow systemd_logind_t udev_var_run_t:dir { read };
+
+    allow systemd_tmpfiles_t etc_t:lnk_file create;
+')
+
+userdebug_or_eng(`
+        gen_require(`
+             type init_var_run_t;
+             type initrc_t;
+             type systemd_logind_var_run_t;
+        ')
+        allow systemd_logind_t init_var_run_t:sock_file write;
+        allow systemd_logind_t initrc_t:unix_stream_socket connectto;
+        allow systemd_logind_t systemd_logind_var_run_t:sock_file write;
+ ')

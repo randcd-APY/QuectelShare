@@ -1,0 +1,14 @@
+[Unit]
+Description=at_network
+Wants=ql_manager_server.service
+After=ql_manager_server.service
+
+[Service]
+Type=simple
+EnvironmentFile=-/etc/environment
+ExecStartPre=/bin/sleep 5
+ExecStart=/etc/initscripts/at_network_le start
+ExecStop=/etc/initscripts/at_network_le stop
+RemainAfterExit=yes
+Restart=no
+#RestartSec=2

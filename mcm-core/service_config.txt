@@ -1,0 +1,5 @@
+non-essentia:mcm_data
+non-essentia:mcm_atcop
+non-essentia:mcm_mobileap
+non-essentia:mcm_loc
+non-essentia:mcm_sim

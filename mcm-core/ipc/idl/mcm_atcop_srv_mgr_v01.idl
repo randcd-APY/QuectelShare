@@ -1,0 +1,30 @@
+
+/****************************************************************************
+ @FILE mcm_atcop_srv_mgr_v01.idl
+ @BRIEF MCM ATCOP Service Manager API
+ @DESCRIPTION
+  IoE Mobile Connection Manager ATCOP Service Manager API (MCM_ATCOP_SRV_MGR)
+
+  This API provides Data Structures for dynamic service loading ATCOP service.
+
+ Copyright (c) 2014 Qualcomm Technologies, Inc.  All Rights Reserved.
+ Qualcomm Technologies Proprietary and Confidential.
+****************************************************************************/
+include "mcm_common_v01.idl";
+
+revision 1;
+
+
+message {
+} mcm_atcop_srv_mgr_unload_req_msg;
+
+message {
+    mandatory mcm_response_t response;
+} mcm_atcop_srv_mgr_unload_resp_msg;
+
+service mcm_atcop_srv_mgr {
+
+    mcm_atcop_srv_mgr_unload_req_msg        MCM_ATCOP_SRV_MGR_UNLODE_REQ,
+    mcm_atcop_srv_mgr_unload_resp_msg       MCM_ATCOP_SRV_MGR_UNLODE_RESP;
+
+} = 0x40A;

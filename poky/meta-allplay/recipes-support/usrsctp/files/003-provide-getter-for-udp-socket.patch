@@ -1,0 +1,26 @@
+diff --git a/usrsctplib/user_socket.c b/usrsctplib/user_socket.c
+index 0568cc4..87268c3 100755
+--- a/usrsctplib/user_socket.c
++++ b/usrsctplib/user_socket.c
+@@ -3414,3 +3414,7 @@ void usrsctp_get_stat(struct sctpstat *stat)
+ {
+ 	*stat = SCTP_BASE_STATS;
+ }
++
++int usrsctp_get_udp_socket(void) {
++	return SCTP_BASE_VAR(userspace_udpsctp);
++}
+diff --git a/usrsctplib/usrsctp.h b/usrsctplib/usrsctp.h
+index b897f44..ca3d0f3 100644
+--- a/usrsctplib/usrsctp.h
++++ b/usrsctplib/usrsctp.h
+@@ -1054,6 +1054,9 @@ USRSCTP_SYSCTL_DECL(sctp_steady_step)
+ USRSCTP_SYSCTL_DECL(sctp_use_dccc_ecn)
+ USRSCTP_SYSCTL_DECL(sctp_buffer_splitting)
+ USRSCTP_SYSCTL_DECL(sctp_initial_cwnd)
++
++int usrsctp_get_udp_socket(void);
++
+ #ifdef SCTP_DEBUG
+ USRSCTP_SYSCTL_DECL(sctp_debug_on)
+ /* More specific values can be found in sctp_constants, but

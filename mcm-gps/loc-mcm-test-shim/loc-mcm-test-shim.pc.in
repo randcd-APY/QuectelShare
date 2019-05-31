@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: loc-mcm-test-shim
+Description: Test Shim Layer to test MCM Location server using MCM APIs
+Version: @VERSION@
+Libs: -L${libdir} -lloc_mcm_test_shim
+Cflags: -I${includedir}/loc-mcm-test-shim

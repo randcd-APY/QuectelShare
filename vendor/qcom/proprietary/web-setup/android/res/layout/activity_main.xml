@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ Copyright (C) 2017 Qualcomm Technologies, Inc.
+ All rights reserved
+ Confidential and Proprietary - Qualcomm Technologies, Inc.
+-->
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:orientation="vertical"
+	tools:context="com.qualcomm.qti.avs.companion.activity.MainActivity">
+
+	<android.support.v7.widget.Toolbar
+		android:id="@+id/main_tool_bar"
+		android:layout_width="match_parent"
+		android:layout_height="?attr/actionBarSize"
+		android:background="@color/colorPrimary">
+	</android.support.v7.widget.Toolbar>
+
+	<ListView
+		android:id="@+id/main_list_view"
+		android:layout_width="match_parent"
+		android:layout_height="0dp"
+		android:layout_weight="1"
+		android:dividerHeight="@dimen/divider_height"
+		android:groupIndicator="@null"
+		android:divider="@color/list_divider"/>
+
+	<RelativeLayout
+		android:id="@+id/main_empty_view"
+		android:layout_width="match_parent"
+		android:layout_height="0dp"
+		android:layout_weight="1">
+
+		<TextView
+			android:id="@+id/main_empty_view_text"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_centerInParent="true"
+			android:gravity="center"
+			style="@style/EmptyViewText"/>
+
+		<ProgressBar
+			android:id="@+id/main_empty_view_progress"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_above="@+id/main_empty_view_text"
+			android:layout_centerHorizontal="true"
+			android:layout_marginBottom="@dimen/vertical_margin"/>
+	</RelativeLayout>
+</LinearLayout>

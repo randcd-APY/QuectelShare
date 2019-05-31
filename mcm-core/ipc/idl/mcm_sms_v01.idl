@@ -1,0 +1,447 @@
+/*****************************************************************************
+ @FILE mcm_sms_v01.idl
+ @BRIEF IoE Mobile Connection Manager Wireless Messaging Service API (MCM_SMS)
+ @DESCRIPTION
+     This API provides the Data Structures for sms related functions.
+
+  MCM API Major Version 0
+  MCM API Minor Version 1
+
+  @COPYRIGHT Copyright (c) 2013, 2017 Qualcomm Technologies, Inc.
+  All rights reserved.
+  Confidential and Proprietary - Qualcomm Technologies, Inc.
+*****************************************************************************/
+
+include "mcm_common_v01.idl";
+
+revision 1;
+//=============================================================================
+// CONSTANTS
+//=============================================================================
+const MCM_SMS_MAX_MO_MSG_LENGTH = 1440; //!< Maximum length of an MO SMS (9*160).
+const MCM_SMS_MAX_MT_MSG_LENGTH = 160; //!< Maximum length of an SMS.
+const MCM_SMS_MAX_ADDR_LENGTH = 252; //!< Maximum string length.
+//=============================================================================
+// DATA TYPES
+//=============================================================================
+enum {
+    MCM_SMS_MSG_FORMAT_TEXT_CDMA = 0x00,  //!< Message format CDMA text.
+    MCM_SMS_MSG_FORMAT_TEXT_GW_PP = 0x06,       //!< Message format GW_PP text.
+    MCM_SMS_MSG_FORMAT_TEXT_GW_BC = 0x07    //!< Message format GW_BC text.
+} mcm_sms_msg_format_t;
+
+enum {
+    MCM_SMS_MSG_SIZE_VALIDATION_MODE_AUTO_BREAK = 1, //!< Message size validation mode;
+                                                     //!< Auto-break into 160-byte segments.
+    MCM_SMS_MSG_SIZE_VALIDATION_MODE_NO_AUTO_BREAK   //!< Message size validation mode;
+                                                     //!< No auto-break.
+} mcm_sms_msg_size_validation_mode_t;  //!< Message size validation mode.
+
+///enum {
+///    MCM_SMS_MSG_CB_CHANNEL_HOSPITAL = 1, //!< Message cb channel hospital
+///    MCM_SMS_MSG_CB_CHANNEL_WEATHER       //!< Message cb channel weather
+///} mcm_sms_msg_cb_channel_t;
+
+enum {
+    MCM_SMS_RECEPTION_MODE_NO_RECEPTION = 1,             //!< No reception.
+    MCM_SMS_RECEPTION_MODE_ON_AUTO_CONFIRM_TO_NW,        //!< Reception on with auto confirm to the network.
+    MCM_SMS_RECEPTION_MODE_ON_WITHOUT_AUTO_CONFIRM_TO_NW //!< Reception on without auto confirm to the network.
+} mcm_sms_reception_mode_t;
+
+enum {
+  MCM_SMS_MESSAGE_CLASS_0 = 0 ,  //!< Class 0.
+  MCM_SMS_MESSAGE_CLASS_1 = 1 ,  //!< Class 1.
+  MCM_SMS_MESSAGE_CLASS_2 = 2 ,  //!< Class 2.
+  MCM_SMS_MESSAGE_CLASS_3 = 3 ,  //!< Class 3.
+  MCM_SMS_MESSAGE_CLASS_NONE = 4 //!< None.
+} mcm_sms_message_class_t; //!< Message class
+
+enum {
+    MCM_CBS_CMAE_CATEGORY_INVALID = -1,
+    MCM_CBS_CMAE_CATEGORY_GEO,         //!< Geophysical, including landslide.
+    MCM_CBS_CMAE_CATEGORY_MET,         //!< Meteorological, including flood.
+    MCM_CBS_CATEGORY_SAFETY,           //!< Safety (general emergency and public safety).
+    MCM_CBS_CMAE_CATEGORY_SECURITY,    //!< Security (law enforcement, military, homeland,
+                                       //!< and local/private security).
+    MCM_CBS_CMAE_CATEGORY_RESCUE,      //!< Rescue (rescue and recovery).
+    MCM_CBS_CMAE_CATEGORY_FIRE,        //!< Fire (fire suppression and rescue).
+    MCM_CBS_CMAE_CATEGORY_HEALTH,      //!< Health (medical and public health).
+    MCM_CBS_CMAE_CATEGORY_ENV,         //!< Environment (pollution and other environmental factors).
+    MCM_CBS_CMAE_CATEGORY_TRANSPORT,   //!< Transport (public and private transportation).
+    MCM_CBS_CMAE_CATEGORY_INFRA,       //!< Infrastructure (utility, telecommunication, and other
+                                       //!< nontransport infrastructure).
+    MCM_CBS_CMAE_CATEGORY_CBRNE,       //!< CBRNE (chemical, biological, radiological, nuclear,
+                                       //!< or high-yield explosive thread or attack).
+    MCM_CBS_CMAE_CATEGORY_OTHER        //!< Other events.
+} mcm_cbs_cmae_category_type_t;
+
+enum {
+    MCM_CBS_CMAE_RESPONSE_TYPE_INVALID = -1,
+    MCM_CBS_CMAE_RESPONSE_TYPE_SHELTER,  //!< Shelter (take shelter in place).
+    MCM_CBS_CMAE_RESPONSE_TYPE_EVACUATE, //!< Evacuate (relocate).
+    MCM_CBS_CMAE_RESPONSE_TYPE_PREPARE,  //!< Prepare (make preparations).
+    MCM_CBS_CMAE_RESPONSE_TYPE_EXECUTE,  //!< Execute (execute a preplanned activity).
+    MCM_CBS_CMAE_RESPONSE_TYPE_MONITOR,  //!< Monitor (attend to information sources).
+    MCM_CBS_CMAE_RESPONSE_TYPE_AVOID,    //!< Avoid (avoid hazards).
+    MCM_CBS_CMAE_RESPONSE_TYPE_ASSESS,   //!< Assess (evaluate the information in this message).
+    MCM_CBS_CMAE_RESPONSE_TYPE_NONE      //!< None (no action recommended).
+} mcm_cbs_cmae_response_type_t;
+
+enum {
+   MCM_CBS_CMAE_SEVERITY_INVALID = -1,
+   MCM_CBS_CMAE_SEVERITY_EXTREME,  //!< Extreme (extraodinary threat to life or property).
+   MCM_CBS_CMAE_SEVERITY_SEVERE    //!< Severe (significant threat to life or property).
+} mcm_cbs_cmae_severity_type_t;
+
+enum {
+   MCM_CBS_CMAE_URGENCY_INVALID = -1,
+   MCM_CBS_CMAE_URGENCY_IMMEDIATE, //!< Immediate (responsive action should be taken immediately). 
+   MCM_CBS_CMAE_URGENCY_EXPECTED   //!< Expected (reponsive action should be taken soon, i.e., within the next hour).
+} mcm_cbs_cmae_urgency_type_t;
+
+enum {
+   MCM_CBS_CMAE_CERTAINTY_INVALID = -1,
+   MCM_CBS_CMAE_CERTAINTY_OBSERVED, //!< Observed (determined to have occurred or to be ongoing).
+   MCM_CBS_CMAE_CERTAINTY_LIKELY    //!< Likely (probabiltiy > ~50%).
+} mcm_cbs_cmae_certainty_type_t;
+
+struct {
+   uint8 year;        //!< Year -- Range 00 to 99 (UTC).
+   uint8 month;       //!< Month -- Range 1 to 12 (UTC).
+   uint8 day;         //!< Day -- Range 1 to 31 (UTC).
+   uint8 hours;       //!< Hour -- Range 0 to 23 (UTC).
+   uint8 minutes;     //!< Minutes -- Range 0 to 59 (UTC).
+   uint8 seconds;     //!< Seconds -- Range 0 to 59 (UTC).
+} mcm_cbs_cmae_expire_t;
+
+struct {
+    char   message_content<MCM_SMS_MAX_MT_MSG_LENGTH>; //!< Message content.
+} mcm_cbs_cmae_record_type_0_t;
+
+struct {
+    mcm_cbs_cmae_category_type_t   category;  //!< Category of the CMAS alert.
+    mcm_cbs_cmae_response_type_t   response;  //!< Response indicated for the CMAS alert.
+    mcm_cbs_cmae_severity_type_t   severity;  //!< Severity of the CMAS alert.
+    mcm_cbs_cmae_urgency_type_t    urgency;   //!< Urgency of the CMAS alert.
+    mcm_cbs_cmae_certainty_type_t  certainty; //!< Certainty of the CMAS alert.
+} mcm_cbs_cmae_record_type_1_t;
+
+struct {
+    uint16                   id;             //!< Identification of the message.
+    uint8                    alert_handling; //!< Indicates whether this alert message requires special handling.
+    mcm_cbs_cmae_expire_t    expire;         //!< Expiration date and time of the CMAS alert.
+    uint8                    language;       //!< Language used for the message content.
+} mcm_cbs_cmae_record_type_2_t;
+
+//=============================================================================
+// MESSAGES
+//=============================================================================
+
+//=============================================================================
+/** @COMMAND MCM_SMS_SET_SERVICE_CENTER_CFG_TYPE
+    @CMD_VERSION 1.0
+    @BRIEF Sets the service center configuration type.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG  MCM_SMS_SET_SERVICE_CENTER_CFG_TYPE_REQ
+//! @TYPE Request
+//! @SENDER Control point
+//----------------------------------------------------------------------------
+message {
+    mandatory string service_center_addr<MCM_SMS_MAX_ADDR_LENGTH>; //!< Address of the service center.
+    optional int64 validity_time;           //!< Validity time.
+}mcm_sms_set_service_center_cfg_type_req_msg;
+
+//! @MSG  MCM_SMS_SET_SERVICE_CENTER_CFG_TYPE_RESP
+//! @TYPE Response
+//! @SENDER Service
+//----------------------------------------------------------------------------
+message {
+     mandatory mcm_response_t response;  //!< Result code.
+}mcm_sms_set_service_center_cfg_type_resp_msg;
+/** @ERROR
+    MCM_SUCCESS
+    MCM_ERROR_GENERIC
+    MCM_ERROR_BADPARM
+    MCM_ERROR_MEMORY
+    MCM_ERROR_INVALID_STATE
+*/
+
+//=============================================================================
+/** @COMMAND MCM_SMS_GET_SERVICE_CENTER_CFG_TYPE
+    @CMD_VERSION 1.0
+    @BRIEF Gets the service center configuration type.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG  MCM_SMS_GET_SERVICE_CENTER_CFG_TYPE_REQ
+//! @TYPE Request
+//! @SENDER Control point
+//----------------------------------------------------------------------------
+message {
+}mcm_sms_get_service_center_cfg_type_req_msg;
+
+//! @MSG  MCM_SMS_GET_SERVICE_CENTER_CFG_TYPE_RESP
+//! @TYPE Response
+//! @SENDER Service
+//----------------------------------------------------------------------------
+message {
+     mandatory mcm_response_t response;  //!< Result code.
+     optional string service_center_addr<MCM_SMS_MAX_ADDR_LENGTH>; //!< Address of the service center.
+     optional int64 validity_time;          //!< Validity time.
+}mcm_sms_get_service_center_cfg_type_resp_msg;
+/** @ERROR
+    MCM_SUCCESS
+    MCM_ERROR_GENERIC
+    MCM_ERROR_BADPARM
+    MCM_ERROR_MEMORY
+    MCM_ERROR_INVALID_STATE
+*/
+
+//=============================================================================
+/** @COMMAND MCM_SMS_SEND_MO_MSG
+    @CMD_VERSION 1.0
+    @BRIEF Sends an MO message.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG  MCM_SMS_SEND_MO_MSG_REQ
+//! @TYPE Request
+//! @SENDER Control point
+//----------------------------------------------------------------------------
+message {
+      mandatory mcm_sms_msg_format_t message_format;
+      /**< Message format. */
+      mandatory string message_content<MCM_SMS_MAX_MO_MSG_LENGTH>;
+      /**< Message content. */
+      mandatory string destination<MCM_SMS_MAX_ADDR_LENGTH>;
+      /**< Destination. */
+      optional mcm_sms_msg_size_validation_mode_t size_validation;
+      /**< Size validation. */
+}mcm_sms_send_mo_msg_req_msg;
+
+//! @MSG  MCM_SMS_SEND_MO_MSG_RESP
+//! @TYPE Response
+//! @SENDER Service
+//----------------------------------------------------------------------------
+message {
+     mandatory mcm_response_t response;  //!< Result code.
+}mcm_sms_send_mo_msg_resp_msg;
+/** @ERROR
+    MCM_SUCCESS
+    MCM_ERROR_GENERIC
+    MCM_ERROR_BADPARM
+    MCM_ERROR_MEMORY
+    MCM_ERROR_INVALID_STATE
+*/
+
+//=============================================================================
+/** @COMMAND MCM_SMS_SET_MSG_CONFIG
+    @CMD_VERSION 1.0
+    @BRIEF Sets the message configutation.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG  MCM_SMS_SET_MSG_CONFIG_REQ
+//! @TYPE Request
+//! @SENDER Control point
+//----------------------------------------------------------------------------
+message {
+    optional mcm_sms_msg_size_validation_mode_t default_size_validation_mode;
+    /**< Default size validation mode. */
+    optional boolean enable_cb;
+    /**< Enable callback. */
+}mcm_sms_set_msg_config_req_msg;
+
+//! @MSG  MCM_SMS_SET_MSG_CONFIG_RESP
+//! @TYPE Response
+//! @SENDER Service
+//----------------------------------------------------------------------------
+message {
+     mandatory mcm_response_t response;  //!< Result code.
+}mcm_sms_set_msg_config_resp_msg;
+/** @ERROR
+    MCM_SUCCESS
+    MCM_ERROR_GENERIC
+    MCM_ERROR_BADPARM
+    MCM_ERROR_MEMORY
+    MCM_ERROR_INVALID_STATE
+*/
+
+//=============================================================================
+/** @COMMAND MCM_SMS_GET_MSG_CONFIG
+    @CMD_VERSION 1.0
+    @BRIEF Gets the message configuration.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG  MCM_SMS_GET_MSG_CONFIG_REQ
+//! @TYPE Request
+//! @SENDER Control point
+//----------------------------------------------------------------------------
+message {
+
+}mcm_sms_get_msg_config_req_msg;
+
+//! @MSG  MCM_SMS_GET_MSG_CONFIG_RESP
+//! @TYPE Response
+//! @SENDER Service
+//----------------------------------------------------------------------------
+message {
+    mandatory mcm_response_t response;  //!< Result code.
+    optional mcm_sms_msg_size_validation_mode_t default_size_validation_mode;
+    /**< Default size validation mode. */
+    optional boolean enable_cb;
+    /**< Enable callback. */
+}mcm_sms_get_msg_config_resp_msg;
+/** @ERROR
+    MCM_SUCCESS
+    MCM_ERROR_GENERIC
+    MCM_ERROR_BADPARM
+    MCM_ERROR_MEMORY
+    MCM_ERROR_INVALID_STATE
+*/
+
+//=============================================================================
+/** @COMMAND MCM_SMS_SET_RECEPTION_MODE
+    @CMD_VERSION 1.0
+    @BRIEF Sets the reception mode.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG  MCM_SMS_SET_RECEPTION_MODE_REQ
+//! @TYPE Request
+//! @SENDER Control point
+//----------------------------------------------------------------------------
+message {
+    mandatory mcm_sms_reception_mode_t reception_mode;
+    /**< Reception mode. */
+    optional int64 last_absorbed_message_id;
+    /**< Last absorbed message ID. */
+}mcm_sms_set_reception_mode_req_msg;
+
+//! @MSG  MCM_WMS_SET_RECEPTION_MODE_RESP
+//! @TYPE Response
+//! @SENDER Service
+//----------------------------------------------------------------------------
+message {
+    mandatory mcm_response_t response;  //!< Result code.
+}mcm_sms_set_reception_mode_resp_msg;
+/** @ERROR
+    MCM_SUCCESS
+    MCM_ERROR_GENERIC
+    MCM_ERROR_BADPARM
+    MCM_ERROR_MEMORY
+    MCM_ERROR_INVALID_STATE
+*/
+
+//=============================================================================
+// EVENT REGISTER
+//=============================================================================
+//=============================================================================
+/** @COMMAND MCM_SMS_EVENT_REGISTER
+    @CMD_VERSION 1.0
+    @BRIEF Registers for an indication of events.
+    @DESCRIPTION
+     Corresponding events and their indications:
+          - SMS PP indication event (mcm_sms_pp_ind_msg)
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+
+//! @MSG  MCM_SMS_EVENT_REGISTER_REQ
+//! @TYPE Request
+//! @SENDER Control point
+//----------------------------------------------------------------------------
+message {
+    optional boolean register_sms_pp_event; //!< Receive a PP SMS event.
+} mcm_sms_event_register_req_msg;
+
+//! @MSG  MCM_SMS_EVENT_REGISTER_RESP
+//! @TYPE Response
+//! @SENDER Service
+//----------------------------------------------------------------------------
+message {
+    mandatory mcm_response_t response;  //!< Result code.
+} mcm_sms_event_register_resp_msg;
+/** @ERROR
+    MCM_SUCCESS
+    MCM_ERROR_GENERIC
+    MCM_ERROR_BADPARM
+    MCM_ERROR_MEMORY
+    MCM_ERROR_INVALID_STATE
+*/
+
+//=============================================================================
+/** @COMMAND MCM_SMS_PP_IND
+    @CMD_VERSION 1.0
+    @BRIEF Point-to-point message indication.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG  MCM_SMS_PP_IND
+//! @TYPE Request
+//! @SENDER Control point
+//----------------------------------------------------------------------------
+message {
+    mandatory mcm_sms_msg_format_t message_format;
+    /**< Message format. */
+    mandatory string message_content<MCM_SMS_MAX_MT_MSG_LENGTH>;
+    /**< Message content. */
+    mandatory string source_address<MCM_SMS_MAX_ADDR_LENGTH>;
+    /**< Source address. */
+    mandatory int64 message_id;
+    /**< Message ID. */
+    optional mcm_sms_message_class_t message_class;
+    /**< Message class. */
+}mcm_sms_pp_ind_msg;
+
+//=============================================================================
+/** @COMMAND MCM_SMS_CB_IND
+    @CMD_VERSION 1.0
+    @BRIEF Cell broadcast message indication.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG  MCM_SMS_CB_IND
+//! @TYPE Request
+//! @SENDER Control point
+//----------------------------------------------------------------------------
+message {
+    mandatory mcm_sms_msg_format_t message_format;
+    /**< Message format. */
+    mandatory string message_content<MCM_SMS_MAX_MT_MSG_LENGTH>;
+    /**< Message content. */
+}mcm_sms_cb_ind_msg;
+
+//=============================================================================
+/** @COMMAND MCM_SMS_CB_CMAS_IND
+    @CMD_VERSION 1.0
+    @BRIEF Cell broadcast CMAS message indication.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG  MCM_SMS_CB_CMAS_IND
+//! @TYPE Request
+//! @SENDER Control point
+//----------------------------------------------------------------------------
+message {
+    optional mcm_cbs_cmae_record_type_0_t type_0_record;
+    /**< Type 0 record. */
+    optional mcm_cbs_cmae_record_type_1_t type_1_record;
+    /**< Type 1 record. */
+    optional mcm_cbs_cmae_record_type_2_t type_2_record;
+    /**< Type 2 record. */
+}mcm_sms_cb_cmas_ind_msg;
+

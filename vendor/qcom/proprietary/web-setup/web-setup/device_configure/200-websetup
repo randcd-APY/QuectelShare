@@ -1,0 +1,46 @@
+#!/bin/sh
+
+DATA_CFG="/etc/data/mobileap_cfg.xml"
+DATA_CFG_TMP="/tmp/mobileap_cfg.xml"
+HOSTAP_CFG="/etc/misc/wifi/hostapd.conf"
+HOSTAP_CFG_TMP="/tmp/hostapd.conf"
+DEV_CFG="/persist/device.conf"
+
+# Skip if websetup is not enabled
+case "$(getprop websetup.enable false)" in
+	full)
+		grep -q "<WLANEnableAtBootup>1</WLANEnableAtBootup>" "$DATA_CFG" || changeBoot="1"
+		grep -q "<EnableWebserverWWANAccess>1</EnableWebserverWWANAccess>" "$DATA_CFG" || changeWebServer="1"
+		;;
+	webOnly)
+		grep -q "<EnableWebserverWWANAccess>1</EnableWebserverWWANAccess>" "$DATA_CFG" || changeWebServer="1"
+		;;
+	false)
+		return 0
+		;;
+	*)
+		return 1
+		;;
+esac
+
+
+if [ "$changeWebServer" ] && grep -q "ssid=QSoftAP" "$HOSTAP_CFG"; then
+	friendlyId=$(jq -r ".friendlyId" "$DEV_CFG")
+	sed -r \
+		-e "s/^ssid2?=.*$/ssid2=\"$friendlyId\"/" \
+		-e 's/^wpa=2$/#wpa=2/' \
+		-e '/^wpa_passphrase=1234567890$/d' \
+		"$HOSTAP_CFG" > "$HOSTAP_CFG_TMP" \
+		&& cp "$HOSTAP_CFG_TMP" "$HOSTAP_CFG" \
+		&& rm "$HOSTAP_CFG_TMP"
+fi
+
+if [ "$changeBoot" ] || [ "$changeWebServer" ]; then
+	sed -r \
+		${changeBoot:+-e "s_(<WLANEnableAtBootup>).*(</WLANEnableAtBootup>)_\11\2_"} \
+		${changeWebServer:+-e "s_(<EnableWebserverWWANAccess>).*(</EnableWebserverWWANAccess>)_\11\2_"} \
+		-e "s_(<WlanMode>).*(</WlanMode>)_\1AP\2_" \
+		"$DATA_CFG" > "$DATA_CFG_TMP" \
+		&& cp "$DATA_CFG_TMP" "$DATA_CFG" \
+		&& rm "$DATA_CFG_TMP"
+fi

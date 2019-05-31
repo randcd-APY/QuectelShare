@@ -1,0 +1,13 @@
+[Unit]
+Description=Quec_launcher
+Wants=ql-fb-service.service
+After=ql-fb-service.service
+
+[Service]
+Type=simple
+EnvironmentFile=-/etc/environment
+ExecStart=/usr/bin/quec_launcher
+Restart=no
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,9 @@
+[Unit]
+Description=AllJoyn daemon
+
+[Service]
+Restart=on-failure
+ExecStart=/usr/bin/alljoyn-daemon --nofork --config-file="/etc/alljoyn/alljoyn.conf"
+
+[Install]
+WantedBy=multi-user.target

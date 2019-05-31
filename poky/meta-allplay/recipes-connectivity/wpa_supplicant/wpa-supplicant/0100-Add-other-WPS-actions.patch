@@ -1,0 +1,17 @@
+Index: wpa_supplicant-2.4/wpa_supplicant/wpa_cli.c
+===================================================================
+--- wpa_supplicant-2.4.orig/wpa_supplicant/wpa_cli.c
++++ wpa_supplicant-2.4/wpa_supplicant/wpa_cli.c
+@@ -3432,6 +3432,12 @@ static void wpa_cli_action_process(const
+ 		wpa_cli_exec(action_file, ifname, pos);
+ 	} else if (str_match(pos, WPS_EVENT_FAIL)) {
+ 		wpa_cli_exec(action_file, ifname, pos);
++	} else if (str_match(pos, WPS_EVENT_TIMEOUT)) {
++		wpa_cli_exec(action_file, ctrl_ifname, pos);
++	} else if (str_match(pos, WPS_EVENT_OVERLAP)) {
++		wpa_cli_exec(action_file, ctrl_ifname, pos);
++	} else if (str_match(pos, WPS_EVENT_CRED_RECEIVED)) {
++		wpa_cli_exec(action_file, ctrl_ifname, pos);
+ 	} else if (str_match(pos, AP_STA_CONNECTED)) {
+ 		wpa_cli_exec(action_file, ifname, pos);
+ 	} else if (str_match(pos, AP_STA_DISCONNECTED)) {

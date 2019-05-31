@@ -1,0 +1,33 @@
+#! /bin/sh
+## Copyright (c) 2018 Qualcomm Technologies, Inc.
+## All Rights Reserved.
+## Confidential and Proprietary - Qualcomm Technologies, Inc.
+#
+# init.d script to start the cdsprpc daemon
+#
+
+set -e
+
+case "$1" in
+  start)
+        echo -n "Starting cdsprpcd: "
+        start-stop-daemon -S -b -a /usr/bin/cdsprpcd
+        echo "done"
+        ;;
+  stop)
+        echo -n "Stopping cdsprpcd: "
+        start-stop-daemon -K -n cdsprpcd
+        echo "done"
+        ;;
+  restart)
+        $0 stop
+        $0 start
+        ;;
+  *)
+        echo "Usage cdsprpcd { start | stop | restart}" >&2
+        exit 1
+        ;;
+esac
+
+exit 0
+

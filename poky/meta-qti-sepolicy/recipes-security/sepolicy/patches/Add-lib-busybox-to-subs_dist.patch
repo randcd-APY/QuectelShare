@@ -1,0 +1,28 @@
+From 69f209dfe231563e27a1e36c542c8e5b40ad9f3d Mon Sep 17 00:00:00 2001
+From: Dennis Cagle <dcagle@codeaurora.org>
+Date: Mon, 7 May 2018 17:58:41 -0700
+Subject: [PATCH] Add /lib/busybox/* to subs_dist
+
+Change-Id: I6cd827858c3dbb1cd052afbeb90add83f82382ae
+---
+ config/file_contexts.subs_dist | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/config/file_contexts.subs_dist b/config/file_contexts.subs_dist
+index 471ff61..0b1657a 100644
+--- a/config/file_contexts.subs_dist
++++ b/config/file_contexts.subs_dist
+@@ -35,3 +35,10 @@
+ /usr/lib/busybox/bin /bin
+ /usr/lib/busybox/sbin /sbin
+ /usr/lib/busybox/usr /usr
++
++/lib/busybox/bin /bin
++/lib/busybox/sbin /sbin
++/lib/busybox/usr /usr
++/lib64/busybox/bin /bin
++/lib64/busybox/sbin /sbin
++/lib64/busybox/usr /usr
+-- 
+1.9.1
+

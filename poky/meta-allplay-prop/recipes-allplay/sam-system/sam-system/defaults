@@ -1,0 +1,8 @@
+#! /bin/sh
+
+# delete rc.d symlink created by an old uci-default (this is needed so that if
+# we change the startup priority of sam-system, we won't start the app twice,
+# once via the new symlink from ROM, once via the old symlink from the overlay)
+sync
+rm -f /overlay/etc/rc.d/*sam-systemd
+mount -o remount /

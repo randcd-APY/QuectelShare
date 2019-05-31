@@ -1,0 +1,13 @@
+diff --git a/usrsctplib/netinet/sctputil.c b/usrsctplib/netinet/sctputil.c
+index 5210f73..3f448ac 100755
+--- a/usrsctplib/netinet/sctputil.c
++++ b/usrsctplib/netinet/sctputil.c
+@@ -5849,7 +5849,7 @@ sctp_sorecvmsg(struct socket *so,
+ 	    (inp->sctp_flags & SCTP_PCB_FLAGS_SOCKET_ALLGONE)) {
+ 		goto out;
+ 	}
+-#if (defined(__FreeBSD__) && __FreeBSD_version > 500000) || defined(__Windows__)
++#if (defined(__FreeBSD__) && __FreeBSD_version > 500000) || defined(__Windows__) || defined(__Userspace_os_Linux)
+ 	if ((so->so_rcv.sb_state & SBS_CANTRCVMORE) && (so->so_rcv.sb_cc == 0)) {
+ #else
+ 	if ((so->so_state & SS_CANTRCVMORE) && (so->so_rcv.sb_cc == 0)) {

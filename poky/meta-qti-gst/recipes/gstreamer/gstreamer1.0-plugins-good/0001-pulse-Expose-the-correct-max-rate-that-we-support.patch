@@ -1,0 +1,184 @@
+From 0f3b7b0dca61b71bcc7732cba38581a439ec6992 Mon Sep 17 00:00:00 2001
+From: Arun Raghavan <arunsr@codeaurora.org>
+Date: Mon, 19 Nov 2018 20:05:39 +0530
+Subject: [PATCH] pulse: Expose the correct max rate that we support
+
+PulseAudio defines PA_RATE_MAX as the maximum sampling rate that it
+supports. We were previously exposing a maximum rate of INT_MAX, which
+is incorrect, but worked because nothing was really using a rate greater
+than 384000 kHz.
+
+While playing DSD data, we hit a case where there might be very high
+sample rates (>1MHz), and pulsesink fails during stream creation with
+such streams because it erroneously advertises that it supports such
+rates.
+
+Since PA_RATE_MAX is #define'd to (8*48000U), we can't just use it in
+the caps string. Instead, we fix up the rate to what we actually support
+whenever we use our macro caps.
+---
+ ext/pulse/pulsesink.c | 13 +++++++------
+ ext/pulse/pulsesrc.c  | 13 ++++++-------
+ ext/pulse/pulseutil.c | 45 ++++++++++++++++++++++++++++++++++++++++++-
+ ext/pulse/pulseutil.h |  3 +++
+ 4 files changed, 60 insertions(+), 14 deletions(-)
+
+diff --git a/ext/pulse/pulsesink.c b/ext/pulse/pulsesink.c
+index 521c4a602..42330a4ba 100644
+--- a/ext/pulse/pulsesink.c
++++ b/ext/pulse/pulsesink.c
+@@ -1815,11 +1815,6 @@ static gboolean gst_pulsesink_query (GstBaseSink * sink, GstQuery * query);
+ static GstStateChangeReturn gst_pulsesink_change_state (GstElement * element,
+     GstStateChange transition);
+ 
+-static GstStaticPadTemplate pad_template = GST_STATIC_PAD_TEMPLATE ("sink",
+-    GST_PAD_SINK,
+-    GST_PAD_ALWAYS,
+-    GST_STATIC_CAPS (PULSE_SINK_TEMPLATE_CAPS));
+-
+ #define gst_pulsesink_parent_class parent_class
+ G_DEFINE_TYPE_WITH_CODE (GstPulseSink, gst_pulsesink, GST_TYPE_AUDIO_BASE_SINK,
+     gst_pulsesink_init_contexts ();
+@@ -1891,6 +1886,7 @@ gst_pulsesink_class_init (GstPulseSinkClass * klass)
+   GstBaseSinkClass *bc;
+   GstAudioBaseSinkClass *gstaudiosink_class = GST_AUDIO_BASE_SINK_CLASS (klass);
+   GstElementClass *gstelement_class = GST_ELEMENT_CLASS (klass);
++  GstCaps *caps;
+   gchar *clientname;
+ 
+   gobject_class->finalize = gst_pulsesink_finalize;
+@@ -1983,7 +1979,12 @@ gst_pulsesink_class_init (GstPulseSinkClass * klass)
+   gst_element_class_set_static_metadata (gstelement_class,
+       "PulseAudio Audio Sink",
+       "Sink/Audio", "Plays audio to a PulseAudio server", "Lennart Poettering");
+-  gst_element_class_add_static_pad_template (gstelement_class, &pad_template);
++
++  caps =
++      gst_pulse_fix_pcm_caps (gst_caps_from_string (PULSE_SINK_TEMPLATE_CAPS));
++  gst_element_class_add_pad_template (gstelement_class,
++      gst_pad_template_new ("sink", GST_PAD_SINK, GST_PAD_ALWAYS, caps));
++  gst_caps_unref (caps);
+ }
+ 
+ static void
+diff --git a/ext/pulse/pulsesrc.c b/ext/pulse/pulsesrc.c
+index 7af74ee6e..31ead0cfe 100644
+--- a/ext/pulse/pulsesrc.c
++++ b/ext/pulse/pulsesrc.c
+@@ -112,12 +112,6 @@ static GstStateChangeReturn gst_pulsesrc_change_state (GstElement *
+ 
+ static GstClockTime gst_pulsesrc_get_time (GstClock * clock, GstPulseSrc * src);
+ 
+-static GstStaticPadTemplate pad_template = GST_STATIC_PAD_TEMPLATE ("src",
+-    GST_PAD_SRC,
+-    GST_PAD_ALWAYS,
+-    GST_STATIC_CAPS (_PULSE_CAPS_PCM)
+-    );
+-
+ #define gst_pulsesrc_parent_class parent_class
+ G_DEFINE_TYPE_WITH_CODE (GstPulseSrc, gst_pulsesrc, GST_TYPE_AUDIO_SRC,
+     G_IMPLEMENT_INTERFACE (GST_TYPE_STREAM_VOLUME, NULL));
+@@ -129,6 +123,7 @@ gst_pulsesrc_class_init (GstPulseSrcClass * klass)
+   GstAudioSrcClass *gstaudiosrc_class = GST_AUDIO_SRC_CLASS (klass);
+   GstBaseSrcClass *gstbasesrc_class = GST_BASE_SRC_CLASS (klass);
+   GstElementClass *gstelement_class = GST_ELEMENT_CLASS (klass);
++  GstCaps *caps;
+   gchar *clientname;
+ 
+   gobject_class->finalize = gst_pulsesrc_finalize;
+@@ -222,7 +217,11 @@ gst_pulsesrc_class_init (GstPulseSrcClass * klass)
+       "PulseAudio Audio Source",
+       "Source/Audio",
+       "Captures audio from a PulseAudio server", "Lennart Poettering");
+-  gst_element_class_add_static_pad_template (gstelement_class, &pad_template);
++
++  caps = gst_pulse_fix_pcm_caps (gst_caps_from_string (_PULSE_CAPS_PCM));
++  gst_element_class_add_pad_template (gstelement_class,
++      gst_pad_template_new ("src", GST_PAD_SRC, GST_PAD_ALWAYS, caps));
++  gst_caps_unref (caps);
+ 
+   /**
+    * GstPulseSrc:volume:
+diff --git a/ext/pulse/pulseutil.c b/ext/pulse/pulseutil.c
+index 83aa4b640..ea08d156f 100644
+--- a/ext/pulse/pulseutil.c
++++ b/ext/pulse/pulseutil.c
+@@ -450,7 +450,7 @@ gst_pulse_format_info_to_caps (pa_format_info * format)
+       if (pa_format_info_get_prop_string (format,
+               PA_PROP_FORMAT_SAMPLE_FORMAT, &tmp)) {
+         /* No specific sample format means any sample format */
+-        ret = gst_caps_from_string (_PULSE_CAPS_PCM);
++        ret = gst_pulse_fix_pcm_caps (gst_caps_from_string (_PULSE_CAPS_PCM));
+         goto out;
+ 
+       } else if (ss.format == PA_SAMPLE_ALAW) {
+@@ -507,3 +507,46 @@ gst_pulse_format_info_to_caps (pa_format_info * format)
+ out:
+   return ret;
+ }
++
++GstCaps *
++gst_pulse_fix_pcm_caps (GstCaps * incaps)
++{
++  GstCaps *outcaps;
++  int i;
++
++  outcaps = gst_caps_make_writable (incaps);
++
++  for (i = 0; i < gst_caps_get_size (outcaps); i++) {
++    GstStructure *st = gst_caps_get_structure (outcaps, i);
++    const gchar *format = gst_structure_get_name (st);
++    const GValue *value;
++    GValue new_value = G_VALUE_INIT;
++    gint min, max, step;
++
++    if (!(g_str_equal (format, "audio/x-raw") ||
++            g_str_equal (format, "audio/x-alaw") ||
++            g_str_equal (format, "audio/x-mulaw")))
++      continue;
++
++    value = gst_structure_get_value (st, "rate");
++
++    if (!GST_VALUE_HOLDS_INT_RANGE (value))
++      continue;
++
++    min = gst_value_get_int_range_min (value);
++    max = gst_value_get_int_range_max (value);
++    step = gst_value_get_int_range_step (value);
++
++    if (min > PA_RATE_MAX)
++      min = PA_RATE_MAX;
++    if (max > PA_RATE_MAX)
++      max = PA_RATE_MAX;
++
++    g_value_init (&new_value, GST_TYPE_INT_RANGE);
++    gst_value_set_int_range_step (&new_value, min, max, step);
++
++    gst_structure_take_value (st, "rate", &new_value);
++  }
++
++  return outcaps;
++}
+diff --git a/ext/pulse/pulseutil.h b/ext/pulse/pulseutil.h
+index ef11424ee..c70369fc7 100644
+--- a/ext/pulse/pulseutil.h
++++ b/ext/pulse/pulseutil.h
+@@ -40,6 +40,8 @@
+                      "S24BE, S24LE, S24_32BE, S24_32LE, U8 }"
+ #endif
+ 
++/* NOTE! that we do NOT actually support rate=MAX. This must be fixed up using
++ * gst_pulse_fix_pcm_caps() before being used. */
+ #define _PULSE_CAPS_LINEAR \
+     "audio/x-raw, " \
+       "format = (string) " _PULSE_FORMATS ", " \
+@@ -90,5 +92,6 @@ pa_proplist *gst_pulse_make_proplist (const GstStructure *properties);
+ GstStructure *gst_pulse_make_structure (pa_proplist *properties);
+ 
+ GstCaps * gst_pulse_format_info_to_caps (pa_format_info * format);
++GstCaps * gst_pulse_fix_pcm_caps (GstCaps * incaps);
+ 
+ #endif
+-- 
+2.19.1
+

@@ -1,0 +1,2 @@
+ACTION=="add" SUBSYSTEM=="fastrpc", KERNEL=="adsprpc-smd", OWNER="system", GROUP="system", MODE="0600"
+ACTION=="add" SUBSYSTEM=="fastrpc", KERNEL=="adsprpc-smd-secure", OWNER="system", GROUP="system", MODE="0600"

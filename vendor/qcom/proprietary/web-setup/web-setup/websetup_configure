@@ -1,0 +1,13 @@
+#!/bin/sh
+
+PEM="/persist/websetup.pem"
+
+# HTTPS self-signed certificate
+if [ ! -f "$PEM" ]; then
+	ORG="<company>"
+	ORG_UNIT="<model>"
+
+	openssl req -x509 -newkey rsa:2048 -sha256 -days 36524 \
+		-subj "/O=$ORG/OU=$ORG_UNIT" \
+		-nodes -keyout "$PEM" -out "$PEM"
+fi

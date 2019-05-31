@@ -1,0 +1,88 @@
+# Copyright (c) 2018 The Linux Foundation. All rights reserved.
+
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
+# met:
+#    * Redistributions of source code must retain the above copyright
+#      notice, this list of conditions and the following disclaimer.
+#    * Redistributions in binary form must reproduce the above
+#      copyright notice, this list of conditions and the following
+#      disclaimer in the documentation and/or other materials provided
+#      with the distribution.
+#    * Neither the name of The Linux Foundation nor the names of its
+#      contributors may be used to endorse or promote products derived
+#      from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED
+# WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+policy_module(adbd, 1.0)
+
+type adbd_t;
+type adbd_exec_t;
+
+init_daemon_domain(adbd_t, adbd_exec_t)
+
+userdebug_or_eng(`
+    unconfined_shell_domtrans(adbd_t)
+    unconfined_domain(adbd_t)
+
+    gen_require(`
+        attribute user_data;
+        attribute system_data;
+    ')
+    manage_user_data_files(adbd_t, user_data)
+    manage_system_data_files(adbd_t, system_data)
+')
+
+files_read_config_files(adbd_t)
+kernel_read_system_state(adbd_t)
+allow adbd_t self:capability { dac_override setgid };
+allow adbd_t self:tcp_socket create_stream_socket_perms;
+corenet_tcp_bind_all_unreserved_ports(adbd_t)
+corenet_tcp_bind_generic_node(adbd_t)
+dev_read_sysfs(adbd_t)
+
+# USB gadgets
+fs_manage_configfs_files(adbd_t)
+# /dev/usb-ffs/adb
+fs_search_functionfs_dirs(adbd_t)
+fs_rw_functionfs_files(adbd_t)
+
+type adbd_system_data_t;
+system_data_files_type(adbd_system_data_t)
+
+# usb initscript
+type adbd_initrc_exec_t;
+type adbd_initrc_t;
+
+init_script_domain(adbd_initrc_t, adbd_initrc_exec_t)
+domtrans_pattern(adbd_initrc_t, adbd_exec_t, adbd_t)
+adb_manage_data_files(adbd_initrc_t)
+leprop_rw_props(adbd_initrc_t)
+alog_rw_log(adbd_initrc_t)
+data_filetrans(adbd_initrc_t, adbd_system_data_t, file)
+# The default initrc_t context is unconfined - do the same here.
+unconfined_domain(adbd_initrc_t)
+
+# /sys/class/android_usb/android0/*
+gen_require(`
+    type sysfs_t;
+')
+create_files_pattern(adbd_initrc_t, sysfs_t, sysfs_t)
+
+# Allow all domains opened via adb shell to display log messages on adb shell
+type adbd_pty_t;
+term_create_pty(adbd_t, adbd_pty_t)
+allow domain adbd_pty_t:chr_file rw_term_perms;
+allow domain adbd_t:fd use;
+qcmap_read_qcmap_etc_data_files(adbd_initrc_t)

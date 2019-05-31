@@ -1,0 +1,14 @@
+[Unit]
+Description=ql_manager_server
+#Wants=netmgrd.service
+After=qmuxd.service
+
+[Service]
+Type=simple
+Restart=always
+ExecStartPre=/bin/sleep 1
+ExecStart=/usr/bin/ql_manager_server
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

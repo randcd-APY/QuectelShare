@@ -1,0 +1,30 @@
+
+/****************************************************************************
+ @FILE mcm_mobileap_srv_mgr_v01.idl
+ @BRIEF MCM Mobileap Service Manager API
+ @DESCRIPTION
+  IoE Mobile Connection Manager MobileAP Service Manager API (MCM_MOBILEAP_SRV_MGR)
+
+  This API provides Data Structures for dynamic service loading for MOBILEAP service.
+
+ Copyright (c) 2014 Qualcomm Technologies, Inc.  All Rights Reserved.
+ Qualcomm Technologies Proprietary and Confidential.
+****************************************************************************/
+include "mcm_common_v01.idl";
+
+revision 1;
+
+
+message {
+} mcm_mobileap_srv_mgr_unload_req_msg;
+
+message {
+    mandatory mcm_response_t response;
+} mcm_mobileap_srv_mgr_unload_resp_msg;
+
+service mcm_mobileap_srv_mgr {
+
+    mcm_mobileap_srv_mgr_unload_req_msg        MCM_MOBILEAP_SRV_MGR_UNLODE_REQ,
+    mcm_mobileap_srv_mgr_unload_resp_msg       MCM_MOBILEAP_SRV_MGR_UNLODE_RESP;
+
+} = 0x40B;

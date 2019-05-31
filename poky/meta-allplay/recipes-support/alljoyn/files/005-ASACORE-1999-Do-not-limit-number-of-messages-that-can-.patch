@@ -1,0 +1,252 @@
+diff --git a/alljoyn_core/src/LocalTransport.cc b/alljoyn_core/src/LocalTransport.cc
+index 75a8e10..44c2f97 100644
+--- a/alljoyn_core/src/LocalTransport.cc
++++ b/alljoyn_core/src/LocalTransport.cc
+@@ -427,7 +427,9 @@ QStatus _LocalEndpoint::Dispatcher::DispatchMessage(Message& msg)
+     uint32_t zero = 0;
+     void* context = new Message(msg);
+     qcc::AlarmListener* localEndpointListener = this;
+-    Alarm alarm(zero, localEndpointListener, context, zero);
++    bool limitable = (endpoint->GetUniqueName() != msg->GetSender());
++    Alarm alarm(zero, localEndpointListener, context, zero, limitable);
++
+     QStatus status = AddAlarm(alarm);
+     if (status != ER_OK) {
+         Message* temp = static_cast<Message*>(context);
+diff --git a/common/inc/qcc/Alarm.h b/common/inc/qcc/Alarm.h
+index 4a2eff4..33338c7 100644
+--- a/common/inc/qcc/Alarm.h
++++ b/common/inc/qcc/Alarm.h
+@@ -87,8 +87,9 @@ class _Alarm {
+      * @param listener        Object to call when alarm is triggered.
+      * @param context         Opaque context passed to listener callback.
+      * @param periodMs        Periodicity of alarm in ms or 0 for no repeat.
++     * @param limited         Whether this alarm should be counted towards the Timer's max alarm limit
+      */
+-    _Alarm(Timespec absoluteTime, AlarmListener* listener, void* context = NULL, uint32_t periodMs = 0);
++    _Alarm(Timespec absoluteTime, AlarmListener* listener, void* context = NULL, uint32_t periodMs = 0, bool limited = true);
+ 
+     /**
+      * Create an alarm that can be added to a Timer.
+@@ -97,16 +98,18 @@ class _Alarm {
+      * @param listener        Object to call when alarm is triggered.
+      * @param context         Opaque context passed to listener callback.
+      * @param periodMs        Periodicity of alarm in ms or 0 for no repeat.
++     * @param limited         Whether this alarm should be counted towards the Timer's max alarm limit
+      */
+-    _Alarm(uint32_t relativeTime, AlarmListener* listener, void* context = NULL, uint32_t periodMs = 0);
++    _Alarm(uint32_t relativeTime, AlarmListener* listener, void* context = NULL, uint32_t periodMs = 0, bool limited = true);
+ 
+     /**
+      * Create an alarm that immediately calls a listener.
+      *
+      * @param listener        Object to call
+      * @param context         Opaque context passed to listener callback.
++     * @param limited         Whether this alarm should be counted towards the Timer's max alarm limit
+      */
+-    _Alarm(AlarmListener* listener, void* context = NULL);
++    _Alarm(AlarmListener* listener, void* context = NULL, bool limited = true);
+ 
+     /**
+      * Get context associated with alarm.
+@@ -117,7 +120,6 @@ class _Alarm {
+ 
+     /**
+      * Set context associated with alarm.
+-     *
+      */
+     void SetContext(void* c) const;
+ 
+@@ -144,6 +146,9 @@ class _Alarm {
+     uint32_t periodMs;
+     mutable void* context;
+     int32_t id;
++    const bool limitable;               /*< Whether this alarm needs to be counted towards the Timer's max alarm limit */
++
++    _Alarm& operator=(const _Alarm& other);
+ };
+ 
+ }
+diff --git a/common/src/Alarm.cc b/common/src/Alarm.cc
+index ffa1e82..c2c3bc7 100644
+--- a/common/src/Alarm.cc
++++ b/common/src/Alarm.cc
+@@ -31,17 +31,17 @@ using namespace qcc;
+ 
+ volatile int32_t qcc::_Alarm::nextId = 0;
+ 
+-_Alarm::_Alarm() : listener(NULL), periodMs(0), context(NULL), id(IncrementAndFetch(&nextId))
++_Alarm::_Alarm() : listener(NULL), periodMs(0), context(NULL), id(IncrementAndFetch(&nextId)), limitable(true)
+ {
+ }
+ 
+-_Alarm::_Alarm(Timespec absoluteTime, AlarmListener* listener, void* context, uint32_t periodMs)
+-    : alarmTime(absoluteTime), listener(listener), periodMs(periodMs), context(context), id(IncrementAndFetch(&nextId))
++_Alarm::_Alarm(Timespec absoluteTime, AlarmListener* listener, void* context, uint32_t periodMs, bool limitable)
++    : alarmTime(absoluteTime), listener(listener), periodMs(periodMs), context(context), id(IncrementAndFetch(&nextId)), limitable(limitable)
+ {
+ }
+ 
+-_Alarm::_Alarm(uint32_t relativeTime, AlarmListener* listener, void* context, uint32_t periodMs)
+-    : alarmTime(), listener(listener), periodMs(periodMs), context(context), id(IncrementAndFetch(&nextId))
++_Alarm::_Alarm(uint32_t relativeTime, AlarmListener* listener, void* context, uint32_t periodMs, bool limitable)
++    : alarmTime(), listener(listener), periodMs(periodMs), context(context), id(IncrementAndFetch(&nextId)), limitable(limitable)
+ {
+     if (relativeTime == WAIT_FOREVER) {
+         alarmTime = END_OF_TIME;
+@@ -51,8 +51,8 @@ _Alarm::_Alarm(uint32_t relativeTime, AlarmListener* listener, void* context, ui
+     }
+ }
+ 
+-_Alarm::_Alarm(AlarmListener* listener, void* context)
+-    : alarmTime(0, TIME_RELATIVE), listener(listener), periodMs(0), context(context), id(IncrementAndFetch(&nextId))
++_Alarm::_Alarm(AlarmListener* listener, void* context, bool limitable)
++    : alarmTime(0, TIME_RELATIVE), listener(listener), periodMs(0), context(context), id(IncrementAndFetch(&nextId)), limitable(limitable)
+ {
+ }
+ 
+diff --git a/common/src/Timer.cc b/common/src/Timer.cc
+index 6562fe9..7859bf9 100644
+--- a/common/src/Timer.cc
++++ b/common/src/Timer.cc
+@@ -270,6 +270,7 @@ class TimerImpl : public ThreadListener {
+     Mutex reentrancyLock;
+     qcc::String nameStr;
+     const uint32_t maxAlarms;
++    uint32_t numLimitableAlarms;               /**< Number of alarms currently in the alarm queue that count towards the limit */
+     std::deque<qcc::Thread*> addWaitQueue;     /**< Threads waiting for alarms set to become not-full */
+ 
+ };
+@@ -284,7 +285,8 @@ TimerImpl::TimerImpl(String name, bool expireOnExit, uint32_t concurrency, bool
+     controllerIdx(0),
+     preventReentrancy(preventReentrancy),
+     nameStr(name),
+-    maxAlarms(maxAlarms)
++    maxAlarms(maxAlarms),
++    numLimitableAlarms(0)
+ {
+     /* TimerImpl thread objects will be created when required */
+ }
+@@ -377,7 +379,7 @@ QStatus TimerImpl::AddAlarm(const Alarm& alarm)
+     lock.Lock();
+     if (isRunning) {
+         /* Don't allow an infinite number of alarms to exist on this timer */
+-        while (maxAlarms && (alarms.size() >= maxAlarms) && isRunning) {
++        while (maxAlarms && alarm->limitable && (numLimitableAlarms >= maxAlarms) && isRunning) {
+             Thread* thread = Thread::GetThread();
+             assert(thread);
+             addWaitQueue.push_front(thread);
+@@ -405,7 +407,9 @@ QStatus TimerImpl::AddAlarm(const Alarm& alarm)
+             /* Insert the alarm and alert the TimerImpl thread if necessary */
+             bool alertThread = alarms.empty() || (alarm < *alarms.begin());
+             alarms.insert(alarm);
+-
++            if (alarm->limitable) {
++                numLimitableAlarms++;
++            }
+             if (alertThread && (controllerIdx >= 0)) {
+                 TimerThread* tt = timerThreads[controllerIdx];
+                 if (tt->state == TimerThread::IDLE) {
+@@ -430,7 +434,7 @@ QStatus TimerImpl::AddAlarmNonBlocking(const Alarm& alarm)
+     lock.Lock();
+     if (isRunning) {
+         /* Don't allow an infinite number of alarms to exist on this timer */
+-        if (maxAlarms && (alarms.size() >= maxAlarms)) {
++        if (maxAlarms && (alarm->limitable && numLimitableAlarms >= maxAlarms)) {
+             lock.Unlock();
+             return ER_TIMER_FULL;
+         }
+@@ -438,7 +442,9 @@ QStatus TimerImpl::AddAlarmNonBlocking(const Alarm& alarm)
+         /* Insert the alarm and alert the TimerImpl thread if necessary */
+         bool alertThread = alarms.empty() || (alarm < *alarms.begin());
+         alarms.insert(alarm);
+-
++        if (alarm->limitable) {
++            numLimitableAlarms++;
++        }
+         if (alertThread && (controllerIdx >= 0)) {
+             TimerThread* tt = timerThreads[controllerIdx];
+             if (tt->state == TimerThread::IDLE) {
+@@ -463,6 +469,9 @@ bool TimerImpl::RemoveAlarm(const Alarm& alarm, bool blockIfTriggered)
+             while (it != alarms.end()) {
+                 if ((*it)->id == alarm->id) {
+                     foundAlarm = true;
++                    if ((*it)->limitable) {
++                        numLimitableAlarms--;
++                    }
+                     alarms.erase(it);
+                     break;
+                 }
+@@ -472,6 +481,9 @@ bool TimerImpl::RemoveAlarm(const Alarm& alarm, bool blockIfTriggered)
+             set<Alarm>::iterator it = alarms.find(alarm);
+             if (it != alarms.end()) {
+                 foundAlarm = true;
++                if ((*it)->limitable) {
++                    numLimitableAlarms--;
++                }
+                 alarms.erase(it);
+             }
+         }
+@@ -511,6 +523,9 @@ bool TimerImpl::ForceRemoveAlarm(const Alarm& alarm, bool blockIfTriggered)
+             while (it != alarms.end()) {
+                 if ((*it)->id == alarm->id) {
+                     foundAlarm = true;
++                    if ((*it)->limitable) {
++                        numLimitableAlarms--;
++                    }
+                     alarms.erase(it);
+                     break;
+                 }
+@@ -520,6 +535,9 @@ bool TimerImpl::ForceRemoveAlarm(const Alarm& alarm, bool blockIfTriggered)
+             set<Alarm>::iterator it = alarms.find(alarm);
+             if (it != alarms.end()) {
+                 foundAlarm = true;
++                if ((*it)->limitable) {
++                    numLimitableAlarms--;
++                }
+                 alarms.erase(it);
+             }
+         }
+@@ -557,6 +575,9 @@ QStatus TimerImpl::ReplaceAlarm(const Alarm& origAlarm, const Alarm& newAlarm, b
+     if (isRunning) {
+         set<Alarm>::iterator it = alarms.find(origAlarm);
+         if (it != alarms.end()) {
++            if ((*it)->limitable) {
++                numLimitableAlarms--;
++            }
+             alarms.erase(it);
+             status = AddAlarm(newAlarm);
+         } else if (blockIfTriggered) {
+@@ -593,6 +614,9 @@ bool TimerImpl::RemoveAlarm(const AlarmListener& listener, Alarm& alarm)
+         for (set<Alarm>::iterator it = alarms.begin(); it != alarms.end(); ++it) {
+             if ((*it)->listener == &listener) {
+                 alarm = *it;
++                if ((*it)->limitable) {
++                    numLimitableAlarms--;
++                }
+                 alarms.erase(it);
+                 removedOne = true;
+                 break;
+@@ -924,6 +948,9 @@ ThreadReturn STDCALL TimerThread::Run(void* arg)
+                 set<Alarm>::iterator it = timer->alarms.find(topAlarm);
+                 if (it != timer->alarms.end()) {
+                     Alarm top = *it;
++                    if (top->limitable) {
++                        timer->numLimitableAlarms--;
++                    }
+                     timer->alarms.erase(it);
+                     currentAlarm = &top;
+                     if (0 < timer->addWaitQueue.size()) {
+@@ -1067,6 +1094,9 @@ void TimerImpl::ThreadExit(Thread* thread)
+              */
+             set<Alarm>::iterator it = alarms.begin();
+             Alarm alarm = *it;
++            if (alarm->limitable) {
++                numLimitableAlarms--;
++            }
+             alarms.erase(it);
+             tt->SetCurrentAlarm(&alarm);
+             lock.Unlock();
+-- 
+2.5.0
+

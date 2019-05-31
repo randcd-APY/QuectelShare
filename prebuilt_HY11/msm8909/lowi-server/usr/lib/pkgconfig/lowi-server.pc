@@ -1,0 +1,10 @@
+prefix=/usr
+exec_prefix=/usr
+libdir=/usr/lib
+includedir=/usr/include
+
+Name: lowi-server
+Description: QTI GPS lowi server
+Version: @VERSION
+Libs:
+Cflags:

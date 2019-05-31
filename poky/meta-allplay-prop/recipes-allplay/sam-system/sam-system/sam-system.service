@@ -1,0 +1,13 @@
+[Unit]
+Description=AllPlay system app
+Wants=leprop.service device_configure.service alljoyn.service
+After=leprop.service device_configure.service alljoyn.service
+Conflicts=dnsmasq.service
+
+[Service]
+Restart=on-failure
+ExecStartPre=/bin/sh -c '[ "$(getprop websetup.enable)" == "webOnly" ]'
+ExecStart=/usr/bin/sam-systemd
+
+[Install]
+WantedBy=multi-user.target

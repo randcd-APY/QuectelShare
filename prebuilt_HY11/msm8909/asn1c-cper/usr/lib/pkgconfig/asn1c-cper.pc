@@ -1,0 +1,9 @@
+prefix=/usr
+exec_prefix=/usr
+libdir=/usr/lib
+includedir=/usr/include
+
+Name: asn1c-cper
+Description: QTI GPS asn1c
+Version: @VERSION
+Libs: -L${libdir} -lasn1c_cper

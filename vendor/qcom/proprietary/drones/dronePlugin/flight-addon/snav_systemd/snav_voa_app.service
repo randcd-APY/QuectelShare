@@ -1,0 +1,21 @@
+# Copyright (c) 2017 Qualcomm Technologies, Inc.
+# All Rights Reserved.
+# Confidential and Proprietary - Qualcomm Technologies, Inc.
+#
+
+[Unit]
+Description=Snapdragon Navigator VOA App
+SourcePath=/usr/bin/snav_voa_app
+After=snav_vio_app.service
+Requires=snav_vio_app.service
+
+[Service]
+User=root
+Type=simple
+Restart=always
+RemainAfterExit=no
+ExecStart=/usr/bin/snav_voa_app
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,61 @@
+<!--
+ Copyright (C) 2017 Qualcomm Technologies, Inc.
+ All rights reserved
+ Confidential and Proprietary - Qualcomm Technologies, Inc.
+-->
+<resources>
+	<string name="app_name">QTI AVS</string>
+	<string name="searching">Searching&#8230;</string>
+	<string name="no_wifi_connection">No Wi-Fi Connection</string>
+	<string name="setup_wifi">SETUP WI-FI</string>
+	<string name="setup_alex">SETUP ALEXA</string>
+	<string name="alexa">Alexa</string>
+	<string name="skip">Skip</string>
+	<string name="done">Done</string>
+	<string name="name_your_device">Name Your Device</string>
+	<string name="enter_password_for">Enter Password for %1$s</string>
+	<string name="choose_wifi_network">Choose Wi-Fi Network</string>
+	<string name="no_access_coarse_location_permission">Location Permission Needed</string>
+	<string name="connecting">Connecting&#8230;</string>
+	<string name="retrieving_scan_list">Retrieving Wi-Fi Networks&#8230;</string>
+	<string name="error">Error</string>
+	<string name="login_success">Login Success</string>
+	<string name="login_error">Login Error</string>
+	<string name="token_is">Token is %1$s</string>
+	<string name="auth_error_is">Auth error code is %1$s</string>
+	<string name="ok">Ok</string>
+	<string name="network_not_supported">The authentication encryption of \"%1$s\" is not supported.</string>
+	<string name="wrong_network">Wrong network connected.  We\'re supposed to be connected to \"%1$s\", but we are on \"%2$s\".</string>
+	<string name="onboarding_error">An error occurred while onboarding to \"%1$s\".\n\nPlease try again.</string>
+	<string name="app_unable_connect">Onboarding of device was successful, but %1$s was unable to connect to \"%2$s\".\n\nPlease try to connect to \"%2$s\" manually.</string>
+	<string name="unable_to_retrieve_scan_list">Unable to retrieve network list.\n\nPlease try again.</string>
+	<string name="unable_to_connect">%1$s was unable to connect to \"%2$s\".\n\nPlease try to connect to \"%2$s\" manually.</string>
+	<string name="unable_to_obtain_info">Unable to obtain information from \"%1$s\".\nPlease try again.</string>
+	<string name="cont">Continue</string>
+	<string name="great">Great!</string>
+	<string name="successfully_onboarded">Your device is now onboarded.</string>
+	<string name="setup_complete">Setup Complete</string>
+	<string name="save">Save</string>
+	<string name="connect">Connect</string>
+	<string name="cancel">Cancel</string>
+	<string name="show_password">Show password</string>
+	<string name="sign_in_with_amazon">Sign in with Amazon</string>
+	<string name="things_to_try">Things to try</string>
+	<string name="alexa_intro">Your device includes access to Alexa.\nConnect your Amazon account to access personalized features.</string>
+	<string name="alexa_detail">Alexa allows you to use your voice to play music and get news, sports scores, weather and more—all hands-free.\nAll you have to do is ask Alexa.</string>
+	<string name="alexa_ask">Here are some of the many things you can ask Alexa</string>
+	<string name="alexa_weather">Alexa, what’s the weather?</string>
+	<string name="alexa_flash_briefing">Alexa, play my Flash Briefing.</string>
+	<string name="alexa_indian_restaurant">Alexa, what are some top-rated Indian restaurants?</string>
+	<string name="alexa_set_timer">Alexa, set a timer for 20 mins.</string>
+	<string name="alexa_more_info">To learn more and access additional features, download the Alexa App.</string>
+	<string name="alexa_app">Alexa App</string>
+	<string name="network_ssid">NETWORK SSID</string>
+	<string name="enter_ssid">Enter SSID</string>
+	<string name="security">SECURITY</string>
+	<string name="network_password">NETWORK PASSWORD</string>
+	<string name="add_wifi_network">ADD WI-FI NETWORK</string>
+	<string name="enter_password">Enter password</string>
+	<string name="security_open">OPEN</string>
+	<string name="security_wpa2">WPA2</string>
+</resources>

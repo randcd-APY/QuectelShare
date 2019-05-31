@@ -1,0 +1,12 @@
+[Unit]
+SourcePath=/usr/bin/QCMAP_ConnectionManager
+Description= QCMAP connectionManager service
+After=mount-data.service netmgrd.service
+
+[Service]
+Restart=always
+ExecStartPre=/bin/sleep 1
+ExecStart=/usr/bin/QCMAP_ConnectionManager /etc/data/mobileap_cfg.xml d
+
+[Install]
+WantedBy=multi-user.target

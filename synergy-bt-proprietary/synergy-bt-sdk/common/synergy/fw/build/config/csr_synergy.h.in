@@ -1,0 +1,182 @@
+#ifndef _CSR_SYNERGY_H
+#define _CSR_SYNERGY_H
+/*****************************************************************************
+
+Copyright (c) 2010 - 2017 Qualcomm Technologies International, Ltd.
+All Rights Reserved.
+Qualcomm Technologies International, Ltd. Confidential and Proprietary. 
+
+*****************************************************************************/
+#include "csr_components.h"
+
+#define CSR_PLATFORM_${CSR_PLATFORM}
+
+#define CSR_FUNCATTR_NORETURN(x) ${CSR_FUNCATTR_NORETURN}
+
+/* Versioning */
+#define CSR_VERSION_NUMBER(major,minor,fix) ((major * 10000) + (minor * 100) + fix)
+
+#define H4		1
+#define H4IBS		2
+#define H4DS		3
+
+#define BLUECORE	1
+#define QCA		2
+
+#define MSM		1
+#define MDM		2
+#define ATLAS7		3
+
+#define INTERNAL	1
+#define EXTERNAL	2
+
+/* Overall configuration */
+#ifndef CSR_ENABLE_SHUTDOWN
+#cmakedefine CSR_ENABLE_SHUTDOWN
+#endif
+
+#ifndef CSR_EXCEPTION_HANDLER
+#cmakedefine CSR_EXCEPTION_HANDLER
+#endif
+
+#ifndef CSR_EXCEPTION_PANIC
+#cmakedefine CSR_EXCEPTION_PANIC
+#endif
+
+#ifndef CSR_CHIP_MANAGER_TEST_ENABLE
+#cmakedefine CSR_CHIP_MANAGER_TEST_ENABLE
+#endif
+
+#ifndef CSR_CHIP_MANAGER_QUERY_ENABLE
+#cmakedefine CSR_CHIP_MANAGER_QUERY_ENABLE
+#endif
+
+#ifndef CSR_CHIP_MANAGER_ENABLE
+#cmakedefine CSR_CHIP_MANAGER_ENABLE
+#endif
+
+#ifndef CSR_BUILD_DEBUG
+#cmakedefine CSR_BUILD_DEBUG
+#endif
+
+#ifndef CSR_INSTRUMENTED_PROFILING_SERVICE
+#cmakedefine CSR_INSTRUMENTED_PROFILING_SERVICE
+#endif
+
+#ifndef CSR_LOG_ENABLE
+#cmakedefine CSR_LOG_ENABLE
+#endif
+
+#if (${CSR_BT_CHIP_TYPE} == BLUECORE)
+#define CSR_USE_BLUECORE_CHIP
+#elif (${CSR_BT_CHIP_TYPE} == QCA)
+#define CSR_USE_QCA_CHIP
+#endif /* CSR_BT_CHIP_TYPE */
+
+#ifndef CSR_ENABLE_QCA_CHIP_DSP
+#cmakedefine CSR_ENABLE_QCA_CHIP_DSP
+#endif
+
+#ifndef CSR_QCA_CHIP_CTL_LOG_ENABLE
+#cmakedefine CSR_QCA_CHIP_CTL_LOG_ENABLE
+#endif
+
+#ifndef CSR_ASYNC_LOG_TRANSPORT
+#cmakedefine CSR_ASYNC_LOG_TRANSPORT
+#endif
+
+#if (${CSR_H4_TRANSPORT} == H4)
+#define CSR_H4_TRANSPORT_ENABLE
+#elif (${CSR_H4_TRANSPORT} == H4IBS)
+#define CSR_H4IBS_TRANSPORT_ENABLE
+#elif (${CSR_H4_TRANSPORT} == H4DS)
+#define CSR_H4DS_TRANSPORT_ENABLE
+#endif /* CSR_H4_TRANSPORT */
+
+#if (${CSR_HOST_PLATFORM} == MSM)
+#define USE_MSM_PLATFORM
+#elif (${CSR_HOST_PLATFORM} == MDM)
+#define USE_MDM_PLATFORM
+#elif (${CSR_HOST_PLATFORM} == ATLAS7)
+#define USE_ATLAS7_PLATFORM
+#elif (${CSR_HOST_PLATFORM} == IMX)
+#define USE_IMX_PLATFORM
+#endif /* CSR_HOST_PLATFORM */
+
+#if (${CSR_BOOT_QCA_CHIP_MODE} == INTERNAL)
+#define CSR_BOOT_QCA_CHIP_INTERNALLY
+#elif (${CSR_BOOT_QCA_CHIP_MODE} == EXTERNAL)
+#define CSR_BOOT_QCA_CHIP_EXTERNALLY
+#endif /* CSR_BOOT_QCA_CHIP_MODE */
+
+#ifndef CSR_USE_BT_AUDIO_SERVICE
+#cmakedefine CSR_USE_BT_AUDIO_SERVICE
+#endif
+
+#ifndef CSR_AMP_ENABLE
+#cmakedefine CSR_AMP_ENABLE
+#endif
+
+#ifndef CSR_BT_LE_ENABLE
+#cmakedefine CSR_BT_LE_ENABLE
+#endif
+
+#cmakedefine CSR_FRW_BUILDSYSTEM_AVAILABLE
+#ifdef CSR_FRW_BUILDSYSTEM_AVAILABLE
+#include "csr_frw_config.h"
+#endif
+
+#ifdef CSR_COMPONENT_BT
+#include "csr_bt_config.h"
+#endif
+
+#cmakedefine CSR_WIFI_BUILDSYSTEM_AVAILABLE
+#ifdef CSR_WIFI_BUILDSYSTEM_AVAILABLE
+#include "csr_wifi_config.h"
+#endif
+
+#cmakedefine CSR_MERCURY_BUILDSYSTEM_AVAILABLE
+#ifdef CSR_MERCURY_BUILDSYSTEM_AVAILABLE
+#include "csr_mercury_config.h"
+#endif
+
+/* Do not edit this area - Start */
+#ifdef CSR_LOG_ENABLE
+#ifndef CSR_LOG_INCLUDE_FILE_NAME_AND_LINE_NUMBER
+#define CSR_LOG_INCLUDE_FILE_NAME_AND_LINE_NUMBER
+#endif
+#endif
+
+#ifdef CSR_BUILD_DEBUG
+#ifndef MBLK_DEBUG
+#define MBLK_DEBUG
+#endif
+#endif
+
+#ifdef CSR_ENABLE_SHUTDOWN
+#ifndef ENABLE_SHUTDOWN
+#define ENABLE_SHUTDOWN
+#endif
+#endif
+
+#ifndef CSR_EXCEPTION_HANDLER
+#ifndef EXCLUDE_CSR_EXCEPTION_HANDLER_MODULE
+#define EXCLUDE_CSR_EXCEPTION_HANDLER_MODULE
+#endif
+#endif
+
+#ifdef CSR_EXCEPTION_PANIC
+#ifndef EXCEPTION_PANIC
+#define EXCEPTION_PANIC
+#endif
+#endif
+
+#ifndef FTS_VER
+#define FTS_VER "${CSR_EXTERNAL_FTS_VER}"
+#endif
+
+/* Do not edit this area - End */
+
+void CsrSupressEmptyCompilationUnit(void);
+
+#endif /* _CSR_SYNERGY_H */

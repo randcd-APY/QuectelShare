@@ -1,0 +1,142 @@
+# Copyright (c) 2018, The Linux Foundation. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
+# met:
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above
+#       copyright notice, this list of conditions and the following
+#       disclaimer in the documentation and/or other materials provided
+#       with the distribution.
+#     * Neither the name of The Linux Foundation nor the names of its
+#       contributors may be used to endorse or promote products derived
+#       from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED
+# WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+policy_module(alexa , 1.0)
+
+########################################
+#
+# Declarations
+#
+
+type alexa_data_t;
+files_type(alexa_data_t)
+
+type alexa_t;
+type alexa_exec_t;
+init_daemon_domain(alexa_t, alexa_exec_t)
+
+files_mountpoint(alexa_data_t)
+
+files_read_etc_files(alexa_t);
+manage_system_data_files(alexa_t, alexa_data_t)
+
+sysnet_read_config(alexa_t);
+allow alexa_t self:udp_socket { read write create connect getattr };
+allow alexa_t self:tcp_socket { read write create connect getattr setopt name_connect getopt };
+allow alexa_t self:unix_dgram_socket { read write create bind listen ioctl connect  };
+allow alexa_t self:netlink_route_socket { read write create bind getattr setopt nlmsg_read };
+allow alexa_t self:capability net_raw;
+allow alexa_t self:fifo_file { read write ioctl getattr };
+
+corenet_tcp_connect_http_port(alexa_t)
+
+#################
+
+type alexa_avs_fifo_t;
+files_pid_file(alexa_avs_fifo_t)
+alexa_manage_avs_fifo(alexa_t)
+
+leprop_rw_props(alexa_t)
+kernel_read_system_state(alexa_t)
+allow alexa_t self:capability sys_time;
+dontaudit alexa_t self:capability2 block_suspend;
+
+type alexa_tmp_t;
+files_type(alexa_tmp_t);
+files_var_filetrans(alexa_t, alexa_tmp_t, file)
+files_tmp_filetrans(alexa_t, alexa_tmp_t, file)
+allow alexa_t alexa_tmp_t:file { read write open create execute unlink };
+
+######################################
+# canditates for qahw/qti_audio_server
+
+gen_require(`
+    type sound_device_t;
+')
+
+audio_binder_call_transfer(alexa_t)
+
+servicemanager_binder_use(alexa_t)
+alog_rw_log(alexa_t) # Alexa does not access android logs
+
+allow audio-server-daemon_t alexa_t:binder call;
+allow audio-server-daemon_t alexa_t:fd use;
+
+allow alexa_t device_t:chr_file { read write ioctl open };
+dev_read_sound(alexa_t)
+dev_write_sound(alexa_t)
+dontaudit alexa_t self:capability dac_override;
+#######################################
+
+gen_require(`
+    type clock_device_t;
+    type event_device_t;
+    type dhcpc_var_run_t;
+    type init_var_run_t;
+    type udev_var_run_t;
+    type firmware_t;
+    type v4l_device_t;
+    type debugfs_t;
+')
+
+allow alexa_t clock_device_t:chr_file { read write ioctl open };
+allow alexa_t event_device_t:chr_file { read write ioctl open getattr };
+allow alexa_t dhcpc_var_run_t:file { read open getattr };
+allow alexa_t debugfs_t:dir { search };
+
+##required for wake_lock request
+corecmd_exec_shell(alexa_t)
+
+##required for GStreamer##
+allow alexa_t self:netlink_kobject_uevent_socket { create setopt bind getattr };
+dev_rw_sysfs(alexa_t)
+rw_video_dev(alexa_t)
+allow alexa_t udev_var_run_t:file { read open getattr };
+allow alexa_t udev_var_run_t:dir { search };
+allow alexa_t firmware_t:dir { search };
+dev_read_video_dev(alexa_t)
+dev_write_video_dev(alexa_t)
+gnome_stream_connect_gconf(alexa_t)
+gnome_manage_gstreamer_orcexec(alexa_t)
+gnome_mmap_gstreamer_orcexec(alexa_t)
+gnome_user_runtime_filetrans_gstreamer_orcexec(alexa_t, file)
+gnome_user_home_dir_filetrans_gstreamer_orcexec(alexa_t, file)
+
+###########################
+
+corecmd_exec_bin(alexa_t)
+
+userdebug_or_eng(`
+  rw_diag_dev(alexa_t);
+')
+
+allow alexa_t init_var_run_t:dir { search };
+dev_read_urand(alexa_t)
+miscfiles_read_generic_certs(alexa_t)
+
+# Manage private files inside /data
+data_filetrans(alexa_t, alexa_data_t, { file dir })

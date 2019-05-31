@@ -1,0 +1,235 @@
+# Copyright (c) 2016,2018 The Linux Foundation. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
+# met:
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above
+#       copyright notice, this list of conditions and the following
+#       disclaimer in the documentation and/or other materials provided
+#       with the distribution.
+#     * Neither the name of The Linux Foundation nor the names of its
+#       contributors may be used to endorse or promote products derived
+#       from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED
+# WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+policy_module(location, 1.0)
+
+gen_require(`
+    type system_dir_t;
+    type adbd_t;
+')
+
+########################################
+#
+# Declarations
+#
+
+type loc_t;
+type loc_exec_t;
+
+init_daemon_domain(loc_t, loc_exec_t)
+inittab_domtrans(loc_t, loc_exec_t)
+
+dontaudit loc_t system_dir_t:dir search;
+
+corecmd_exec_bin(loc_t)
+dev_read_sysfs(loc_t)
+dev_read_urand(loc_t)
+files_read_etc_files(loc_t)
+logging_send_syslog_msg(loc_t)
+allow loc_t self:{ socket udp_socket } create_socket_perms;
+allow loc_t self:fifo_file rw_fifo_file_perms;
+allow loc_t self:process { setcap signal };
+allow loc_t self:netlink_route_socket read;
+
+#added by peeta
+allow xtwifi_agent_t cert_t:dir search;
+allow xtwifi_agent_t cert_t:file { read getattr open };
+
+# Drop from root
+allow loc_t self:capability { setuid setgid };
+kernel_read_network_state(loc_t)
+
+type loc_data_t;
+user_data_files_type(loc_data_t)
+data_filetrans(loc_t, loc_data_t, file)
+manage_user_data_files(loc_t, loc_data_t)
+
+## location hal
+
+type loc_hald_t;
+type loc_hald_exec_t;
+
+init_daemon_domain(loc_hald_t, loc_hald_exec_t)
+inittab_domtrans(loc_hald_t, loc_hald_exec_t)
+logging_send_syslog_msg(loc_hald_t)
+
+userdebug_or_eng(`
+    rw_diag_dev(loc_hald_t)
+')
+dev_read_sysfs(loc_hald_t)
+files_read_etc_files(loc_hald_t)
+files_rw_qcmap_etc_data_files(loc_hald_t)
+
+allow loc_hald_t self:capability { net_admin setgid setuid };
+allow loc_hald_t self:process setcap;
+allow loc_hald_t self:fifo_file rw_fifo_file_perms;
+allow loc_hald_t self:{ socket unix_dgram_socket } create_socket_perms;
+allow loc_hald_t self:netlink_socket create_socket_perms;
+allow loc_hald_t { loc_t engine_service_t }:unix_dgram_socket sendto;
+allow loc_t loc_hald_t:unix_dgram_socket sendto;
+allow loc_hald_t self:unix_dgram_socket sendto;
+allow loc_hald_t xtra_daemon_t:unix_dgram_socket sendto;
+allow loc_hald_t adbd_t:unix_dgram_socket sendto;
+allow loc_hald_t socket_device_t:sock_file write;
+search_user_data_dir(loc_hald_t)
+
+
+dontaudit loc_hald_t self:capability { dac_override dac_read_search };
+dontaudit loc_hald_t system_dir_t:dir search;
+
+### xtwifi_agent
+
+type xtwifi_agent_t;
+type xtwifi_agent_exec_t;
+
+init_daemon_domain(xtwifi_agent_t, xtwifi_agent_exec_t)
+# Launched by loc_launcher instead of init
+domtrans_pattern(loc_t, xtwifi_agent_exec_t, xtwifi_agent_t)
+logging_send_syslog_msg(xtwifi_agent_t)
+
+dontaudit xtwifi_agent_t system_dir_t:dir search;
+
+files_read_etc_files(xtwifi_agent_t)
+allow xtwifi_agent_t self:{ udp_socket unix_dgram_socket } create_socket_perms;
+
+data_filetrans(xtwifi_agent_t, loc_data_t, file)
+manage_user_data_files(xtwifi_agent_t, loc_data_t)
+
+### xtwifi_client
+
+type xtwifi_client_t;
+type xtwifi_client_exec_t;
+
+init_daemon_domain(xtwifi_client_t, xtwifi_client_exec_t)
+# Launched by loc_launcher instead of init
+domtrans_pattern(loc_t, xtwifi_client_exec_t, xtwifi_client_t)
+logging_send_syslog_msg(xtwifi_client_t)
+
+dontaudit xtwifi_client_t system_dir_t:dir search;
+
+files_read_etc_files(xtwifi_client_t)
+dev_read_sysfs(xtwifi_client_t)
+
+allow xtwifi_client_t self:fifo_file rw_fifo_file_perms;
+allow xtwifi_client_t self:{ socket unix_dgram_socket } create_socket_perms;
+
+data_filetrans(xtwifi_client_t, loc_data_t, file)
+manage_user_data_files(xtwifi_client_t, loc_data_t)
+dev_read_urand(xtwifi_client_t)
+
+### engine-service
+type engine_service_t;
+type engine_service_exec_t;
+
+init_daemon_domain(engine_service_t, engine_service_exec_t)
+# Launched by loc_launcher instead of init
+domtrans_pattern(loc_t, engine_service_exec_t, engine_service_t)
+logging_send_syslog_msg(engine_service_t)
+
+userdebug_or_eng(`
+    rw_diag_dev(engine_service_t)
+')
+
+allow engine_service_t loc_hald_t:unix_dgram_socket sendto;
+allow engine_service_t self:socket create_socket_perms;
+
+files_read_etc_files(engine_service_t)
+data_filetrans(engine_service_t, loc_data_t, file)
+manage_user_data_files(engine_service_t, loc_data_t)
+
+dontaudit engine_service_t system_dir_t:dir search;
+
+### xtra-daemon
+type xtra_daemon_t;
+type xtra_daemon_exec_t;
+init_daemon_domain(xtra_daemon_t, xtra_daemon_exec_t)
+
+# Launched by loc_launcher instead of init
+domtrans_pattern(loc_t, xtra_daemon_exec_t, xtra_daemon_t)
+logging_send_syslog_msg(xtra_daemon_t)
+
+allow xtra_daemon_t loc_hald_t:unix_dgram_socket sendto;
+allow xtra_daemon_t self:{ socket udp_socket } create_socket_perms;
+allow xtra_daemon_t self:tcp_socket { read write create connect getattr setopt name_connect getopt };
+allow xtra_daemon_t self:fifo_file rw_fifo_file_perms;
+# read build.prop
+leprop_read_props(xtra_daemon_t)
+## this is for access to /run/resolv.conf
+files_read_generic_pids(xtra_daemon_t)
+allow xtra_daemon_t self:process signal;
+
+corenet_tcp_connect_http_port(xtra_daemon_t)
+sysnet_read_config(xtra_daemon_t)
+dev_read_urand(xtra_daemon_t)
+dev_read_rand(xtra_daemon_t)
+miscfiles_read_generic_certs(xtra_daemon_t)
+dev_read_sysfs(xtra_daemon_t)
+
+type loc_tmp_t;
+files_tmp_file(loc_tmp_t)
+files_tmp_filetrans(xtra_daemon_t, loc_tmp_t, file)
+allow xtra_daemon_t loc_tmp_t:file { create_file_perms write_file_perms read_file_perms };
+files_read_generic_tmp_symlinks(xtra_daemon_t)
+
+files_read_etc_files(xtra_daemon_t)
+data_filetrans(xtra_daemon_t, loc_data_t, file)
+manage_user_data_files(xtra_daemon_t, loc_data_t)
+
+dontaudit xtra_daemon_t system_dir_t:dir search;
+
+### lowi-server
+type lowi_server_t;
+type lowi_server_exec_t;
+init_daemon_domain(lowi_server_t, lowi_server_exec_t)
+
+# Launched by loc_launcher instead of init
+domtrans_pattern(loc_t, lowi_server_exec_t, lowi_server_t)
+logging_send_syslog_msg(lowi_server_t)
+
+kernel_read_network_state(lowi_server_t)
+allow lowi_server_t self:{ netlink_route_socket udp_socket } create_socket_perms;
+allow lowi_server_t self:capability net_admin;
+
+files_read_etc_files(lowi_server_t)
+
+kernel_dontaudit_request_load_module(lowi_server_t)
+dontaudit lowi_server_t system_dir_t:dir search;
+
+
+### location socket
+type loc_socket_t;
+files_type(loc_socket_t)
+device_manage_socket_file({ loc_t loc_hald_t xtra_daemon_t engine_service_t }, loc_socket_t)
+
+allow { xtwifi_agent_t xtwifi_client_t lowi_server_t xtra_daemon_t engine_service_t } loc_socket_t:sock_file write;
+allow { lowi_server_t xtwifi_agent_t xtwifi_client_t xtra_daemon_t engine_service_t } loc_t:unix_stream_socket { connectto rw_stream_socket_perms };
+device_search_sockets({ xtwifi_agent_t xtwifi_client_t xtra_daemon_t lowi_server_t engine_service_t })
+
+#added by peeta
+allow xtwifi_client_t leprop_t:unix_stream_socket connectto;
+allow loc_t leprop_sock_t:sock_file write;
+allow loc_t leprop_t:unix_stream_socket connectto;

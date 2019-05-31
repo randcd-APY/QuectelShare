@@ -1,0 +1,3 @@
+# BT proprietary Packages
+IMAGE_INSTALL += "qc-bt-daemon"
+IMAGE_INSTALL += "hci-qcomm-init"

@@ -1,0 +1,10 @@
+<config>
+  <image_tree>
+    <name>LE.UM.2.3.1.r1</name>
+    <build_id>LE.UM.2.3.1.r1-04000-8x09.0-1</build_id>
+    <branch_point_revision/>
+    <revision>04000</revision>
+    <spin>1</spin>
+    <client>8x09.0</client>
+  </image_tree>
+</config>

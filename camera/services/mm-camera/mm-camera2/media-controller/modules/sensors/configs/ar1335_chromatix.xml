@@ -1,0 +1,172 @@
+<!--
+  Copyright (c) 2017 Qualcomm Technologies, Inc.
+  All Rights Reserved.
+  Confidential and Proprietary - Qualcomm Technologies, Inc.
+-->
+
+<!--
+CommonChromatixInfo:
+	CommonChromatixInfo is the information about chromatix needed for
+		various use cases.
+	Ex:- Preview, Snapshot, ZSL, HFR, HDR, Video, Liveshot for ISP, CPP,
+		3A and SW PostProc.
+	Entries in this node are common for all sensor modes.
+
+ResolutionChromatixInfo:
+	ResolutionChromatixInfo is the information about chromatix needed for
+		various use cases.
+	Ex:- Preview, Snapshot, ZSL, HFR, HDR, Video, Liveshot for ISP, CPP,
+		3A and SW PostProc.
+	Entries in this node are specific to sensor resolution.
+
+ChromatixName:
+	Contains the list of chromatix names for all modules.
+	special_mode_mask:
+		It is the bit mask for special modes, which is used for
+			chromatix selection.
+		Special modes can be any mode that needs a special chromatix.
+		Ex:- scene mode, DZOOM mode, OIS capture mode, flash mode
+		This is applicable for CommonChromatixInfo and
+			ResolutionChromatixInfo.
+		special_mode_mask="0" means none of the special modes are
+			selected.
+	sensor_resolution_index:
+		It is the sensor resolution index for which chromatix libraries
+			will be choosen.
+		It is applicable only in ResolutionChromatixInfo.
+
+ISPCommon :
+	Common tuning library name for ISP
+ISPPreview :
+	Preview tuning library name for ISP
+ISPSnapshot :
+	Snapshot tuning library name for ISP
+CPPCommon :
+	Common tuning library name for CPP
+CPPPreview :
+	Preview tuning library name for CPP
+CPPSnapshot :
+	Snapshot tuning library name for CPP
+CPPLiveshot :
+	Liveshot tuning library name for CPP
+PostProc :
+	Tuning library name for postproc module
+A3Preview :
+	Preview tuning library for 3A
+A3Video :
+	Video tuning library for 3A
+
+Order of Resolution Pick:
+	Assume the current sensor mode is "r" and special mode mask is "s".
+	Chromatix for a module and type is choosen in this order till we find a
+		valid chroamtix file name or else NULL is returned.
+	1) From ResolutionChromatixInfo node for which sensor_resolution_index
+		is "r" and special_mode_mask is "s".
+	2) From CommonChromatixInfo node for which special_mode_mask is "s".
+	3) From ResolutionChromatixInfo node for which sensor_resolution_index
+		is "r" and special_mode_mask is "0".
+	4) From CommonChromatixInfo node for which special_mode_mask is "0".
+	5) NULL is returned if we dont find in any of the above cases.
+
+special_mode_mask values:
+	SENSOR_SPECIAL_MODE_NONE = 0,
+	SENSOR_SPECIAL_MODE_FLASH = 1,
+	SENSOR_SPECIAL_MODE_ZOOM_UPSCALE = 2,
+	SENSOR_SPECIAL_MODE_ZOOM_DOWNSCALE = 4,
+	SENSOR_SPECIAL_MODE_OIS_CAPTURE = 8,
+-->
+
+<ChromatixConfigurationRoot>
+  <CommonChromatixInfo>
+    <ChromatixName>
+      <ISPCommon>ar1335_common</ISPCommon>
+      <PostProc>ar1335_postproc</PostProc>
+    </ChromatixName>
+  </CommonChromatixInfo>
+  <ResolutionChromatixInfo>
+    <ChromatixName sensor_resolution_index="0">
+      <ISPPreview>ar1335_preview</ISPPreview>
+      <ISPSnapshot>ar1335_preview</ISPSnapshot>
+      <ISPVideo>ar1335_preview</ISPVideo>
+      <CPPPreview>ar1335_cpp_preview</CPPPreview>
+      <CPPSnapshot>ar1335_cpp_preview</CPPSnapshot>
+      <CPPVideo>ar1335_cpp_preview</CPPVideo>
+      <CPPLiveshot>ar1335_cpp_preview</CPPLiveshot>
+      <A3Preview>ar1335_zsl_preview</A3Preview>
+      <A3Video>ar1335_zsl_preview</A3Video>
+      <Iot>ar1335_iot_preview</Iot>
+    </ChromatixName>
+    <ChromatixName sensor_resolution_index="1">
+      <ISPPreview>ar1335_preview</ISPPreview>
+      <ISPSnapshot>ar1335_preview</ISPSnapshot>
+      <ISPVideo>ar1335_preview</ISPVideo>
+      <CPPPreview>ar1335_cpp_preview</CPPPreview>
+      <CPPSnapshot>ar1335_cpp_preview</CPPSnapshot>
+      <CPPVideo>ar1335_cpp_preview</CPPVideo>
+      <CPPLiveshot>ar1335_cpp_preview</CPPLiveshot>
+      <A3Preview>ar1335_zsl_preview</A3Preview>
+      <A3Video>ar1335_zsl_preview</A3Video>
+      <Iot>ar1335_iot_preview</Iot>
+    </ChromatixName>
+    <ChromatixName sensor_resolution_index="2">
+      <ISPPreview>ar1335_preview</ISPPreview>
+      <ISPSnapshot>ar1335_preview</ISPSnapshot>
+      <ISPVideo>ar1335_preview</ISPVideo>
+      <CPPPreview>ar1335_cpp_preview</CPPPreview>
+      <CPPSnapshot>ar1335_cpp_preview</CPPSnapshot>
+      <CPPVideo>ar1335_cpp_preview</CPPVideo>
+      <CPPLiveshot>ar1335_cpp_preview</CPPLiveshot>
+      <A3Preview>ar1335_zsl_preview</A3Preview>
+      <A3Video>ar1335_zsl_preview</A3Video>
+      <Iot>ar1335_iot_preview</Iot>
+    </ChromatixName>
+    <ChromatixName sensor_resolution_index="3">
+      <ISPPreview>ar1335_1080_60</ISPPreview>
+      <ISPSnapshot>ar1335_1080_60</ISPSnapshot>
+      <ISPVideo>ar1335_1080_60</ISPVideo>
+      <CPPPreview>ar1335_cpp_hfr_60</CPPPreview>
+      <CPPSnapshot>ar1335_cpp_hfr_60</CPPSnapshot>
+      <CPPVideo>ar1335_cpp_hfr_60</CPPVideo>
+      <CPPLiveshot>ar1335_cpp_hfr_60</CPPLiveshot>
+      <A3Preview>ar1335_a3_1080_60</A3Preview>
+      <A3Video>ar1335_a3_1080_60</A3Video>
+      <Iot>ar1335_iot_svhdr</Iot>
+    </ChromatixName>
+    <ChromatixName sensor_resolution_index="5">
+      <ISPPreview>ar1335_hfr_50</ISPPreview>
+      <ISPSnapshot>ar1335_hfr_50</ISPSnapshot>
+      <ISPVideo>ar1335_hfr_50</ISPVideo>
+      <CPPPreview>ar1335_cpp_hfr_60</CPPPreview>
+      <CPPSnapshot>ar1335_cpp_hfr_60</CPPSnapshot>
+      <CPPVideo>ar1335_cpp_hfr_60</CPPVideo>
+      <CPPLiveshot>ar1335_cpp_hfr_60</CPPLiveshot>
+      <A3Preview>ar1335_a3_hfr_50</A3Preview>
+      <A3Video>ar1335_a3_hfr_50</A3Video>
+      <Iot>ar1335_iot_svhdr</Iot>
+    </ChromatixName>
+    <ChromatixName sensor_resolution_index="4">
+      <ISPPreview>ar1335_hfr_60</ISPPreview>
+      <ISPSnapshot>ar1335_hfr_60</ISPSnapshot>
+      <ISPVideo>ar1335_hfr_60</ISPVideo>
+      <CPPPreview>ar1335_cpp_hfr_60</CPPPreview>
+      <CPPSnapshot>ar1335_cpp_hfr_60</CPPSnapshot>
+      <CPPVideo>ar1335_cpp_hfr_60</CPPVideo>
+      <CPPLiveshot>ar1335_cpp_hfr_60</CPPLiveshot>
+      <A3Preview>ar1335_a3_hfr_60</A3Preview>
+      <A3Video>ar1335_a3_hfr_60</A3Video>
+      <Iot>ar1335_iot_svhdr</Iot>
+    </ChromatixName>
+    <ChromatixName sensor_resolution_index="0" special_mode_mask="IR MODE">
+      <ISPPreview>ar1335_preview_ir</ISPPreview>
+      <ISPSnapshot>ar1335_preview_ir</ISPSnapshot>
+      <ISPVideo>ar1335_preview_ir</ISPVideo>
+      <CPPPreview>ar1335_cpp_preview_ir</CPPPreview>
+      <CPPSnapshot>ar1335_cpp_preview_ir</CPPSnapshot>
+      <CPPVideo>ar1335_cpp_preview_ir</CPPVideo>
+      <CPPLiveshot>ar1335_cpp_preview_ir</CPPLiveshot>
+      <A3Preview>ar1335_zsl_preview_ir</A3Preview>
+      <A3Video>ar1335_zsl_preview_ir</A3Video>
+      <Iot>ar1335_iot_preview_ir</Iot>
+    </ChromatixName>
+  </ResolutionChromatixInfo>
+</ChromatixConfigurationRoot>

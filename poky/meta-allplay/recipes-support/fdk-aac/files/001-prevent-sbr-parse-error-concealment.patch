@@ -1,0 +1,37 @@
+--- a/libAACdec/src/aacdecoder.cpp	2015-03-11 08:27:03.000000000 -0700
++++ b/libAACdec/src/aacdecoder.cpp	2015-06-18 16:11:29.040502601 -0700
+@@ -555,10 +555,14 @@
+         /* Enable SBR for implicit SBR signalling. */
+         if (sbrError == SBRDEC_OK) {
+           self->sbrEnabled = 1;
++        } else {
++          self->sbrEnabled = 0;
++          error = AAC_DEC_PARSE_ERROR;
+         }
+       } else {
+         /* Do not try to apply SBR because initializing the element failed. */
+         self->sbrEnabled = 0;
++        error = AAC_DEC_PARSE_ERROR;
+       }
+       /* Citation from ISO/IEC 14496-3 chapter 4.5.2.1.5.2
+       Fill elements containing an extension_payload() with an extension_type of EXT_SBR_DATA
+@@ -575,6 +579,7 @@
+       }
+     } else {
+       error = AAC_DEC_PARSE_ERROR;
++      self->frameOK = 0;
+     }
+     break;
+ 
+@@ -684,7 +689,10 @@
+     FDKpushBiDirectional(hBs, *count);
+     *count = 0;
+     /* Patch error code because decoding can go on. */
+-    error = AAC_DEC_OK;
++    //error = AAC_DEC_OK; // Since the decoder can also be used for finding the stream info
++                          // this error flag cannot be reset otherwise it can lead to
++                          // initialization errors in the external demuxer/decoder which
++                          // does not have access to the private data structures
+     /* Be sure that parsing errors have been stored. */
+   }
+   return error;

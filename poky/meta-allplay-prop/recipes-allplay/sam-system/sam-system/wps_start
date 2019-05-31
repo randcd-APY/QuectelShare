@@ -1,0 +1,271 @@
+#!/bin/sh
+
+WPS_SUCCESS=0
+WPS_CHKSUM_ERR=1
+WPS_PIN_LEN_ERR=2
+WPS_NO_DRVR_ERR=3
+WPS_NOT_RDY_ERR=4
+WPS_IN_PRGRS_ERR=5
+WPS_GEN_FAIL_ERR=6
+DEF_WPS_DEV_TYPE="11-0050F204-1"
+
+wps_method=
+wps_pin_key=
+wps_bssid=
+wpa_cli_args=
+check=0
+disable_checksum=0
+phy_dev="$(cat "/sys/class/net/wlan0/phy80211/name")"
+wps_iface="wpslan"
+pid_file="/var/run/wps-action-${wps_iface}.pid"
+ctrl_sock="/var/run/wpa_supplicant-${wps_iface}"
+conf_file="/var/run/wpa_supplicant-${wps_iface}.conf"
+
+wps_pin_checksum() {
+	local pin="$1"
+	local chk
+	local sum
+
+	[ "$pin" = "any" ] && return 0;
+
+	# check that the pin is a 8 digit number
+	case "$pin" in
+		[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]) ;; #ok
+		*) return 1;; #not ok
+	esac
+
+	# split the actual pin from the checksum
+	chk=${pin:7:1}
+	pin=${pin:0:7}
+
+	# compute the checksum
+	sum=0
+	while [ $pin -gt 0 ]; do
+		sum=$((sum + 3 * (pin % 10)))
+		pin=$((pin / 10))
+		sum=$((sum + (pin % 10)))
+		pin=$((pin / 10))
+	done
+	sum=$(((10 - sum % 10) % 10))
+
+	# verify the checksum
+	[ $chk -eq $sum  ]
+}
+
+usage() {
+	cat << EOF
+$0: Start wps authentication either by pin or button methods
+
+Syntax: wps_start <wps_method> [wps_pin] [bssid] [Options: -c -r]
+	wps_method:
+		wps_pbc: for push button
+		wps_pin: for pin method
+
+	wps_pin: Specify the pin for WPS pin operation, must be 8 characters
+		Not required for push button\n
+
+	bssid: Specify the bssid of AP to perform WPS authentication with
+		Must be in format of xx:xx:xx:xx:xx:xx
+		If not specified default to value of "any"
+
+	-c: Disable pin checksum, only valid for pin method
+
+	-r: Readiness check only.  Do not actually start WPS
+
+	Return values:
+	0: success (WPS was successfully STARTED)
+	1: pin checksum error
+	2: pin incorrect length
+	3: interface not loaded, ethernet cable probably connected
+	4: sam not ready, try later
+	5: WPS already in progress
+	6: general failure
+EOF
+}
+
+process_options() {
+	while [ "$#" -gt 0 ]; do
+		case "$1" in
+		-c) disable_checksum=1
+			;;
+		-r) check=1;
+			;;
+		*) echo "Invalid option specified"
+			;;
+		esac
+		shift
+	done
+}
+
+#NOTE: Many of these parameters are required for wifi cert
+create_wps_conf()  {
+	local intf=$1
+	local pin_methods
+	local pbc_methods
+	local wps_conf_methods
+
+	#Parse push button methods
+	if [ -f /proc/device-tree/wifi/wps/push-button/physical ]; then
+		pbc_methods="physical_push_button"
+	fi
+	if [ -f /proc/device-tree/wifi/wps/push-button/virtual ]; then
+		pbc_methods="$pbc_methods virtual_push_button"
+	fi
+
+	#Parse pin methods
+	if [ -f /proc/device-tree/wifi/wps/pin/virtual-display ]; then
+		pin_methods="virtual_display"
+	fi
+	if [ -f /proc/device-tree/wifi/wps/pin/physical-display ]; then
+		pin_methods="$pin_methods physical_display"
+	fi
+	if [ -f /proc/device-tree/wifi/wps/pin/label ]; then
+		pin_methods="$pin_methods label"
+	fi
+	if [ -f /proc/device-tree/wifi/wps/pin/keypad ]; then
+		pin_methods="$pin_methods keypad"
+	fi
+
+	#Remove potential leading spaces
+	pbc_methods=$(echo $pbc_methods | sed "s/^[ \t]*//")
+	pin_methods=$(echo $pin_methods | sed "s/^[ \t]*//")
+
+	#If we have PBC methods add them
+	if [ -n "$pbc_methods" ]; then
+		wps_conf_methods="$pbc_methods"
+	fi
+	#If we have pin methods add them
+	if [ -n "$pin_methods" ]; then
+		wps_conf_methods="$wps_conf_methods $pin_methods"
+	fi
+
+	#Remove potential leading spaces
+	wps_conf_methods=$(echo $wps_conf_methods | sed "s/^[ \t]*//")
+
+	#Get Device type from dtb, if not present go with default
+	device="$DEF_WPS_DEV_TYPE"
+	[ -f /proc/device-tree/wifi/wps/device-type/category ] && \
+	[ -f /proc/device-tree/wifi/wps/device-type/oui ] && \
+	[ -f /proc/device-tree/wifi/wps/device-type/subcategory ] && {
+		device="$(cat /proc/device-tree/wifi/wps/device-type/category)-$(cat /proc/device-tree/wifi/wps/device-type/oui)-$(cat /proc/device-tree/wifi/wps/device-type/subcategory)"
+	}
+
+	manufacturer=$(cat /proc/device-tree/manufacturer)
+	manufacturer=${manufacturer:0:64}
+
+	model=$(cat /proc/device-tree/model)
+	model=${model:0:32}
+
+	model_number=$(cat /proc/device-tree/model-number)
+	model_number=${model_number:0:32}
+
+	device_name=$(cat /proc/device-tree/friendly-name)
+	device_name=${device_name:0:32}
+
+	#Prepare conf file
+	cat > "$conf_file" <<-EOF
+		ctrl_interface=$ctrl_sock
+		update_config=1
+		wps_cred_processing=1
+		config_methods=$wps_conf_methods
+		device_type=$device
+		manufacturer=$manufacturer
+		model_name=$model
+		model_number=$model_number
+		device_name=$device_name
+	EOF
+}
+
+#Process args and validate
+wps_method="$1"
+shift
+case "${wps_method}" in
+	wps_pbc)
+		wpa_cli_args="${wps_method}"
+		# Process options
+		process_options "$@"
+		;;
+	wps_pin)
+		# make sure we got a pin and it is 8 characters
+		wps_pin_key="$1"
+		if [ "${wps_pin_key}" = "any" ]; then
+			: # ok
+		elif [ "${#wps_pin_key}" -ne 8 ]; then
+			logger -s "wps_start ($$): pin length"
+			exit $WPS_PIN_LEN_ERR
+		elif [ $disable_checksum -eq 0 ] && ! wps_pin_checksum "${wps_pin_key}"; then
+			logger -s "wps_start ($$): invalid checksum"
+			exit $WPS_CHKSUM_ERR
+		fi
+		# Now bssid, if not specified use "any"
+		# Could have been excluded and skipped to options
+		shift
+		wps_bssid="$1"
+		if [ "${#wps_bssid}" -ne 17 ]; then
+			# Could be an option, check here.
+			# NOTE: yes 17 char option may be a problem but we can live with it
+			wps_bssid="any"
+		else
+			shift
+		fi
+		process_options "$@"
+		#Quirk here for "any" pin make sure bssid is empty
+		if [ "${wps_pin_key}" = "any" ]; then
+			wps_bssid=
+		fi
+		wpa_cli_args="${wps_method} ${wps_bssid} ${wps_pin_key}"
+		;;
+	*)
+		echo "Invalid method type specified"
+		usage
+		exit $WPS_GEN_FAIL_ERR
+		;;
+esac
+
+if [ ${check} -eq 1 ]; then
+	logger -s "wps_start ($$): check done"
+	exit $WPS_SUCCESS
+fi
+
+#Create conf file for supplicant for appropriate WPS parameters
+create_wps_conf $wps_iface
+
+#Check for existence of conf file as a sanity check
+[ -f "$conf_file" ] || {
+	logger -s "wps_start ($$): conf file for WPS is NOT present!, aborting"
+	exit $WPS_GEN_FAIL_ERR
+}
+
+#Bring up WPS interface
+iw phy "$phy_dev" interface add "$wps_iface" type managed
+ifconfig $wps_iface up
+
+#Load supplicant for WPS interface
+wpa_supplicant -B -P ${pid_file} -i $wps_iface -c "$conf_file" > /dev/null
+
+#
+# At this point the device should be enabled in STA mode with supplicant
+# Start the wps process for the specified supplicant interface and let the action
+# file process the results of the WPS setup attempt
+#
+
+if ! pidof wpa_supplicant > /dev/null; then
+	# Shouldnt get here... supplicant should be started!!!
+	logger -s "wps_start ($$): supplicant not started"
+	exit ${WPS_GEN_FAIL_ERR}
+fi
+
+logger -s "wps_start ($$): starting wps..."
+
+wpa_cli -p ${ctrl_sock} -i ${wps_iface} -a/lib/wifi/wps-supplicant-action -P ${pid_file} -B > /dev/null 2>&1 || { logger -s "wps_start ($$): failed to launch monitoring wpa_cli"; exit $WPS_GEN_FAIL_ERR; }
+wpa_cli -p ${ctrl_sock} -i ${wps_iface} ${wpa_cli_args} > /tmp/pin_gen 2>&1 || { logger -s "wps_start ($$): failed to configure wpa_cli"; exit $WPS_GEN_FAIL_ERR; }
+
+# If we got here return success,  WPS should be started
+logger -s "wps_start ($$): WPS has been started"
+if [ "${wps_pin_key}" = "any" ]; then
+	echo "Display Pin: $(cat /tmp/pin_gen)"
+fi
+rm -f /tmp/pin_gen
+
+logger -s "wps_start ($$): start done."
+exit $WPS_SUCCESS

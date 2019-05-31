@@ -1,0 +1,32 @@
+From 1133f899f92b144c0d0d16599238f1beb8789ac1 Mon Sep 17 00:00:00 2001
+From: Abhinav Asati <asatiabhi@codeaurora.org>
+Date: Fri, 6 Apr 2018 15:07:58 +0530
+Subject: [PATCH] Adding QTI SpeakerManager changes
+
+Change-Id: I3700c3eb3f9de383a730107011ee9515f1955d9e
+---
+ CapabilityAgents/SpeakerManager/src/SpeakerManager.cpp | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/CapabilityAgents/SpeakerManager/src/SpeakerManager.cpp b/CapabilityAgents/SpeakerManager/src/SpeakerManager.cpp
+index 76d4fd2..5d1fc14 100644
+--- a/CapabilityAgents/SpeakerManager/src/SpeakerManager.cpp
++++ b/CapabilityAgents/SpeakerManager/src/SpeakerManager.cpp
+@@ -655,12 +655,14 @@ bool SpeakerManager::executeGetSpeakerSettings(
+ }
+ 
+ void SpeakerManager::addSpeaker(std::shared_ptr<avsCommon::sdkInterfaces::SpeakerInterface> speaker) {
++    /*
+     if (!speaker) {
+         ACSDK_ERROR(LX("addSpeakerFailed").d("reason", "speaker cannot be nullptr"));
+         return;
+     }
+     m_speakerMap.insert(
+         std::pair<SpeakerInterface::Type, std::shared_ptr<SpeakerInterface>>(speaker->getSpeakerType(), speaker));
++    */
+ }
+ 
+ }  // namespace speakerManager
+-- 
+1.9.1
+

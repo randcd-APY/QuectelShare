@@ -1,0 +1,25 @@
+From 6b99ff6efb59d92fe8a862ba8af76961169f291b Mon Sep 17 00:00:00 2001
+From: Ravi Kumar Siddojigari <rsiddoji@codeaurora.org>
+Date: Mon, 20 Feb 2017 18:51:27 +0530
+Subject: [PATCH] selinux: update the getty.te for addressing the denial
+
+type=1400 audit(17474.349:98): avc:  denied  { read write  pid=1303 comm="agetty"
+path="socket:[17094]" dev="sockfs" ino=17094 scontext=system_u:system_r:getty_t:s0-s15:c0.c1023
+tcontext=system_u:system_r:init_t:s0-s15:c0.c1023 tclass=unix_stream_socket permissive=1
+---
+ policy/modules/system/getty.te | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/policy/modules/system/getty.te b/policy/modules/system/getty.te
+index 05c6413..504a181 100644
+--- a/policy/modules/system/getty.te
++++ b/policy/modules/system/getty.te
+@@ -134,3 +134,5 @@ optional_policy(`
+ optional_policy(`
+ 	udev_read_db(getty_t)
+ ')
++
++init_rw_stream_sockets( getty_t)
+-- 
+1.9.1
+

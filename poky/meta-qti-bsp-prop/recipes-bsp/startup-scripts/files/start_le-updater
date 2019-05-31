@@ -1,0 +1,35 @@
+#!/bin/sh
+
+# ---------------------------------------------------------------------------
+# Copyright (c) 2018 Qualcomm Technologies, Inc.
+# All Rights Reserved.
+# Confidential and Proprietary - Qualcomm Technologies, Inc.
+# ---------------------------------------------------------------------------
+
+#
+# le-updater        init.d script to start the le-updater
+#
+set -e
+
+case "$1" in
+  start)
+        echo -n "Starting le-updater: "
+        start-stop-daemon -S -b -a /usr/bin/le-updater
+        echo "done"
+        ;;
+  stop)
+        echo -n "Stoping le-updater: "
+        /usr/bin/killall le-updater
+        echo "done"
+        ;;
+  restart)
+        $0 stop
+        $0 start
+        ;;
+  *)
+        echo "Usage start_le-updater { start | stop | restart}" >&2
+        exit 1
+        ;;
+esac
+
+exit 0

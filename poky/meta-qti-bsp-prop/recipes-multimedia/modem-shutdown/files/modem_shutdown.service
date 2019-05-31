@@ -1,0 +1,17 @@
+# Copyright (c) 2017 Qualcomm Technologies, Inc.
+# All Rights Reserved.
+# Confidential and Proprietary - Qualcomm Technologies, Inc.
+#
+
+[Unit]
+Description= modem-shutdown Service
+SourcePath=/usr/bin/qmi_shutdown_modem 
+DefaultDependencies=no
+
+[Service]
+Restart=no
+RemainAfterExit=yes
+ExecStart=/usr/bin/qmi_shutdown_modem --immediately
+
+[Install]
+WantedBy=multi-user.target

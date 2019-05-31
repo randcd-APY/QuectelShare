@@ -1,0 +1,316 @@
+<script type="text/javascript">//<![CDATA[
+	$(function() {
+		$("#friendly_name_input").keyup(function(event) {
+			if (event.which == 13) {
+				$("#friendly_name_input").val( ($("#friendly_name_input").val()).replace(/[\u0000-\u001f]/g, ""));
+				event.preventDefault();
+				friendly_name_change_validate();
+			}
+
+			if (event.keyCode == 27) { /* escape */
+				friendly_name_change_end(false);
+			}
+		});
+
+		$("#friendly_name_button").off("click").click(function(){friendly_name_change_start()});
+
+		$("body").click(function(event){
+			if( $('#friendly_name_input').is(':visible') &&
+					event.target.id != "friendly_name_input" &&
+					event.target.id != "friendly_name_text" &&
+					event.target.id != "friendly_name_button"){
+				friendly_name_change_end(false);
+			}
+		});
+
+		$("#friendly_name_button").bind('touchstart', function(){
+			$("#friendly_name_button").removeClass("form_button_small").addClass("form_button_small_nohover");
+		});
+	});
+
+	function friendly_name_change_start(){
+		$("#friendly_name_button").off("click").click(function(){friendly_name_change_validate()});
+		$("#friendly_name_button").html("<%_Apply%>");
+		$("#friendly_name_text").hide();
+		$("#friendly_name_input").val($("#friendly_name_text").text()).show();
+		var position = $("#friendly_name_input").val().length;
+		if (document.getElementById("friendly_name_input").setSelectionRange){
+			var input_handler = document.getElementById("friendly_name_input");
+			input_handler.focus();
+			input_handler.setSelectionRange(0, position);
+		}
+		else{ /* ie8 and prior */
+			var range = document.getElementById("friendly_name_input").createTextRange();
+			range.select();
+		}
+	}
+
+	function friendly_name_change_validate(){
+
+		if ($("#friendly_name_input").val().length<1){
+			friendly_name_change_end(false);
+			return false;
+		}
+
+		/* check the field actually changed */
+		if ($("#friendly_name_text").text() == ($("#friendly_name_input").val())) {
+			/* user did not change friendly name.. */
+			friendly_name_change_end(false);
+		}
+		else {
+			/* Friendly name was changed by user */
+			$("#friendly_name").val($("#friendly_name_input").val());
+
+			$.post("/ui/set_friendly_name", $("#update_friendly_name_form").serialize())
+			.done( function(data) {
+				$("#message_tip").text("<%_Device name updated.%>").addClass("success");
+				$("#message_tip").show();
+				friendly_name_change_end(true);
+			})
+			.error(function() {
+				$("#message_tip").text("<%_Device name update failed.%>").addClass("error");
+				$("#message_tip").show();
+				friendly_name_change_end(false);
+			});
+		}
+	}
+
+	function friendly_name_change_end(success){
+		$("#friendly_name_button").off("click").click(function(){friendly_name_change_start()});
+		$("#friendly_name_button").html("<%_Change%>");
+
+		if (success){
+			$("#friendly_name_text").text($("#friendly_name_input").val());
+			$("#friendly_name_text").attr("title",$("#friendly_name_input").val());
+		}
+		else{
+			$("#friendly_name_input").val($("#friendly_name_text").text());
+		}
+
+		$("#friendly_name_text").show();
+		$("#friendly_name_input").hide();
+	}
+
+	function refreshOverview() {
+		$.ajax({method: 'GET', url: '/config/status', dataType: 'json', timeout: 10000 })
+		.done(function(response) {
+			if ($("#message_tip").text() == "<%_Refresh failed.%>") {
+				$("#message_tip").hide();
+			}
+
+			$('#friendly_name_text').text(response.friendlyName);
+			$('#manufacturer').text(response.manufacturer);
+			$('#model').text(response.model);
+			$('#firmware_version').text(response.firmwareVersion);
+
+			if (response.ip.type == 'static') {
+				$('#ip_type').text('<%_Static%>');
+			}
+			else if (response.ip.type == 'dhcp') {
+				$('#ip_type').text('<%_Automatic (DHCP)%>');
+			}
+			else {
+				$('#ip_type').text('<%_Unknown%>');
+			}
+			var ip = new String(response.ip.net).split('/');
+			$('#ip_addr').text(ip[0]);
+
+			if (ip[1] == 0) {
+				$('#ip_subnet').text('0.0.0.0');
+			}
+			else {
+				var bitmask = 0xffffffff << (32 - ip[1]);
+				var bytes = [];
+				bytes.push((bitmask >> 24) & 0xff);
+				bytes.push((bitmask >> 16) & 0xff);
+				bytes.push((bitmask >> 8) & 0xff);
+				bytes.push((bitmask >> 0) & 0xff);
+				$('#ip_subnet').text(bytes.join('.'));
+			}
+			$('#ip_gateway').text(response.ip.gateway);
+			$('#ip_mac').text(response.wifi.mac);
+
+			$('#wifi_ssid').text(response.wifi.ssid);
+
+			var icon;
+			if (response.wifi.rssi < -100)
+				icon = '/resources/icons/signal-none.png';
+			else if (response.wifi.rssi < -88)
+				icon = '/resources/icons/signal-0.png';
+			else if (response.wifi.rssi < -76)
+				icon = '/resources/icons/signal-0-25.png';
+			else if (response.wifi.rssi < -64)
+				icon = '/resources/icons/signal-25-50.png';
+			else if (response.wifi.rssi < -52)
+				icon = '/resources/icons/signal-50-75.png';
+			else
+				icon = '/resources/icons/signal-75-100.png';
+			$('#wifi_icon')
+				.attr('src', icon)
+				.attr('title', '<%_Signal%>: ' + response.wifi.rssi + ' dBm');
+
+			var channel
+			if ((response.wifi.frequency >= 2412) && (response.wifi.frequency <= 2484)) {
+				channel = (response.wifi.frequency - 2412) / 5 + 1;
+			}
+			else if ((response.wifi.frequency >= 5035) && (response.wifi.frequency <= 5865)) {
+				channel = (response.wifi.frequency - 5035) / 5 + 7;
+			}
+			else {
+				channel = 0;
+			}
+			$('#wifi_channel').text(channel + ' (' + (response.wifi.frequency / 1000) + ' GHz)');
+			$('#wifi_encryption').text(response.wifi.security);
+			$('#wifi_bitrate').text(response.wifi.tx.bitrate);
+			$('#wifi_mac').text(response.wifi.mac);
+		})
+		.fail(function() {
+			if (firstRefresh) {
+				$("#message_tip").text("<%_Refresh failed.%>").addClass("error");
+				$("#message_tip").show();
+			}
+		})
+		.always(function() {
+			firstRefresh = false;
+			setTimeout(refreshOverview, 10*1000);
+		});
+	}
+
+	var firstRefresh = true;
+	refreshOverview();
+
+//]]></script>
+
+	<div id="wrapper_root" class="force_width_outer_wrapper custom_background_image custom_background_image_connect">
+		<div class="force_width_inner_wrapper">
+			<div class="language_selection_button shadow" onclick="javascript:display_language_selections();">&nbsp;</div>
+			<div class="header">
+				<div class="header_logo">&nbsp;</div><!-- /header_logo -->
+			</div><!-- /header -->
+
+			<div class="activity_header">
+				<div class="activity_title">
+				<%_Overview%>
+				</div><!-- /activity_title -->
+			</div><!-- /activity_title_header -->
+
+			<div class="activity_content_wrapper">
+					<div class="information_field">
+						<div id="message_tip" style="display:none;"></div>
+					</div><!-- /information_field -->
+					<div class="information_field">
+						<table width="100%">
+						<tr>
+							<th colspan="3" align="left"><%_General Information%>:</th>
+						</tr>
+						<tr><td colspan="3" class="td_line"></td></tr>
+						<tr>
+							<td align="right" class="bold"><%_Device Name%>:</td>
+							<td align="left">
+								<div id="friendly_name_text" style="display:block;" class="pointer overview_no_text_overflow"
+								onclick="javascript:friendly_name_change_start();"></div>
+								<input type="text" id="friendly_name_input" class="form_text_input" maxlength="60"
+								style="display:none;width:100%;padding:0px;"/>
+								</td>
+							<td align="right"><div class="form_button_small" id="friendly_name_button"><%_Change%></div></td>
+						</tr>
+
+						<tr>
+							<td align="right" class="bold"><%_Manufacturer%>:</td>
+							<td align="left" colspan="2" id="manufacturer"></td>
+						</tr>
+
+						<tr>
+							<td align="right" class="bold"><%_Model%>:</td>
+							<td align="left" colspan="2" id="model"></td>
+						</tr>
+
+						<tr>
+							<td align="right" class="bold"><%_Firmware Version%>:</td>
+							<td align="left" colspan="2" id="firmware_version"></td>
+						</tr>
+						<tr><td colspan="3">&nbsp;</td></tr>
+						<tr>
+							<th align="left" colspan="2"><%_Network Overview%>:</th>
+						</tr>
+						<tr><td colspan="3" class="td_line"></td></tr>
+						<tr>
+							<td align="right" class="bold"><%_Type%>:</td>
+							<td align="left" colspan="2" id="ip_type"></td>
+						</tr>
+
+						<tr>
+							<td align="right" class="bold"><%_IP Address%>:</td>
+							<td align="left" colspan="2" id="ip_addr"></td>
+						</tr>
+
+						<tr>
+							<td align="right" class="bold"><%_Subnet%>:</td>
+							<td align="left" colspan="2" id="ip_subnet"></td>
+						</tr>
+						<tr>
+							<td align="right" class="bold"><%_Gateway%>:</td>
+							<td align="left" colspan="2" id="ip_gateway"></td>
+						</tr>
+						<tr>
+							<td align="right" class="bold"><%_MAC Address%>:</td>
+							<td align="left" colspan="2" id="ip_mac"></td>
+						</tr>
+						<tr><td colspan="3">&nbsp;</td></tr>
+
+						<tr>
+							<th colspan="3" align="left" class="bold"><%_Wi-Fi%>:</th>
+						</tr>
+						<tr><td colspan="3" class="td_line"></td></tr>
+
+						<tr>
+							<td align="right" class="bold"><%_Network Name%>:</td>
+							<td align="left" colspan="2">
+								<div id="wifi_ssid" class="float_left"></div>
+								<div id="wifi_signal" class="float_left" style="margin-left:5px;width:20px;height:20px;">
+									<img id="wifi_icon" src="/resources/icons/signal-none.png" title="<%_Not associated%>" />
+								</div>
+							</td>
+						</tr>
+
+						<tr>
+							<td align="right" class="bold"><%_Channel%>:</td>
+							<td align="left" colspan="2" id="wifi_channel"></td>
+						</tr>
+
+						<tr>
+							<td align="right" class="bold"><%_Encryption%>:</td>
+							<td align="left" colspan="2" id="wifi_encryption"></td>
+						</tr>
+
+						<tr>
+							<td align="right" class="bold"><%_Bitrate%>:</td>
+							<td align="left" colspan="2" id="wifi_bitrate"></td>
+						</tr>
+
+						<tr>
+							<td align="right" class="bold"><%_MAC Address%>:</td>
+							<td align="left" colspan="2" id="wifi_mac"></td>
+						</tr>
+
+						<!-- /wifi output area -->
+
+						</table>
+					</div><!-- /information_field -->
+			</div><!-- /activity_content_wrapper -->
+			<div class="activity_content_shadow_wrapper">
+				<div class="activity_content_shadow_left"></div>
+				<div class="activity_content_shadow_right"></div>
+				<div class="activity_content_shadow_middle"></div>
+				<div class="float_clear"></div>
+			</div><!-- /activity_content_shadow_wrapper -->
+			<!-- powered by float -->
+			<div class="powered_by_footer  float_left">&nbsp;</div>
+			<!-- /powered by float -->
+			<div class="float_clear"></div>
+
+		</div><!-- /force_width_inner_wrapper -->
+
+		<form id="update_friendly_name_form">
+			<input type="hidden" id="friendly_name" name="friendlyName"/>
+		</form>

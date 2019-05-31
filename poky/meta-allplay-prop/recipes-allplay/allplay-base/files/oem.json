@@ -1,0 +1,17 @@
+{
+	"system": {
+		"modelDescription": "AllPlay capable network audio module.",
+		"defaultFriendlyName" : "AllPlay Speaker"
+	},
+
+	"allplay": {
+		"outputDevice" : 6,
+		"aprtLatency" : 200,
+		"hlsLatency" : 550,
+		"playlistMaxMemorySize" : 10485760,
+		"maxAudioPlaybackQueueSize" : 5242880,
+		"spotifyClientId" : "",
+		"spotifyDeviceType" : 4
+	}
+
+}

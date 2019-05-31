@@ -1,0 +1,15 @@
+Index: alljoyn-15.04.00b-src/common/inc/qcc/platform.h
+===================================================================
+--- alljoyn-15.04.00b-src.orig/common/inc/qcc/platform.h	2017-01-25 15:01:33.465562835 -0800
++++ alljoyn-15.04.00b-src/common/inc/qcc/platform.h	2017-01-25 15:02:11.177562830 -0800
+@@ -60,7 +60,9 @@
+ 
+ 
+ 
+-#if (__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__ >= 1))
++#if (__GNUC__ == 5) && (__GNUC_MINOR__ == 2)
++#define QCC_DEPRECATED(func) func /** Disable deprecation, too many false warnings (GCC Bug #65974) */
++#elif (__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__ >= 1))
+ #define QCC_DEPRECATED(func) func __attribute__((deprecated)) /**< mark a function as deprecated in gcc. */
+ #else
+ #define QCC_DEPRECATED(func) func /**< not all gcc versions support the deprecated attribute. */

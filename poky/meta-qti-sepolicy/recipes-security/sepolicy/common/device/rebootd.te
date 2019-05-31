@@ -1,0 +1,88 @@
+# Copyright (c) 2018 The Linux Foundation. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
+# met:
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above
+#       copyright notice, this list of conditions and the following
+#       disclaimer in the documentation and/or other materials provided
+#       with the distribution.
+#     * Neither the name of The Linux Foundation nor the names of its
+#       contributors may be used to endorse or promote products derived
+#       from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED
+# WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+policy_module(rebootd, 1.0)
+
+type rebootd_t;
+type rebootd_exec_t;
+
+init_daemon_domain(rebootd_t, rebootd_exec_t)
+
+allow rebootd_t self:capability chown;
+
+type rebootd_pipe_t;
+dev_node(rebootd_pipe_t)
+
+gen_require(`
+    type device_t;
+')
+type_transition rebootd_t device_t:fifo_file rebootd_pipe_t "rebooterdev";
+manage_fifo_files_pattern(rebootd_t, device_t, rebootd_pipe_t)
+userdebug_or_eng(`
+    gen_require(`
+         type var_run_t;
+         type init_t;
+         type init_var_run_t;
+    ')
+    corecmd_exec_shell(rebootd_t)
+    files_read_generic_pids(rebootd_t)
+    allow rebootd_t init_t:dir search;
+    allow rebootd_t init_t:file read_file_perms;
+    allow rebootd_t self:capability net_admin;
+    allow rebootd_t var_run_t:sock_file write;
+    manage_files_pattern(rebootd_t, init_var_run_t, init_var_run_t)
+    manage_sock_files_pattern(rebootd_t, init_var_run_t, init_var_run_t)
+    manage_fifo_files_pattern(rebootd_t, init_var_run_t, init_var_run_t)
+    manage_dirs_pattern(rebootd_t, init_var_run_t, init_var_run_t)
+    shutdown_domtrans(rebootd_t)
+    kernel_read_system_state(rebootd_t)
+    init_exec(rebootd_t)
+    init_rw_initctl(rebootd_t)
+    init_read_utmp(rebootd_t)
+    allow rebootd_t self:capability setuid;
+    allow rebootd_t self:unix_dgram_socket create_socket_perms;
+    allow rebootd_t var_run_t:dir create_dir_perms;
+')
+## reset reboot cookie script ##
+type reset_reboot_initrc_exec_t;
+type reset_reboot_initrc_t;
+type reboot_cookie_data_t;
+user_data_files_type(reboot_cookie_data_t)
+init_script_domain(reset_reboot_initrc_t, reset_reboot_initrc_exec_t)
+manage_user_data_files(reset_reboot_initrc_t, reboot_cookie_data_t)
+corecmd_exec_shell(reset_reboot_initrc_t)
+dev_create_null_dev(reset_reboot_initrc_t)
+term_read_console(reset_reboot_initrc_t)
+kernel_read_system_state(reset_reboot_initrc_t)
+files_read_etc_files(reset_reboot_initrc_t)
+logging_list_logs(reset_reboot_initrc_t)
+auth_manage_login_records(reset_reboot_initrc_t)
+gen_require(`
+    type var_log_t;
+')
+create_lnk_files_pattern(reset_reboot_initrc_t, var_log_t, var_log_t)
+data_filetrans(reset_reboot_initrc_t, reboot_cookie_data_t, file)

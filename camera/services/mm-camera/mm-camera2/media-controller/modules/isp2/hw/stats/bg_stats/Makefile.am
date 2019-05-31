@@ -1,0 +1,3 @@
+EXTRA_CFLAGS =
+AM_CFLAGS=
+SUBDIRS =  bg_stats44 bg_stats46

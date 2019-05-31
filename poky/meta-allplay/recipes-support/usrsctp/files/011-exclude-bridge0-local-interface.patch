@@ -1,0 +1,15 @@
+diff --git a/usrsctplib/netinet/sctp_bsd_addr.c b/usrsctplib/netinet/sctp_bsd_addr.c
+index f5f2a3b..d0fef16 100755
+--- a/usrsctplib/netinet/sctp_bsd_addr.c
++++ b/usrsctplib/netinet/sctp_bsd_addr.c
+@@ -473,6 +473,10 @@ sctp_init_ifns_for_vrf(int vrfid)
+ 			continue;
+ 		}
+ #endif
++		if (strcmp(ifa->ifa_name, "bridge0") == 0) {
++			continue;
++		}
++
+ 		ifa_flags = 0;
+ 		sctp_ifa = sctp_add_addr_to_vrf(vrfid,
+ 		                                ifa,

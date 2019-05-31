@@ -1,0 +1,11 @@
+[Unit]
+Wants=mount-data.service
+After=mount-data.service
+DefaultDependencies=false
+
+[Path]
+PathChanged=/etc/alexa/AlexaClientSDKConfig.json
+Unit=mdns_avs_stop.service
+
+[Install]
+WantedBy=mdns_avs.service

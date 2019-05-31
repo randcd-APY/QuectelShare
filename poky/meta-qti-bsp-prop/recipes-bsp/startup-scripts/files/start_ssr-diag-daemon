@@ -1,0 +1,30 @@
+#! /bin/sh
+#
+# ssr-diag-daemon        init.d script to start the Subsystem Restart Diag service
+#
+
+set -e
+
+case "$1" in
+  start)
+        echo -n "Starting ssr-diag: "
+        start-stop-daemon -S -b -a /usr/bin/ssr_diag
+        echo "done"
+        ;;
+  stop)
+        echo -n "Stopping ssr-diag: "
+        start-stop-daemon -K -n ssr_diag
+        echo "done"
+        ;;
+  restart)
+        $0 stop
+        $0 start
+        ;;
+  *)
+        echo "Usage ssr-diag-daemon { start | stop | restart}" >&2
+        exit 1
+        ;;
+esac
+
+exit 0
+

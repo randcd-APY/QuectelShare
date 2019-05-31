@@ -1,0 +1,36 @@
+diff --git a/alljoyn_core/router/AllJoynObj.cc b/alljoyn_core/router/AllJoynObj.cc
+index 4d27bfe..a4f2469 100644
+--- a/alljoyn_core/router/AllJoynObj.cc
++++ b/alljoyn_core/router/AllJoynObj.cc
+@@ -1236,7 +1236,7 @@ void AllJoynObj::JoinSessionThread::GetBusAddrsFromAdvertisements(const char* se
+     while (nmit != ajObj.nameMap.end() && (nmit->first == sessionHost)) {
+         if (nmit->second.transport & optsIn.transports) {
+             QCC_DbgPrintf(("JoinSessionThread::RunJoin(): Found busaddr in name map: \"%s\"", nmit->second.busAddr.c_str()));
+-            JoinSessionEntry joinSessionEntry(nmit->first, nmit->second.transport, nmit->second.busAddr);
++            JoinSessionEntry joinSessionEntry(nmit->first, nmit->second.transport, nmit->second.busAddr, nmit->second.timestamp);
+             advertisements.insert(joinSessionEntry);
+         }
+         ++nmit;
+diff --git a/alljoyn_core/router/AllJoynObj.h b/alljoyn_core/router/AllJoynObj.h
+index d2d97dd..ffad387 100644
+--- a/alljoyn_core/router/AllJoynObj.h
++++ b/alljoyn_core/router/AllJoynObj.h
+@@ -969,11 +969,15 @@ class AllJoynObj : public BusObject, public NameListener, public TransportListen
+         qcc::String name;
+         TransportMask transport;
+         qcc::String busAddr;
+-        JoinSessionEntry(qcc::String name, TransportMask transport, qcc::String busAddr) : name(name), transport(transport), busAddr(busAddr) { }
++        uint64_t timestamp;
++        JoinSessionEntry(qcc::String name, TransportMask transport, qcc::String busAddr, uint64_t timestamp)
++            : name(name), transport(transport), busAddr(busAddr), timestamp(timestamp) { }
+         bool operator<(const JoinSessionEntry& other) const {
+             // Order in descending order of transport so that UDP transport is sent first.
+-            return (name < other.name) || ((name == other.name) && (transport > other.transport))
+-                   || ((name == other.name) && (transport == other.transport)  && (busAddr < other.busAddr));
++            return (name < other.name)
++                   || ((name == other.name) && (transport > other.transport))
++                   || ((name == other.name) && (transport == other.transport) && (timestamp > other.timestamp))
++                   || ((name == other.name) && (transport == other.transport) && (timestamp == other.timestamp) && (busAddr < other.busAddr));
+         }
+         bool operator==(const JoinSessionEntry& other) const {
+             return name == other.name && transport == other.transport && busAddr == other.busAddr;

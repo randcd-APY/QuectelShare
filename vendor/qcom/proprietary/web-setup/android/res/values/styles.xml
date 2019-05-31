@@ -1,0 +1,132 @@
+<!--
+ Copyright (C) 2017 Qualcomm Technologies, Inc.
+ All rights reserved
+ Confidential and Proprietary - Qualcomm Technologies, Inc.
+-->
+<resources>
+
+	<!-- Base application theme. -->
+	<style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+		<!-- Customize your theme here. -->
+		<item name="colorPrimary">@color/colorPrimary</item>
+		<item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+		<item name="colorControlNormal">@android:color/white</item>
+		<item name="colorAccent">@color/colorAccent</item>
+		<item name="windowActionBar">false</item>
+		<item name="windowNoTitle">true</item>
+		<item name="android:textColorPrimary">@android:color/white</item>
+		<item name="actionButtonStyle">@style/AppTheme.Widget.ActionButton</item>
+		<item name="actionMenuTextColor">@android:color/white</item>
+		<item name="android:actionMenuTextColor">@android:color/white</item>
+	</style>
+
+	<style name="AppTheme.Widget.ActionButton" parent="@style/Widget.AppCompat.ActionButton">
+		<item name="textAllCaps">false</item>
+	</style>
+
+	<style name="EmptyViewText" parent="@android:style/Widget.TextView">
+		<item name="android:textSize">@dimen/empty_view_text</item>
+		<item name="android:textColor">@color/empty_view_text</item>
+		<item name="android:ellipsize">end</item>
+	</style>
+
+	<style name="ListItemText" parent="@android:style/Widget.TextView">
+		<item name="android:textSize">@dimen/list_item_text</item>
+		<item name="android:textColor">@color/list_item_text</item>
+		<item name="android:ellipsize">end</item>
+		<item name="android:singleLine">true</item>
+	</style>
+
+	<style name="ListItemSectionText" parent="@android:style/Widget.TextView">
+		<item name="android:textSize">@dimen/list_item_section_text</item>
+		<item name="android:textColor">@color/list_item_section_text</item>
+		<item name="android:ellipsize">end</item>
+		<item name="android:singleLine">true</item>
+	</style>
+
+	<style name="CustomDialogMessage" parent="@android:style/Widget.TextView">
+		<item name="android:textSize">@dimen/dialog_message_text</item>
+		<item name="android:textColor">@color/dialog_message_text</item>
+	</style>
+
+	<style name="CustomDialogTitle" parent="@android:style/Widget.TextView">
+		<item name="android:textSize">@dimen/dialog_title_text</item>
+		<item name="android:textColor">@color/dialog_title_text</item>
+		<item name="android:textStyle">bold</item>
+	</style>
+
+	<style name="CheckBoxStyle" parent="Base.Theme.AppCompat">
+		<item name="colorAccent">@color/colorAccent</item>
+		<item name="android:textColorSecondary">@color/colorAccent</item>
+	</style>
+
+	<style name="CustomDialogPasswordCheckbox" parent="@android:style/Widget.CompoundButton.CheckBox">
+		<item name="android:textColor">@color/dialog_checkbox</item>
+		<item name="android:textSize">@dimen/dialog_checkbox</item>
+		<item name="android:text">@string/show_password</item>
+	</style>
+
+	<style name="CustomDialogEditText" parent="Widget.AppCompat.EditText">
+		<item name="android:textSize">@dimen/dialog_edit_text</item>
+		<item name="android:textColor">@color/dialog_edit_text</item>
+		<item name="android:singleLine">true</item>
+		<item name="android:maxLines">1</item>
+	</style>
+
+	<style name="CustomDialogText" parent="@android:style/Widget.TextView">
+		<item name="android:textSize">@dimen/dialog_text</item>
+		<item name="android:textColor">@color/dialog_edit_text</item>
+		<item name="android:singleLine">true</item>
+		<item name="android:maxLines">1</item>
+	</style>
+
+	<style name="CustomDialogSpinner" parent="@android:style/Widget.TextView.SpinnerItem">
+		<item name="android:textSize">@dimen/dialog_text</item>
+		<item name="android:textColor">@color/dialog_edit_text</item>
+	</style>
+
+	<style name="SetupFragmentButton" parent="@android:style/Widget.DeviceDefault.Button.Borderless">
+		<item name="android:textColor">@color/setup_fragment_button_text</item>
+		<item name="android:textSize">@dimen/setup_fragment_button_text</item>
+		<item name="android:background">@drawable/bgd_setup_button</item>
+		<item name="android:textAllCaps">false</item>
+	</style>
+
+	<style name="SetupInstructionFragmentInstructionText" parent="@android:style/Widget.TextView">
+		<item name="android:textSize">@dimen/setup_instruction_fragment_instruction_text</item>
+		<item name="android:textColor">@color/setup_instruction_fragment_instruction_text</item>
+		<item name="android:background">@color/colorPrimaryDark</item>
+	</style>
+
+	<style name="SetupAddedFragmentGreatText" parent="@android:style/Widget.TextView">
+		<item name="android:textColor">@color/setup_added_fragment_great_text</item>
+		<item name="android:textSize">@dimen/setup_added_fragment_great_text</item>
+		<item name="android:singleLine">true</item>
+	</style>
+
+	<style name="SetupAddedFragmentRegularAddedText" parent="@android:style/Widget.TextView">
+		<item name="android:textColor">@color/setup_added_fragment_regular_added_text</item>
+		<item name="android:textSize">@dimen/setup_added_fragment_regular_added_text</item>
+	</style>
+
+	<style name="SetupAddedFragmentSpecialAddedText" parent="@android:style/Widget.TextView">
+		<item name="android:textColor">@color/setup_added_fragment_special_added_text</item>
+		<item name="android:textSize">@dimen/setup_added_fragment_special_added_text</item>
+	</style>
+
+	<style name="AlexaIntroText" parent="@android:style/Widget.TextView">
+		<item name="android:textColor">@color/alexa_intro_text</item>
+		<item name="android:textSize">@dimen/alexa_intro_text</item>
+	</style>
+
+	<style name="AlexaDetailText" parent="@android:style/Widget.TextView">
+		<item name="android:textColor">@color/alexa_detail_text</item>
+		<item name="android:textSize">@dimen/alexa_detail_text</item>
+	</style>
+
+	<style name="AlexaBubbleText" parent="@android:style/Widget.TextView">
+		<item name="android:textColor">@color/alexa_bubble_text</item>
+		<item name="android:textSize">@dimen/alexa_bubble_text</item>
+	</style>
+
+</resources>

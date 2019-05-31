@@ -1,0 +1,2 @@
+LICENSE_FLAGS_WHITELIST = "commercial"
+

@@ -1,0 +1,414 @@
+msid "lang"
+msgstr "ja"
+
+msgid "Content-Type: text/plain; charset=UTF-8"
+msgstr "Content-Type: text/plain; charset=UTF-8"
+
+msgid "(%s available)"
+msgstr "（%s利用可能）"
+
+msgid "AllPlay Audio Module"
+msgstr "AllPlayオーディオモジュール"
+
+msgid "AllPlay Audio Module Configurator"
+msgstr "AllPlayオーディオモジュールコンフィギュレータ"
+
+msgid "AllPlay Audio Module Firmware Upgrade"
+msgstr "AllPlayオーディオモジュールファームウェアアップグレード"
+
+msgid "Apply"
+msgstr "適用"
+
+msgid "Automatic (DHCP)"
+msgstr "自動（DHCP）"
+
+msgid "BSSID"
+msgstr "BSSID"
+
+msgid "Backup / Flash Firmware"
+msgstr "バックアップ/フラッシュファームウェア"
+
+msgid "Bit Rate"
+msgstr "ビットレート"
+
+msgid "Bitrate"
+msgstr "ビットレート"
+
+msgid "Cancel"
+msgstr "キャンセル"
+
+msgid "Change"
+msgstr "変更"
+
+msgid "Changes applied."
+msgstr "変更が適用されました。"
+
+msgid "Channel"
+msgstr "チャネル"
+
+msgid "Checksum"
+msgstr "チェックサム"
+
+msgid "Choose file"
+msgstr "Choose file"
+
+msgid "Wireless Network Settings"
+msgstr "ワイヤレスネットワークの設定"
+
+msgid "Wired Network Settings"
+msgstr "有線ネットワークの設定"
+
+msgid "Choose the wireless network you would like to use, and enter a password if one is required."
+msgstr "使用するワイヤレスネットワークを選択し、必要に応じてパスワードを入力してください。"
+
+msgid "Collecting data"
+msgstr "データの収集"
+
+msgid "Collecting data..."
+msgstr "データを収集しています..."
+
+msgid "Configuration files will be kept."
+msgstr "構成ファイルは保持されます。"
+
+msgid "Connect"
+msgstr "接続"
+
+msgid "Connected"
+msgstr "接続済み"
+
+msgid "Connecting"
+msgstr "接続しています"
+
+msgid "Connecting, please wait..."
+msgstr "接続しています。しばらくお待ちください..."
+
+msgid "Connection failure, unable to connect to network."
+msgstr "接続に失敗しました。ネットワークに接続できません。"
+
+msgid "Country"
+msgstr "国"
+
+msgid "DHCP"
+msgstr "DHCP"
+
+msgid "Default gateway"
+msgstr "デフォルトゲートウェイ"
+
+msgid "Device Name"
+msgstr "デバイス名"
+
+msgid "Device name update failed."
+msgstr "デバイス名の更新に失敗しました。"
+
+msgid "Device name updated."
+msgstr "デバイス名を更新しました。"
+
+msgid "Disabled [Ethernet is connected]"
+msgstr "（イーサネットで接続）を無効にしました"
+
+msgid "Encryption"
+msgstr "暗号化"
+
+msgid "Erasing..."
+msgstr "消去しています..."
+
+msgid "Ethernet"
+msgstr "イーサネット"
+
+msgid "Firmware Version"
+msgstr "ファームウェアバージョン"
+
+msgid "Flash Image..."
+msgstr "イメージのフラッシュ..."
+
+msgid "Flash a new firmware image"
+msgstr "新しいファームウェアイメージをフラッシュ"
+
+msgid "Flashing..."
+msgstr "フラッシュしています..."
+
+msgid "Gateway"
+msgstr "ゲートウェイ"
+
+msgid "General Information"
+msgstr "一般情報"
+
+msgid "IP Address"
+msgstr "IPアドレス"
+
+msgid "It appears you are trying to flash an image that does not fit into memory. Please verify the image file."
+msgstr "メモリに格納できないイメージをフラッシュしようとしているようです。イメージファイルを確認してください。"
+
+msgid "JavaScript Disabled"
+msgstr "JavaScriptが無効になっています"
+
+msgid "Join Network"
+msgstr "ネットワークに参加"
+
+msgid "Loading"
+msgstr "読み込んでいます"
+
+msgid "MAC Address"
+msgstr "MACアドレス"
+
+msgid "Manufacturer"
+msgstr "メーカー"
+
+msgid "Mode"
+msgstr "モード"
+
+msgid "Model"
+msgstr "モデル"
+
+msgid "Network Name"
+msgstr "ネットワーク名"
+
+msgid "Network Overview"
+msgstr "ネットワーク概要"
+
+msgid "Next"
+msgstr "次"
+
+msgid "No file selected."
+msgstr "No file selected."
+
+msgid "No information available"
+msgstr "情報がありません"
+
+msgid "Noise"
+msgstr "ノイズ"
+
+msgid "None"
+msgstr "なし"
+
+msgid "Not associated"
+msgstr "確立されていません"
+
+msgid "Not connected"
+msgstr "接続されていません"
+
+msgid "OPEN"
+msgstr "オープン"
+
+msgid "Other Network..."
+msgstr "他のネットワーク..."
+
+msgid "Overview"
+msgstr "概要"
+
+msgid "Package libiwinfo required!"
+msgstr "libiwinfoパッケージが必要です！"
+
+msgid "Password"
+msgstr "パスワード"
+
+msgid "Please choose settings for your Wired network."
+msgstr "ワイヤレスネットワークの設定を選択してください。"
+
+msgid "Please correct the following items:"
+msgstr "以下の項目を修正してください。"
+
+msgid "Please enter a name for your device."
+msgstr "デバイス名を入力してください。"
+
+msgid "Please enter a network name."
+msgstr "ネットワーク名を入力してください。"
+
+msgid "Please enter the correct network password for $ssid."
+msgstr "$ssidの正しいネットワークパスワードを入力してください。"
+
+msgid "Please enter the correct password for $ssid."
+msgstr "$ssidの正しいパスワードを入力してください。"
+
+msgid "Please enter the password for $ssid."
+msgstr "$ssidのパスワードを入力してください。"
+
+msgid "Note: AllPlay devices are not compatible with $netType security mode. $netType is an outdated mode which is known to be vulnerable to attack.<br/><br/>In order to use an AllPlay device you will need to reconfigure your router to use WPA2-PSK security. Please refer to your router's user manual for more information."
+msgstr "注意：AllPlayデバイスは$ネットタイプのセキュリティモードと互換性がありません。 $netTypeには、WPA2-PSKセキュリティを使用するようにルータを再設定する必要がありますAllPlayデバイスを使用するためには、攻撃に脆弱な。<br/><br/>であることが知られている旧式のモードです。詳細については、お使いのルーターの取扱説明書をご参照ください。"
+
+msgid "The wireless network '$ssid' is not compatible with AllPlay devices because '$ssid' uses $netType security mode.<br/><br/>In order to use an AllPlay device with '$ssid' you will need to reconfigure your router to use WPA2-PSK security mode. Please refer to your router's user manual for more information."
+msgstr "'$ssid' は$netTypeセキュリティモードを使用しているため、ワイヤレスネットワーク '$ssid' はAllPlayデバイスと互換性がありません。<br/><br/>あなたはWPA2-PSKセキュリティモードを使用するようにルータを再設定する必要があります'$ssid'にAllPlayデバイスを使用するためには。詳細については、お使いのルーターの取扱説明書をご参照ください。"
+
+msgid "Please give your device a name to identify it on the network. Examples: Kitchen, Bedroom."
+msgstr "ネットワーク上で識別できるようにデバイスに名前（例：キッチン、ベッドルーム）をつけてください。"
+
+msgid "Please make sure that you have the Qualcomm<sup>&#174;</sup> AllPlay<sup>&#8482;</sup> Jukebox app installed on your mobile device to begin streaming music."
+msgstr "音楽のストリーミングをする前に、Qualcomm<sup>&#174;</sup> AllPlay<sup>&#8482;</sup> Jukebox アプリがモバイルデバイスにインストールされていることを確認してください。"
+
+msgid "Please select a compatible firmware image."
+msgstr "対応するファームウェアのイメージを選択してください。"
+
+msgid "Please use a JavaScript-enabled browser to configure this product."
+msgstr "この製品を構成するには、ブラウザでJavaScriptを有効にしてください。"
+
+msgid "Please wait..."
+msgstr "お待ちください..."
+
+msgid "Primary DNS"
+msgstr "プライマリDNS"
+
+msgid "Proceed"
+msgstr "続行"
+
+msgid "Reboot"
+msgstr "再起動"
+
+msgid "Rebooting..."
+msgstr "再起動しています..."
+
+msgid "Reconnecting interface"
+msgstr "インターフェースの再接続"
+
+msgid "Refresh list"
+msgstr "[更新リスト"
+
+msgid "SSID"
+msgstr "SSID"
+
+msgid "Secondary DNS"
+msgstr "セカンダリDNS"
+
+msgid "Security Mode"
+msgstr "セキュリティモード"
+
+msgid "Select '.sam', '.samu' or '.same' firmware images only."
+msgstr "「.sam」、「.samu」または「.samu」のファームウェアイメージのみ選択してください。"
+
+msgid "Show Password"
+msgstr "パスワードの表示"
+
+msgid "Signal"
+msgstr "信号"
+
+msgid "Size"
+msgstr "サイズ"
+
+msgid "Static"
+msgstr "静的"
+
+msgid "Subnet"
+msgstr "サブネット"
+
+msgid "Subnet mask"
+msgstr "サブネットマスク"
+
+msgid "System"
+msgstr "システム"
+
+msgid "The <em>libiwinfo-lua</em> package is not installed.<br/>You must install this component for your wireless configuration to work."
+msgstr "<em>libiwinfo-lua</em>パッケージがインストールされていません。<br/>ワイヤレス構成を機能させるには、このコンポーネントが必要です。"
+
+msgid "The device requires a manual restart."
+msgstr "デバイスは手動で再起動する必要があります。"
+
+msgid "The firmware is flashing now.<br /> DO NOT POWER OFF THE DEVICE!<br /> Wait a few minutes before you try to reconnect. It might be necessary to renew the address of your computer to connect to the device again, depending on your settings."
+msgstr "ファームウェアをフラッシュしています。<br />デバイスの電源を切らないでください。<br />数分待ってから再接続してください。設定によっては、デバイスを再接続するには、コンピュータのアドレスを更新する必要がある場合もあります。"
+
+msgid "The flash image was uploaded. The checksum and file size are listed below. Compare them with the original file to ensure data integrity.<br /> Click \"Proceed\" below to start the flash procedure."
+msgstr "フラッシュイメージがアップロードされました。チェックサムとファイルサイズが以下に表示されています。元のファイルと比較し、データの完全性を確認してください。<br /> ［続行］をクリックして、フラッシュの手順を進めてください。"
+
+msgid "The network is slow and it is taking a long time to upload the new firmware file. Please try again, or connect to a faster network to perform the update."
+msgstr "The network is slow and it is taking a long time to upload the new firmware file. Please try again, or connect to a faster network to perform the update."
+
+msgid "The system is erasing the configuration partition now and will reboot itself when finished."
+msgstr "構成パーティションを消去しています。完了するとシステムは自動的に再起動します。"
+
+msgid "Tx-Power"
+msgstr "Tx-Power"
+
+msgid "Type"
+msgstr "タイプ"
+
+msgid "Upgrade Firmware"
+msgstr "ファームウェアのアップグレード"
+
+msgid "Upload a compatible image here to replace the running firmware."
+msgstr "対応するイメージをここにアップロードして、実行中のファームウェアを置き換えてください。"
+
+msgid "WEP"
+msgstr "WEP"
+
+msgid "WPA-PSK"
+msgstr "WPA-PSK"
+
+msgid "WPA2-PSK"
+msgstr "WPA2-PSK"
+
+msgid "Waiting for changes to be applied..."
+msgstr "変更が適用されるのを待っています..."
+
+msgid "Wi-Fi"
+msgstr "Wi-Fi"
+
+msgid "Wireless is disabled or not associated"
+msgstr "ワイヤレスが無効になっている、または確立されていません"
+
+msgid "Wireless is restarting..."
+msgstr "ワイヤレス機能を再起動しています..."
+
+msgid "You're connected!"
+msgstr "接続されました！"
+
+msgid "Your network connection may be lost shortly."
+msgstr "ネットワーク接続がこの後間もなく切断される可能性があります。"
+
+msgid "must be completed"
+msgstr "を完了する必要があります"
+
+msgid "AirPlay Password"
+msgstr "AirPlayのパスワード"
+
+msgid "AirPlay password"
+msgstr "AirPlayのパスワード"
+
+msgid "AirPlay password?"
+msgstr "AirPlayのパスワードを要求"
+
+msgid "AirPlay password updated."
+msgstr "AirPlayのパスワードが更新されました。"
+
+msgid "Choose your security options for the device."
+msgstr "デバイスのセキュリティオプションを選択してください。"
+
+msgid "Confirm password"
+msgstr "パスワードの確認"
+
+msgid "Failed to update the AirPlay password."
+msgstr "AirPlayのパスワードの更新に失敗しました。"
+
+msgid "Incorrect AirPlay password. Please try again."
+msgstr "AirPlayのパスワードが正しくありません。 もう一度試してください。"
+
+msgid "New password"
+msgstr "新しいパスワード"
+
+msgid "Old AirPlay password"
+msgstr "古いAirPlayのパスワード"
+
+msgid "Old password"
+msgstr "古いパスワード"
+
+msgid "Please enter a new password."
+msgstr "新しいパスワードを入力してください。"
+
+msgid "Require password"
+msgstr "パスワードを要求"
+
+msgid "Security"
+msgstr "セキュリティ"
+
+msgid "The AirPlay password does not match the confirm password."
+msgstr "AirPlayのパスワードが確認されたパスワードと一致しません。"
+
+msgid "The new AirPlay password does not match the confirm password."
+msgstr "新しいAirPlayのパスワードが確認されたパスワードと一致しません。"
+
+msgid "Yes"
+msgstr "あり"
+
+msgid "No"
+msgstr "なし"
+
+
+msgid "&#169; Qualcomm Connected Experiences | All rights reserved."
+msgstr "&#169; Qualcomm Connected Experiences | All rights reserved."

@@ -1,0 +1,12 @@
+[Unit]
+Description=AllPlay player
+Wants=device_configure.service alljoyn.service
+After=device_configure.service alljoyn.service
+
+[Service]
+Restart=on-failure
+Environment=ER_DEBUG_MDF=7 ER_DEBUG_HLS_SERVER=7 ER_DEBUG_THREADNAME=0
+ExecStart=/usr/bin/orbPlayer
+
+[Install]
+WantedBy=multi-user.target

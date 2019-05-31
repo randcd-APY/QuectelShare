@@ -1,0 +1,36 @@
+Cambridge Silicon Radio Limited
+Software License Agreement
+
+Please carefully read the terms and conditions of this Agreement before proceeding to install the software. By installing the software you imply your acceptance of the terms and conditions herein. Do not proceed with the installation if you do not agree with the terms and conditions herein.
+
+1.	GRANT OF LICENSE
+
+Cambridge Silicon Radio Limited, hereafter referred to as CSR, grants the licensee, hereafter referred to as YOU, a nonexclusive, non-transferrable license to use the software in this installation. This software, including programs, images, software components, source code, example code, build scripts, documentation, firmware and libraries, shall at all times remain the property of CSR. YOU have no rights or title over this software, except as set forth in this Agreement.
+
+Some of the software components in this install may be covered by alternative license agreements, such as the GPL. Where this is the case, YOU agree to be bound by those license agreements in addition to this agreement. Where there is a conflict between this agreement and a license of a software component, the license of the software component shall take precedence over this agreement. 
+
+2.	USAGE
+
+YOU are permitted to install this software on up to two platforms. Up to two installations can be run simultaneously by YOU and your agents.
+
+YOU are permitted to temporarily install the software on another platform ("temporary platform"), including a third party site or a platform in a licensee's home, so long as that software is only used by YOU, the software is not used simultaneously on the temporary platform and the original platforms, and YOU remove the software from the temporary platform after use.
+
+Further installations may only be permitted by prior written instrument, executed by authorised representatives of CSR and YOU.
+
+YOU may store other further copies of this software in an uninstalled state for the sole purpose of backup. YOU may not distribute these further copies. YOU are permitted to archive these further copies with a third party, provided that the software is only subsequently executed by YOU, and YOU are still bound by this Agreement.
+
+YOU may not sell, rent, license or sublicense this software. YOU may not make this software available for use by a third party. YOU may not remove any copyright, trademark, disclaimer or warning notice included or embedded in any part of the software. All copies of Programs shall contain all copyright and proprietary notices as in the original.
+
+3.	REVERSE ENGINEERING
+
+YOU are permitted to reverse engineer this software for the purposes of understanding the software's function in producing further software to interact with this software, provided that this information has not already been made available to YOU or your agents, and only the parts of the software pertinent to the understanding of the interface with the Licensee's interoperable applications are subjected to reverse engineering. YOU are not permitted to reverse engineer the software for any other purposes, nor to create software with similar functionality to this software using information gained through reverse engineering.
+
+4.	LIMITATION OF LIABILITY
+
+CSR makes no warranties as to the fitness for purpose, merchantability or function of this software. CSR accepts no responsibility for the use of the software. CSR accepts no liability for consequential loss.
+
+5.	EXTENTS
+
+Where there are other agreements between YOU and CSR, the restrictions imposed by the other agreements shall be additive, and where there is a conflict between agreements, any restrictions in agreements shall take precedence over grants made by this agreement, with the specific exception of other agreements granting distribution rights over this software.
+
+Where there treaties and laws applicable to YOU which render any provision in this agreement void, unlawful, otherwise unenforceable, or lessen the extent of that provision, that provision shall be enforced to the maximum extent permissible. The remainder of the agreement shall not be affected.

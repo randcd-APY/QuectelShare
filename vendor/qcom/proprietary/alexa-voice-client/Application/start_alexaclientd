@@ -1,0 +1,38 @@
+#! /bin/sh
+#
+#  Copyright (c) 2017 Qualcomm Technologies, Inc.
+#  All Rights Reserved.
+#  Confidential and Proprietary - Qualcomm Technologies, Inc.
+#
+# Alexa Client init.d script to start the AlexaClientApp
+#
+
+set -e
+
+NAME=AlexaClientApp
+PIDFILE=/var/run/$NAME.pid
+DAEMON=/usr/bin/AlexaClientApp
+DAEMON_LOG=/var/log/alexa.log
+
+case "$1" in
+  start)
+        echo -n "Starting "$NAME > /dev/kmsg
+        start-stop-daemon -S -b -a $DAEMON -- > $DAEMON_LOG 2>&1
+        echo "done" > /dev/kmsg
+        ;;
+  stop)
+        echo -n "Stopping "$NAME > /dev/kmsg
+        start-stop-daemon -K -n $DAEMON
+        echo "done" > /dev/kmsg
+        ;;
+  restart)
+        $0 stop
+        $0 start
+        ;;
+  *)
+        echo "Usage $0 { start | stop | restart}" >&2
+        exit 1
+        ;;
+esac
+
+exit 0

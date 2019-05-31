@@ -1,0 +1,10 @@
+[Unit]
+Description=Netmgrd Service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/netmgrd
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

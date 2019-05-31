@@ -1,0 +1,12 @@
+[Unit]
+SourcePath=/usr/bin/diagrebootapp
+Description= diagrebootapp service
+
+[Service]
+Type=forking
+Restart=always
+ExecStart=/sbin/start-stop-daemon -S -b -a /usr/bin/diagrebootapp
+ExecStop=/sbin/start-stop-daemon -K -n /usr/bin/diagrebootapp
+
+[Install]
+WantedBy=multi-user.target

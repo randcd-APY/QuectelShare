@@ -1,0 +1,2 @@
+allow chkpwd_t device_t:sock_file { write };
+allow chkpwd_t initrc_t:unix_dgram_socket { sendto };

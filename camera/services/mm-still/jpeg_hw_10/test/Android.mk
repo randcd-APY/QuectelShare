@@ -1,0 +1,20 @@
+ifneq ($(BUILD_TINY_ANDROID),true)
+LOCAL_PATH := $(call my-dir)
+include $(CLEAR_VARS)
+
+LOCAL_C_INCLUDES += $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include/
+
+LOCAL_SRC_DIR := $(LOCAL_PATH)
+LOCAL_SRC_FILES := jpegdma_drv_test.c
+
+LOCAL_MODULE := mm-still-jpegdma-drv-test
+LOCAL_SHARED_LIBRARIES := libdl liblog libcutils
+
+LOCAL_MODULE_TAGS := optional eng
+LOCAL_ADDITIONAL_DEPENDENCIES  := $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr
+LOCAL_MODULE_OWNER := qti
+LOCAL_PROPRIETARY_MODULE := true
+
+include $(BUILD_EXECUTABLE)
+
+endif #BUILD_TINY_ANDROID

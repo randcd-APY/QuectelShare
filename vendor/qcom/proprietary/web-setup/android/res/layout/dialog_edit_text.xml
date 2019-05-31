@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ Copyright (C) 2017 Qualcomm Technologies, Inc.
+ All rights reserved
+ Confidential and Proprietary - Qualcomm Technologies, Inc.
+-->
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:orientation="vertical">
+
+	<TextView
+		android:id="@+id/custom_dialog_edit_text_title"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginLeft="@dimen/dialog_edit_text_side_margin"
+		android:layout_marginRight="@dimen/dialog_edit_text_side_margin"
+		android:layout_marginBottom="@dimen/vertical_margin"
+		android:layout_marginTop="@dimen/vertical_margin"
+		style="@style/CustomDialogTitle"/>
+
+	<EditText
+		android:id="@+id/custom_dialog_edit_text"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginLeft="@dimen/dialog_edit_text_side_margin"
+		android:layout_marginRight="@dimen/dialog_edit_text_side_margin"
+		android:layout_marginTop="@dimen/dialog_edit_text_side_margin"
+		style="@style/CustomDialogEditText"
+		android:theme="@style/CustomDialogEditText"
+		tools:hint="Edit Text"/>
+
+	<CheckBox
+		android:theme="@style/CheckBoxStyle"
+		android:id="@+id/custom_dialog_checkbox"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_margin="@dimen/dialog_edit_text_side_margin"
+		android:paddingLeft="@dimen/dialog_edit_text_checkbox_padding"
+		style="@style/CustomDialogPasswordCheckbox"
+		android:visibility="gone"/>
+</LinearLayout>

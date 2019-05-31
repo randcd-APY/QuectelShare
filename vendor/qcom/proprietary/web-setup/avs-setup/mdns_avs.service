@@ -1,0 +1,12 @@
+[Unit]
+Description=mDNS service for AVS
+Wants=device_configure.service
+BindsTo=mdnsd.service
+After=device_configure.service mdnsd.service
+
+[Service]
+Restart=on-failure
+ExecStart=/usr/bin/mdns_avs
+
+[Install]
+WantedBy=mdnsd.service

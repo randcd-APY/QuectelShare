@@ -1,0 +1,14 @@
+
+[Unit]
+Description=MODPROBE_WLAN_MODULE
+After=firmware-links.service firmware.mount
+Conflicts=shutdown.target
+
+[Service]
+Type=simple
+RemainAfterExit=yes
+ExecStart=/sbin/modprobe wlan
+ExecStop=/sbin/modprobe -r wlan
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,175 @@
+diff --git a/usrsctplib/netinet/sctp_uio.h b/usrsctplib/netinet/sctp_uio.h
+index ad156d4..319dd20 100755
+--- a/usrsctplib/netinet/sctp_uio.h
++++ b/usrsctplib/netinet/sctp_uio.h
+@@ -1346,7 +1346,8 @@ sctp_sorecvmsg(struct socket *so,
+     int fromlen,
+     int *msg_flags,
+     struct sctp_sndrcvinfo *sinfo,
+-    int filling_sinfo);
++    int filling_sinfo,
++    const struct timespec *abstime);
+ #endif
+ 
+ /*
+diff --git a/usrsctplib/netinet/sctputil.c b/usrsctplib/netinet/sctputil.c
+index 3f448ac..7fc8f91 100755
+--- a/usrsctplib/netinet/sctputil.c
++++ b/usrsctplib/netinet/sctputil.c
+@@ -5696,7 +5696,9 @@ sctp_sorecvmsg(struct socket *so,
+     int fromlen,
+     int *msg_flags,
+     struct sctp_sndrcvinfo *sinfo,
+-    int filling_sinfo)
++    int filling_sinfo,
++    const struct timespec *abstime
++    )
+ {
+ 	/*
+ 	 * MSG flags we will look at MSG_DONTWAIT - non-blocking IO.
+@@ -5894,7 +5896,7 @@ sctp_sorecvmsg(struct socket *so,
+ 				goto out;
+ 			}
+ 		}
+-		error = sbwait(&so->so_rcv);
++		error = sbtimedwait(&so->so_rcv, abstime);
+ 		if (error) {
+ 			goto out;
+ 		}
+@@ -6566,7 +6568,7 @@ sctp_sorecvmsg(struct socket *so,
+ 		sbunlock(&so->so_rcv, 1);
+ #endif
+ 		if (so->so_rcv.sb_cc <= control->held_length) {
+-			error = sbwait(&so->so_rcv);
++			error = sbtimedwait(&so->so_rcv, abstime);
+ 			if (error) {
+ #if defined(__FreeBSD__)
+ 				goto release;
+diff --git a/usrsctplib/user_socket.c b/usrsctplib/user_socket.c
+index cffc541..af599f6 100755
+--- a/usrsctplib/user_socket.c
++++ b/usrsctplib/user_socket.c
+@@ -155,6 +155,28 @@ sbwait(struct sockbuf *sb)
+ }
+ 
+ 
++int
++sbtimedwait(struct sockbuf *sb, const struct timespec *abstime)
++{
++	if (abstime == NULL) {
++		return sbwait(sb);
++	}
++#if defined(__Userspace__) /* __Userspace__ */
++
++	SOCKBUF_LOCK_ASSERT(sb);
++
++	sb->sb_flags |= SB_WAIT;
++#if defined (__Userspace_os_Windows)
++#error sbtimedwait not defined for Windows
++#else
++	return (pthread_cond_timedwait(&(sb->sb_cond), &(sb->sb_mtx), abstime));
++#endif
++
++#else
++#error sbtimedwait only defined for userspace
++#endif
++}
++
+ 
+ 
+ /* Taken from  /src/sys/kern/uipc_socket.c
+@@ -968,7 +990,7 @@ userspace_sctp_recvmsg(struct socket *so,
+ 	}
+ 	error = sctp_sorecvmsg(so, &auio, (struct mbuf **)NULL,
+ 		    from, fromlen, msg_flags,
+-		    (struct sctp_sndrcvinfo *)sinfo, 1);
++		    (struct sctp_sndrcvinfo *)sinfo, 1, NULL);
+ 
+ 	if (error) {
+ 		if (auio.uio_resid != (int)ulen &&
+@@ -1013,6 +1035,19 @@ userspace_sctp_recvmsg(struct socket *so,
+ 	}
+ }
+ 
++
++ssize_t
++usrsctp_recvv_timeout(struct socket *so,
++    void *dbuf,
++    size_t len,
++    struct sockaddr *from,
++    socklen_t *fromlenp,
++    void *info,
++    socklen_t *infolen,
++    unsigned int *infotype,
++    int *msg_flags,
++    const struct timespec *abstime);
++
+ ssize_t
+ usrsctp_recvv(struct socket *so,
+     void *dbuf,
+@@ -1024,6 +1059,21 @@ usrsctp_recvv(struct socket *so,
+     unsigned int *infotype,
+     int *msg_flags)
+ {
++	return usrsctp_recvv_timeout(so, dbuf, len, from, fromlenp, info, infolen, infotype, msg_flags, NULL);
++}
++
++ssize_t
++usrsctp_recvv_timeout(struct socket *so,
++    void *dbuf,
++    size_t len,
++    struct sockaddr *from,
++    socklen_t *fromlenp,
++    void *info,
++    socklen_t *infolen,
++    unsigned int *infotype,
++    int *msg_flags,
++    const struct timespec *abstime)
++{
+ 	struct uio auio;
+ 	struct iovec iov[SCTP_SMALL_IOVEC_SIZE];
+ 	struct iovec *tiov;
+@@ -1062,7 +1112,7 @@ usrsctp_recvv(struct socket *so,
+ 	}
+ 	errno = sctp_sorecvmsg(so, &auio, (struct mbuf **)NULL,
+ 		    from, fromlen, msg_flags,
+-		    (struct sctp_sndrcvinfo *)&seinfo, 1);
++		    (struct sctp_sndrcvinfo *)&seinfo, 1, abstime);
+ 	if (errno) {
+ 		if (auio.uio_resid != (int)ulen &&
+ 		    (errno == EINTR ||
+diff --git a/usrsctplib/user_socketvar.h b/usrsctplib/user_socketvar.h
+index 5c3d9ee..12efaca 100755
+--- a/usrsctplib/user_socketvar.h
++++ b/usrsctplib/user_socketvar.h
+@@ -780,6 +780,7 @@ extern void sowakeup(struct socket *so, struct sockbuf *sb);
+ extern void wakeup(void *ident, struct socket *so); /*__Userspace__ */
+ extern int uiomove(void *cp, int n, struct uio *uio);
+ extern int sbwait(struct sockbuf *sb);
++extern int sbtimedwait(struct sockbuf *sb, const struct timespec *abstime);
+ extern int sodisconnect(struct socket *so);
+ extern int soconnect(struct socket *so, struct sockaddr *nam);
+ extern int sctp_disconnect(struct socket *so);
+diff --git a/usrsctplib/usrsctp.h b/usrsctplib/usrsctp.h
+index ca3d0f3..bd6c2fe 100644
+--- a/usrsctplib/usrsctp.h
++++ b/usrsctplib/usrsctp.h
+@@ -904,6 +904,18 @@ usrsctp_recvv(struct socket *so,
+               unsigned int *infotype,
+               int *msg_flags);
+ 
++ssize_t
++usrsctp_recvv_timeout(struct socket *so,
++              void *dbuf,
++              size_t len,
++              struct sockaddr *from,
++              socklen_t * fromlen,
++              void *info,
++              socklen_t *infolen,
++              unsigned int *infotype,
++              int *msg_flags,
++              const struct timespec *abstime);
++
+ int
+ usrsctp_bind(struct socket *so,
+              struct sockaddr *name,

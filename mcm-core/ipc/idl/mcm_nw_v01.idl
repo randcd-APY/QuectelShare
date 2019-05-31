@@ -1,0 +1,699 @@
+/****************************************************************************
+ @FILE mcm_nw_v01.idl
+ @BRIEF IoE Mobile Connection Manager Network API (MCM_NW).
+ @DESCRIPTION
+    IoE Mobile Connection Manager Network API (MCM_NW).
+
+    This header defines the API for managing and reporting the
+    mobile network connections, their status and statistics.
+
+  MCM API Major Version 0
+  MCM API Minor Version 1
+
+  @COPYRIGHT Copyright (c) 2013, 2017 Qualcomm Technologies, Inc.
+  All rights reserved.
+  Confidential and Proprietary - Qualcomm Technologies, Inc.
+****************************************************************************/
+
+include "mcm_common_v01.idl";
+
+revision 1;
+
+
+
+//=============================================================================
+// CONSTANTS
+//=============================================================================
+const MCM_NW_SCAN_LIST_MAX = 40;
+const MCM_NW_NITZ_STR_BUF_MAX = 30;
+
+mask {
+    MCM_MODE_NONE = 0x00,    //!< No network.
+    MCM_MODE_GSM = 0x01,     //!< Include GSM networks.
+    MCM_MODE_WCDMA = 0x02,   //!< Include WCDMA networks.
+    MCM_MODE_CDMA = 0x04,    //!< Include CDMA networks.
+    MCM_MODE_EVDO = 0x08,    //!< Include EVDO networks.
+    MCM_MODE_LTE  = 0x10,    //!< Include LTE networks.
+    MCM_MODE_TDSCDMA = 0x20, //!< Include TDSCDMA networks.
+    MCM_MODE_PRL = 0x10000   //!< Give preference according to the preferred
+                             //!< roaming list.
+} mcm_nw_mode_type;/**< Network selection modes. These are ORed together to specify the
+                     preferred network for searching and registration. For example:
+                     MCM_NW_MODE_GSM | MCM_NW_MODE_WCDMA selects GSM/WCDMA
+                     networks with preference to WCDMA. \n
+                     MCM_NW_MODE_GSM | MCM_NW_MODE_WCDMA | MCM_NW_MODE_PRL
+                     is the same but gives preference according to the roaming list.
+                */
+
+
+enum {
+ MCM_NW_SERVICE_NONE = 0x0000, //!< Not registered or no data.
+ MCM_NW_SERVICE_LIMITED = 0x0001, //!< Registered; emergency service only.
+ MCM_NW_SERVICE_FULL = 0x0002 //!< Registered, full service.
+} mcm_nw_service_t; //!< Status of network service, registerd with the network or not.
+
+
+enum {
+ MCM_NW_SELECTION_AUTOMATIC = 0x0000, //!< Automatic network selection.
+ MCM_NW_SELECTION_MANUAL = 0x0001 //!< Manual network selection.
+} mcm_nw_selection_type_t; //!< Network selection type.
+
+enum {
+ MCM_NW_NETWORK_STATUS_NONE = 0x0000, //!< Network status not available.
+ MCM_NW_NETWORK_STATUS_CURRENT_SERVING = 0x0001, //!< Current serving network.
+ MCM_NW_NETWORK_STATUS_PREFERRED = 0x0002, //!< Preferred network
+ MCM_NW_NETWORK_STATUS_NOT_PREFERRED = 0x0003, //!< Not the preferred network
+ MCM_NW_NETWORK_STATUS_AVAILABLE = 0x0004, //!< Service available.
+ MCM_NW_NETWORK_STATUS_FORBIDDEN = 0x0005 //!< Forbidden service.
+} mcm_nw_network_status_t; //!< Network status.
+
+enum {
+ MCM_NW_RADIO_TECH_TD_SCDMA = 1,  //!< TDSCDMA.
+ MCM_NW_RADIO_TECH_GSM = 2,       //!< GSM; only supports voice.
+ MCM_NW_RADIO_TECH_HSPAP = 3,     //!< HSPA+.
+ MCM_NW_RADIO_TECH_LTE = 4,       //!< LTE.
+ MCM_NW_RADIO_TECH_EHRPD = 5,     //!< EHRPD.
+ MCM_NW_RADIO_TECH_EVDO_B = 6,    //!< EVDO B.
+ MCM_NW_RADIO_TECH_HSPA = 7,      //!< HSPA.
+ MCM_NW_RADIO_TECH_HSUPA = 8,     //!< HSUPA.
+ MCM_NW_RADIO_TECH_HSDPA = 9,     //!< HSDPA.
+ MCM_NW_RADIO_TECH_EVDO_A = 10,   //!< EVDO A.
+ MCM_NW_RADIO_TECH_EVDO_0 = 11,   //!< EVDO 0.
+ MCM_NW_RADIO_TECH_1xRTT = 12,    //!< 1xRTT.
+ MCM_NW_RADIO_TECH_IS95B = 13,    //!< IS95B.
+ MCM_NW_RADIO_TECH_IS95A = 14,    //!< IS95A.
+ MCM_NW_RADIO_TECH_UMTS = 15,     //!< UMTS.
+ MCM_NW_RADIO_TECH_EDGE = 16,     //!< EDGE.
+ MCM_NW_RADIO_TECH_GPRS = 17,     //!< GPRS.
+ MCM_NW_RADIO_TECH_NONE = 18      //!< No technology.
+} mcm_nw_radio_tech_t; //!< Detailed radio technology reported by the
+                       //!< network registration.
+
+
+
+
+enum {
+  MCM_NW_CELL_ACCESS_NONE = 0x00, //!< Unknown cell access state.
+  MCM_NW_CELL_ACCESS_NORMAL_ONLY = 0x01, //!< Cell access is allowed for normal calls only.
+  MCM_NW_CELL_ACCESS_EMERGENCY_ONLY = 0x02, //!< Cell access is allowed for emergency calls only.
+  MCM_NW_CELL_ACCESS_NO_CALLS = 0x03, //!< Cell access is not allowed for any call type.
+  MCM_NW_CELL_ACCESS_ALL_CALLS = 0x04 //!< Cell access is allowed for all call types.
+} mcm_nw_cell_access_state_t;  //!< Cell access state.
+
+enum {
+ MCM_NW_ROAM_STATE_OFF = 0, //!< None, or roaming indicator off.
+ MCM_NW_ROAM_STATE_ON = 1 //!< Roaming indicator on.
+} mcm_nw_roam_state_t; //!< Roaming status.
+
+enum {
+ MCM_NW_TECH_DOMAIN_NONE = 0,  //!< None.
+ MCM_NW_TECH_DOMAIN_3GPP = 1,  //!< 3GPP.
+ MCM_NW_TECH_DOMAIN_3GPP2 = 2  //!< 3GPP2.
+} mcm_nw_tech_domain_t;  //!< Technology domain.
+
+enum {
+ MCM_NW_IMSI_UNKNOWN_HLR_DENY_REASON = 1, //!< IMSI unknown in HLR
+ MCM_NW_ILLEGAL_MS_DENY_REASON, //!< Illegal MS
+ MCM_NW_IMSI_UNKNOWN_VLR_DENY_REASON, //!< IMSI unknown in VLR
+ MCM_NW_IMEI_NOT_ACCEPTED_DENY_REASON, //!< IMSI not accepted
+ MCM_NW_ILLEGAL_ME_DENY_REASON, //!< Illegal ME
+ MCM_NW_PLMN_NOT_ALLOWED_DENY_REASON, //!< PLMN not allowed
+ MCM_NW_LA_NOT_ALLOWED_DENY_REASON, //!< Location area not allowed
+ MCM_NW_ROAMING_NOT_ALLOWED_LA_DENY_REASON, //!< Roaming not allowed in this location area
+ MCM_NW_NO_SUITABLE_CELLS_LA_DENY_REASON, //!< No suitable cells in location area
+ MCM_NW_NETWORK_FAILURE_DENY_REASON, //!< Network failure
+ MCM_NW_MAC_FAILURE_DENY_REASON, //!< MAC failure
+ MCM_NW_SYNCH_FAILURE_DENY_REASON, //!< Sync failure
+ MCM_NW_CONGESTION_DENY_REASON, //!< Congestion
+ MCM_NW_GSM_AUTHENTICATION_UNACCEPTABLE_DENY_REASON, //!< GSM authentication unacceptable
+ MCM_NW_NOT_AUTHORIZED_CSG_DENY_REASON, //!< Not autherized in this CSG
+ MCM_NW_SERVICE_OPTION_NOT_SUPPORTED_DENY_REASON, //!< Service option not supported
+ MCM_NW_REQ_SERVICE_OPTION_NOT_SUBSCRIBED_DENY_REASON, //!< Requested service option not subscribed
+ MCM_NW_CALL_CANNOT_BE_IDENTIFIED_DENY_REASON, //!< Call cannot be identified
+ MCM_NW_SEMANTICALLY_INCORRECT_MSG_DENY_REASON, //!< Semantically incorrect message
+ MCM_NW_INVALID_MANDATORY_INFO_DENY_REASON, //!< Invalid mandatory information
+ MCM_NW_MSG_TYPE_NON_EXISTENT_DENY_REASON, //!< Message type non-existent or not implemented
+ MCM_NW_INFO_ELEMENT_NON_EXISTENT_DENY_REASON, //!< Message type not compatible with the protocol state
+ MCM_NW_CONDITIONAL_IE_ERR_DENY_REASON, //!< Conditional IE error
+ MCM_NW_MSG_INCOMPATIBLE_PROTOCOL_STATE_DENY_REASON, //!< Message not compatible with the protocol state
+ MCM_NW_PROTOCOL_ERROR_DENY_REASON //!< Protocol error, unspecified
+} mcm_nw_deny_reason_t;
+
+//=============================================================================
+// DATA TYPES
+//=============================================================================
+
+struct {
+   string   long_eons<512>; //!< Long EONS.
+
+   string   short_eons<512>; //!< Short EONS.
+
+   string   mcc<3>; //!< Mobile country code.
+
+   string   mnc<3>; //!< Mobile network code.
+} mcm_nw_operator_name_t;  //!< Operator name.
+
+struct {
+
+  mcm_nw_operator_name_t operator_name; //!< Operator name.
+
+  mcm_nw_network_status_t network_status; //!< Network status.
+
+  mcm_nw_radio_tech_t rat; //!< Radio technology.
+
+} mcm_nw_scan_entry_t; //!< Network scan entry for 3GPP networks.
+
+struct {
+   mcm_nw_tech_domain_t tech_domain; //!< Technology, used to determine the structure type
+                //!< mcm_tech: 0 -- None, 1 -- 3GPP, 2 -- 3GPP2.
+   mcm_nw_radio_tech_t radio_tech; //!< Radio technology @ref mcm_nw_radiotech.
+   mcm_nw_roam_state_t  roaming; //!< 0 -- Off, 1 -- Roaming (3GPP2 has extended values).
+   mcm_nw_deny_reason_t deny_reason; //!< Set when registration state is
+                                     //!< @ref mcm_nw_deny_reason_t.
+   mcm_nw_service_t registration_state; //!< Registration state.
+}mcm_nw_common_registration_t;   //!< Registration details for any system.
+                                //!< This type is used to determine the appropriate
+                                //!< struct type (3GPP -- mcm_nw_3gpp_registration, or
+                                //!< 3GPP2 -- mcm_nw_3gpp2_registration)
+                                //!< that is used to query for detailed system information.
+                                //!< It is also used to fetch the reason for denied registration
+                                //!< when the registration state is MCM_NW_SERVICE_DENIED.
+
+
+struct {
+   mcm_nw_tech_domain_t tech_domain; //!< Technology, used to determine the structure type
+                //!< mcm_tech: 0 -- None, 1 -- 3GPP, 2 -- 3GPP2.
+   mcm_nw_radio_tech_t radio_tech; //!< Radio technology @ref mcm_nw_radiotech.
+   string   mcc<3>; //!< Mobile country code.
+   string   mnc<3>; //!< Mobile network code.
+   mcm_nw_roam_state_t  roaming; //!< 0 -- Off, 1 -- Roaming (3GPP2 has extended values).
+   uint8  forbidden; //!< Forbidden: 0 -- No, 1 -- Yes.
+   uint32 cid; //!< Cell id for the registered 3GPP system.
+   uint16 lac; //!< Locatin area code for the registered 3GPP system.
+   uint16 psc; //!< Primary scrambling code (WCDMA only); 0 -- None.
+   uint16 tac; //!< Tracking area code information for LTE.
+}mcm_nw_3gpp_registration_t;  //!< Registration details for a 3GPP system.
+                                //!< Registration details are available for a registered system.
+
+
+
+struct {
+   mcm_nw_tech_domain_t tech_domain; //!< Technology, used to determine structure type
+                //!< mcm_tech: 0 -- None, 1 -- 3GPP, 2 -- 3GPP2.
+   mcm_nw_radio_tech_t radio_tech; //!< Radio technology @ref mcm_nw_radiotech.
+   string   mcc<3>; //!< Mobile country code.
+   string  mnc<3>; //!< Mobile network code.
+   mcm_nw_roam_state_t  roaming; //!< Roaming status @ref mcm_nw_roam_state.
+   uint8  forbidden; //!< Forbidden: 0 -- No, 1 -- Yes.
+   uint8  inPRL; //!< 0 -- Not in PRL, 1 -- In PRL.
+   uint8  css;  //!< Concurrent services supported: 0 -- No, 1 -- Yes.
+   uint16 sid; //!< CDMA system ID.
+   uint16 nid; //!< CDMA network ID.
+   uint16 bsid; //!< Base station ID.
+}mcm_nw_3gpp2_registration_t; //!< Registration details for a 3GPP2 system.
+                                //!< Registration details are available for a registered system.
+
+struct {
+   mcm_nw_selection_type_t nw_selection_type; //!< Network selection type.
+   string   mcc<3>; //!< Mobile country code for a manual network selection.
+   string  mnc<3>; //!< Mobile network code for a manual network selection.
+  mcm_nw_radio_tech_t rat; //!< Radio technology.
+}mcm_nw_selection_t; //!< Network selection details for a 3GPP system.
+
+struct {
+	int8 rssi; //!< RSSI in dBm. Indicates received signal strength.
+               //!< A signed value; -125 or lower indicates no signal.
+}mcm_nw_gsm_sig_info_t; //!< GSM singal information.
+
+struct {
+	int8 rssi; //!< RSSI in dBm. Indicates forward link pilot Ec.
+               //!< A signed value; -125 or lower indicates no signal.
+	int16 ecio; //!< Ec/Io value representing negative 0.5 dB increments, e.g., 2 means -1 dbm.
+}mcm_nw_wcdma_sig_info_t; //!< WCDMA signal strength information.
+
+struct {
+  int8 rssi;  //!< RSSI in dBm. Indicates forward link pilot Ec.
+              //!< a signed value; -125 or lower indicates no signal.
+  int8 rscp; //!< RSCP in dBm.
+  int16 ecio; //!< Ec/Io value representing negative 0.5 dB increments, e.g., 2 means -1 dbm.
+  int8 sinr; //!< Measured SINR in dB.
+}mcm_nw_tdscdma_sig_info_t; //!< TDSCDMA signal strength information.
+
+struct {
+  int8 rssi; //!< RSSI in dBm. Indicates forward link pilot Ec.
+             //!< A signed value; -125 or lower indicates no signal.
+  int8 rsrq; //!< RSRQ value in dB (signed integer value), as measured by L1.
+			 //!< Range: -3 to -20 (-3 means -3 dB, -20 means -20 dB).
+  int16 rsrp; //!< Current RSRP in dBm, as measured by L1.
+			 //!< Range: -44 to -140 (-44 means -44 dBm, -140 means -140 dBm).
+  int16 snr;  //!< SNR level as a scaled integer in units of 0.1 dB;
+		     //!< e.g., -16 dB has a value of -160 and 24.6 dB has a value of 246.
+}mcm_nw_lte_sig_info_t; //!< LTE signal strength information.
+
+
+struct {
+  int8 rssi;  //!< RSSI in dBm. Indicates forward link pilot Power (AGC) + Ec/Io.
+              //!< A signed value; -125 or lower indicates no signal.
+  int16 ecio; //!< Ec/Io value representing negative 0.5 dB increments, e.g., 2 means -1 dbm.
+}mcm_nw_cdma_sig_info_t; //!< CDMA signal strength information.
+
+
+struct {
+  int8 rssi;  //!< RSSI in dBm. Indicates forward link pilot Power (AGC) + Ec/Io.
+              //!< A signed value; -125 or lower indicates no signal.
+  int16 ecio; //!< Ec/Io value representing negative 0.5 dB increments, e.g., 2 means -1 dbm.
+  int8 sinr;  //!< SINR level.
+  int32 io;   //!< Received IO in dBm.
+}mcm_nw_hdr_sig_info_t; //!< HDR signal strength information.
+
+struct {
+   string   nitz_time<MCM_NW_NITZ_STR_BUF_MAX>; //!< NITZ Time.
+} mcm_nw_nitz_time_t;  //!< NITZ Time.
+
+//=============================================================================
+// MESSAGES
+//=============================================================================
+
+//=============================================================================
+/** @COMMAND MCM_NW_SET_CONFIG
+    @CMD_VERSION 1.0
+    @BRIEF Configures the settings that define the MCM network interface.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG MCM_NW_SET_CONFIG_REQ
+//! @TYPE Request
+//! @SENDER Control point
+//-----------------------------------------------------------------------------
+message {
+  //! Configuration parameters for MCM network registration
+  //! Network registration details
+  //! Technology dependent network registration details
+
+  optional uint64  preferred_nw_mode; //!< Preferred network mode for connections;
+                               //!< a bitmask of mcm_nw_mode.
+  optional mcm_nw_roam_state_t roaming_pref;  //!< Roaming preference.
+} mcm_nw_set_config_req_msg;
+
+//! @MSG MCM_NW_SET_CONFIG_RESP
+//! @TYPE Response
+//! @SENDER Service
+//-----------------------------------------------------------------------------
+message {
+ mandatory mcm_response_t response;  //!< Result code.
+} mcm_nw_set_config_resp_msg;
+
+//=============================================================================
+/** @COMMAND MCM_NW_GET_CONFIG
+    @CMD_VERSION 1.0
+    @BRIEF Gets the configuration status for this network interface.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG MCM_NW_GET_CONFIG_REQ
+//! @TYPE Request
+//! @SENDER Control point
+//-----------------------------------------------------------------------------
+message {
+} mcm_nw_get_config_req_msg;
+
+//! @MSG MCM_NW_GET_CONFIG_RESP
+//! @TYPE Response
+//! @SENDER Service
+//-----------------------------------------------------------------------------
+message {
+ mandatory mcm_response_t response;  //!< Result code.
+
+  //! Configuration parameters for MCM network registration
+  //! Network registration details
+  //! Technology dependent network registration details
+
+  optional uint64  preferred_nw_mode; //!< Preferred network mode for connections;
+                      //!< a bitmask of mcm_nw_mode.
+  optional mcm_nw_roam_state_t roaming_pref;  //!< Roaming preference
+} mcm_nw_get_config_resp_msg;
+
+//=============================================================================
+/** @COMMAND MCM_NW_GET_REGISTRATION_STATUS
+    @CMD_VERSION 1.0
+    @BRIEF Gets the status associated with the connection of \<id\>.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG MCM_NW_GET_REGISTRATION_STATUS_REQ
+//! @TYPE Request
+//! @SENDER Control point
+//-----------------------------------------------------------------------------
+message {
+}mcm_nw_get_registration_status_req_msg;
+
+//! @MSG MCM_NW_GET_REGISTRATION_STATUS_RESP
+//! @TYPE Response
+//! @SENDER Service
+//-----------------------------------------------------------------------------
+message {
+ mandatory mcm_response_t response;  //!< Result code.
+
+ // nw_status_parms
+  optional mcm_nw_common_registration_t voice_registration;
+  /**< Voice registration. */
+  optional mcm_nw_common_registration_t data_registration;
+  /**< Data registration. */
+  optional mcm_nw_3gpp_registration_t voice_registration_details_3gpp;
+  /**< Voice registration details for 3GPP. */
+  optional mcm_nw_3gpp_registration_t data_registration_details_3gpp;
+  /**< Data registration details for 3GPP. */
+  optional mcm_nw_3gpp2_registration_t voice_registration_details_3gpp2;
+  /**< Voice registration details for 3GPP2. */
+  optional mcm_nw_3gpp2_registration_t data_registration_details_3gpp2;
+  /**< Data registration details for 3GPP2. */
+} mcm_nw_get_registration_status_resp_msg;
+
+//=============================================================================
+//! @MSG MCM_NW_SCAN_REQ
+//! @TYPE Request
+//! @SENDER Control point
+//-----------------------------------------------------------------------------
+message {
+}mcm_nw_scan_req_msg;
+
+//! @MSG MCM_NW_SCAN_RESP
+//! @TYPE Response
+//! @SENDER Service
+//-----------------------------------------------------------------------------
+message {
+ mandatory mcm_response_t response;  //!< Result code.
+ optional mcm_nw_scan_entry_t entry<MCM_NW_SCAN_LIST_MAX>;  //!< Scan entry.
+ } mcm_nw_scan_resp_msg;
+
+
+ //=============================================================================
+//! @MSG MCM_NW_GET_OPERATOR_NAME_REQ
+//! @TYPE Request
+//! @SENDER Control point
+//-----------------------------------------------------------------------------
+message {
+}mcm_nw_get_operator_name_req_msg;
+
+//! @MSG MCM_NW_GET_OPERATOR_NAME_REQ
+//! @TYPE Response
+//! @SENDER Service
+//-----------------------------------------------------------------------------
+message {
+ mandatory mcm_response_t response;  //!< Result code.
+ optional mcm_nw_operator_name_t operator_name;  //!< Operator name.
+ } mcm_nw_get_operator_name_resp_msg;
+
+/** @COMMAND MCM_NW_SCREEN_ON_OFF_REQ
+    @CMD_VERSION 1.0
+    @BRIEF Turn the screen on/off to save the battery.
+    @DESCRIPTION
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG MCM_NW_SCREEN_ON_OFF_REQ
+//! @TYPE Request
+//! @SENDER Control point
+//-----------------------------------------------------------------------------
+message {
+ mandatory uint8 turn_off_screen;  //!< Turn the screen off.
+}mcm_nw_screen_on_off_req_msg;
+
+//! @MSG MCM_NW_SCREEN_ON_OFF_RESP
+//! @TYPE Response
+//! @SENDER Service
+//-----------------------------------------------------------------------------
+message {
+ mandatory mcm_response_t response;  //!< Result code.
+ } mcm_nw_screen_on_off_resp_msg;
+
+
+/** @COMMAND MCM_NW_SELECTION_REQ
+    @CMD_VERSION 1.0
+    @BRIEF Network selection (manual or automatic).
+    @DESCRIPTION
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG MCM_NW_SELECTION
+//! @TYPE Request
+//! @SENDER Control point
+//-----------------------------------------------------------------------------
+message {
+ mandatory mcm_nw_selection_t nw_selection_info;  //!< Network selection information.
+}mcm_nw_selection_req_msg;
+
+//! @MSG MCM_NW_SCREEN_ON_OFF_RESP
+//! @TYPE Response
+//! @SENDER Service
+//-----------------------------------------------------------------------------
+message {
+ mandatory mcm_response_t response;  //!< Result code.
+ } mcm_nw_selection_resp_msg;
+
+/** @COMMAND MCM_NW_GET_SIGNAL_STRENGTH
+    @CMD_VERSION 1.0
+    @BRIEF Get signal strength information.
+    @DESCRIPTION
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG MCM_NW_GET_SIGNAL_STRENGTH_REQ
+//! @TYPE Request
+//! @SENDER Control point
+//-----------------------------------------------------------------------------
+message {
+}mcm_nw_get_signal_strength_req_msg;
+
+//! @MSG MCM_NW_GET_SIGNAL_STRENGTH_RESP
+//! @TYPE Response
+//! @SENDER Service
+//-----------------------------------------------------------------------------
+message {
+ mandatory mcm_response_t response;  //!< Result code.
+ optional mcm_nw_gsm_sig_info_t gsm_sig_info;
+ /**< GSM signal information. */
+ optional mcm_nw_wcdma_sig_info_t wcdma_sig_info;
+ /**< WCDMA signal information. */
+ optional mcm_nw_tdscdma_sig_info_t tdscdma_sig_info;
+ /**< TDSCDMA signal information. */
+ optional mcm_nw_lte_sig_info_t lte_sig_info;
+ /**< LTE signal information. */
+ optional mcm_nw_cdma_sig_info_t cdma_sig_info;
+ /**< CDMA signal information. */
+ optional mcm_nw_hdr_sig_info_t hdr_sig_info;
+ /**< HDR signal information. */
+ } mcm_nw_get_signal_strength_resp_msg;
+
+
+/** @COMMAND MCM_NW_GET_CELL_ACCESS_STATE
+    @CMD_VERSION 1.0
+    @BRIEF Get the cell access state.
+    @DESCRIPTION
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG MCM_NW_GET_CELL_ACCESS_STATE_REQ
+//! @TYPE Request
+//! @SENDER Control point
+//-----------------------------------------------------------------------------
+message {
+}mcm_nw_get_cell_access_state_req_msg;
+
+//! @MSG MCM_NW_GET_CELL_ACCESS_STATE_RESP
+//! @TYPE Response
+//! @SENDER Service
+//-----------------------------------------------------------------------------
+message {
+ mandatory mcm_response_t response;  //!< Result code.
+ optional mcm_nw_cell_access_state_t nw_cell_access_state;
+ /**< Network cell access state. */
+} mcm_nw_get_cell_access_state_resp_msg;
+
+//=============================================================================
+/** @COMMAND MCM_NW_GET_NITZ_TIME_INFO
+    @CMD_VERSION 1.0
+    @BRIEF Get NITZ Time information.
+    @DESCRIPTION
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG MCM_NW_GET_NITZ_TIME_INFO_REQ
+//! @TYPE Request
+//! @SENDER Control point
+//-----------------------------------------------------------------------------
+message {
+}mcm_nw_get_nitz_time_info_req_msg;
+
+//! @MSG MCM_NW_GET_NITZ_TIME_INFO_RESP
+//! @TYPE Response
+//! @SENDER Service
+//-----------------------------------------------------------------------------
+message {
+ mandatory mcm_response_t response;  //!< Result code.
+ optional mcm_nw_nitz_time_t nw_nitz_time;
+ optional uint64 abs_time;
+ optional int8 leap_sec;
+} mcm_nw_get_nitz_time_info_resp_msg;
+
+//=============================================================================
+// EVENT REGISTER
+//=============================================================================
+//=============================================================================
+/** @COMMAND MCM_NW_EVENT_REGISTER
+    @CMD_VERSION 1.0
+    @BRIEF Register for an indication of events.
+    @DESCRIPTION
+      Corresponding events can be registered: \n
+      - MCM_NW_NETWORK_REGISTRATION_EV
+      - MCM_NW_VOICE_REGISTRATION_EV
+      - MCM_NW_DATA_REGISTRATION_EV
+      - MCM_NW_IMS_REGISTRATION_EV
+      - MCM_NW_TIME_EV
+      - MCM_NW_SIGNAL_STRENGTH_EV
+      - MCM_NW_ERROR_RATE_EV
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG MCM_NW_EVENT_REGISTER_REQ
+//! @TYPE Request
+//! @SENDER Control point
+//-----------------------------------------------------------------------------
+message {
+    optional boolean register_voice_registration_event;
+    /**< Register for a voice registration event. */
+    optional boolean register_data_registration_event;
+    /**< Register for a data registration event. */
+    optional boolean register_signal_strength_event;
+    /**< Register for a signal strength event. */
+	optional boolean register_cell_access_state_change_event;
+    /**< Register for a cell access state change event. */
+    optional boolean register_nitz_time_update_event;
+    /**< Register for a nitz time update event. */
+} mcm_nw_event_register_req_msg;
+
+//! @MSG MCM_NW_EVENT_REGISTER_RESP
+//! @TYPE Response
+//! @SENDER Service
+//-----------------------------------------------------------------------------
+message {
+    mandatory mcm_response_t response;  //!< Result code.
+} mcm_nw_event_register_resp_msg;
+
+//=============================================================================
+/** @COMMAND MCM_NW_VOICE_REGISTRATION_EVENT_IND
+    @CMD_VERSION 1.0
+    @BRIEF Indication for the corresponding registered event
+	       MCM_NW_VOICE_REGISTRATION_EV.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG MCM_NW_VOICE_REGISTRATION_EVENT_IND
+//! @TYPE Indication
+//! @SENDER Service
+//-----------------------------------------------------------------------------
+message {
+ // nw_status_parms
+  optional mcm_nw_common_registration_t voice_registration;
+  /**< Voice registration. */
+  optional mcm_nw_3gpp_registration_t voice_registration_details_3gpp;
+  /**< Voice registration details for 3GPP. */
+  optional mcm_nw_3gpp2_registration_t voice_registration_details_3gpp2;
+  /**< Voice registration details for 3GPP2. */
+} mcm_nw_voice_registration_event_ind_msg;
+//=============================================================================
+/** @COMMAND MCM_NW_DATA_REGISTRATION_EVENT_IND
+    @CMD_VERSION 1.0
+    @BRIEF Indication for the corresponding registered event
+	       MCM_NW_DATA_REGISTRATION_EV.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG MCM_NW_DATA_REGISTRATION_EVENT_IND
+//! @TYPE Indication
+//! @SENDER Service
+//-----------------------------------------------------------------------------
+message {
+  optional mcm_nw_common_registration_t data_registration;
+  /**< Data registration. */
+  optional mcm_nw_3gpp_registration_t data_registration_details_3gpp;
+  /**< Data registration details for 3GPP. */
+  optional mcm_nw_3gpp2_registration_t data_registration_details_3gpp2;
+  /**< Data registration details for 3GPP2. */
+} mcm_nw_data_registration_event_ind_msg;
+
+//=============================================================================
+/** @COMMAND MCM_NW_SIGNAL_STRENGTH_EVENT_IND
+    @CMD_VERSION 1.0
+    @BRIEF Indication for the corresponding registered event
+	       MCM_NW_SIGNAL_STRENGTH_EV.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG MCM_NW_SIGNAL_STRENGTH_EVENT_IND
+//! @TYPE Indication
+//! @SENDER Service
+//-----------------------------------------------------------------------------
+message {
+ optional mcm_nw_gsm_sig_info_t gsm_sig_info;
+ /**< GSM singal information. */
+ optional mcm_nw_wcdma_sig_info_t wcdma_sig_info;
+ /**< WCDMA singal information. */
+ optional mcm_nw_tdscdma_sig_info_t tdscdma_sig_info;
+ /**< TDSCDMA singal information. */
+ optional mcm_nw_lte_sig_info_t lte_sig_info;
+ /**< LTE singal information. */
+ optional mcm_nw_cdma_sig_info_t cdma_sig_info;
+ /**< CDMA singal information. */
+ optional mcm_nw_hdr_sig_info_t hdr_sig_info;
+ /**< HDR singal information. */
+} mcm_nw_signal_strength_event_ind_msg;
+
+
+//=============================================================================
+/** @COMMAND MCM_NW_CELL_ACCESS_STATE_CHANGE_EVENT_IND
+    @CMD_VERSION 1.0
+    @BRIEF Indication for a change in the cell access state, e.g., emergency only, CS call only.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG MCM_NW_CELL_ACCESS_STATE_CHANGE_EVENT_IND
+//! @TYPE Indication
+//! @SENDER Service
+//-----------------------------------------------------------------------------
+message {
+ mandatory mcm_nw_cell_access_state_t nw_cell_access_state;
+ /**< Network cell access state. */
+} mcm_nw_cell_access_state_change_event_ind_msg;
+
+//=============================================================================
+/** @COMMAND MCM_NW_NITZ_TIME_IND
+    @CMD_VERSION 1.0
+    @BRIEF Indication to update NITZ time.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG MCM_NW_NITZ_TIME_IND
+//! @TYPE Indication
+//! @SENDER Service
+//-----------------------------------------------------------------------------
+message {
+ optional mcm_nw_nitz_time_t nw_nitz_time;
+ /**< NITZ Time update. */
+ optional uint64 abs_time;
+ optional int8 leap_sec;
+} mcm_nw_nitz_time_ind_msg;

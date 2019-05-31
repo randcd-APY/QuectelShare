@@ -1,0 +1,4 @@
+ServerID=10.45.146.243
+Port=3491
+Phone=+1-203-123456789
+WaitDuration=10

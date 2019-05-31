@@ -1,0 +1,20 @@
+#Include the robot settings
+
+# Get base product settings
+require msm8909-base-image.inc
+# These two lines below is a workaround to remove init-mss,
+# since packagegroup-ss-mgr just include reboot-daemon and init-mss
+IMAGE_INSTALL_remove = "packagegroup-ss-mgr"
+IMAGE_INSTALL += "reboot-daemon"
+IMAGE_INSTALL += "e2fsprogs"
+IMAGE_INSTALL += "start-scripts-userfs-reset"
+IMAGE_INSTALL += "chrony"
+IMAGE_INSTALL += "chronyc"
+
+IMAGE_INSTALL += "openssh"
+IMAGE_INSTALL += "${@base_conditional('PRODUCT','robot-rome', 'iw', '', d)}"
+IMAGE_INSTALL += "${@base_conditional('PRODUCT','robot-rome', 'sigma-dut', '', d)}"
+IMAGE_INSTALL += "${@base_conditional('PRODUCT','robot-rome', 'libcap', '', d)}"
+IMAGE_INSTALL += "${@base_conditional('PRODUCT','robot-rome', 'attr', '', d)}"
+IMAGE_INSTALL += "mtd-utils-ubifs"
+IMAGE_INSTALL += "start-scripts-storage-mount"

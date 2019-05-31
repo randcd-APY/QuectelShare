@@ -1,0 +1,16 @@
+[Unit]
+Description=qmuxd service
+#Wants=reboot-daemon.service
+After=QCMAP_ConnectionManagerd.service
+
+[Service]
+Type=simple
+ExecStartPre=/bin/sleep 1
+ExecStartPre=/bin/mkdir -p /dev/socket/qmux_radio
+ExecStart=/usr/bin/qmuxd
+ExecStop=/sbin/start-stop-daemon -K -n /usr/bin/qmuxd
+StandardError=null
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

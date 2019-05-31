@@ -1,0 +1,13 @@
+diff --git a/usrsctplib/user_socket.c b/usrsctplib/user_socket.c
+index 87268c3..0c78198 100755
+--- a/usrsctplib/user_socket.c
++++ b/usrsctplib/user_socket.c
+@@ -1355,6 +1355,8 @@ usrsctp_socket(int domain, int type, int protocol,
+ 	register_recv_cb(so, receive_cb);
+ 	register_send_cb(so, sb_threshold, send_cb);
+ 	register_ulp_info(so, ulp_info);
++
++	sctp_init_vrf_list(SCTP_DEFAULT_VRF); // Refresh network interface list
+ 	return (so);
+ }
+ 

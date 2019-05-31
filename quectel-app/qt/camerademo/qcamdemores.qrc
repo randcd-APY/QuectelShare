@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file>back.jpg</file>
+        <file>recorder.jpg</file>
+        <file>take.jpg</file>
+        <file>takedisable.jpg</file>
+        <file>video.jpg</file>
+    </qresource>
+</RCC>

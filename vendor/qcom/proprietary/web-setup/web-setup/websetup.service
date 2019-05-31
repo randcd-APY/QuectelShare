@@ -1,0 +1,13 @@
+[Unit]
+Description=Web based setup sevice
+Wants=device_configure.service
+After=device_configure.service
+Conflicts=lighttpd.service
+
+[Service]
+Restart=on-failure
+ExecStartPre=/usr/sbin/websetup_configure
+ExecStart=/usr/sbin/lighttpd -D -f /etc/websetup.lighttpd.conf
+
+[Install]
+WantedBy=multi-user.target

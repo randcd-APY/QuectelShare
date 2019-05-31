@@ -1,0 +1,11 @@
+# Data proprietary source Packages
+IMAGE_INSTALL += "qmi"
+IMAGE_INSTALL += "qmi-framework"
+IMAGE_INSTALL += "qmi-simple-ril"
+IMAGE_INSTALL += "data"
+IMAGE_INSTALL += "data-items"
+#IMAGE_INSTALL += "embms-kernel"
+IMAGE_INSTALL += "start-scripts-ipa-fws"
+IMAGE_INSTALL += "ipa-fws"
+IMAGE_INSTALL += "mbim"
+IMAGE_INSTALL += "data-module"

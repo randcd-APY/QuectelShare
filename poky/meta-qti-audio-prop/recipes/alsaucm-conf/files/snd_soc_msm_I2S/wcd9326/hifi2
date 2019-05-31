@@ -1,0 +1,76 @@
+SectionVerb {
+        EnableSequence [
+                exec "echo setting playback"
+                cdev "hw:0"
+                cset "name='PRI_MI2S_RX Audio Mixer MultiMedia4' 1"
+        ]
+        DisableSequence [
+                cdev "hw:0"
+                cset "name='PRI_MI2S_RX Audio Mixer MultiMedia4' 0"
+        ]
+        # ALSA PCMs
+        CapturePCM 0
+        PlaybackPCM 0
+}
+
+SectionDevice."Speaker".0{
+        EnableSequence [
+                cdev "hw:0"
+                cset "name='MI2S_RX Channels' 1"
+                cset "name='SLIM RX0 MUX' 1"
+                cset "name='SLIM RX1 MUX' 1"
+                cset "name='RX INT7_1 MIX1 INP0' 5"
+                cset "name='RX INT8_1 MIX1 INP0' 6"
+                cset "name='COMP7 Switch' 1"
+                cset "name='COMP8 Switch' 1"
+                cset "name='SpkrLeft COMP Switch' 1"
+                cset "name='SpkrRight COMP Switch' 1"
+                cset "name='SpkrLeft BOOST Switch' 1"
+                cset "name='SpkrRight BOOST Switch' 1"
+                cset "name='SpkrLeft SWR DAC_Port Switch' 1"
+                cset "name='SpkrRight SWR DAC_Port Switch' 1"
+        ]
+        DisableSequence [
+                cdev "hw:0"
+                cset "name='MI2S_RX Channels' 0"
+                cset "name='SLIM RX0 MUX' 0"
+                cset "name='SLIM RX1 MUX' 0"
+                cset "name='RX INT7_1 MIX1 INP0' 0"
+                cset "name='RX INT8_1 MIX1 INP0' 0"
+                cset "name='COMP7 Switch' 0"
+                cset "name='COMP8 Switch' 0"
+                cset "name='SpkrLeft COMP Switch' 0"
+                cset "name='SpkrRight COMP Switch' 0"
+                cset "name='SpkrLeft BOOST Switch' 0"
+                cset "name='SpkrRight BOOST Switch' 0"
+                cset "name='SpkrLeft SWR DAC_Port Switch' 0"
+                cset "name='SpkrRight SWR DAC_Port Switch' 0"
+        ]
+}
+
+SectionDevice."Headphones" {
+        EnableSequence [
+                cdev "hw:0"
+                cset "name='SLIM RX0 MUX' 1"
+                cset "name='SLIM RX1 MUX' 1"
+                cset "name='MI2S_RX Channels' 1"
+                cset "name='RX INT1_1 MIX1 INP0' 5"
+                cset "name='RX INT2_1 MIX1 INP0' 6"
+                cset "name='RX INT1 DEM MUX' 1"
+                cset "name='RX INT2 DEM MUX' 1"
+                cset "name='COMP1 Switch' 1"
+                cset "name='COMP2 Switch' 1"
+        ]
+        DisableSequence [
+                cdev "hw:0"
+                cset "name='SLIM RX0 MUX' 0"
+                cset "name='SLIM RX1 MUX' 0"
+                cset "name='MI2S_RX Channels' 0"
+                cset "name='RX INT1_1 MIX1 INP0' 0"
+                cset "name='RX INT2_1 MIX1 INP0' 0"
+                cset "name='RX INT1 DEM MUX' 0"
+                cset "name='RX INT2 DEM MUX' 0"
+                cset "name='COMP1 Switch' 0"
+                cset "name='COMP2 Switch' 0"
+        ]
+}

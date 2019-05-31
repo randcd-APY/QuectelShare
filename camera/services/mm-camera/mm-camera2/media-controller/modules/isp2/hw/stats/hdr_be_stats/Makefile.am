@@ -1,0 +1,3 @@
+EXTRA_CFLAGS =
+AM_CFLAGS=
+SUBDIRS =  hdr_be_stats46

@@ -1,0 +1,24 @@
+diff --git a/common/os/posix/Socket.cc b/common/os/posix/Socket.cc
+index ba60350..4c107d6 100644
+--- a/common/os/posix/Socket.cc
++++ b/common/os/posix/Socket.cc
+@@ -57,9 +57,9 @@ namespace qcc {
+ 
+ const SocketFd INVALID_SOCKET_FD = -1;
+ const int MAX_LISTEN_CONNECTIONS = SOMAXCONN;
++const int CONNECT_TIMEOUT = 5;
+ 
+ #if defined(QCC_OS_DARWIN)
+-const int CONNECT_TIMEOUT = 5;
+ #define MSG_NOSIGNAL 0
+ 
+ static void DisableSigPipe(SocketFd socket)
+@@ -210,7 +210,7 @@ QStatus Connect(SocketFd sockfd, const IPAddress& remoteAddr, uint16_t remotePor
+         return status;
+     }
+ 
+-#if defined(QCC_OS_DARWIN)
++#if 1 //defined(QCC_OS_DARWIN)
+     int selectRet;
+     fd_set wfdset;
+     int so_error;

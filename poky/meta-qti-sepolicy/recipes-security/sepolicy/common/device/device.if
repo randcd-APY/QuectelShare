@@ -1,0 +1,225 @@
+# Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
+# met:
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above
+#       copyright notice, this list of conditions and the following
+#       disclaimer in the documentation and/or other materials provided
+#       with the distribution.
+#     * Neither the name of The Linux Foundation nor the names of its
+#       contributors may be used to endorse or promote products derived
+#       from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED
+# WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+## <summary> devices interface </summary>
+
+########################################
+## <summary>
+##      Read and write the subsys_modem device.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`rw_subsys_modem_dev',`
+    gen_require(`
+        type device_t, subsys_modem_device_t;
+    ')
+
+    rw_chr_files_pattern($1, device_t, subsys_modem_device_t)
+')
+
+########################################
+## <summary>
+##      Read and write the subsys_wcnss device.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`rw_subsys_ssr_dev',`
+    gen_require(`
+        type device_t, subsys_ssr_device_t;
+    ')
+
+    rw_chr_files_pattern($1, device_t, subsys_ssr_device_t)
+')
+########################################
+## <summary>
+##      Read and write  audio device nodes
+##      which are starting with msm_*
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`rw_audio_dev',`
+    gen_require(`
+        type device_t, audio_device_t;
+    ')
+
+    rw_chr_files_pattern($1, device_t, audio_device_t)
+')
+
+########################################
+## <summary>
+##      Read and write the /dev/v4l-subdev*
+##      or  /dev/media[0-9]device.
+##      or /dev/video[0-99] device
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`rw_video_dev',`
+    gen_require(`
+        type device_t, video_device_t;
+    ')
+
+    rw_chr_files_pattern($1, device_t, video_device_t)
+')
+
+########################################
+## <summary>
+##      Read and write the shared_memory_log
+##      pointing to /dev/smem_log
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`rw_shared_memory_dev',`
+    gen_require(`
+        type device_t, shared_log_device_t;
+    ')
+
+    rw_chr_files_pattern($1, device_t, shared_log_device_t)
+')
+
+########################################
+## <summary>
+##      Read and write the smd_dev
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`rw_smd_dev',`
+    gen_require(`
+        type device_t, smd_device_t;
+    ')
+
+    rw_chr_files_pattern($1, device_t, smd_device_t)
+')
+
+########################################
+## <summary>
+##      Read and write the diag_dev
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`rw_diag_dev',`
+    gen_require(`
+        type device_t, diag_device_t;
+    ')
+
+    rw_chr_files_pattern($1, device_t, diag_device_t)
+')
+
+########################################
+## <summary>
+##      Read ubifs control devices
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`device_read_ubi_device',`
+    gen_require(`
+        type device_t;
+        type ubi_device_t;
+    ')
+
+    read_chr_files_pattern($1, device_t, ubi_device_t)
+')
+
+########################################
+## <summary>
+##      Create named socket in /dev/socket
+##      Example: device_manage_socket(leprop_t, leprop_sock_t, "leprop")
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain managing the socket
+##      </summary>
+## </param>
+## <param name="context">
+##      <summary>
+##      Context of newly created sockets
+##      </summary>
+## </param>
+## <param name="filename">
+##      <summary>
+##      Filename to transition
+##      </summary>
+## </param>
+#
+interface(`device_manage_socket_file',`
+    gen_require(`
+        type socket_device_t;
+    ')
+
+    type_transition $1 socket_device_t:sock_file $2 $3;
+    manage_sock_files_pattern($1, socket_device_t, $2)
+')
+
+########################################
+## <summary>
+##      Search for device sockets
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access
+##      </summary>
+## </param>
+#
+interface(`device_search_sockets',`
+    gen_require(`
+        type socket_device_t;
+    ')
+
+    allow $1 socket_device_t:dir search_dir_perms;
+')
+

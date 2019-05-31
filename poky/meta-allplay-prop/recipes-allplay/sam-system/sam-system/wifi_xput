@@ -1,0 +1,96 @@
+#!/bin/sh
+
+showhelp() {
+	cat << EOF
+  $0 [-i <update_interval>] [-d <interface>] [rx] [tx]
+
+  Displays receive (rx) or transmit (tx) throughput every <update_interval>
+  seconds. Without parameters, defaults to updating rx throughput every
+  second.
+
+  Optional parameters:
+    -i : set update interval (in seconds)
+    -d : specify interface (default = "$iface")
+    tx : display transmit throughput
+    rx : display receive throughput (default)
+    -h : print this help
+
+EOF
+}
+
+# Process arguments
+interval=1
+tx=0
+rx=0
+iface="$(ls -1 /sys/devices/platform/ar934x_wmac/net/ | head -1)"
+while [ -n "$1" ]; do
+	case "$1" in
+	-i) interval="$2"; shift;;
+	-d) iface="$2"; shift;;
+	tx) tx=1;;
+	rx) rx=1;;
+	-h) showhelp; exit 1;;
+	*)
+		echo "Invalid opton: $1" >&2
+		showhelp
+		exit 1
+		;;
+	esac
+	shift
+done
+
+if [ "$rx" -eq 0 ] && [ "$tx" -eq 0 ]; then
+	rx=1;
+fi
+
+# Take in old and new bytes tx/rx and return bits per second
+compute_xput() {
+	local new=$1
+	local old=$2
+	local dur=$3
+	local val
+
+	val=$((new - old))
+	val=$((val * 8))
+	val=$((val / dur))
+
+	echo $val
+}
+
+# Display throughput
+oldrx=0
+oldtx=0
+while [ 1 ]; do
+	local tmp=$(iw dev "$iface" station dump)
+	if [ -z "$tmp" ]; then
+		printf "WLAN appears to be disconnected. Exiting.\n\n"
+		exit 1
+	fi
+
+	if [ $rx -eq 1 ]; then
+		list=$(iw dev $iface station dump | grep "rx bytes" | cut -f 3)
+		sum=0
+		for v in $list; do
+			sum=$((sum + v))
+		done
+		if [ $oldrx -ne 0 ]; then
+			printf "RX: %d bps\t" $(compute_xput $sum $oldrx $interval)
+		fi
+		oldrx=$sum
+	fi
+	if [ $tx -eq 1 ]; then
+		list=$(iw dev $iface station dump | grep "tx bytes" | cut -f 3)
+		sum=0
+		for v in $list; do
+			sum=$((sum + v))
+		done
+		if [ $oldtx -ne 0 ]; then
+			printf "TX: %d bps" $(compute_xput $sum $oldtx $interval)
+		fi
+		oldtx=$sum
+	fi
+
+	printf "\n"
+	sleep $interval
+done
+

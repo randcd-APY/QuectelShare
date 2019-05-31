@@ -1,0 +1,78 @@
+From dd473a63798fd2621d8d8bd1367b908fee85592e Mon Sep 17 00:00:00 2001
+From: Bert Kong <bert_kong@codeaurora.org>
+Date: Wed, 8 Nov 2017 12:08:11 -0800
+Subject: [PATCH] zero-copy
+
+---
+ libs/gst/base/gstbaseparse.c | 42 ++++++++++++++++++++++++++++++++++++++++++
+ libs/gst/base/gstbaseparse.h |  4 ++++
+ 2 files changed, 46 insertions(+)
+
+diff --git a/libs/gst/base/gstbaseparse.c b/libs/gst/base/gstbaseparse.c
+index 816b7ab..8f9a282 100644
+--- a/libs/gst/base/gstbaseparse.c
++++ b/libs/gst/base/gstbaseparse.c
+@@ -4940,3 +4940,45 @@ gst_base_parse_merge_tags (GstBaseParse * parse, GstTagList * tags,
+
+   GST_OBJECT_UNLOCK (parse);
+ }
++
++
++gboolean
++gst_base_parse_negotiate_allocation(GstBaseParse *parse,
++                                    GstAllocator **allocator,
++                                    GstAllocationParams *params) {
++  GstQuery *query = NULL;
++  gboolean ret = FALSE;
++
++  query = gst_query_new_allocation(NULL, TRUE);
++
++  if ((ret=gst_pad_peer_query(parse->srcpad, query))==FALSE) {
++    GST_DEBUG_OBJECT (parse, "didn't get downstream ALLOCATION hints");
++    goto no_decide_allocation;
++  }
++
++  /* we got configuration from our peer or the decide_allocation method,
++   * parse them */
++  if (gst_query_get_n_allocation_params (query) > 0) {
++      gst_query_parse_nth_allocation_param (query, 0, allocator, params);
++      ret = TRUE;
++  }
++  else {
++    *allocator = NULL;
++    goto no_decide_allocation;
++  }
++
++  GST_DEBUG_OBJECT (parse, "debug ---> got downstream ALLOCATION hints %p", *allocator);
++
++done:
++  if (query)
++    gst_query_unref (query);
++
++  return ret;
++
++  /* Errors */
++no_decide_allocation:
++  {
++    GST_WARNING_OBJECT (parse, "failed to decide allocation");
++    goto done;
++  }
++}
+diff --git a/libs/gst/base/gstbaseparse.h b/libs/gst/base/gstbaseparse.h
+index f3081ef..7a43320 100644
+--- a/libs/gst/base/gstbaseparse.h
++++ b/libs/gst/base/gstbaseparse.h
+@@ -349,6 +349,10 @@ void            gst_base_parse_merge_tags       (GstBaseParse  * parse,
+                                                  GstTagList    * tags,
+                                                  GstTagMergeMode mode);
+
++gboolean        gst_base_parse_negotiate_allocation(GstBaseParse *parse,
++                                                    GstAllocator **allocator,
++                                                    GstAllocationParams *params);
++
+ #ifdef G_DEFINE_AUTOPTR_CLEANUP_FUNC
+ G_DEFINE_AUTOPTR_CLEANUP_FUNC(GstBaseParseFrame, gst_base_parse_frame_free)
+ #endif
+--
+1.9.1
+

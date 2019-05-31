@@ -1,0 +1,865 @@
+From 0b979594e7bc88ed11d353b144b9fab4c27e5dac Mon Sep 17 00:00:00 2001
+From: Ravinder Konka <rkonka@codeaurora.org>
+Date: Mon, 20 Apr 2015 13:08:41 +0530
+Subject: [PATCH] upnp-enabled
+
+Change-Id: I90de5595c48e561be725b0d1d85e79fa55800f07
+---
+ Makefile.linux        | 119 +++++------
+ UPNP_QCMAP_Client.cpp | 528 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ UPNP_QCMAP_Client.h   |  61 +++++
+ 3 files changed, 659 insertions(+), 65 deletions(-)
+ create mode 100755 UPNP_QCMAP_Client.cpp
+ create mode 100755 UPNP_QCMAP_Client.h
+
+diff --git a/Makefile.linux b/Makefile.linux
+index 8c3a9d3..0d1678c 100755
+--- a/Makefile.linux
++++ b/Makefile.linux
+@@ -30,10 +30,10 @@ CFLAGS += -Wall
+ CFLAGS += -Wextra -Wstrict-prototypes -Wdeclaration-after-statement
+ #CFLAGS += -Wno-missing-field-initializers
+ #CFLAGS += -ansi	# iptables headers does use typeof which is a gcc extension
+-CC ?= gcc
++#CC ?= gcc
+ RM = rm -f
+ INSTALL = install
+-STRIP ?= strip
++#STRIP ?= strip
+ PKG_CONFIG ?= pkg-config
+ CP = cp
+
+@@ -50,33 +50,14 @@ BASEOBJS = miniupnpd.o upnphttp.o upnpde
+            upnpevents.o upnputils.o getconnstatus.o \
+            upnppinhole.o pcplearndscp.o asyncsendto.o
+
+-LNXOBJS = linux/getifstats.o linux/ifacewatcher.o linux/getroute.o
+-NETFILTEROBJS = netfilter/iptcrdr.o netfilter/iptpinhole.o netfilter/nfct_get.o
+-
+-ALLOBJS = $(BASEOBJS) $(LNXOBJS) $(NETFILTEROBJS)
+-
+-PCFILE_FOUND := $(shell $(PKG_CONFIG) --exists libiptc; echo $$?)
++CPPOBJS = UPNP_QCMAP_Client.o netfilter/iptcrdr.o netfilter/iptpinhole.o
+
+-ifeq (${PCFILE_FOUND},0)
+-
+-IPTABLESVERSION := $(shell $(PKG_CONFIG) --modversion libiptc)
+-IPTABLESVERSION1 := $(shell echo $(IPTABLESVERSION) | cut -d. -f1 )
+-IPTABLESVERSION2 := $(shell echo $(IPTABLESVERSION) | cut -d. -f2 )
+-IPTABLESVERSION3 := $(shell echo $(IPTABLESVERSION) | cut -d. -f3 )
+-# test if iptables version >= 1.4.3
+-TEST := $(shell [ \( \( $(IPTABLESVERSION1) -ge 1 \) -a \( $(IPTABLESVERSION2) -ge 4 \) \) -a \( $(IPTABLESVERSION3) -ge 3 \) ] && echo 1 )
+-ifeq ($(TEST), 1)
+-CPPFLAGS += -DIPTABLES_143
+-endif
++LNXOBJS = linux/getifstats.o linux/ifacewatcher.o linux/getroute.o
+
+-CFLAGS  += $(shell $(PKG_CONFIG) --cflags libiptc)
+-LDLIBS  += $(shell $(PKG_CONFIG) --static --libs-only-l libiptc)
+-LDFLAGS += $(shell $(PKG_CONFIG) --libs-only-L libiptc)
+-LDFLAGS += $(shell $(PKG_CONFIG) --libs-only-other libiptc)
+-else
++ALLOBJS = $(BASEOBJS) $(LNXOBJS) $(NETFILTEROBJS) $(CPPOBJS)
+
+ ifeq "$(wildcard /etc/gentoo-release )" ""
+-LDLIBS ?= -liptc
++#LDLIBS ?= -liptc
+ else # gentoo
+ # the following is better, at least on gentoo with iptables 1.4.6
+ # see http://miniupnp.tuxfamily.org/forum/viewtopic.php?p=1618
+@@ -87,8 +68,8 @@ endif
+
+ ARCH ?= $(shell uname -m | grep -q "x86_64" && echo 64)
+ ifdef IPTABLESPATH
+-CPPFLAGS := $(CPPFLAGS) -I$(IPTABLESPATH)/include/
+-LDFLAGS := $(LDFLAFGS) -L$(IPTABLESPATH)/libiptc/
++#CPPFLAGS := $(CPPFLAGS) -I$(IPTABLESPATH)/include/
++#LDFLAGS := $(LDFLAFGS) -L$(IPTABLESPATH)/libiptc/
+ # get iptables version and set IPTABLES_143 macro if needed
+ ifeq ($(TARGET_OPENWRT),)
+ IPTABLESVERSION := $(shell grep "\#define VERSION" $(IPTABLESPATH)/config.h | tr -d \" |cut -d" " -f3 )
+@@ -125,7 +106,7 @@ else # ifdef IPTABLESPATH
+ TEST := $(shell test -f /usr/include/xtables.h && grep -q "XTABLES_VERSION_CODE" /usr/include/xtables.h && echo 1)
+ ifeq ($(TEST), 1)
+ CPPFLAGS := $(CPPFLAGS) -DIPTABLES_143
+-LDLIBS = -liptc
++#LDLIBS = -liptc
+ TESTIP4TC := $(shell test -f /lib/libip4tc.so && echo 1)
+ ifeq ($(TESTIP4TC), 1)
+ LDLIBS := $(LDLIBS) -lip4tc
+@@ -136,7 +117,6 @@ LDLIBS := $(LDLIBS) -lip6tc
+ endif # ($(TESTIP6TC), 1)
+ endif # ($(TEST), 1)
+ endif # ifdef IPTABLESPATH
+-endif # ifdef PCFILE_FOUND
+
+ LDLIBS += -lnfnetlink
+
+@@ -149,11 +129,35 @@ endif # ($(TEST),1)
+
+ LDLIBS += $(shell $(PKG_CONFIG) --static --libs-only-l libssl)
+
+-TESTUPNPDESCGENOBJS = testupnpdescgen.o upnpdescgen.o
++LDLIBS += ${LIBDIR}/libqcmap_client.so.1
++LDFLAGS := $(LDFLAFGS) -L${LIBDIR}/libqcmap_client.so.1
++
++qcmap_client_inc = -D__packed__= \
++        -DIMAGE_APPS_PROC \
++        -DFEATURE_Q_NO_SELF_QPTR \
++        -DAEEINTERFACE_CPLUSPLUS \
++        -DFEATURE_SMD \
++        -DFEATURE_DIAG_MP_MASTER_APPS \
++        -DFEATURE_DS_LINUX_ANDROID \
++        -DFEATURE_DSS_LINUX \
++        -DFEATURE_LINUX \
++        -DFEATURE_MULTIPROCESSOR \
++        -DFEATURE_DSUTILS_OFFTARGET \
++        -DFEATURE_NO_REX \
++        -DFEATURE_XMLLIB \
++		 -I$(INCDIR) \
++		 -I$(INCDIR)/rpcsvc \
++        -I$(INCDIR)/data \
++        -I$(INCDIR)/qmi-framework\
++        -I$(INCDIR)/qmi \
++        -I$(INCDIR)/diag \
++        -I$(INCDIR)/dsutils \
++        -I$(INCDIR)/xmllib
+
+-EXECUTABLES = miniupnpd testupnpdescgen testgetifstats \
+-              testupnppermissions miniupnpdctl testgetifaddr \
+-              testgetroute testasyncsendto testportinuse
++CPPFLAGS += -Dstrlcpy=strncpy -Dstrlcat=strncat $(qcmap_client_inc)
++
++EXECUTABLES = miniupnpd testgetifstats \
++              testupnppermissions miniupnpdctl testgetifaddr
+
+ .PHONY:	all clean install depend genuuid
+
+@@ -162,24 +166,20 @@ all:	$(EXECUTABLES)
+ clean:
+ 	$(RM) $(ALLOBJS)
+ 	$(RM) $(EXECUTABLES)
+-	$(RM) testupnpdescgen.o testgetifstats.o
++	$(RM) UPNP_QCMAP_Client.o
++	$(RM) netfilter/iptcrdr.o
++	$(RM) netfilter/iptpinhole.o
++	$(RM) testgetifstats.o
+ 	$(RM) testupnppermissions.o testgetifaddr.o
+-	$(RM) testgetroute.o testasyncsendto.o
+-	$(RM) testportinuse.o
++	$(RM) testasyncsendto.o
+ 	$(RM) miniupnpdctl.o
+
+ install:	miniupnpd miniupnpd.8 miniupnpd.conf genuuid \
+-	netfilter/iptables_init.sh netfilter/iptables_removeall.sh \
+-	netfilter/ip6tables_init.sh netfilter/ip6tables_removeall.sh \
+ 	linux/miniupnpd.init.d.script
+ 	$(STRIP) miniupnpd
+ 	$(INSTALL) -d $(DESTDIR)$(SBININSTALLDIR)
+ 	$(INSTALL) miniupnpd $(DESTDIR)$(SBININSTALLDIR)
+ 	$(INSTALL) -d $(DESTDIR)$(ETCINSTALLDIR)
+-	$(INSTALL) netfilter/iptables_init.sh $(DESTDIR)$(ETCINSTALLDIR)
+-	$(INSTALL) netfilter/iptables_removeall.sh $(DESTDIR)$(ETCINSTALLDIR)
+-	$(INSTALL) netfilter/ip6tables_init.sh $(DESTDIR)$(ETCINSTALLDIR)
+-	$(INSTALL) netfilter/ip6tables_removeall.sh $(DESTDIR)$(ETCINSTALLDIR)
+ 	$(INSTALL) --mode=0644 -b miniupnpd.conf $(DESTDIR)$(ETCINSTALLDIR)
+ 	$(INSTALL) -d $(DESTDIR)$(PREFIX)/etc/init.d
+ 	$(INSTALL) linux/miniupnpd.init.d.script $(DESTDIR)$(PREFIX)/etc/init.d/miniupnpd
+@@ -197,9 +197,8 @@ else
+ 	sed -i -e "s/^uuid=[-0-9a-f]*/uuid=`($(STAGING_DIR_HOST)/bin/genuuid||$(STAGING_DIR_HOST)/bin/uuidgen||$(STAGING_DIR_HOST)/bin/uuid) 2>/dev/null`/" miniupnpd.conf
+ endif
+
+-miniupnpd:	$(BASEOBJS) $(LNXOBJS) $(NETFILTEROBJS)
+-
+-testupnpdescgen:	$(TESTUPNPDESCGENOBJS)
++miniupnpd:	$(BASEOBJS) $(CPPOBJS) $(LNXOBJS)
++	$(CXX) $(CPPFLAGS) $(LDFLAGS) -o $@ $(BASEOBJS) $(CPPOBJS) $(LNXOBJS) $(LDLIBS)
+
+ testgetifstats:	testgetifstats.o linux/getifstats.o
+
+@@ -207,14 +206,6 @@ testupnppermissions:	testupnppermissions
+
+ testgetifaddr:	testgetifaddr.o getifaddr.o
+
+-testgetroute:	testgetroute.o linux/getroute.o upnputils.o
+-
+-testasyncsendto:	testasyncsendto.o asyncsendto.o upnputils.o \
+-	linux/getroute.o
+-
+-testportinuse:	testportinuse.o portinuse.o getifaddr.o \
+-	netfilter/iptcrdr.o
+-
+ miniupnpdctl:	miniupnpdctl.o
+
+ config.h:	genconfig.sh VERSION
+@@ -224,7 +215,6 @@ depend:	config.h
+ 	makedepend -f$(MAKEFILE_LIST) -Y \
+ 	$(ALLOBJS:.o=.c) $(TESTUPNPDESCGENOBJS:.o=.c) \
+ 	testgetifstats.c testupnppermissions.c testgetifaddr.c \
+-	testgetroute.c testasyncsendto.c testportinuse.c \
+ 	miniupnpdctl.c 2>/dev/null
+
+ # DO NOT DELETE
+@@ -233,24 +223,30 @@ miniupnpd.o: config.h macros.h upnpgloba
+ miniupnpd.o: miniupnpdtypes.h upnphttp.h upnpdescgen.h miniupnpdpath.h
+ miniupnpd.o: getifaddr.h upnpsoap.h options.h minissdp.h upnpredirect.h
+ miniupnpd.o: upnppinhole.h daemonize.h upnpevents.h asyncsendto.h natpmp.h
+-miniupnpd.o: pcpserver.h commonrdr.h upnputils.h ifacewatcher.h
++miniupnpd.o: pcpserver.h commonrdr.h upnputils.h ifacewatcher.h UPNP_QCMAP_Client.h
+ upnphttp.o: config.h upnphttp.h upnpdescgen.h miniupnpdpath.h upnpsoap.h
+ upnphttp.o: upnpevents.h upnputils.h
+ upnpdescgen.o: config.h getifaddr.h upnpredirect.h upnpdescgen.h
+ upnpdescgen.o: miniupnpdpath.h upnpglobalvars.h upnppermissions.h
+ upnpdescgen.o: miniupnpdtypes.h upnpdescstrings.h upnpurns.h getconnstatus.h
++upnpdescgen.o: UPNP_QCMAP_Client.h
+ upnpsoap.o: macros.h config.h upnpglobalvars.h upnppermissions.h
+ upnpsoap.o: miniupnpdtypes.h upnphttp.h upnpsoap.h upnpreplyparse.h
+ upnpsoap.o: upnpredirect.h upnppinhole.h getifaddr.h getifstats.h
+-upnpsoap.o: getconnstatus.h upnpurns.h
++upnpsoap.o: getconnstatus.h upnpurns.h UPNP_QCMAP_Client.h
+ upnpreplyparse.o: upnpreplyparse.h minixml.h
+ minixml.o: minixml.h
+ portinuse.o: macros.h config.h upnpglobalvars.h upnppermissions.h
+-portinuse.o: miniupnpdtypes.h getifaddr.h portinuse.h netfilter/iptcrdr.h
++portinuse.o: miniupnpdtypes.h getifaddr.h portinuse.h
+ portinuse.o: commonrdr.h
+ upnpredirect.o: macros.h config.h upnpredirect.h upnpglobalvars.h
+ upnpredirect.o: upnppermissions.h miniupnpdtypes.h upnpevents.h portinuse.h
+ upnpredirect.o: netfilter/iptcrdr.h commonrdr.h
++upnpredirect.o: UPNP_QCMAP_Client.h
++UPNP_QCMAP_Client.o: UPNP_QCMAP_Client.cpp UPNP_QCMAP_Client.h getifstats.h
++	$(CXX) $(CPPFLAGS) -c UPNP_QCMAP_Client.cpp
++netfilter/iptcrdr.o: netfilter/iptcrdr.h commonrdr.h
++netfilter/iptpinhole.o: netfilter/iptpinhole.h
+ getifaddr.o: config.h getifaddr.h
+ daemonize.o: daemonize.h config.h
+ upnpglobalvars.o: config.h upnpglobalvars.h upnppermissions.h
+@@ -284,13 +280,6 @@ linux/ifacewatcher.o: config.h ifacewatc
+ linux/ifacewatcher.o: miniupnpdtypes.h getifaddr.h upnpglobalvars.h
+ linux/ifacewatcher.o: upnppermissions.h natpmp.h
+ linux/getroute.o: getroute.h upnputils.h
+-netfilter/iptcrdr.o: macros.h config.h netfilter/iptcrdr.h commonrdr.h
+-netfilter/iptcrdr.o: config.h upnpglobalvars.h upnppermissions.h
+-netfilter/iptcrdr.o: miniupnpdtypes.h
+-netfilter/iptpinhole.o: config.h netfilter/iptpinhole.h upnpglobalvars.h
+-netfilter/iptpinhole.o: upnppermissions.h config.h miniupnpdtypes.h
+-testupnpdescgen.o: macros.h config.h upnpdescgen.h upnpdescstrings.h
+-testupnpdescgen.o: getifaddr.h
+ upnpdescgen.o: config.h getifaddr.h upnpredirect.h upnpdescgen.h
+ upnpdescgen.o: miniupnpdpath.h upnpglobalvars.h upnppermissions.h
+ upnpdescgen.o: miniupnpdtypes.h upnpdescstrings.h upnpurns.h getconnstatus.h
+diff --git a/UPNP_QCMAP_Client.cpp b/UPNP_QCMAP_Client.cpp
+new file mode 100755
+index 0000000..53030c3
+--- /dev/null
++++ b/UPNP_QCMAP_Client.cpp
+@@ -0,0 +1,536 @@
++/*
++Copyright (c) 2013,2015 Qualcomm Technologies, Inc. All rights reserved.
++Qualcomm Technologies Proprietary and Confidential
++*/
++#include "QCMAP_Client.h"
++#include "getifstats.h"
++#include <syslog.h>
++
++QCMAP_Client *QcMapClient = NULL;
++
++#ifdef __cplusplus
++       extern "C"
++       {
++#endif
++
++int AddFirewallEntryWrapper(const char * iaddr,const char * rem_host, unsigned short rem_port,
++                                   unsigned short int_port,
++                                   int proto)
++{
++  uint32 firewall_handle=0;
++  boolean add_upnp_flag = true;
++  qmi_error_type_v01 qmi_err_num;
++  qcmap_msgr_firewall_conf_t * extd_firewall_add = (qcmap_msgr_firewall_conf_t *)malloc(sizeof(qcmap_msgr_firewall_conf_t));
++  memset(extd_firewall_add, 0, sizeof(qcmap_msgr_firewall_conf_t));
++
++  if(strlen(rem_host) > 0)
++  {
++    if(inet_pton(AF_INET6, rem_host,
++    (char *)&extd_firewall_add->extd_firewall_entry.filter_spec.ip_hdr.v6.src.addr.in6_u.u6_addr8) <= 0)
++    {
++      return -1;
++    }
++    extd_firewall_add->extd_firewall_entry.filter_spec.ip_hdr.v6.field_mask |= IPFLTR_MASK_IP6_SRC_ADDR;
++    extd_firewall_add->extd_firewall_entry.filter_spec.ip_hdr.v6.src.prefix_len= 128;
++  }
++
++  if(strlen(iaddr) > 0)
++  {
++    if(inet_pton(AF_INET6, iaddr,
++    (char *)&extd_firewall_add->extd_firewall_entry.filter_spec.ip_hdr.v6.dst.addr.in6_u.u6_addr8) <= 0)
++    {
++      return -1;
++    }
++    extd_firewall_add->extd_firewall_entry.filter_spec.ip_hdr.v6.field_mask |= IPFLTR_MASK_IP6_DST_ADDR;
++    extd_firewall_add->extd_firewall_entry.filter_spec.ip_hdr.v6.dst.prefix_len= 128;
++  }
++  extd_firewall_add->extd_firewall_entry.filter_spec.ip_vsn = IP_V6;
++  extd_firewall_add->extd_firewall_entry.filter_spec.ip_hdr.v6.next_hdr_prot = proto;
++  extd_firewall_add->extd_firewall_entry.filter_spec.ip_hdr.v6.field_mask |= IPFLTR_MASK_IP6_NEXT_HDR_PROT;
++  if (proto == PS_IPPROTO_TCP )
++  {
++    syslog(LOG_INFO, "Protocol:TCP");
++    extd_firewall_add->extd_firewall_entry.filter_spec.next_prot_hdr.tcp.src.port = rem_port;
++    extd_firewall_add->extd_firewall_entry.filter_spec.next_prot_hdr.tcp.field_mask |= IPFLTR_MASK_TCP_SRC_PORT;
++    extd_firewall_add->extd_firewall_entry.filter_spec.next_prot_hdr.tcp.dst.port = int_port;
++    extd_firewall_add->extd_firewall_entry.filter_spec.next_prot_hdr.tcp.field_mask |= IPFLTR_MASK_TCP_DST_PORT;
++    extd_firewall_add->extd_firewall_entry.filter_spec.next_prot_hdr.tcp.src.range = 0;
++    extd_firewall_add->extd_firewall_entry.filter_spec.next_prot_hdr.tcp.dst.range = 0;
++  }
++  else if ( proto == PS_IPPROTO_UDP )
++  {
++    syslog(LOG_INFO, "Protocol:UDP");
++    extd_firewall_add->extd_firewall_entry.filter_spec.next_prot_hdr.udp.src.port = rem_port;
++    extd_firewall_add->extd_firewall_entry.filter_spec.next_prot_hdr.udp.field_mask |= IPFLTR_MASK_UDP_SRC_PORT;
++    extd_firewall_add->extd_firewall_entry.filter_spec.next_prot_hdr.udp.dst.port = int_port;
++    extd_firewall_add->extd_firewall_entry.filter_spec.next_prot_hdr.udp.field_mask |= IPFLTR_MASK_UDP_DST_PORT;
++    extd_firewall_add->extd_firewall_entry.filter_spec.next_prot_hdr.udp.src.range = 0;
++    extd_firewall_add->extd_firewall_entry.filter_spec.next_prot_hdr.udp.dst.range = 0;
++  }
++  if(QcMapClient->AddUPNPPinholeEntry(extd_firewall_add,&qmi_err_num,add_upnp_flag ) == true)
++  {
++    firewall_handle = extd_firewall_add->extd_firewall_entry.firewall_handle;
++    syslog(LOG_INFO,"Added Firewall Entry successfully. Firewall Handle: %d\n",firewall_handle);
++  }
++  else if (qmi_err_num == QMI_ERR_INTERFACE_NOT_FOUND_V01)
++  {
++    firewall_handle = extd_firewall_add->extd_firewall_entry.firewall_handle;
++    syslog(LOG_INFO,"Backhaul down. Saved firwall entry in configuration file.");
++  }
++  else if (qmi_err_num == QMI_ERR_NO_EFFECT_V01)
++  {
++    syslog(LOG_INFO,"\nFirewall Entry Already Present");
++    return -4;
++  }
++  else
++  {
++    printf("\nAdd Firewall Entry failed, Error: 0x%x", qmi_err_num);
++    return -1;
++  }
++  return firewall_handle;
++}
++
++int DeleteFirewallEntryWrapper(int uid)
++{
++  qmi_error_type_v01 qmi_err_num;
++  int handle=0;
++  handle= uid;
++  if(handle <0)
++  {
++    return -2;
++    syslog(LOG_INFO,"\n Entered Handle is invalid \n");
++  }
++  if (QcMapClient->DeleteFireWallEntry(handle, &qmi_err_num)< 0)
++  {
++    if (qmi_err_num == QMI_ERR_INTERFACE_NOT_FOUND_V01)
++    {
++      syslog(LOG_INFO,"\nBackhaul down. firewall entry deleted from configuration file.");
++      return 0;
++    }
++    else
++    {
++      return -2;
++    }
++  }
++  else
++  {
++    printf("\nDelete firewall Successfully");
++    return 0;
++  }
++}
++
++int GetFirewallEntryWrapper( int uid,
++                                   char * rem_host, unsigned short * rem_port,
++                                   unsigned short * int_port,
++                                   int * protocol)
++{
++  syslog(LOG_INFO, "GET FIREWALL ENtry Wrapper");
++  char str[INET6_ADDRSTRLEN];
++  qcmap_msgr_firewall_conf_t extd_firewall_get;
++  int   index;
++  int   result;
++  int next_hdr_prot = 0;
++  qcmap_msgr_firewall_entry_conf_t *firewall_entry =
++                                      (qcmap_msgr_firewall_entry_conf_t * )malloc(sizeof(qcmap_msgr_firewall_entry_conf_t));
++  qmi_error_type_v01 qmi_err_num;
++  int proto;
++  memset(&extd_firewall_get, 0, sizeof(qcmap_msgr_firewall_conf_t));
++  extd_firewall_get.extd_firewall_entry.filter_spec.ip_vsn = IP_V6;
++  extd_firewall_get.extd_firewall_entry.firewall_handle = uid;
++  if(QcMapClient->GetFireWallEntry(&extd_firewall_get.extd_firewall_entry, &qmi_err_num))
++  {
++    firewall_entry=&extd_firewall_get.extd_firewall_entry;
++    inet_ntop(AF_INET6, firewall_entry->filter_spec.ip_hdr.v6.src.addr.in6_u.u6_addr32, str, INET6_ADDRSTRLEN);
++	syslog(LOG_INFO, "GET FIREWALL ENtry Wrapper After Remote-address %s",str);
++    if(rem_host)
++    {
++      rem_host=str;
++      memcpy(rem_host,str,sizeof(str));
++    }
++    proto = firewall_entry->filter_spec.ip_hdr.v6.next_hdr_prot;
++    switch(proto)
++    {
++      case PS_IPPROTO_TCP:
++         syslog(LOG_INFO, "Protocol: TCP");
++         if(rem_port)
++           *rem_port= firewall_entry->filter_spec.next_prot_hdr.tcp.src.port;
++         if(int_port)
++           *int_port =firewall_entry->filter_spec.next_prot_hdr.tcp.dst.port;
++         break;
++      case PS_IPPROTO_UDP:
++        syslog(LOG_INFO, "UDP");
++        if(rem_port)
++        {
++          *rem_port = firewall_entry->filter_spec.next_prot_hdr.udp.src.port;
++           syslog(LOG_INFO, "Remote port= %d ",*rem_port);
++        }
++        if(int_port)
++        {  *int_port =firewall_entry->filter_spec.next_prot_hdr.udp.dst.port;
++           syslog(LOG_INFO, "Internal port= %d ",*int_port);
++        }
++        break;
++      default:
++        printf("\nProtocol : Any");
++        rem_port = NULL;
++        int_port =NULL;
++        break;
++    }
++    return 1;
++  }
++  else
++  {
++    return -2;
++  }
++}
++
++void GetFirewallStatusWrapper(unsigned short *firewall_enable ,unsigned short *upnp_pinhole_allowed)
++{
++  boolean upnp_pinhole_allow;
++  qmi_error_type_v01	qmi_err_num;
++  boolean enable_firewall, pkts_allowed;
++  if (QcMapClient->GetFirewall(&enable_firewall, &pkts_allowed,&qmi_err_num))
++  {
++    if(enable_firewall)
++    {
++       printf("Firewall is Enabled\n");
++      *firewall_enable =1;
++    }
++    else
++    {
++       printf("Firewall is Disabled \n");
++       *firewall_enable =0;
++    }
++  }
++  else
++    printf("Get Firewall configuration failed,Error 0x%x", qmi_err_num);
++
++  if (QcMapClient->GetUPNPState(&upnp_pinhole_allow,&qmi_err_num))
++  {
++    if(upnp_pinhole_allow)
++    {
++      printf("Firewall is configured to ALLOW Pinhole\n");
++      *upnp_pinhole_allowed = 1;
++    }
++    else
++    {
++      *upnp_pinhole_allowed = 0;
++      printf("Firewall is configured to DISALLOW Pinholes\n");
++    }
++  }
++  else
++  printf("Get Firewall configuration failed,Error 0x%x", qmi_err_num);
++}
++
++int addStaticNatEntry_wrapper(struct in_addr addr, unsigned int proto, unsigned int local_port, unsigned int g_port)
++{
++  qcmap_msgr_snat_entry_config_v01 snat_entry;
++  qmi_error_type_v01 qmi_err_num;
++  /* Port mapping is not present, try to add it */
++  memset(&snat_entry, 0, sizeof(qcmap_msgr_snat_entry_config_v01));
++  snat_entry.private_ip_addr = ntohl(addr.s_addr);
++  snat_entry.protocol = (uint8)proto;
++  snat_entry.private_port = (uint16)local_port;
++  snat_entry.global_port = (uint16)g_port;
++  if (!QcMapClient->AddStaticNatEntry(&snat_entry, &qmi_err_num))
++  {
++    if(qmi_err_num == QMI_ERR_INTERFACE_NOT_FOUND_V01)
++      return 0;
++    if(qmi_err_num == QMI_ERR_NO_EFFECT_V01)
++      return -2;
++    return -1;
++  }
++  return 0;
++}
++
++int deleteStaticNatEntry_wrapper(unsigned short port, int proto)
++{
++  qcmap_msgr_snat_entry_config_v01 snat_entry;
++  qcmap_msgr_snat_entry_config_v01 snat_config[QCMAP_MSGR_MAX_SNAT_ENTRIES_V01];
++  int i=0, num_entries=0, r=-1;
++  qmi_error_type_v01 qmi_err_num;
++  memset(&snat_entry, 0, sizeof(qcmap_msgr_snat_entry_config_v01));
++  snat_entry.protocol = (uint8)proto;
++  snat_entry.global_port = (uint16)port;
++  memset(snat_config, 0, QCMAP_MSGR_MAX_SNAT_ENTRIES_V01*sizeof(qcmap_msgr_snat_entry_config_v01));
++  if (QcMapClient->GetStaticNatConfig(snat_config, &num_entries, &qmi_err_num))
++  {
++    for (i=0; i<num_entries; i++)
++    {
++      if(port == snat_config[i].global_port && proto == snat_config[i].protocol)
++      {
++        snat_entry.private_ip_addr = snat_config[i].private_ip_addr;
++        snat_entry.private_port = snat_config[i].private_port;
++        r = QcMapClient->DeleteStaticNatEntry(&snat_entry, &qmi_err_num);
++        if (r == 0)
++        {
++          if (qmi_err_num == QMI_ERR_INTERFACE_NOT_FOUND_V01)
++            return 0;
++          return -1;
++        }
++        return r;
++      }
++    }
++  }
++  return r;
++}
++
++int getStaticNatConfigByEntry(int index, char *addr, int addrlen, unsigned short *eport, unsigned short *iport, int *proto)
++{
++  qmi_error_type_v01 qmi_err_num;
++  in_addr tmpIP;
++  int i=0, num_entries=0;
++  qcmap_msgr_snat_entry_config_v01 snat_config[QCMAP_MSGR_MAX_SNAT_ENTRIES_V01];
++  memset(snat_config, 0, QCMAP_MSGR_MAX_SNAT_ENTRIES_V01*sizeof(qcmap_msgr_snat_entry_config_v01));
++  if (QcMapClient->GetStaticNatConfig(snat_config, &num_entries, &qmi_err_num))
++  {
++    for (i=0; i<num_entries; i++)
++    {
++      if(i == index)
++      {
++        tmpIP.s_addr = ntohl(snat_config[i].private_ip_addr);
++        snprintf(addr, addrlen,"%u.%u.%u.%u", tmpIP.s_addr & 0xff, (tmpIP.s_addr >> 8) & 0xff, (tmpIP.s_addr >> 16) & 0xff, tmpIP.s_addr >> 24);
++        *iport = snat_config[i].private_port;
++        *eport = snat_config[i].global_port;
++        *proto = snat_config[i].protocol;
++        return 0;
++      }
++    }
++  }
++  return -1;
++}
++
++int getSpecificEntry(unsigned int eport, unsigned int proto, char *addr, int addrlen,
++    unsigned short *iport, char * rhost, int rhostlen, unsigned int * timestamp)
++{
++  qmi_error_type_v01 qmi_err_num;
++  in_addr tmpIP;
++  int i=0, num_entries=0;
++  qcmap_msgr_snat_entry_config_v01 snat_config[QCMAP_MSGR_MAX_SNAT_ENTRIES_V01];
++  memset(snat_config, 0, QCMAP_MSGR_MAX_SNAT_ENTRIES_V01*sizeof(qcmap_msgr_snat_entry_config_v01));
++  if (QcMapClient->GetStaticNatConfig(snat_config, &num_entries, &qmi_err_num))
++  {
++    for (i=0; i<num_entries; i++)
++    {
++      if((snat_config[i].global_port == (uint16)eport) && (snat_config[i].protocol == (uint8)proto))
++      {
++        tmpIP.s_addr = ntohl(snat_config[i].private_ip_addr);
++        snprintf(addr, addrlen,"%u.%u.%u.%u", tmpIP.s_addr & 0xff, (tmpIP.s_addr >> 8) & 0xff, (tmpIP.s_addr >> 16) & 0xff, tmpIP.s_addr >> 24);
++        *iport = snat_config[i].private_port;
++        return 0;
++      }
++    }
++  }
++
++  return -1;
++}
++
++unsigned short *getPortMappingsWrapper(unsigned short startport,unsigned short endport,unsigned int proto, unsigned int *list_size )
++{
++  qmi_error_type_v01 qmi_err_num;
++  in_addr tmpIP;
++  int i=0,num_entries=0;
++  unsigned int count =0, capacity = QCMAP_MSGR_MAX_SNAT_ENTRIES_V01;
++  unsigned short *entries =NULL;
++   entries= (unsigned short *)calloc(capacity, sizeof(unsigned short));
++  qcmap_msgr_snat_entry_config_v01 snat_config[QCMAP_MSGR_MAX_SNAT_ENTRIES_V01];
++  memset(snat_config, 0, QCMAP_MSGR_MAX_SNAT_ENTRIES_V01*sizeof(qcmap_msgr_snat_entry_config_v01));
++  if (QcMapClient->GetStaticNatConfig(snat_config, &num_entries, &qmi_err_num))
++  {
++    for (i=0; i<num_entries; i++)
++    {
++        if((snat_config[i].protocol == (uint8)proto) && ( snat_config[i].global_port >= startport  && snat_config[i].global_port <= endport) )
++         { 
++            entries[count] = snat_config[i].global_port;
++            count++;
++         }
++    }
++    *list_size = count;
++    return entries;
++  }
++  return NULL;
++}
++
++int getIfaceStats(struct ifdata * data)
++{
++  qmi_error_type_v01 qmi_err_num;
++  qcmap_msgr_ip_family_enum_v01 ip_family;
++  qcmap_msgr_wwan_statistics_type_v01 wwan_stats;
++  qcmap_msgr_data_bitrate_v01 data_rate;
++  memset(&wwan_stats, 0, sizeof(qcmap_msgr_wwan_statistics_type_v01));
++  memset(&data_rate, 0, sizeof(qcmap_msgr_data_bitrate_v01));
++  //IP family, IPV4-4 IPV6-6
++  ip_family = (qcmap_msgr_ip_family_enum_v01) 4;
++  if (QcMapClient->GetWWANStatistics(ip_family, &wwan_stats, &qmi_err_num))
++  {
++    data->baudrate = 4200000;	/* that is the answer */
++    data->opackets = wwan_stats.pkts_tx;
++    data->ipackets = wwan_stats.pkts_rx;
++    data->obytes = wwan_stats.bytes_tx;
++    data->ibytes = wwan_stats.bytes_rx;
++    if(QcMapClient->GetDataRate(&data_rate, &qmi_err_num))
++    {
++      data->downstream_bitrate = (unsigned long)(data_rate.max_rx_rate & 0xFFFFFFFF);
++      data->upstream_bitrate = (unsigned long)(data_rate.max_tx_rate & 0xFFFFFFFF);
++    }
++    return 0;
++  }
++  return -1;
++}
++
++int QCMAPClient(){
++  qmi_error_type_v01 qmi_err_num;
++  if(QcMapClient != NULL)
++  {
++    return 0;
++  }
++  QcMapClient = new QCMAP_Client(NULL);
++  QcMapClient->EnableMobileAP(&qmi_err_num);
++  return 1;
++}
++
++int tearDownQCMAPClient()
++{
++  qmi_error_type_v01 qmi_err_num;
++  if(QcMapClient == NULL)
++  {
++    return 0;
++  }
++  QcMapClient->DisableMobileAP(&qmi_err_num);
++  delete(QcMapClient);
++  return 1;
++}
++
++int getIPAddr(char *ext_ip_addr, int size)
++{
++  qmi_error_type_v01 qmi_err_num;
++  in_addr public_ip;
++  in_addr primary_dns;
++  in_addr secondary_dns;
++  in_addr tmpIP;
++  memset(&public_ip,0,sizeof(in_addr));
++  memset(&primary_dns,0,sizeof(in_addr));
++  memset(&secondary_dns,0,sizeof(in_addr));
++  if (QcMapClient->GetIPv4NetworkConfiguration((in_addr_t *)&public_ip.s_addr,
++      (uint32 *)&primary_dns.s_addr,(in_addr_t *)&secondary_dns.s_addr,
++      &qmi_err_num))
++  {
++    if ( public_ip.s_addr != 0 )
++    {
++      tmpIP.s_addr = ntohl(public_ip.s_addr);
++      snprintf(ext_ip_addr, size,"%u.%u.%u.%u", tmpIP.s_addr & 0xff, (tmpIP.s_addr >> 8) & 0xff, (tmpIP.s_addr >> 16) & 0xff, tmpIP.s_addr >> 24);
++      return 0;
++    }
++  }
++  return -1;
++}
++
++/**
++ * get the connection status
++ * return values :
++ *  0 - Unconfigured
++ *  1 - Connecting
++ *  2 - Connected
++ *  3 - PendingDisconnect
++ *  4 - Disconnecting
++ *  5 - Disconnected */
++int getWanStatus()
++{
++  int r = 0;
++  qcmap_msgr_wwan_call_type_v01 call_type = QCMAP_MSGR_WWAN_CALL_TYPE_V4_V01;
++  qmi_error_type_v01 qmi_err_num;
++  qcmap_msgr_wwan_status_enum_v01 v4_status, v6_status;
++  if (QcMapClient->GetWWANStatus(&v4_status, &v6_status, &qmi_err_num))
++  {
++    if ( v4_status != NULL)
++    {
++      if(v4_status == QCMAP_MSGR_WWAN_STATUS_CONNECTING_V01)
++      {
++        r = 1;
++      }
++    else if(v4_status == QCMAP_MSGR_WWAN_STATUS_CONNECTED_V01)
++    {
++      r = 2;
++    }
++    else if(v4_status == QCMAP_MSGR_WWAN_STATUS_DISCONNECTING_V01)
++    {
++      r = 4;
++    }
++    else if(v4_status == QCMAP_MSGR_WWAN_STATUS_DISCONNECTED_V01)
++    {
++      r = 5;
++    }
++  }
++  //else if ( v6_status != NULL)
++  //{
++  //if(v6_status == QCMAP_MSGR_WWAN_STATUS_IPV6_CONNECTING_V01)
++  //{
++  //r = 1;
++  //}
++  //else if(v6_status == QCMAP_MSGR_WWAN_STATUS_IPV6_CONNECTED_V01)
++  //{
++  //r = 2;
++  //}
++  //else if(v6_status == QCMAP_MSGR_WWAN_STATUS_IPV6_DISCONNECTING_V01)
++  //{
++  //r = 4;
++  //}
++  //else if(v6_status == QCMAP_MSGR_WWAN_STATUS_IPV6_DISCONNECTED_V01)
++  //{
++  //r = 5;
++  //}
++  //}
++  }
++  return r;
++}
++
++const char *getWanStatusStr()
++{
++  int status;
++  const char * str = NULL;
++  status = getWanStatus();
++  switch(status) {
++  case 0:
++    str = "Unconfigured";
++    break;
++  case 1:
++    str = "Connecting";
++    break;
++  case 2:
++    str = "Connected";
++    break;
++  case 3:
++    str = "PendingDisconnect";
++    break;
++  case 4:
++    str = "Disconnecting";
++    break;
++  case 5:
++    str = "Disconnected";
++    break;
++  }
++  return str;
++}
++
++int startConnection()
++{
++  qmi_error_type_v01 qmi_err_num;
++  qcmap_msgr_wwan_call_type_v01 call_type = QCMAP_MSGR_WWAN_CALL_TYPE_V4_V01;
++  if (QcMapClient->ConnectBackHaul(call_type, &qmi_err_num))
++    return 0;
++  else
++    return -1;
++}
++
++int stopConnection()
++{
++  qmi_error_type_v01 qmi_err_num;
++  qcmap_msgr_wwan_call_type_v01 call_type = QCMAP_MSGR_WWAN_CALL_TYPE_V4_V01;
++  if (QcMapClient->DisconnectBackHaul(call_type, &qmi_err_num))
++    return 0;
++  else
++    return -1;
++}
++
++#ifdef __cplusplus
++}
++#endif
+diff --git a/UPNP_QCMAP_Client.h b/UPNP_QCMAP_Client.h
+new file mode 100755
+index 0000000..eeaa42c
+--- /dev/null
++++ b/UPNP_QCMAP_Client.h
+@@ -0,0 +1,64 @@
++/*
++Copyright (c) 2013,2015 Qualcomm Technologies, Inc. All rights reserved.
++Qualcomm Technologies Proprietary and Confidential
++*/
++#include "QCMAP_Client.h"
++#include "qualcomm_mobile_access_point_msgr_v01.h"
++extern "C" {
++
++  int AddFirewallEntryWrapper
++  (
++    const char * iaddr,const char * rem_host, unsigned short rem_port,
++    unsigned short int_port, int proto);
++
++  int DeleteFirewallEntryWrapper(int uid);
++  int GetFirewallEntryWrapper
++  (
++    int uid,
++    char * raddr,  unsigned short * rport,
++    unsigned short * iport,
++    int * proto
++  );
++  boolean GetFirewallStatusWrapper
++  (
++    unsigned short *firewall_enable,
++    unsigned short *upnp_enabled
++   );
++
++   int addStaticNatEntry_wrapper
++   (
++      struct in_addr    addr,
++      unsigned int      proto,
++      unsigned int      local_port,
++      unsigned int      g_port
++   );
++
++   int deleteStaticNatEntry_wrapper
++   (
++      unsigned short port,
++      int proto
++   );
++
++
++int getStaticNatConfigByEntry
++   (
++      int index,
++      char *addr,
++      int addrlen,
++      unsigned short *eport,
++      unsigned short *iport,
++      int *proto
++   );
++
++   unsigned short *getPortMappingsWrapper
++   (
++       unsigned short startport,
++       unsigned short endport,
++       unsigned int proto,
++       unsigned int * list_size
++   );
++
++   int getIfaceStats
++   (
++      struct ifdata * data
++   );
+--
+1.8.2.1
+

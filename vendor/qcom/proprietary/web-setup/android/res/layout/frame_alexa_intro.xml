@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ Copyright (C) 2017 Qualcomm Technologies, Inc.
+ All rights reserved
+ Confidential and Proprietary - Qualcomm Technologies, Inc.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
+
+	<ImageView
+		android:id="@+id/alexa_logo"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="@dimen/alexa_logo_top_margin"
+		android:scaleType="center"
+		android:src="@drawable/ic_amazon_alexa"/>
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="0dp"
+		android:orientation="vertical"
+		android:layout_weight="1"
+		android:weightSum="1">
+
+		<View
+			android:layout_width="match_parent"
+			android:layout_height="0dp"
+			android:layout_weight="0.1"/>
+
+		<TextView
+			android:id="@+id/alexa_intro_text"
+			android:layout_width="match_parent"
+			android:layout_height="0dp"
+			android:gravity="center"
+			style="@style/AlexaIntroText"
+			android:layout_marginLeft="@dimen/alexa_intro_side_margin"
+			android:layout_marginRight="@dimen/alexa_intro_side_margin"
+			android:text="@string/alexa_intro"
+			android:layout_weight="0.35"/>
+
+		<View
+			android:layout_width="match_parent"
+			android:layout_height="0dp"
+			android:layout_weight="0.05"/>
+
+		<TextView
+			android:id="@+id/alexa_detail_text"
+			android:layout_width="match_parent"
+			android:layout_height="0dp"
+			android:gravity="center"
+			style="@style/AlexaDetailText"
+			android:layout_marginLeft="@dimen/alexa_detail_side_margin"
+			android:layout_marginRight="@dimen/alexa_detail_side_margin"
+			android:text="@string/alexa_detail"
+			android:layout_weight="0.35"/>
+
+		<View
+			android:layout_width="match_parent"
+			android:layout_height="0dp"
+			android:layout_weight="0.15"/>
+	</LinearLayout>
+</LinearLayout>

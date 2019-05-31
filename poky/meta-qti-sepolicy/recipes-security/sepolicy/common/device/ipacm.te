@@ -1,0 +1,113 @@
+# Copyright (c) 2018 The Linux Foundation. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
+# met:
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above
+#       copyright notice, this list of conditions and the following
+#       disclaimer in the documentation and/or other materials provided
+#       with the distribution.
+#     * Neither the name of The Linux Foundation nor the names of its
+#       contributors may be used to endorse or promote products derived
+#       from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED
+# WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+policy_module(ipacm, 1.0)
+
+### ipa data directory
+
+type ipacm_data_t;
+user_data_files_type(ipacm_data_t)
+
+### ipacm
+
+type ipacm_t;
+type ipacm_exec_t;
+
+init_daemon_domain(ipacm_t, ipacm_exec_t)
+logging_send_syslog_msg(ipacm_t)
+
+allow ipacm_t self:capability { net_raw net_admin };
+allow ipacm_t self:{ udp_socket netlink_route_socket } create_socket_perms;
+
+userdebug_or_eng(`
+    rw_diag_dev(ipacm_t)
+')
+files_rw_qcmap_etc_data_files(ipacm_t)
+data_filetrans(ipacm_t, ipacm_data_t, dir)
+manage_user_data_files(ipacm_t, ipacm_data_t)
+
+### ipacm_perf
+
+type ipacm_perf_t;
+type ipacm_perf_exec_t;
+
+init_daemon_domain(ipacm_perf_t, ipacm_perf_exec_t)
+logging_send_syslog_msg(ipacm_perf_t)
+
+userdebug_or_eng(`
+    rw_diag_dev(ipacm_perf_t)
+')
+
+allow ipacm_perf_t self:capability net_raw;
+allow ipacm_perf_t self:netlink_route_socket r_netlink_socket_perms;
+allow ipacm_perf_t self:{ socket udp_socket } create_socket_perms;
+allow ipacm_perf_t self:fifo_file rw_fifo_file_perms;
+allow ipacm_perf_t self:unix_dgram_socket { create_socket_perms sendto };
+data_filetrans(ipacm_perf_t, ipacm_data_t, dir)
+manage_user_data_files(ipacm_perf_t, ipacm_data_t)
+
+### ipacm_diag
+
+type ipacm_diag_t;
+type ipacm_diag_exec_t;
+
+init_daemon_domain(ipacm_diag_t, ipacm_diag_exec_t)
+logging_send_syslog_msg(ipacm_diag_t)
+
+userdebug_or_eng(`
+    rw_diag_dev(ipacm_diag_t)
+')
+
+allow ipacm_t ipacm_diag_t:unix_dgram_socket sendto;
+data_filetrans(ipacm_diag_t, ipacm_data_t, dir)
+manage_user_data_files(ipacm_diag_t, ipacm_data_t)
+
+### /var/run sockets
+
+type ipacm_var_run_t;
+files_pid_file(ipacm_var_run_t)
+files_pid_filetrans({ ipacm_t ipacm_diag_t ipacm_perf_t }, ipacm_var_run_t, { sock_file file })
+manage_sock_files_pattern({ ipacm_t ipacm_diag_t ipacm_perf_t }, ipacm_var_run_t, ipacm_var_run_t)
+
+allow ipacm_t ipacm_diag_t:unix_dgram_socket sendto;
+allow ipacm_t self:netlink_netfilter_socket create_socket_perms;
+rw_diag_dev(ipacm_diag_t)
+allow ipacm_diag_t self:unix_dgram_socket { create setopt };
+allow ipacm_t self:capability net_admin;
+allow ipacm_t self:fifo_file write;
+dev_rw_generic_chr_files(ipacm_perf_t)
+dev_rw_generic_chr_files(ipacm_t)
+type ipacm_tmp_t;
+allow ipacm_t ipacm_tmp_t:dir manage_dir_perms;
+allow ipacm_t ipacm_tmp_t:file manage_file_perms;
+files_tmp_filetrans(ipacm_t, ipacm_tmp_t, { file dir })
+allow ipacm_t self:netlink_route_socket nlmsg_read;
+kernel_read_net_sysctls(ipacm_t)
+corecmd_exec_shell(ipacm_t)
+dev_read_sysfs(ipacm_diag_t)
+dev_read_sysfs(ipacm_perf_t)
+files_tmpfs_file(ipacm_tmp_t)

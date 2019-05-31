@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ Copyright (C) 2017 Qualcomm Technologies, Inc.
+ All rights reserved
+ Confidential and Proprietary - Qualcomm Technologies, Inc.
+-->
+<TextView
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/list_item_security_text"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:paddingTop="@dimen/list_item_spinner_padding"
+	android:paddingBottom="@dimen/list_item_spinner_padding"
+	android:paddingLeft="@dimen/list_item_spinner_left_padding"
+	style="@style/CustomDialogSpinner"/>

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="gbm_buffer_backend">
+
+  <copyright>
+    Copyright (c) 2017, The Linux Foundation. All rights reserved.
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions are
+    met:
+    * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+    copyright notice, this list of conditions and the following
+    disclaimer in the documentation and/or other materials provided
+    with the distribution.
+    * Neither the name of The Linux Foundation nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+    THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED
+    WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT
+    ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+    BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+    CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+    SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+    BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+    WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+    OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+    IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+    Copyright (c) 2014, 2015 Collabora, Ltd.
+
+    Permission to use, copy, modify, distribute, and sell this
+    software and its documentation for any purpose is hereby granted
+    without fee, provided that the above copyright notice appear in
+    all copies and that both that copyright notice and this permission
+    notice appear in supporting documentation, and that the name of
+    the copyright holders not be used in advertising or publicity
+    pertaining to distribution of the software without specific,
+    written prior permission.  The copyright holders make no
+    representations about the suitability of this software for any
+    purpose.  It is provided "as is" without express or implied
+    warranty.
+
+    THE COPYRIGHT HOLDERS DISCLAIM ALL WARRANTIES WITH REGARD TO THIS
+    SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+    FITNESS, IN NO EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE FOR ANY
+    SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+    WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN
+    AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
+    ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
+    THIS SOFTWARE.
+  </copyright>
+
+  <interface name="gbm_buffer_backend" version="1">
+    <description summary="GBM buffer backend support">
+    This factory interface used to create wl_buffer from given GBM buffer.
+    </description>
+
+    <request name="destroy" type="destructor">
+      <description summary="unbind the factory">
+        Destroy the protocol object created at client.
+      </description>
+    </request>
+
+    <request name="create_params">
+      <description summary="create a temporary object for buffer parameters">
+        This temporary object is used to hold gbm_buffer_params as
+        a single batch to create a wl_buffer.It can only be used once and
+        should be destroyed after an 'created' or 'failed' event has been
+        received.
+      </description>
+      <arg name="params_id" type="new_id" interface="gbm_buffer_params"
+           summary="the new temporary"/>
+    </request>
+
+  </interface>
+
+  <interface name="gbm_buffer_params" version="1">
+    <description summary="parameters for creating a gbmbuf-based wl_buffer">
+      This temporary object is a collection of dmabufs and other
+      parameters that together form a single logical buffer. The temporary
+      object may eventually create one wl_buffer unless cancelled by
+      destroying it before requesting 'create'.
+
+      Single-planar formats only require one dmabuf, however
+      multi-planar formats may require more than one dmabuf. For all
+      formats, 'add' request must be called once per plane (even if the
+      underlying dmabuf fd is identical).
+
+      You must use consecutive plane indices ('plane_idx' argument for 'add')
+      from zero to the number of planes used by the drm_fourcc format code.
+      All planes required by the format must be given exactly once, but can
+      be given in any order. Each plane index can be set only once.
+    </description>
+
+    <request name="destroy" type="destructor">
+      <description summary="delete this object, used or not">
+        Cleans up the temporary data sent to the server for dmabuf-based
+        wl_buffer creation.
+      </description>
+    </request>
+
+    <enum name="flags">
+      <entry name="y_invert" value="1" summary="contents are y-inverted"/>
+      <entry name="interlaced" value="2" summary="content is interlaced"/>
+      <entry name="bottom_first" value="4" summary="bottom field first"/>
+    </enum>
+
+    <request name="create">
+      <description summary="create a wl_buffer from the given gbmbufs">
+        This asks for creation of a wl_buffer from the added gbmbuf
+        buffers. The wl_buffer is not created immediately but returned via
+        the 'created' event if the gbmbuf sharing succeeds. The sharing
+        may fail at runtime for reasons a client cannot predict, in
+        which case the 'failed' event is triggered.
+
+        The 'format' argument is a DRM_FORMAT code, as defined by the
+        libdrm's drm_fourcc.h. The Linux kernel's DRM sub-system is the
+        authoritative source on how the format codes should work.
+
+        The 'flags' is a bitfield of the flags defined in enum "flags".
+        'y_invert' means the that the image needs to be y-flipped.
+
+        Flag 'interlaced' means that the frame in the buffer is not
+        progressive as usual, but interlaced. An interlaced buffer as
+        supported here must always contain both top and bottom fields.
+        The top field always begins on the first pixel row. The temporal
+        ordering between the two fields is top field first, unless
+        'bottom_first' is specified. It is undefined whether 'bottom_first'
+        is ignored if 'interlaced' is not set.
+
+      </description>
+      <arg name="fd" type="fd" summary="ion lib based fd"/>
+      <arg name="meta_fd" type="fd" summary="ion lib based meta_fd"/>
+      <arg name="width" type="uint" summary="base plane width in pixels"/>
+      <arg name="height" type="uint" summary="base plane height in pixels"/>
+      <arg name="format" type="uint" summary="DRM_FORMAT code"/>
+      <arg name="flags" type="int" summary="see enum flags"/>
+    </request>
+
+    <event name="created">
+      <description summary="buffer creation succeeded">
+        This event indicates that the attempted buffer creation was
+        successful. It provides the new wl_buffer referencing the dmabuf(s).
+
+        Upon receiving this event, the client should destroy the
+        zlinux_dmabuf_params object.
+      </description>
+      <arg name="buffer" type="new_id" interface="wl_buffer"
+           summary="the newly created wl_buffer"/>
+    </event>
+
+    <event name="failed">
+      <description summary="buffer creation failed">
+        This event indicates that the attempted buffer creation has
+        failed. It usually means that one of the dmabuf constraints
+        has not been fulfilled.
+
+        Upon receiving this event, the client should destroy the
+        zlinux_buffer_params object.
+      </description>
+    </event>
+
+  </interface>
+
+</protocol>

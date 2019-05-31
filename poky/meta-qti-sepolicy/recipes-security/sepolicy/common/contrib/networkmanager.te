@@ -1,0 +1,98 @@
+# Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
+# met:
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above
+#       copyright notice, this list of conditions and the following
+#       disclaimer in the documentation and/or other materials provided
+#       with the distribution.
+#     * Neither the name of The Linux Foundation nor the names of its
+#       contributors may be used to endorse or promote products derived
+#       from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED
+# WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+type wifi_data_t;
+user_data_files_type(wifi_data_t)
+manage_user_data_files(NetworkManager_t, wifi_data_t)
+
+type wifi_system_data_t;
+system_data_files_type(wifi_system_data_t)
+manage_system_data_files(NetworkManager_t, wifi_system_data_t)
+
+# this rules are for wpa_supplicant which run in NetworkManger context
+rw_shared_memory_dev(NetworkManager_t)
+userdebug_or_eng(`
+    rw_diag_dev(NetworkManager_t)
+')
+dev_rw_null(NetworkManager_t)
+
+manage_user_data_files(wpa_cli_t, wifi_data_t)
+manage_user_data_files(dhcpc_t, wifi_data_t)
+
+# this needs to have for qcmap_cm context
+read_write_qcmap_cm_socket_files(NetworkManager_t)
+qcmap_cm_rw_sock_files(NetworkManager_t)
+qcmap_cm_sendto_unix_dgram_socket(NetworkManager_t);
+
+### WLAN initscript ###
+
+type wlan_initrc_exec_t;
+type wlan_initrc_t;
+init_script_domain(wlan_initrc_t, wlan_initrc_exec_t)
+
+corecmd_exec_shell(wlan_initrc_t)
+corecmd_exec_bin(wlan_initrc_t)
+dev_write_kmsg(wlan_initrc_t)
+kernel_read_system_state(wlan_initrc_t)  # uname
+sysnet_domtrans_ifconfig(wlan_initrc_t)
+modutils_domtrans_insmod(wlan_initrc_t)
+# The above rule doesn't seem to grant read permissions
+modutils_exec_insmod(wlan_initrc_t)
+
+allow wlan_initrc_t self:fifo_file rw_file_perms;
+qcmap_cm_rw_unix_dgram_socket(NetworkManager_t)
+userdebug_or_eng(`
+    rw_diag_dev(dhcpc_t)
+')
+qcmap_cm_rw_unix_netlink_socket(dhcpc_t)
+qcmap_cm_rw_unix_netlink_socket(NetworkManager_t)
+qcmap_manage_var_run_qcmap_dir(NetworkManager_t)
+qcmap_delete_qcmap_pid(NetworkManager_t)
+
+allow wlan_initrc_t self:fifo_file rw_file_perms;
+files_search_default(NetworkManager_t);
+files_rw_qcmap_etc_data_files(NetworkManager_t)
+read_write_qcmap_cm_socket_files(wlan_initrc_t)
+
+qcmap_manage_qcmap_pid(NetworkManager_t)
+userdebug_or_eng(`
+    networkmanager_wifi_data_filetrans(NetworkManager_t, file, "wpa_supplicant.log")
+    networkmanager_wifi_data_filetrans(NetworkManager_t, file, "hostapd.log")
+    networkmanager_wifi_data_filetrans(NetworkManager_t, file, "hostapd1.log")
+    networkmanager_wifi_data_filetrans(NetworkManager_t, file, "hostapd2.log")
+')
+#TODO properly con_mode node
+dev_rw_sysfs(wlan_initrc_t)
+gen_require(`
+    type firmware_t;
+')
+allow wlan_initrc_t firmware_t:dir { search getattr open };
+allow wlan_initrc_t firmware_t:file read_file_perms;
+files_search_home(wlan_initrc_t)
+kernel_search_debugfs(wlan_initrc_t)
+getty_use_fds(wlan_initrc_t)
+term_use_unallocated_ttys(wlan_initrc_t)

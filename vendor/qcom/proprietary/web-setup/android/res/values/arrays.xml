@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ Copyright (C) 2017 Qualcomm Technologies, Inc.
+ All rights reserved
+ Confidential and Proprietary - Qualcomm Technologies, Inc.
+-->
+<resources>
+	<string-array name="network_security_array">
+		<item>@string/security_open</item>
+		<item>@string/security_wpa2</item>
+	</string-array>
+</resources>

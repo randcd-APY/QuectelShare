@@ -1,0 +1,11 @@
+[Unit]
+Description=SELinux init service loading
+DefaultDependencies=no
+Before=sysinit.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/selinux-init.sh
+
+[Install]
+WantedBy=multi-user.target

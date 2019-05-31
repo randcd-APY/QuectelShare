@@ -1,0 +1,15 @@
+##############################################################################
+#
+# Copyright (c) 2011-2015 Qualcomm Technologies International, Ltd.
+# All Rights Reserved. 
+# Qualcomm Technologies International, Ltd. Confidential and Proprietary.
+#       
+##############################################################################
+FW_INC := \
+	-I$(FW_SRC_ROOT)/config \
+	-I$(FW_SRC_ROOT)/gsp/inc \
+	-I$(FW_SRC_ROOT)/gsp/src/inc \
+	-I${CSR_INC_GLOBAL}
+
+FW_LIB := ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}
+

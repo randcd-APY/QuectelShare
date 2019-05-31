@@ -1,0 +1,77 @@
+# Copyright (c) 2018 The Linux Foundation. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
+# met:
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above
+#       copyright notice, this list of conditions and the following
+#       disclaimer in the documentation and/or other materials provided
+#       with the distribution.
+#     * Neither the name of The Linux Foundation nor the names of its
+#       contributors may be used to endorse or promote products derived
+#       from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED
+# WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+policy_module(qnetmgrd, 1.0)
+
+type qnetmgrd_t;
+type qnetmgrd_exec_t;
+
+init_daemon_domain(qnetmgrd_t, qnetmgrd_exec_t)
+logging_send_syslog_msg(qnetmgrd_t)
+
+userdebug_or_eng(`
+    rw_diag_dev(qnetmgrd_t)
+')
+
+allow qnetmgrd_t self:capability { net_admin net_raw chown fsetid };
+allow qnetmgrd_t self:{
+    socket
+    udp_socket
+    netlink_socket
+    netlink_route_socket
+} create_socket_perms;
+allow qnetmgrd_t self:fifo_file rw_fifo_file_perms;
+
+gen_require(`
+    type socket_device_t;
+')
+# added by peeta
+#allow qnetmgrd_t socket_device_t:dir { write add_name };
+#allow qnetmgrd_t socket_device_t:sock_file create;
+allow qnetmgrd_t data_t:sock_file unlink;
+allow qnetmgrd_t sysfs_t:file write;
+
+dev_read_sysfs(qnetmgrd_t)
+files_rw_qcmap_etc_data_files(qnetmgrd_t)
+kernel_load_module(qnetmgrd_t)
+kernel_rw_net_sysctls(qnetmgrd_t)
+kernel_read_vm_overcommit_sysctl(qnetmgrd_t)
+sysnet_domtrans_ifconfig(qnetmgrd_t)
+
+# Don't implicitly load kernel modules
+kernel_dontaudit_request_load_module(qnetmgrd_t)
+
+type qnetmgrd_data_t;
+user_data_files_type(qnetmgrd_data_t)
+data_filetrans(qnetmgrd_t, qnetmgrd_data_t, { dir sock_file })
+manage_user_data_files(qnetmgrd_t, qnetmgrd_data_t)
+
+#added by peeta
+allow qnetmgrd_t initrc_t:unix_stream_socket connectto;
+allow qnetmgrd_t self:tcp_socket { create ioctl };
+allow qnetmgrd_t socket_device_t:dir { write remove_name add_name };
+allow qnetmgrd_t socket_device_t:sock_file { write create unlink };

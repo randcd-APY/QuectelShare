@@ -1,0 +1,99 @@
+# Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
+# met:
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above
+#       copyright notice, this list of conditions and the following
+#       disclaimer in the documentation and/or other materials provided
+#       with the distribution.
+#     * Neither the name of The Linux Foundation nor the names of its
+#       contributors may be used to endorse or promote products derived
+#       from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED
+# WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+policy_module(device, 1.0)
+
+### tftp server ###
+
+type tftp_server_t;
+type tftp_server_exec_t;
+init_daemon_domain(tftp_server_t, tftp_server_exec_t)
+inittab_domtrans(tftp_server_t, tftp_server_exec_t)
+
+# /sys/power/wakelock
+dev_rw_sysfs(tftp_server_t)
+allow tftp_server_t self:capability2 block_suspend;
+
+# /system/rfs/msm/mpss
+system_read_link_files(tftp_server_t)
+
+read_firmware_file(tftp_server_t)
+logging_send_syslog_msg(tftp_server_t)
+
+allow tftp_server_t self:socket create_socket_perms;
+allow tftp_server_t self:process signal;
+allow tftp_server_t self:capability net_bind_service;
+dontaudit tftp_server_t self:capability net_raw;
+
+firmware_manage_shared_props(tftp_server_t)
+manage_user_data_files(tftp_server_t, mpss_persist_t)
+manage_user_data_files(tftp_server_t, adsp_persist_t)
+
+type tombstone_data_t;
+user_data_files_type(tombstone_data_t)
+# TODO: userdebug_or_eng?
+manage_user_data_files(tftp_server_t, tombstone_data_t)
+
+### misc properties ###
+
+type mpss_persist_t;
+user_data_files_type(mpss_persist_t)
+type adsp_persist_t;
+user_data_files_type(adsp_persist_t)
+
+### dev nodes ###
+
+type subsys_modem_device_t;
+dev_node(subsys_modem_device_t)
+
+type subsys_ssr_device_t;
+dev_node(subsys_ssr_device_t)
+
+type audio_device_t;
+dev_node(audio_device_t)
+
+type video_device_t;
+dev_node(video_device_t)
+
+type shared_log_device_t;
+dev_node(shared_log_device_t)
+
+type smd_device_t;
+dev_node(smd_device_t);
+
+type ubi_device_t;
+dev_node(ubi_device_t);
+
+type socket_device_t;
+files_type(socket_device_t);
+allow socket_device_t device_t:filesystem associate;
+
+type diag_device_t;
+dev_node(diag_device_t);
+
+type ion_device_t;
+dev_node(ion_device_t);

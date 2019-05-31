@@ -1,0 +1,40 @@
+From 896f33dc459a7c699a1f4061e5fcca3555e135a0 Mon Sep 17 00:00:00 2001
+From: Marcel Ziswiler <marcel.ziswiler@toradex.com>
+Date: Wed, 8 Jun 2016 14:23:29 +0200
+Subject: [PATCH] Fix cross compilation
+
+Signed-off-by: Marcel Ziswiler <marcel.ziswiler@toradex.com>
+---
+ GNUmakefile | 17 -----------------
+ 1 file changed, 17 deletions(-)
+
+diff --git a/GNUmakefile b/GNUmakefile
+index 4de9d10..d053e94 100755
+--- a/GNUmakefile
++++ b/GNUmakefile
+@@ -125,23 +125,6 @@ ifeq ($(IS_X86)$(IS_X32)$(IS_CYGWIN)$(IS_MINGW)$(SUN_COMPILER),00000)
+  endif
+ endif
+ 
+-# Guard use of -march=native
+-ifeq ($(GCC42_OR_LATER)$(IS_NETBSD),10)
+-   CXXFLAGS += -march=native
+-else ifneq ($(CLANG_COMPILER)$(INTEL_COMPILER),00)
+-   CXXFLAGS += -march=native
+-else
+-  # GCC 3.3 and "unknown option -march="
+-  # Ubuntu GCC 4.1 compiler crash with -march=native
+-  # NetBSD GCC 4.8 compiler and "bad value (native) for -march= switch"
+-  # Sun compiler is handled below
+-  ifeq ($(SUN_COMPILER)$(IS_X64),01)
+-    CXXFLAGS += -m64
+-  else ifeq ($(SUN_COMPILER)$(IS_X86),01)
+-    CXXFLAGS += -m32
+-  endif # X86/X32/X64
+-endif
+-
+ # Aligned access required for -O3 and above due to vectorization
+ UNALIGNED_ACCESS := $(shell $(EGREP) -c "^[[:space:]]*//[[:space:]]*\#[[:space:]]*define[[:space:]]*CRYPTOPP_NO_UNALIGNED_DATA_ACCESS" config.h)
+ ifneq ($(UNALIGNED_ACCESS),0)
+-- 
+2.6.6

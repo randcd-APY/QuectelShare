@@ -1,0 +1,172 @@
+#!/bin/sh
+
+IFNAME=$1
+CMD=$2
+CRED=$3
+main_iface="wlan"
+section="wlan_iface"
+DEBUG=
+
+DEBUG_LOG() {
+	if [ -n "${DEBUG}" ]; then
+		echo "$1" >> /tmp/.wps_debug
+	fi
+}
+
+get_psk() {
+	local conf=$1
+	psk=$(awk '\
+		match($0,/psk=[0-9A-Fa-f]{64}/) {print substr($0,RSTART+4,RLENGTH-4);} \
+		match($0,/psk=".{8,63}"/) {print substr($0,RSTART+5,RLENGTH-6);} \
+		' "$conf" | tail -1)
+}
+
+get_ssid() {
+	local conf=$1
+	ssid=$(awk '\
+		match($0,/ssid=".*"/) {print substr($0,RSTART+6,RLENGTH-7);} \
+		' "$conf" | tail -1)
+}
+
+hex2string() {
+	local i=0
+	while [ $i -lt ${#1} ]; do
+		echo -en "\x${1:$i:2}"
+		i=$((i + 2))
+	done
+}
+
+get_attribute_by_type() {
+	local cred_raw="$1"
+	local attr_type="$2"
+	local offset="$3"
+
+	while [ "${cred_raw:$offset:4}" != "${attr_type}" ] && [ "${offset}" -lt ${#cred_raw} ]; do
+		offset=$((offset + 4))
+		attr_len=$(printf "%d" "0x${cred_raw:$offset:4}")
+		offset=$((attr_len * 2 + 4 + offset))
+	done
+
+	# Now retrieve the data
+	if [ "${offset}" -lt ${#cred_raw} ]; then
+		offset=$((offset + 4))
+		attr_len=$(printf "%d" "0x${cred_raw:$offset:4}")
+		echo ${cred_raw:$((offset + 4)):$((attr_len * 2))}
+	fi
+}
+
+#
+# This function retrieves the necessary attributes from the provided credential to determine
+# the appropriate wireless configuration to set to the UCI if attributes retrieved successfully
+#
+proc_cred() {
+	local credential="$1"
+
+	# Sanity check the minimum length
+	if [ "${#credential}" -lt 8 ]; then
+		DEBUG_LOG "This is invalid credential"
+		return 1
+	fi
+	# Verify the credential by type and length
+	if [ "${credential:0:4}" != "100e" ]; then
+		DEBUG_LOG "This is not a credential"
+		return 1
+	fi
+	cred_len=$(printf "%d" "0x${credential:4:4}")
+	if [ $((cred_len * 2 + 8)) -ne ${#credential} ]; then
+		DEBUG_LOG "Invalid credential length"
+		return 1
+	fi
+
+	# Get SSID attribute data
+	ssid=$(get_attribute_by_type "$credential" "1045" "8")
+	if [ -z "$ssid" ]; then
+		DEBUG_LOG "SSID is null"
+		return 1
+	fi
+	ssid=$(hex2string "$ssid")
+
+	# Get auth type attribute data
+	auth_type=$(get_attribute_by_type "$credential" "1003" "8")
+	if [ -z "$auth_type" ]; then
+		DEBUG_LOG "auth_type is null"
+		return 1
+	fi
+	auth_type=$(printf "%d" "0x${auth_type}")
+
+	# Get enc type attribute data
+	enc_type=$(get_attribute_by_type "$credential" "100f" "8")
+	if [ -z "$enc_type" ]; then
+		DEBUG_LOG "enc_type is null"
+		return 1;
+	fi
+	enc_type=$(printf "%d" "0x${enc_type}")
+
+	# Figure out auth type value for UCI
+	if [ "$((auth_type & 32))" -gt 0 ]; then
+		# WPA2-Personal... Get Network Key attribute data
+		passphrase=$(get_attribute_by_type "$credential" "1027" "8")
+		if [ -z "$passphrase" ]; then
+			DEBUG_LOG "passphrase is null"
+			return 1
+		fi
+		passphrase=$(hex2string "$passphrase")
+		DEBUG_LOG "PSK2 credential: enc_type=$enc_type"
+		auth_uci='psk2'
+	elif [ "$((auth_type & 2))" -gt 0 ]; then
+		# WPA-Personal.. WPS 1.0 devices sends 2 credentials in mixed mode,
+		# WPA2-Personal for unicast & WPA-Personal for broadcast/multicast
+		# Ignore the WPA-Personal credential
+		DEBUG_LOG "PSK credential: enc_type=$enc_type"
+		return 0
+	elif [ "$((auth_type & 1))" -gt 0 ] && [ "$((enc_type & 1))" -gt 0 ]; then
+		# Open auth no encryption
+		auth_uci='none'
+	else
+		# Invalid configuration
+		DEBUG_LOG "Invalid auth configuration"
+		return 1
+	fi
+
+	# If we are here we have the necessary cred data to commit UCI
+	EVENT=configure_wifi SSID="$ssid" PASSWORD="$passphrase" /etc/statemgr
+	EVENT=event_onboarding_wifi_configured /etc/statemgr
+
+	return 0
+}
+
+wps_fail() {
+	wps_result=$1
+	DEBUG_LOG "wps_fail: $wps_result"
+
+	/usr/bin/sam-systemd wps "${wps_result}"
+}
+
+psk=
+ssid=
+wpa_version=
+
+DEBUG_LOG "wps-supplicant-action $CMD"
+
+case "$CMD" in
+	*WPS-CRED-RECEIVED*)
+		proc_cred "$CRED" || {
+			DEBUG_LOG "proc_cred returned error"
+			wps_fail "fail"
+			exit
+		}
+
+		/usr/bin/sam-systemd wps "connected"
+		;;
+	*WPS-TIMEOUT*)
+		wps_fail "timeout"
+		;;
+	*WPS-FAIL*)
+		wps_fail "fail"
+		;;
+	*WPS-OVERLAP-DETECTED*)
+		wps_fail "overlap"
+		;;
+	*DISCONNECTED*)
+		;;
+esac

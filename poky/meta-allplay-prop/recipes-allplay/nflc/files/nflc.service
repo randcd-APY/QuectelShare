@@ -1,0 +1,10 @@
+[Unit]
+Description=DLNA service(DMR)
+
+[Service]
+Restart=on-failure
+ExecStart=/usr/bin/nfdlna -c /usr/share/dlna/xml/ -f dmr.xml
+KillSignal=SIGKILL
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,1134 @@
+
+/****************************************************************************
+ @FILE mcm_voice_v01.idl
+ @BRIEF MCM Voice API
+ @DESCRIPTION
+  IoE Mobile Connection Manager Voice API (MCM_VOICE)
+
+  This API provides Data Structures for Voice call processing.
+
+  MCM API Major Version 0
+  MCM API Minor Version 2
+
+  @COPYRIGHT Copyright (c) 2013 Qualcomm Technologies, Inc.
+  All rights reserved.
+  Confidential and Proprietary - Qualcomm Technologies, Inc.
+****************************************************************************/
+
+include "mcm_common_v01.idl";
+
+revision 2;
+
+//=============================================================================
+// CONSTANTS
+//=============================================================================
+const MCM_MAX_VOICE_CALLS = 8; //!< GSM provides up to 8 calls; 3GPP2 provides 2.
+const MCM_MAX_PHONE_NUMBER = 82;//L; //!< Maximum length for a phone number or SIP URI (81 + NULL).
+const MCM_MAX_UUS_DATA = 20;  //!< Maximum user-to-user data.
+const MCM_MAX_DTMF_LENGTH = 20;	 //!< Maximum DTMF length.
+const MCM_MAX_USSD_LENGTH = 128;  //!< Maximum USSD length.
+const MCM_MAX_PASSWORD_LENGTH = 4;	//!< Maximum password length.
+const MCM_MAX_CALL_FORWARDING_INFO = 13;  //!< Maximum call forwarding information.
+const MCM_MAX_ECALL_MSD = 140; //!< Maximum size of the MSD sent to the network with an eCall
+
+enum {
+ MCM_VOICE_CALL_STATE_INCOMING = 0x0000, //!<MT incoming; CC setup.
+ MCM_VOICE_CALL_STATE_DIALING = 0x0001,  //!<Dialing state.
+ MCM_VOICE_CALL_STATE_ALERTING = 0x0002, //!<MT call waiting; MO alterting.
+ MCM_VOICE_CALL_STATE_ACTIVE = 0x0003,   //!<Call is active.
+ MCM_VOICE_CALL_STATE_HOLDING = 0x0004,  //!<Call is on hold.
+ MCM_VOICE_CALL_STATE_END = 0x0005, //!<Call is disconnected.
+ MCM_VOICE_CALL_STATE_WAITING = 0x0006   //!<Call is waiting.
+} mcm_voice_call_state_t; //!< Call states for a voice call.
+
+enum {
+ MCM_VOICE_CALL_TYPE_NOT_SPECIFIED = 0x0000, //!<Placeholder for a zero value.
+ MCM_VOICE_CALL_TYPE_VOICE = 0x0001, //!< Voice call.
+ MCM_VOICE_CALL_TYPE_EMERGENCY = 0x0002, //!< Emergency call.
+ MCM_VOICE_CALL_TYPE_ECALL_AUTO     = 0x0003, //!< Automatically triggered eCall
+ MCM_VOICE_CALL_TYPE_ECALL_MANUAL     = 0x0004 //!< Manually triggered eCall
+} mcm_voice_call_type_t; //!< Call types for a voice call.
+
+enum {
+ MCM_VOICE_CALL_MOBILE_ORIGINATED = 0x0000,  //!< Mobile-originated.
+ MCM_VOICE_CALL_MOBILE_TERMINATED = 0x0001   //!< Mobile-terminated.
+} mcm_voice_call_direction_type_t;  //!< Voice call direction.
+
+enum {
+ MCM_VOICE_CALL_NUMBER_UNKNOWN = 0x0000,
+ MCM_VOICE_CALL_NUMBER_ALLOWED = 0x0001,     //!< Number allowed.
+ MCM_VOICE_CALL_NUMBER_RESTRICTED = 0x0002,  //!< Number restricted.
+ MCM_VOICE_CALL_NUMBER_PAYPHONE = 0x0003     //!< Payhone number.
+} mcm_voice_call_number_presentation_type_t;  //!< Voice call number presentation.
+
+enum {
+
+ MCM_VOICE_REASON_NONE = 1, //!<Placeholder for a zero value.
+ MCM_VOICE_REASON_NORMAL = 2, //!< Call ended normally.
+ MCM_VOICE_REASON_BUSY = 3, //!< Call was rejected (busy).
+ MCM_VOICE_REASON_CONGESTION = 4, //!< Network congestion.
+ MCM_VOICE_REASON_CALL_BARRED = 5, //!< Incoming calls barred.
+ MCM_VOICE_REASON_FDN_BLOCKED = 6, //!< Blocked by fixed dialing.
+ MCM_VOICE_REASON_DIAL_MODIFIED_TO_USSD = 7, //!< Converted to a USSD message.
+ MCM_VOICE_REASON_DIAL_MODIFIED_TO_SS = 8, //!< Converted to a SUP.
+ MCM_VOICE_REASON_DIAL_MODIFIED_TO_DIAL = 9, //!< Converted to another call type.
+ MCM_VOICE_REASON_ACM_LIMIT_EXCEEDED = 10, //!< No funds.
+ MCM_VOICE_REASON_NETWORK_GENERIC_ERROR = 11
+} mcm_voice_reason_t; //!< Reason why a call was terminated.
+
+enum {
+ MCM_VOICE_CALL_ANSWER, //!<Answer the call.
+ MCM_VOICE_CALL_END, //!<Deprecated. Do not use.
+ MCM_VOICE_CALL_HOLD, //!<Hold the call.
+ MCM_VOICE_CALL_UNHOLD, //!<Release the call from hold.
+ MCM_VOICE_CALL_CONFERENCE, //!<Conference call.
+ MCM_VOICE_CALL_GO_PRIVATE, //!<Private call.
+ MCM_VOICE_CALL_END_ALL //!<End all calls.
+} mcm_voice_call_operation_t; //!< Voice call operation type.
+
+enum {
+ MCM_VOICE_UUS_TYPE1_IMPLICIT, //!< Type 1 implicit.
+ MCM_VOICE_UUS_TYPE1_REQUIRED, //!< Type 1 required.
+ MCM_VOICE_UUS_TYPE1_NOT_REQUIRED, //!< Type 1 not required.
+ MCM_VOICE_UUS_TYPE2_REQUIRED, //!< Type 2 required.
+ MCM_VOICE_UUS_TYPE2_NOT_REQUIRED, //!< Type 2 not required.
+ MCM_VOICE_UUS_TYPE3_REQUIRED, //!< Type 3 required.
+ MCM_VOICE_UUS_TYPE3_NOT_REQUIRED, //!< Type 3 not required.
+ MCM_VOICE_UUS_TYPE_DATA //!< Data.
+} mcm_voice_uus_type_t; //!< UUS type.
+
+enum {
+ MCM_VOICE_UUS_DCS_IA5, //!< IA5.
+ MCM_VOICE_UUS_DCS_OHLP, //!< OHLP.
+ MCM_VOICE_UUS_DCS_USP, //!< USP.
+ MCM_VOICE_UUS_DCS_X244 //!< x244.
+} mcm_voice_uus_dcs_type_t; //!< UUS data coding scheme. 
+
+enum {
+ MCM_VOICE_TECH_NONE, //!< None.
+ MCM_VOICE_TECH_3GPP, //!< 3GPP.
+ MCM_VOICE_TECH_3GPP2 //!< 3GPP2.
+} mcm_voice_tech_t; //!< Voice technology.
+
+enum {
+ MCM_VOICE_CALL_FORWARDING_DISABLED = 0, //!< Disabled.
+ MCM_VOICE_CALL_FORWARDING_ENABLED //!< Enabled.
+} mcm_voice_call_forwarding_status_t; //!< Voice call forwarding status.
+
+enum {
+ MCM_VOICE_CALL_FORWARDING_TYPE_VOICE = 0, //!< Voice.
+ MCM_VOICE_CALL_FORWARDING_TYPE_DATA, //!< Data.
+ MCM_VOICE_CALL_FORWARDING_TYPE_VOICE_DATA //!< Voice and data.
+} mcm_voice_call_forwarding_type_t; //!< Voice call forwarding type.
+
+enum {
+ MCM_VOICE_CALL_WAITING_VOICE_ENABLED = 0, //!< Voice call waiting enabled.
+ MCM_VOICE_CALL_WAITING_DATA_ENABLED, //!< Data call waiting enabled.
+ MCM_VOICE_CALL_WAITING_VOICE_DATA_ENABLED, //!< Voice and data call waiting enabled.
+ MCM_VOICE_CALL_WAITING_DISABLED //!< Voice call waiting disabled.
+} mcm_voice_call_waiting_service_t; //!< Voice call waiting service status.
+
+enum {
+ MCM_VOICE_SERVICE_ACTIVATE = 0, //!< Activate.
+ MCM_VOICE_SERVICE_DEACTIVATE, //!< Deactivate.
+ MCM_VOICE_SERVICE_REGISTER, //!< Register.
+ MCM_VOICE_SERVICE_ERASE //!< Erase.
+} mcm_voice_call_service_t; //!< Call forward request type for voice call.
+
+enum {
+ MCM_VOICE_CALL_FORWARD_UNCONDITIONALLY = 0, //!< Unconditional call forwarding.
+ MCM_VOICE_CALL_FORWARD_MOBILEBUSY, //!< Forward when the mobile device is busy.
+ MCM_VOICE_CALL_FORWARD_NOREPLY, //!< Forward when there is no reply.
+ MCM_VOICE_CALL_FORWARD_UNREACHABLE, //!< Forward when the call is unreachable.
+ MCM_VOICE_CALL_FORWARD_ALLFORWARDING, //!< All forwarding.
+ MCM_VOICE_CALL_FORWARD_ALLCONDITIONAL //!< All conditional forwarding.
+} mcm_voice_call_forwarding_reason_t; //!< Call forwarding reason.
+
+enum {
+ MCM_VOICE_CLIR_INVOCATION = 0, //!< Invocation.
+ MCM_VOICE_CLIR_SUPPRESSION //!< Suppression.
+} mcm_voice_clir_action_t; //!< CLIR type.
+
+enum {
+ MCM_VOICE_CLIR_NOT_PROVISIONED = 0, //!< Not provisioned.
+ MCM_VOICE_CLIR_PROVISIONED_PERMANENT_MODE, //!< Permanently provisioned.
+ MCM_VOICE_CLIR_PRESENTATION_RESTRICTED, //!< Restricted presentation.
+ MCM_VOICE_CLIR_PRESENTATION_ALLOWED //!< Allowed presentation.
+} mcm_voice_clir_presentation_t; //!< CLIR provisioned status.
+
+enum {
+ MCM_VOICE_FACILITY_LOCK_ENABLE = 0, //!< Enable.
+ MCM_VOICE_FACILITY_LOCK_DISABLE //!< Disable.
+} mcm_voice_facility_lock_status_t; //!< Facility lock.
+
+enum {
+ MCM_VOICE_FACILITY_CODE_AO = 0, //!<BAOC (Bar All Outgoing Calls) (refer to 3GPP TS 22.088 @xhyperref{S9,[S9]} clause 1).
+ MCM_VOICE_FACILITY_CODE_OI, //!<BOIC (Bar Outgoing International Calls) (refer to 3GPP TS 22.088 @xhyperref{S9,[S9]}
+                             //!<clause 1).
+ MCM_VOICE_FACILITY_CODE_OX, //!<BOIC-exHC (Bar Outgoing International Calls except to Home Country)
+                             //!< (refer to 3GPP TS 22.088 @xhyperref{S9,[S9]} clause 1).
+ MCM_VOICE_FACILITY_CODE_AI, //!<BAIC (Bar All Incoming Calls) (refer to 3GPP TS 22.088 @xhyperref{S9,[S9]} clause 2).
+ MCM_VOICE_FACILITY_CODE_IR, //!<BIC-Roam (Bar Incoming Calls when Roaming outside the home country)
+                             //!< (refer to 3GPP TS 22.088 @xhyperref{S9,[S9]} clause 2).
+ MCM_VOICE_FACILITY_CODE_AB, //!<All barring services (refer to 3GPP TS 22.030 @xhyperref{S10,[S10]}) (applicable only
+                             //!< for mode=0).
+ MCM_VOICE_FACILITY_CODE_AG, //!<All outgoing barring services (refer to 3GPP TS 22.030 @xhyperref{S10,[S10]})
+                             //!< (applicable only for mode=0).
+ MCM_VOICE_FACILITY_CODE_AC  //!<All incoming barring services (refer to 3GPP TS 22.030 @xhyperref{S10,[S10]})
+                             //!< (applicable only for mode=0).
+} mcm_voice_facility_code_t;
+
+enum {
+ MCM_VOICE_CHANGE_CALL_BARRING_PASSWORD_REASON_ALLOUTGOING = 0, //!< All outgoing.
+ MCM_VOICE_CHANGE_CALL_BARRING_PASSWORD_REASON_OUTGOINGINT, //!< Outgoing internal.
+ MCM_VOICE_CHANGE_CALL_BARRING_PASSWORD_REASON_OUTGOINGINTEXTOHOME, //!< Outgoing external to home.
+ MCM_VOICE_CHANGE_CALL_BARRING_PASSWORD_REASON_ALLINCOMING, //!< All incoming.
+ MCM_VOICE_CHANGE_CALL_BARRING_PASSWORD_REASON_INCOMINGROAMING, //!< Roaming incoming.
+ MCM_VOICE_CHANGE_CALL_BARRING_PASSWORD_REASON_ALLBARRING, //!< All calls are barred.
+ MCM_VOICE_CHANGE_CALL_BARRING_PASSWORD_REASON_ALLOUTGOINGBARRING, //!< All outgoing calls are barred.
+ MCM_VOICE_CHANGE_CALL_BARRING_PASSWORD_REASON_ALLINCOMINGBARRING //!< All incoming calls are barred.
+} mcm_voice_change_call_barring_password_reason_t;  //!< Call barring password reason.
+
+enum {
+ MCM_VOICE_USSD_ENCODING_ASCII = 0, //!< ASCII coding scheme.
+ MCM_VOICE_USSD_ENCODING_8BIT, //!< 8-bit coding scheme.
+ MCM_VOICE_USSD_ENCODING_UCS2 //!< UCS2.
+} mcm_voice_ussd_encoding_t; //!< Unstructured supplementary service data coding scheme.
+
+enum {
+ MCM_VOICE_COMMON_DIAL_VOICE = 0, //!< Voice.
+ MCM_VOICE_COMMON_DIAL_SS, //!< Supplementary service.
+ MCM_VOICE_COMMON_DIAL_USSD //!< Unstructured supplementary service.
+} mcm_voice_common_dial_type_t; //!< Dial type.
+
+enum {
+ MCM_VOICE_MUTE, //!< Mute.
+ MCM_VOICE_UNMUTE //!< Unmute.
+} mcm_voice_mute_type_t;  //!< Muting status.
+
+enum {
+ MCM_VOICE_AUTO_ANSWER_ENABLE, //!< Enable auto-answer.
+ MCM_VOICE_AUTO_ANSWER_DISABLE //!< Disable auto-answer.
+} mcm_voice_auto_answer_type_t;	 //!< Voice auto-answer configuration.
+
+enum {
+ MCM_VOICE_DTMF_EVENT_BURST,      //!< Burst DTMF.
+ MCM_VOICE_DTMF_EVENT_START_CONT, //!< Continuous DTMF start.
+ MCM_VOICE_DTMF_EVENT_STOP_CONT   //!< Continuous DTMF stop.
+} mcm_voice_dtmf_event_type_t;	//!< Voice DTMF event type.
+
+enum {
+ MCM_VOICE_USSD_MSG_TYPE_NEW_MESSAGE,    //!< Initiate a new USSD sesion with network.
+ MCM_VOICE_USSD_MSG_TYPE_REPLY_TO_IND    //!< Reply to a USSD indication from the network.
+} mcm_voice_ussd_msg_type_t;
+
+enum {
+ MCM_VOICE_USSD_INDICATION_FURTHER_ACTION_NOT_REQUIRED, //!< USSD indication requires a USSD reply.
+ MCM_VOICE_USSD_INDICATION_FURTHER_ACTION_REQUIRED      //!< USSD indication does not require a reply.
+} mcm_voice_ussd_ind_notification_t;
+
+enum {
+ MCM_VOICE_EMER_CAT_POLICE = 0, //!< Police
+ MCM_VOICE_EMER_CAT_AMBULANCE, //!< Ambulance
+ MCM_VOICE_EMER_CAT_FIRE_BRIGADE, //!< Fire brigade
+ MCM_VOICE_EMER_CAT_MARINE_GUARD, //!< Marine guard
+ MCM_VOICE_EMER_CAT_MOUNTAIN_RESCUE //!< Mountain rescue
+} mcm_voice_emergency_cat_t; //!< Emergency category bits
+
+enum {
+ MCM_VOICE_E911_INACTIVE = 0, //!< E911 INACTIVE.
+ MCM_VOICE_E911_ACTIVE //!< E911 ACTIVE.
+} mcm_voice_e911_state_t; //!< E911 state.
+
+//=============================================================================
+// DATA TYPES
+//=============================================================================
+
+
+struct {
+   mcm_voice_uus_type_t  type; //!< UUS type; range -- 0 to 6.
+   mcm_voice_uus_dcs_type_t  dcs;  //!< UUS data coding scheme; range -- 0 to 4.
+   uint8   uus_data<MCM_MAX_UUS_DATA>;  //!< Voice call UUS data.
+} mcm_voice_uusdata_t;  //!< User-to-user signaling information; defined in 3GPP 23.087 v8.0.
+
+struct {
+   uint32 call_id; //!< Call ID associated with this call.
+   mcm_voice_call_state_t state; //!< Current call state (mcm_voice_call_state).
+   mcm_voice_tech_t tech; //!< Technology (mcm_tech).
+   string   number<MCM_MAX_PHONE_NUMBER>; //!< Phone number.
+   mcm_voice_call_number_presentation_type_t number_presentation;  //!< Number presentation.
+   mcm_voice_call_direction_type_t direction;  //!< Voice call direction.
+   boolean uusdata_valid;  //!< Indicates whether UUS data is valid.
+   mcm_voice_uusdata_t uusdata; //!< User-to-user signaling data.
+} mcm_voice_call_record_t; //!< Voice call record; connection paramters.
+
+struct {
+   uint32 call_id; //!< Call ID associated with this DTMF event.
+   mcm_voice_dtmf_event_type_t dtmf_event; //!< DTMF event type.
+   char digit<MCM_MAX_DTMF_LENGTH>; //!< DTMF character.
+}mcm_voice_dtmf_info_t;	 //!< DTMF information.
+
+struct {
+   mcm_voice_call_forwarding_type_t type;  //!< Call forwarding type.
+   string number<MCM_MAX_PHONE_NUMBER>;	   //!< Call forwarding number.
+} mcm_voice_call_forwarding_info_t;	 //!< Call forwarding information.
+
+//=============================================================================
+// MESSAGES
+//=============================================================================
+
+//=============================================================================
+/** @COMMAND MCM_VOICE_GET_STATUS
+    @CMD_VERSION 1.0
+    @BRIEF Gets the list of current calls.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG MCM_VOICE_GET_STATUS_REQ
+//! @TYPE Request
+//! @SENDER Control point
+//-----------------------------------------------------------------------------
+message {
+}mcm_voice_get_calls_req_msg;
+
+//! @MSG MCM_VOICE_GET_STATUS_RESP
+//! @TYPE Response
+//! @SENDER Service
+//-----------------------------------------------------------------------------
+message {
+ mandatory mcm_response_t response;	//!< Result code.
+ optional mcm_voice_call_record_t calls<MCM_MAX_VOICE_CALLS>; 	//!< Calls.
+}mcm_voice_get_calls_resp_msg;
+/** @ERROR
+    MCM_SUCCESS
+    MCM_ERROR_GENERIC
+    MCM_ERROR_BADPARM
+    MCM_ERROR_MEMORY
+    MCM_ERROR_INVALID_STATE
+*/
+
+//=============================================================================
+// Module specific API
+//=============================================================================
+//=============================================================================
+//=============================================================================
+/** @COMMAND MCM_VOICE_DIAL_REQ
+    @CMD_VERSION 1.0
+    @BRIEF Dials a call to a specified address and returns a connection ID.
+    @DESCRIPTION
+         This command is used to create voice calls.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+
+//! @MSG MCM_VOICE_CONNECT_REQ
+//! @TYPE Request
+//! @SENDER Control point
+//-----------------------------------------------------------------------------
+message {
+ optional string address<MCM_MAX_PHONE_NUMBER>; //!< End point address of the connection to make.
+ optional mcm_voice_call_type_t call_type; //!< Connection (call) details, or NULL.
+ optional mcm_voice_uusdata_t uusdata; //!< Token ID used to track this command; NULL is OK.
+ optional mcm_voice_emergency_cat_t emergency_cat; //!< Emergency call category.
+ optional uint8 ecall_msd<MCM_MAX_ECALL_MSD>; //!<Minimum Set of Data in ASN.1 PER unaligned format
+                                              //!< as per CEN EN 15722. Only honored when
+                                              //!< call_type is MCM_VOICE_CALL_TYPE_ECALL_AUTO or
+                                              //!< MCM_VOICE_CALL_TYPE_ECALL_MANUAL. Ignored otherwise.
+}mcm_voice_dial_req_msg;
+
+//! @MSG MCM_VOICE_DIAL_RESP
+//! @TYPE Response
+//! @SENDER Service
+//-----------------------------------------------------------------------------
+message {
+ mandatory mcm_response_t response;	//!< Result code.
+ optional uint32 call_id; //!<Call ID.
+}mcm_voice_dial_resp_msg;
+/** @ERROR
+    MCM_SUCCESS
+    MCM_ERROR_GENERIC
+    MCM_ERROR_BADPARM
+    MCM_ERROR_MEMORY
+    MCM_ERROR_INVALID_STATEdis
+*/
+//=============================================================================
+//=============================================================================
+/** @COMMAND MCM_VOICE_GET_CONNECTION_STATUS
+    @CMD_VERSION 1.0
+    @BRIEF Gets the status associated with the connection ID.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG MCM_VOICE_GET_CONNECTION_STATUS_REQ
+//! @TYPE Request
+//! @SENDER Control point
+//-----------------------------------------------------------------------------
+message {
+ mandatory uint32 call_id; //!< Call ID of the connection to query.
+}mcm_voice_get_call_status_req_msg;
+
+//! @MSG MCM_VOICE_GET_CONNECTION_STATUS_RESP
+//! @TYPE Response
+//! @SENDER Server
+//-----------------------------------------------------------------------------
+message {
+ mandatory mcm_response_t response;	//!< Result code.
+ optional mcm_voice_call_record_t status;	//!< Call status.
+} mcm_voice_get_call_status_resp_msg;
+/** @ERROR
+    MCM_SUCCESS
+    MCM_ERROR_GENERIC
+    MCM_ERROR_BADPARM
+    MCM_ERROR_MEMORY
+    MCM_ERROR_INVALID_STATE
+*/
+//=============================================================================
+//=============================================================================
+/** @COMMAND MCM_VOICE_GET_DTMF
+    @CMD_VERSION 1.0
+    @BRIEF Sends a DTMF character over the connection ID.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG MCM_VOICE_GET_DTMF_REQ
+//! @TYPE Request
+//! @SENDER Control point
+//-----------------------------------------------------------------------------
+message {
+ mandatory string dtmf<MCM_MAX_DTMF_LENGTH>; /**< DTMF character to be sent.
+                           Valid DTMF characters are 0-9, A-D, '*', '#'.*/
+}mcm_voice_dtmf_req_msg;
+
+//! @MSG MCM_VOICE_GET_DTMF_RESP
+//! @TYPE Response
+//! @SENDER Server
+//-----------------------------------------------------------------------------
+message {
+ mandatory mcm_response_t response;	//!< Result code. @newpagetable
+}mcm_voice_dtmf_resp_msg;
+/** @ERROR
+    MCM_SUCCESS
+    MCM_ERROR_GENERIC
+    MCM_ERROR_BADPARM
+    MCM_ERROR_MEMORY
+    MCM_ERROR_INVALID_STATE
+*/
+//=============================================================================
+//=============================================================================
+/** @COMMAND MCM_VOICE_START_DTMF
+    @CMD_VERSION 1.0
+    @BRIEF Starts sending a DTMF character over the call ID.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG MCM_VOICE_START_DTMF_REQ
+//! @TYPE Request
+//! @SENDER Control point
+//-----------------------------------------------------------------------------
+message {
+ mandatory uint32 call_id; /**<Call ID.*/
+ mandatory char   digit; /**< DTMF character to be sent.
+                           Valid DTMF characters are 0-9, A-D, '*', '#'.*/
+}mcm_voice_start_dtmf_req_msg;
+
+//! @MSG MCM_VOICE_START_DTMF_RESP
+//! @TYPE Response
+//! @SENDER Server
+//-----------------------------------------------------------------------------
+message {
+ mandatory mcm_response_t response;	//!< Result code.
+ optional  uint32         call_id;	//!< Call ID.
+}mcm_voice_start_dtmf_resp_msg;
+//=============================================================================
+
+//=============================================================================
+/** @COMMAND MCM_VOICE_STOP_DTMF
+    @CMD_VERSION 1.0
+    @BRIEF Stops sending a DTMF character over the call ID.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG MCM_VOICE_STOP_DTMF_REQ
+//! @TYPE Request
+//! @SENDER Control point
+//-----------------------------------------------------------------------------
+message {
+ mandatory uint32 call_id;	//!< Call ID.
+}mcm_voice_stop_dtmf_req_msg;
+
+//! @MSG MCM_VOICE_STOP_DTMF_RESP
+//! @TYPE Response
+//! @SENDER Server
+//-----------------------------------------------------------------------------
+message {
+ mandatory mcm_response_t response;	//!< Result code.
+ optional  uint32         call_id; 	//!< Call ID.
+}mcm_voice_stop_dtmf_resp_msg;
+//=============================================================================
+
+//=============================================================================
+/** @COMMAND MCM_VOICE_MUTE
+    @CMD_VERSION 1.0
+    @BRIEF Mutes/unmutes a voice call.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG MCM_VOICE_MUTE_REQ
+//! @TYPE Request
+//! @SENDER Control point
+//-----------------------------------------------------------------------------
+message {
+ mandatory uint32 call_id; //!< Call ID of the connection to mute/unmute.
+ mandatory mcm_voice_mute_type_t mute_type; //!< Mute or unmute the voice call.
+}mcm_voice_mute_req_msg;
+
+//! @MSG MCM_VOICE_MUTE_RESP
+//! @TYPE Response
+//! @SENDER Service
+//-----------------------------------------------------------------------------
+message {
+ mandatory mcm_response_t response;	//!< Result code.
+}mcm_voice_mute_resp_msg;
+/** @ERROR
+    MCM_SUCCESS
+    MCM_ERROR_GENERIC
+    MCM_ERROR_BADPARM
+    MCM_ERROR_MEMORY
+    MCM_ERROR_INVALID_STATE
+*/
+//=============================================================================
+// 3GPP2 Specific functions, eg. mcm_3gpp2_api
+//=============================================================================
+//=============================================================================
+//=============================================================================
+/** @COMMAND MCM_VOICE_FLASH
+    @CMD_VERSION 1.0
+    @BRIEF Sends a flash sequence character over the connection call ID.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG MCM_VOICE_FLASH_REQ
+//! @TYPE Request
+//! @SENDER Control point
+//-----------------------------------------------------------------------------
+message {
+ mandatory string sflash_string<MCM_MAX_PHONE_NUMBER>; //!< A NULL-terminated flash string to be sent;
+                                                       //!< Maximum 82 characters.
+}mcm_voice_flash_req_msg;
+
+//! @MSG MCM_VOICE_FLASH_RESP
+//! @TYPE Response
+//! @SENDER Service
+//-----------------------------------------------------------------------------
+message {
+ mandatory mcm_response_t response;
+}mcm_voice_flash_resp_msg;
+/** @ERROR
+    MCM_SUCCESS
+    MCM_ERROR_GENERIC
+    MCM_ERROR_BADPARM
+    MCM_ERROR_MEMORY
+    MCM_ERROR_INVALID_STATE
+*/
+//=============================================================================
+// Convenience fucntions
+//=============================================================================
+
+//=============================================================================
+//=============================================================================
+/** @COMMAND MCM_VOICE_HANGUP
+    @CMD_VERSION 1.0
+    @BRIEF Hangs up or disconnects a voice call connection with the specified call ID.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG MCM_VOICE_HANGUP_REQ
+//! @TYPE Request
+//! @SENDER Control point
+//-----------------------------------------------------------------------------
+message {
+ mandatory uint32 call_id; //!< Call ID associated with the connection.
+}mcm_voice_hangup_req_msg;
+
+//! @MSG MCM_VOICE_HANGUP_RESP
+//! @TYPE Response
+//! @SENDER Server
+//-----------------------------------------------------------------------------
+message {
+ mandatory mcm_response_t response;	//!< Result code.
+}mcm_voice_hangup_resp_msg;
+/** @ERROR
+    MCM_SUCCESS
+    MCM_ERROR_GENERIC
+    MCM_ERROR_BADPARM
+    MCM_ERROR_MEMORY
+    MCM_ERROR_INVALID_STATE
+*/
+
+//=============================================================================
+//=============================================================================
+/** @COMMAND MCM_VOICE_COMMAND
+    @CMD_VERSION 1.0
+    @BRIEF Provides various operations for a voice call.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG MCM_VOICE_COMMAND_REQ
+//! @TYPE Request
+//! @SENDER Control point
+//-----------------------------------------------------------------------------
+message {
+  mandatory mcm_voice_call_operation_t call_operation;	//!< Call operation.
+  optional uint32 call_id; 	//!< Call ID.
+  optional uint32 cause;  	//!< Cause.
+} mcm_voice_command_req_msg;
+
+
+//! @MSG MCM_VOICE_COMMAND_RESP
+//! @TYPE Response
+//! @SENDER Server
+//-----------------------------------------------------------------------------
+message {
+  mandatory mcm_response_t response;	//!< Result code.
+} mcm_voice_command_resp_msg;
+
+
+//=============================================================================
+//=============================================================================
+/** @COMMAND MCM_VOICE_AUTO_ANSWER
+    @CMD_VERSION 1.0
+    @BRIEF Enables/disables an incoming voice call.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+//! @MSG MCM_VOICE_AUTO_ANSWER_REQ
+//! @TYPE Request
+//! @SENDER Control point
+//-----------------------------------------------------------------------------
+message {
+  mandatory mcm_voice_auto_answer_type_t auto_answer_type;	//!< Auto-answer type.
+  optional uint32 anto_answer_timer;  	//!< Auto-answer timer.
+} mcm_voice_auto_answer_req_msg;
+
+
+//! @MSG MCM_VOICE_AUTO_ANSWER_RESP
+//! @TYPE Response
+//! @SENDER Server
+//-----------------------------------------------------------------------------
+message {
+  mandatory mcm_response_t response;	//!< Result code.
+} mcm_voice_auto_answer_resp_msg;
+
+//=============================================================================
+// EVENT REGISTER
+//=============================================================================
+//=============================================================================
+/** @COMMAND MCM_VOICE_EVENT_REGISTER
+    @CMD_VERSION 1.0
+    @BRIEF Registers for an indication of events.
+    @DESCRIPTION
+     Corresponding events: \n
+        - MCM_VOICE_STATUS_EV
+        - MCM_VOICE_STAT_EV
+        - MCM_VOICE_CONNECTION_EV
+        - MCM_VOICE_DTMF_EV
+        - MCM_VOICE_MUTE_EV
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+
+//! @MSG  MCM_VOICE_EVENT_REGISTER_REQ
+//! @TYPE Request
+//! @SENDER Control point
+//----------------------------------------------------------------------------
+message {
+    optional boolean register_voice_call_event; //!< MCM_VOICE_CALL_INDICATION
+    optional boolean register_mute_event; //!< MCM_VOICE_MUTE_INDICATION
+    optional boolean register_dtmf_event; //!< MCM_VOICE_DTMF_INDICATION
+    optional boolean register_e911_state_event; //!< MCM_VOICE_E911_STATE_INDICATION
+} mcm_voice_event_register_req_msg;
+
+//! @MSG  MCM_VOICE_EVENT_REGISTER_RESP
+//! @TYPE Response
+//! @SENDER Service
+//----------------------------------------------------------------------------
+message {
+    mandatory mcm_response_t response;	//!< Result code.
+} mcm_voice_event_register_resp_msg;
+/** @ERROR
+    MCM_SUCCESS
+    MCM_ERROR_GENERIC
+    MCM_ERROR_BADPARM
+    MCM_ERROR_MEMORY
+    MCM_ERROR_INVALID_STATE
+*/
+
+//============================================================================
+// EVENT INDICATIONS
+//============================================================================
+//=============================================================================
+/** @COMMAND MCM_VOICE_CONNECTION_IND
+    @CMD_VERSION 1.0
+    @BRIEF Indication for MCM_VOICE_CONNECTION_EV.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+
+//! @MSG  MCM_VOICE_CONNECTION_IND
+//! @TYPE Indication
+//! @SENDER Service
+//----------------------------------------------------------------------------
+message {
+  mandatory mcm_voice_call_record_t calls<MCM_MAX_VOICE_CALLS>;  //!< Calls.
+} mcm_voice_call_ind_msg;
+
+//=============================================================================
+/** @COMMAND MCM_VOICE_MUTE_IND
+    @CMD_VERSION 1.0
+    @BRIEF Indication for MCM_VOICE_MUTE_EV.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+
+//! @MSG  MCM_VOICE_MUTE_IND
+//! @TYPE Indication
+//! @SENDER Service
+//----------------------------------------------------------------------------
+
+message {
+  mandatory boolean is_mute;  //!< Indicates whether a call is muted.
+} mcm_voice_mute_ind_msg;
+
+//=============================================================================
+/** @COMMAND MCM_VOICE_DTMF_IND
+    @CMD_VERSION 1.0
+    @BRIEF Indication for DTMF
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+
+//! @MSG  MCM_VOICE_DTMF_IND
+//! @TYPE Indication
+//! @SENDER Service
+//----------------------------------------------------------------------------
+
+message {
+  mandatory mcm_voice_dtmf_info_t dtmf_info;  //!< DTMF information.
+} mcm_voice_dtmf_ind_msg;
+
+
+//============================================================================
+// SUPPLEMENTARY SERVICES
+//============================================================================
+
+//============================================================================
+/** @COMMAND MCM_VOICE_GET_CALL_FORWARDING_STATUS
+    @CMD_VERSION 1.0
+    @BRIEF Call forwarding status query.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//============================================================================
+
+//! @MSG  MCM_VOICE_GET_CALL_FORWARDING_STATUS_REQ
+//! @TYPE Request
+//! @SENDER Client
+//----------------------------------------------------------------------------
+message {
+    mandatory mcm_voice_call_forwarding_reason_t reason;  //!< Call forwarding reason.
+} mcm_voice_get_call_forwarding_status_req_msg;
+
+//! @MSG  MCM_VOICE_GET_CALL_FORWARDING_STATUS_RESP
+//! @TYPE Response
+//! @SENDER Service
+//----------------------------------------------------------------------------
+message {
+    mandatory mcm_response_t response;	//!< Result code.
+    mandatory mcm_voice_call_forwarding_status_t status;  //!< Call forwarding status.
+    optional mcm_voice_call_forwarding_info_t info<MCM_MAX_CALL_FORWARDING_INFO>;  //!< Call forwarding information.
+} mcm_voice_get_call_forwarding_status_resp_msg;
+
+//============================================================================
+/** @COMMAND MCM_VOICE_SET_CALL_FORWARDING
+    @CMD_VERSION 1.0
+    @BRIEF Sets call forwarding.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//============================================================================
+
+//! @MSG  MCM_VOICE_SET_CALL_FORWARDING_REQ
+//! @TYPE Request
+//! @SENDER Client
+//----------------------------------------------------------------------------
+message {
+    mandatory mcm_voice_call_service_t fwdservice;  //!< Call forwarding service.
+    mandatory mcm_voice_call_forwarding_reason_t reason;  //!< Call forwarding reason.
+    optional string forwarding_number<MCM_MAX_PHONE_NUMBER>;  //!< Call forwarding number.
+} mcm_voice_set_call_forwarding_req_msg;
+
+//! @MSG  MCM_VOICE_SET_CALL_FORWARDING_RESP
+//! @TYPE Response
+//! @SENDER Service
+//----------------------------------------------------------------------------
+message {
+    mandatory mcm_response_t response;//!<Result code. @newpagetable
+} mcm_voice_set_call_forwarding_resp_msg;
+
+//============================================================================
+/** @COMMAND MCM_VOICE_GET_CALL_WAITING_STATUS
+    @CMD_VERSION 1.0
+    @BRIEF Call waiting status query.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//============================================================================
+
+//! @MSG  MCM_VOICE_GET_CALL_WAITING_STATUS_REQ
+//! @TYPE Request
+//! @SENDER Client
+//----------------------------------------------------------------------------
+message {
+} mcm_voice_get_call_waiting_status_req_msg;
+
+//! @MSG  MCM_VOICE_GET_CALL_WAITING_STATUS_RESP
+//! @TYPE Response
+//! @SENDER Service
+//----------------------------------------------------------------------------
+message {
+    mandatory mcm_response_t response;	//!< Result code.
+    mandatory mcm_voice_call_waiting_service_t status;	//!< Call waiting status.
+} mcm_voice_get_call_waiting_status_resp_msg;
+
+//============================================================================
+/** @COMMAND MCM_VOICE_SET_CALL_WAITING
+    @CMD_VERSION 1.0
+    @BRIEF Sets call waiting.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//============================================================================
+
+//! @MSG  MCM_VOICE_SET_CALL_WAITING_REQ
+//! @TYPE Request
+//! @SENDER Client
+//----------------------------------------------------------------------------
+message {
+    mandatory mcm_voice_call_waiting_service_t cwservice;  //!< Call waiting service.
+} mcm_voice_set_call_waiting_req_msg;
+
+//! @MSG  MCM_VOICE_SET_CALL_WAITING_RESP
+//! @TYPE Response
+//! @SENDER Service
+//----------------------------------------------------------------------------
+message {
+    mandatory mcm_response_t response;	//!< Result code.
+} mcm_voice_set_call_waiting_resp_msg;
+
+//============================================================================
+/** @COMMAND MCM_VOICE_GET_CLIR
+    @CMD_VERSION 1.0
+    @BRIEF CLIR status query.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//============================================================================
+
+//! @MSG  MCM_VOICE_GET_CLIR_REQ
+//! @TYPE Request
+//! @SENDER Client
+//----------------------------------------------------------------------------
+message {
+} mcm_voice_get_clir_req_msg;
+
+//! @MSG  MCM_VOICE_GET_CLIR_RESP
+//! @TYPE Response
+//! @SENDER Service
+//----------------------------------------------------------------------------
+message {
+    mandatory mcm_response_t response; //!< Result code.
+    mandatory mcm_voice_clir_action_t action; // CLIR action. Parameters 'n' and 'm' are from TS 27.007 7.7.
+    mandatory mcm_voice_clir_presentation_t presentation;  //!< CLIR presentation.
+} mcm_voice_get_clir_resp_msg;
+
+//============================================================================
+/** @COMMAND MCM_VOICE_SET_CLIR
+    @CMD_VERSION 1.0
+    @BRIEF Set CLIR.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//============================================================================
+
+//! @MSG  MCM_VOICE_SET_CLIR_REQ
+//! @TYPE Request
+//! @SENDER Client
+//----------------------------------------------------------------------------
+message {
+    mandatory mcm_voice_clir_action_t clir_action;
+} mcm_voice_set_clir_req_msg;
+
+//! @MSG  MCM_VOICE_SET_CLIR_RESP
+//! @TYPE Response
+//! @SENDER Service
+//----------------------------------------------------------------------------
+message {
+    mandatory mcm_response_t response;
+} mcm_voice_set_clir_resp_msg;
+
+//============================================================================
+/** @COMMAND MCM_VOICE_SET_FACILITY_LOCK
+    @CMD_VERSION 1.0
+    @BRIEF Sets a facility lock.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//============================================================================
+
+//! @MSG  MCM_VOICE_SET_FACILITY_LOCK_REQ
+//! @TYPE Request
+//! @SENDER Client
+//----------------------------------------------------------------------------
+message {
+    mandatory mcm_voice_facility_code_t code;/**<Facility code. Refer to 3GPP TS 27.007 @xhyperref{S8,[S8]}, Section 6.4.*/
+    mandatory mcm_voice_facility_lock_status_t status;	//!< Facility lock status.
+    mandatory string password<MCM_MAX_PASSWORD_LENGTH>;	//!< Facility lock password.
+} mcm_voice_set_facility_lock_req_msg;
+
+//! @MSG  MCM_VOICE_SET_FACILITY_LOCK_RESP
+//! @TYPE Response
+//! @SENDER Service
+//----------------------------------------------------------------------------
+message {
+    mandatory mcm_response_t response;	//!< Result code.
+} mcm_voice_set_facility_lock_resp_msg;
+
+//============================================================================
+/** @COMMAND MCM_VOICE_CHANGE_CALL_BARRING_PASSWORD
+    @CMD_VERSION 1.0
+    @BRIEF Changes the call barring password.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//============================================================================
+
+//! @MSG  MCM_VOICE_CHANGE_CALL_BARRING_PASSWORD_REQ
+//! @TYPE Request
+//! @SENDER Client
+//----------------------------------------------------------------------------
+message {
+    mandatory mcm_voice_change_call_barring_password_reason_t reason; //!<Reason for the password change. Refer to 3GPP TS 27.007 @xhyperref{S8,[S8]}, Section 7.4.
+    mandatory string old_password<MCM_MAX_PASSWORD_LENGTH>;	 //!< Old password.
+    mandatory string new_password<MCM_MAX_PASSWORD_LENGTH>;	 //!< New password.
+} mcm_voice_change_call_barring_password_req_msg;
+
+//! @MSG  MCM_VOICE_CHANGE_CALL_BARRING_PASSWORD_RESP
+//! @TYPE Response
+//! @SENDER Service
+//----------------------------------------------------------------------------
+message {
+    mandatory mcm_response_t response;  //!< Result code.
+} mcm_voice_change_call_barring_password_resp_msg;
+
+//============================================================================
+/** @COMMAND MCM_VOICE_SEND_USSD
+    @CMD_VERSION 1.0
+    @BRIEF Sends Unstructured Supplementary Service Data (USSD).
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//============================================================================
+
+//! @MSG  MCM_VOICE_SEND_USSD_REQ
+//! @TYPE Request
+//! @SENDER Client
+//----------------------------------------------------------------------------
+message {
+    mandatory mcm_voice_ussd_msg_type_t type;      //!< Whether sending a new request or a reply to indication
+    mandatory mcm_voice_ussd_encoding_t encoding;  //!< USSD encoding.
+    mandatory string ussd_string<MCM_MAX_USSD_LENGTH>;	//!< USSD string.
+} mcm_voice_send_ussd_req_msg;
+
+//! @MSG  MCM_VOICE_SEND_USSD_RESP
+//! @TYPE Response
+//! @SENDER Service
+//----------------------------------------------------------------------------
+message {
+    mandatory mcm_response_t response;	//!< Result code.
+} mcm_voice_send_ussd_resp_msg;
+
+//============================================================================
+/** @COMMAND MCM_VOICE_CANCEL_USSD
+    @CMD_VERSION 1.0
+    @BRIEF Cancels USSD.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//============================================================================
+
+//! @MSG  MCM_VOICE_CANCEL_USSD_REQ
+//! @TYPE Request
+//! @SENDER Client
+//----------------------------------------------------------------------------
+message {
+} mcm_voice_cancel_ussd_req_msg;
+
+//! @MSG  MCM_VOICE_CANCEL_USSD_RESP
+//! @TYPE Response
+//! @SENDER Service
+//----------------------------------------------------------------------------
+message {
+    mandatory mcm_response_t response;	//!< Result code.
+} mcm_voice_cancel_ussd_resp_msg;
+
+//============================================================================
+/** @COMMAND MCM_VOICE_USSD_INDICATION
+    @CMD_VERSION 1.0
+    @BRIEF Receives a USSD indication.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//============================================================================
+
+//! @MSG  MCM_VOICE_RECEIVE_USSD_IND
+//! @TYPE Indication
+//! @SENDER Service
+//----------------------------------------------------------------------------
+message {
+    mandatory mcm_voice_ussd_ind_notification_t notification;
+    mandatory string ussd<MCM_MAX_USSD_LENGTH>;	 //!< USSD indication message.
+} mcm_voice_receive_ussd_ind_msg;
+
+//============================================================================
+//  COMMON DIALING API FOR VOICE AND SS/USSD
+//=============================================================================
+
+//============================================================================
+/** @COMMAND MCM_VOICE_COMMON_DIAL
+    @CMD_VERSION 1.0
+    @BRIEF Voice/SS/USSD common dial API.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//============================================================================
+//! @MSG MCM_VOICE_COMMON_DIAL_REQ
+//! @TYPE Request
+//! @SENDER Control point
+//-----------------------------------------------------------------------------
+message {
+    mandatory string request<MCM_MAX_PHONE_NUMBER>;
+    optional mcm_voice_call_type_t call_type; //!< Connection (call) details, or NULL,
+    optional mcm_voice_uusdata_t uusdata; //!< Token ID used to track this command; NULL is OK.
+    optional mcm_voice_emergency_cat_t emergency_cat; //!< Emergency call category.
+    optional uint8 ecall_msd<MCM_MAX_ECALL_MSD>; //!<Minimum Set of Data in ASN.1 PER unaligned format
+                                                 //!< as per CEN EN 15722. Only honored when
+                                                 //!< call_type is MCM_VOICE_CALL_TYPE_ECALL_AUTO or
+                                                 //!< MCM_VOICE_CALL_TYPE_ECALL_MANUAL. Ignored otherwise.
+} mcm_voice_common_dial_req_msg;
+
+//-----------------------------------------------------------------------------
+
+//! @MSG MCM_VOICE_COMMON_DIAL_RESP
+//! @TYPE Response
+//! @SENDER Service
+//-----------------------------------------------------------------------------
+message {
+    mandatory mcm_response_t response;	//!< Result code.
+
+    optional mcm_voice_common_dial_type_t req_changed_to_type; //!< If SS, check optional SS fields. If not present, the voice call went through.
+
+    // Voice support.
+    optional uint32 call_id;   //!< Call ID.
+
+    // SS support.
+    optional mcm_voice_call_forwarding_status_t       ss_get_cf_status;	 //!< Get call forwarding status.
+    optional mcm_voice_call_forwarding_info_t         ss_get_cf_info<MCM_MAX_CALL_FORWARDING_INFO>;	//!< Call forwarding information.
+
+    optional mcm_voice_call_waiting_service_t         ss_get_cw_status;	 //!< Call waiting status.
+
+    optional mcm_voice_clir_action_t                  ss_get_clir_action;	  //!< CLIR action.
+    optional mcm_voice_clir_presentation_t            ss_get_clir_presentation;	  //!< CLIR presentation.
+} mcm_voice_common_dial_resp_msg;
+
+//============================================================================
+/** @COMMAND MCM_VOICE_UPDATE_ECALL_MSD
+    @CMD_VERSION 1.0
+    @BRIEF Update the Minimum Set of Data (MSD) for an ongoing or subsequent eCall call.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//============================================================================
+//-----------------------------------------------------------------------------
+//! @MSG MCM_VOICE_UPDATE_ECALL_MSD_REQ
+//! @TYPE Request
+//! @SENDER Client
+//-----------------------------------------------------------------------------
+message {
+    optional uint8 ecall_msd<MCM_MAX_ECALL_MSD>; //!<Minimum Set of Data. in ASN.1 PER unaligned format.
+} mcm_voice_update_msd_req_msg;
+
+//-----------------------------------------------------------------------------
+//! @MSG MCM_VOICE_UPDATE_ECALL_MSD_RSP
+//! @TYPE Response
+//! @SENDER Service
+//-----------------------------------------------------------------------------
+message {
+    mandatory mcm_response_t response; //!<Result code.
+} mcm_voice_update_msd_resp_msg;
+
+//=============================================================================
+/** @COMMAND MCM_VOICE_E911_STATE_IND
+    @CMD_VERSION 1.0
+    @BRIEF Indication for MCM_VOICE_E911_STATE_IND.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//=============================================================================
+
+//! @MSG  MCM_VOICE_E911_STATE_IND
+//! @TYPE Indication
+//! @SENDER Service
+//----------------------------------------------------------------------------
+message {
+  mandatory mcm_voice_e911_state_t e911_state;  //!< E911 state.
+} mcm_voice_e911_state_ind_msg;
+
+//============================================================================
+/** @COMMAND MCM_VOICE_GET_E911_STATE
+    @CMD_VERSION 1.0
+    @BRIEF Indication for MCM_VOICE_GET_E911_STATE.
+    @USAGE Production
+    @SECURITY_LEVEL Critical
+ */
+//-----------------------------------------------------------------------------
+//! @MSG MCM_VOICE_GET_E911_STATE_REQ
+//! @TYPE Request
+//! @SENDER Client
+//-----------------------------------------------------------------------------
+message {
+} mcm_voice_get_e911_state_req_msg;
+
+//-----------------------------------------------------------------------------
+//! @MSG MCM_VOICE_GET_E911_STATE_RESP
+//! @TYPE Response
+//! @SENDER Service
+//-----------------------------------------------------------------------------
+message {
+    mandatory mcm_response_t response; //!<Result code.
+    optional mcm_voice_e911_state_t e911_state;  //!< E911 state.
+} mcm_voice_get_e911_state_resp_msg;

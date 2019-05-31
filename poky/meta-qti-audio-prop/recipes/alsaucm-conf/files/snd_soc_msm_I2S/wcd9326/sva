@@ -1,0 +1,28 @@
+SectionVerb {
+        EnableSequence [
+                exec "echo enabling cpe sva"
+                cdev "hw:0"
+        ]
+        DisableSequence [
+                exec "echo disabling cpe sva"
+                cdev "hw:0"
+        ]
+}
+
+SectionDevice."HandsetMic" {
+        EnableSequence [
+                exec "echo enabling cpe handset mic"
+                cdev "hw:0"
+                cset "name='MADONOFF Switch' 1"
+                cset "name='MAD Input' 8" #DMIC0
+                cset "name='MAD_SEL MUX' 0" #SPE
+                cset "name='TX6 HPF cut off' 2" #CF_NEG_3DB_150HZ
+        ]
+        DisableSequence [
+                exec "echo disabling cpe handset mic"
+                cdev "hw:0"
+                cset "name='MADONOFF Switch' 0"
+                cset "name='MAD Input' 9" #DMIC1
+                cset "name='TX6 HPF cut off' 0" #CF_NEG_3DB_4HZ
+        ]
+}

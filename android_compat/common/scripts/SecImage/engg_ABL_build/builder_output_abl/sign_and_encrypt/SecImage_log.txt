@@ -1,0 +1,135 @@
+Logging to Y:\SDX24_Sign\Temp_SecTools_v5.0\engg_ABL_build\builder_output_abl\sign_and_encrypt\SecImage_log.txt
+
+
+    SecImage launched as: "Y:\SDX24_Sign\Temp_SecTools_v5.0\sectools.py secimage -i Y:\SDX24_Sign\Temp_SecTools_v5.0\engg_ABL_build\unsigned_input\abl.elf -g abl -c Y:\SDX24_Sign\Temp_SecTools_v5.0\config\integration\secimage_eccv3.xml --cfg_soc_hw_version 0x60020000 --cfg_in_use_soc_hw_version 1 --cfg_soc_vers 0x6002 -v -sea -o Y:\SDX24_Sign\Temp_SecTools_v5.0\engg_ABL_build\builder_output_abl\sign_and_encrypt"
+
+Config path is set to: Y:\SDX24_Sign\Temp_SecTools_v5.0\config\integration\secimage_eccv3.xml
+WARNING: OEM ID is set to 0 for sign_id "abl"
+Output dir is set to: Y:\SDX24_Sign\Temp_SecTools_v5.0\engg_ABL_build\builder_output_abl\sign_and_encrypt
+Openssl v1.0.1 or greater is available at: "Y:\SDX24_Sign\Temp_SecTools_v5.0\bin\WIN\openssl.exe"
+------------------------------------------------------
+Processing 1/1: Y:\SDX24_Sign\Temp_SecTools_v5.0\engg_ABL_build\unsigned_input\abl.elf
+
+l1_file_name = Y:\SDX24_Sign\Temp_SecTools_v5.0\resources\data_prov_assets\Encryption\Unified\default\l1_key.bin
+l2_file_name = Y:\SDX24_Sign\Temp_SecTools_v5.0\resources\data_prov_assets\Encryption\Unified\default\l2_key.bin
+l3_file_name = Y:\SDX24_Sign\Temp_SecTools_v5.0\resources\data_prov_assets\Encryption\Unified\default\l3_key.bin
+Clear L1 key, clear L2 key, and clear L3 keys were provided locally.
+Performing OEM sign on image: Y:\SDX24_Sign\Temp_SecTools_v5.0\engg_ABL_build\unsigned_input\abl.elf
+attestation_certificate_extensions = Y:\SDX24_Sign\Temp_SecTools_v5.0\resources\data_prov_assets\General_Assets\Signing\openssl\v3_attest.ext
+ca_certificate_extensions = Y:\SDX24_Sign\Temp_SecTools_v5.0\resources\data_prov_assets\General_Assets\Signing\openssl\v3.ext
+openssl_configfile = Y:\SDX24_Sign\Temp_SecTools_v5.0\resources\data_prov_assets\General_Assets\Signing\openssl\opensslroot.cfg
+Using SHA (sha384)
+Using ECDSA with secp384r1 curve
+Initialization with dataprov. These fields might not be used in final output if overridden
+Using a predefined Root private key from: Y:\SDX24_Sign\Temp_SecTools_v5.0\resources\data_prov_assets\Signing\Local\qti_presigned_certs-secp384r1\qpsa_rootca.key
+Using a predefined Root certificate from: Y:\SDX24_Sign\Temp_SecTools_v5.0\resources\data_prov_assets\Signing\Local\qti_presigned_certs-secp384r1\qpsa_rootca.cer
+Initialization with dataprov. These fields might not be used in final output if overridden
+Using a predefined CA private key from: Y:\SDX24_Sign\Temp_SecTools_v5.0\resources\data_prov_assets\Signing\Local\qti_presigned_certs-secp384r1\qpsa_attestca.key
+Using a predefined CA certificate from: Y:\SDX24_Sign\Temp_SecTools_v5.0\resources\data_prov_assets\Signing\Local\qti_presigned_certs-secp384r1\qpsa_attestca.cer
+Initialization with dataprov. These fields might not be used in final output if overridden
+Generating new certificate Attest
+Skipping adding OU fields to attest certificate.
+Generating new private/public key pair for Attest
+Creating certificate request for Attest
+Signing certificate request for Attest
+Creating signature
+Signed & Encrypted image is stored at Y:\SDX24_Sign\Temp_SecTools_v5.0\engg_ABL_build\builder_output_abl\sign_and_encrypt\default\abl\abl.elf
+Clear L1 key, clear L2 key, and clear L3 keys were provided locally.
+OEM signed image with ECDSA
+Image Y:\SDX24_Sign\Temp_SecTools_v5.0\engg_ABL_build\builder_output_abl\sign_and_encrypt\default\abl\abl.elf signature is valid
+Image Y:\SDX24_Sign\Temp_SecTools_v5.0\engg_ABL_build\builder_output_abl\sign_and_encrypt\default\abl\abl.elf is encrypted
+
+Base Properties: 
+| Integrity Check                 | True  |
+| Signed                          | True  |
+| Encrypted                       | True  |
+| Size of signature               | 104   |
+| Size of one cert                | 2048  |
+| Num of certs in cert chain      | 3     |
+| Number of root certs            | 1     |
+| Maximum number of root certs    | 1     |
+| Hash Page Segments as segments  | False |
+| Cert chain size                 | 6144  |
+
+ELF Properties: 
+Elf Header: 
+| Magic                      | ELF                           |
+| Class                      | ELF32                          |
+| Data                       | 2's complement, little endian  |
+| Version                    | 1 (Current)                    |
+| OS/ABI                     | No extensions or unspecified   |
+| ABI Version                | 0                              |
+| Type                       | EXEC (Executable file)         |
+| Machine                    | Advanced RISC Machines ARM     |
+| Version                    | 0x1                            |
+| Entry address              | 0x8fc00000                     |
+| Program headers offset     | 0x00000034                     |
+| Section headers offset     | 0x00000000                     |
+| Flags                      | 0x00000000                     |
+| ELF header size            | 52                             |
+| Program headers size       | 32                             |
+| Number of program headers  | 1                              |
+| Section headers size       | 0                              |
+| Number of section headers  | 0                              |
+| String table section index | 0                              |
+
+Elf Program Headers: 
+| S.No | Type | Offset | VirtAddr | PhysAddr | FileSize | MemSize | Flags | Align |
+|------|------|--------|----------|----------|----------|---------|-------|-------|
+|  1   | LOAD | 0x3000 |0x8fc00000|0x8fc00000| 0x1e000  | 0x1e000 |  0x7  | 0x1000|
+
+Hash Segment Properties: 
+| Header Size     | 168B  |
+| Hash Algorithm  | sha384|
+
+Header: 
+| cert_chain_ptr              | 0xffffffff  |
+| cert_chain_size             | 0x00001800  |
+| cert_chain_size_qti         | 0x00000000  |
+| code_size                   | 0x00000090  |
+| image_id                    | 0x00000000  |
+| image_size                  | 0x000018f8  |
+| metadata_major_version      | 0x00000000  |
+| metadata_major_version_qti  | 0x00000000  |
+| metadata_minor_version      | 0x00000000  |
+| metadata_minor_version_qti  | 0x00000000  |
+| metadata_size               | 0x00000078  |
+| metadata_size_qti           | 0x00000000  |
+| sig_ptr                     | 0xffffffff  |
+| sig_size                    | 0x00000068  |
+| sig_size_qti                | 0x00000000  |
+| version                     | 0x00000006  |
+Metadata:
+| anti_rollback_version        | 0x00000000  |
+| app_id                       | 0x00000000  |
+| debug                        | 0x00000001  |
+| hw_id                        | 0x00000000  |
+| in_use_soc_hw_version        | 0x00000001  |
+| model_id                     | 0x00000000  |
+| mrc_index                    | 0x00000000  |
+| multi_serial_numbers         | 0x00000000  |
+| oem_id                       | 0x00000000  |
+| oem_id_independent           | 0x00000000  |
+| root_revoke_activate_enable  | 0x00000000  |
+| rot_en                       | 0x00000000  |
+| soc_vers                     | 0x00006002  |
+| sw_id                        | 0x0000001c  |
+| uie_key_switch_enable        | 0x00000000  |
+| use_serial_number_in_signing | 0x00000000  |
+
+SecElf Properties: 
+| image_type        | 0     |
+| max_elf_segments  | 100   |
+| testsig_serialnum | None  |
+
+------------------------------------------------------
+
+SUMMARY:
+Following actions were performed: "sign, encrypt, validate"
+Output is saved at: Y:\SDX24_Sign\Temp_SecTools_v5.0\engg_ABL_build\builder_output_abl\sign_and_encrypt
+
+| Idx | SignId | Parse | Integrity | Sign | Encrypt |              Validate              |
+|     |        |       |           |      |         | Parse | Integrity | Sign | Encrypt |
+|-----|--------|-------|-----------|------|---------|-------|-----------|------|---------|
+|  1. |  abl   |   T   |     NA    |  T   |    T    |   T   |     T     |  T   |    T    |
+
