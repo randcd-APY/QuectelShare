@@ -24,6 +24,7 @@ public:
 	QStringListModel *model;
 	QString Get_port();
 	int Get_flag();
+    QString get_dir();
 
 
 	private slots:

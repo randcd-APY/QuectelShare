@@ -18,17 +18,19 @@ require recipes-qt/qt5/qt5.inc
 DEPENDS += "qtbase"
 
 FILES_${PN} += "/lib/systemd/*"
+FILES_${PN} += "/etc/systemd/*"
 
 do_install() {
 		 install -d ${D}${bindir}
 	     install -m 0755 quec_launcher ${D}${bindir}
 
          #added by peeta
-         install -d ${D}${systemd_unitdir}/system
+         install -d ${D}${systemd_unitdir}/system/
          install -m 0644 ${WORKDIR}/quectel-app/qt/quec_launcher/quec_launcher.service.in \
          ${D}${systemd_unitdir}/system/quec_launcher.service
 
-         install -d ${D}${systemd_unitdir}/system/multi-user.target.wants/
+         install -d ${D}${sysconfdir}/systemd/system/local-fs-pre.target.wants/
+
          ln -sf ${systemd_unitdir}/system/quec_launcher.service \
-         ${D}${systemd_unitdir}/system/multi-user.target.wants/quec_launcher.service
+         ${D}${sysconfdir}/systemd/system/local-fs-pre.target.wants/quec_launcher.service
 }

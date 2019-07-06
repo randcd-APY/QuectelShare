@@ -1,38 +1,35 @@
 require qt5.inc
-require qt5-git.inc
+require qt5-ptest.inc
 
-LICENSE = "GFDL-1.3 & BSD & ( GPL-3.0 & The-Qt-Company-GPL-Exception-1.0 | The-Qt-Company-Commercial ) & ( GPL-2.0+ | LGPL-3.0 | The-Qt-Company-Commercial )"
-LIC_FILES_CHKSUM = " \
-    file://LICENSE.LGPL3;md5=e6a600fd5e1d9cbde2d983680233ad02 \
-    file://LICENSE.GPL2;md5=b234ee4d69f5fce4486a80fdaf4a4263 \
-    file://LICENSE.GPL3;md5=d32239bcb673463ab874e80d47fae504 \
-    file://LICENSE.GPL3-EXCEPT;md5=763d8c535a234d9a3fb682c7ecb6c073 \
-    file://LICENSE.FDL;md5=6d9f2a9af4c8b8c3c769f6cc1b6aaf7e \
-"
+SUMMARY = "qtmultimeida application"
+LICENSE = "MIT"
+LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
 
+FILESPATH =+ "${WORKSPACE}:"
+SRC_URI = "file://qtmultimedia"
+
+S = "${WORKDIR}/qtmultimedia"
+SRC_DIR = "${WORKSPACE}/qtmultimedia"
+
+DEPENDS += "qtbase"
 DEPENDS += "qtdeclarative"
+DEPENDS += "gstreamer1.0"
+DEPENDS += "gstreamer1.0-plugins-base"
+DEPENDS += "gstreamer1.0-plugins-good"
+DEPENDS += "gstreamer1.0-plugins-bad"
+DEPENDS += "gstreamer1.0-libav"
+DEPENDS += "alsa-lib"
+DEPENDS += "alsa-utils"
+DEPENDS += "alsa-tools"
 
-PACKAGECONFIG ??= "${@bb.utils.contains('DISTRO_FEATURES', 'alsa', 'alsa', '', d)} \
-                   ${@bb.utils.contains('DISTRO_FEATURES', 'pulseaudio', 'pulseaudio', '', d)}"
-PACKAGECONFIG[alsa] = "-alsa,-no-alsa,alsa-lib"
-PACKAGECONFIG[pulseaudio] = "-pulseaudio,-no-pulseaudio,pulseaudio"
-PACKAGECONFIG[openal] = "-feature-openal,-no-feature-openal,openal-soft"
-PACKAGECONFIG[gstreamer] = "-gstreamer 1.0,,gstreamer1.0 gstreamer1.0-plugins-base gstreamer1.0-plugins-bad"
-PACKAGECONFIG[gstreamer010] = "-gstreamer 0.10,,gstreamer gst-plugins-base gst-plugins-bad"
-
-EXTRA_QMAKEVARS_CONFIGURE += "${PACKAGECONFIG_CONFARGS}"
-
-# Disable GStreamer if completely disabled
-EXTRA_QMAKEVARS_CONFIGURE += "${@bb.utils.contains_any('PACKAGECONFIG', 'gstreamer gstreamer010', '', '-no-gstreamer', d)}"
-
-# Patches from https://github.com/meta-qt5/qtmultimedia/commits/b5.9
-# 5.9.meta-qt5.6
-SRC_URI += "\
-    file://0001-qtmultimedia-fix-a-conflicting-declaration.patch \
-"
-
-# The same issue as in qtbase:
-# http://errors.yoctoproject.org/Errors/Build/44914/
-LDFLAGS_append_x86 = "${@bb.utils.contains('DISTRO_FEATURES', 'ld-is-gold', ' -fuse-ld=bfd ', '', d)}"
-
-SRCREV = "2a3c5de691ae25ca37b91cd54bacddb8187ba52f"
+FILES_${PN}      = "${libdir}/*.so ${libdir}/*.so.* ${libdir}/*.so.*.*.* ${sysconfdir}/* ${bindir}/* ${libdir}/pkgconfig/* ${base_prefix}/*"
+FILES_${PN}-dev  += "${libdir}/*.la ${includedir}"
+do_install() {
+	install -d ${D}${includedir}/qt5
+	install -d ${D}${libdir}/qt5
+	install -d ${D}${bindir}
+	cp -rf lib/* ${D}${libdir}
+	cp -rf plugins ${D}${libdir}/qt5/
+	cp -rf include/* ${D}${includedir}/qt5/
+	cp -f examples/multimediawidgets/player/player ${D}${bindir}/
+}

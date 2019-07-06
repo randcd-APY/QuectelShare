@@ -10,8 +10,10 @@
 #include "QIODevice"
 #include "QByteArray"
 
-#define USER_PIC_SIZE_WIDTH 3264
-#define USER_PIC_SIZE_HEIGHT 2448
+#define BACK_PIC_SIZE_WIDTH 3264
+#define BACK_PIC_SIZE_HEIGHT 2448
+#define FRONT_PIC_SIZE_WIDTH 1600
+#define FRONT_PIC_SIZE_HEIGHT 1200
 #define QT_VIDEO_WIDTH 640
 #define QT_VIDEO_HEIGHT 480
 #define JPEG_NAME_MAXLEN 256
@@ -40,7 +42,7 @@ QCamDemo::QCamDemo(QWidget *parent) :
     if(!targetDir.exists()){    /**<if not exist, then create */
         targetDir.mkpath(targetDir.absolutePath());
     }
-	if(thisCb->startCameraThread()){
+    if(thisCb->startCameraThread(camId)){
 		qDebug() << "QCAM_ERROR: camera thread start failed"<< endl;
 		this->close();
 	}
@@ -60,13 +62,16 @@ void QCamDemo::QCamUIInit()
     ui->CamExit->setGeometry(50, 1180, 100, 100);
     ui->CamFunction->setGeometry(570, 1180, 100, 100);
     ui->CamStart->setGeometry(310, 1180, 100, 100);
+    ui->switchButton->setGeometry(310, 0, 100, 100);
 
     backbtn.addFile(tr(":/back.jpg"));
     startbtn.addFile(tr(":/take.jpg"));
     funcbtn.addFile(tr(":/video.jpg"));
+    switchbtn.addFile(tr(":/switch.jpg"));
     ui->CamExit->setIcon(backbtn);
     ui->CamFunction->setIcon(funcbtn);
     ui->CamStart->setIcon(startbtn);
+    ui->switchButton->setIcon(switchbtn);
 
 }
 
@@ -100,7 +105,7 @@ void CameraCallBack::onPreviewFrame(ICameraFrame* frame)
 
 	char yuvRotateBuf[QT_PREVIEW_SIZE];
 	memset(yuvRotateBuf, 0, sizeof(yuvRotateBuf));
-	rotateYUV240SP((char *)frame->data, yuvRotateBuf, QT_PREVIEW_WIDTH, QT_PREVIEW_HEIGHT);
+	rotateYUV240SP((char *)frame->data, yuvRotateBuf, QT_PREVIEW_WIDTH, QT_PREVIEW_HEIGHT, pThisWindow->camId);
 	NV21_TO_RGB24((unsigned char*)yuvRotateBuf, (unsigned char*)rgbBuf, QT_PREVIEW_HEIGHT, QT_PREVIEW_WIDTH);
 	pThisWindow->update();
 	pthread_mutex_unlock(&mutexPicDone);
@@ -138,7 +143,7 @@ void QCamDemo::paintEvent(QPaintEvent *)
 {
     //qDebug() << "QINFO:paintEvent" << endl;
     QPainter painter(this);
-    QRect rect = QRect(0, 75, 720, 960);
+    QRect rect = QRect(0, 100, 720, 960);
     QImage *tmp_img=new QImage((uchar *)thisCb->rgbBuf,QT_PREVIEW_HEIGHT,QT_PREVIEW_WIDTH,QImage::Format_RGB888);
     painter.drawImage(rect,*tmp_img);
 
@@ -161,8 +166,15 @@ void QCamDemo::on_CamStart_clicked()
     if(isVideoGoing)
         return;
     qDebug() << "QINFO:on_CamStart_clicked: " << endl;
-	thisCb->picSize_.width = USER_PIC_SIZE_WIDTH;
-	thisCb->picSize_.height = USER_PIC_SIZE_HEIGHT;
+    if(camId == 1){
+        thisCb->picSize_.width = FRONT_PIC_SIZE_WIDTH;
+        thisCb->picSize_.height = FRONT_PIC_SIZE_HEIGHT;
+    }else if(camId == 0){
+        thisCb->picSize_.width = BACK_PIC_SIZE_WIDTH;
+        thisCb->picSize_.height = BACK_PIC_SIZE_HEIGHT;
+    }else{
+        qDebug() << "QError:invalide camId" <<endl;
+    }
     thisCb->params_.setPictureSize(thisCb->picSize_);
     //thisCb->params_.setPictureThumbNailSize(thisCb->picSize_);
     thisCb->params_.setExposureTime("0");
@@ -227,4 +239,26 @@ void QCamDemo::mousePressEvent(QMouseEvent *event)
 void QCamDemo::mouseReleaseEvent(QMouseEvent *event)
 {
     qDebug() << "QINFO:mouseReleaseEvent" <<endl;
+}
+
+void QCamDemo::on_switchButton_clicked()
+{
+    if(camId == 1)
+        camId = 0;
+    else if(camId == 0)
+        camId = 1;
+    else
+        qDebug() << "QError:invalide camId" <<endl;
+	qDebug() << "QINFO:camere Id" << camId << endl;
+    if(mVideoRecoder)
+    {
+        quecRecorderThread->quecRecorderRelease();
+        thisCb->camera_->stopRecording();
+    }
+    thisCb->camera_->stopPreview();
+    thisCb->camera_->deleteInstance(&(thisCb->camera_));
+    if(thisCb->startCameraThread(camId)){
+        qDebug() << "QCAM_ERROR: camera thread start failed"<< endl;
+        this->close();
+    }
 }

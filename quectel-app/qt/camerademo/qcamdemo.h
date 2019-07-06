@@ -21,9 +21,10 @@ public:
     ~QCamDemo();
 
     CameraCallBack *thisCb;
-    QIcon backbtn, startbtn, funcbtn;
+    QIcon backbtn, startbtn, funcbtn, switchbtn;
     bool mVideoRecoder;
     bool isVideoGoing = false;
+    int camId = 1;
 
     QuecRecorderThread *quecRecorderThread;
 
@@ -32,6 +33,8 @@ private slots:
     void on_CamStart_clicked();
     void on_CamFunction_clicked();
     void QCamUIInit();
+
+    void on_switchButton_clicked();
 
 private:
     Ui::QCamDemo *ui;

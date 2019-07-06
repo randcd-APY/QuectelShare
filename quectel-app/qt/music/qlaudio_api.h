@@ -56,8 +56,9 @@ struct Audio_Record
 
 };
 
-
-
-void QL_Audio_Record(struct Audio_Record);
+void QL_Record_Stop();
+void QL_Audio_stopback();
+void QL_Audio_startback();
+void QL_Audio_Record(struct Audio_Record record,char *file);
 void QL_Audio_Playback(struct Audio_Playback playback, char *file);
 #endif

@@ -27,20 +27,6 @@
   "ov8825",
 #elif defined(MSM8909_SENSORS)
 #define BOARD_SENSORS \
-  "ov8858_q8v19w", \
-  "ov5670_q5v41b", \
-  "ov2680_5987fhq", \
-  "s5k3m2xm", \
-  "ar0542", \
-  "ov5670_qc700", \
-  "ov5670_30010a3", \
-  "ov5675_d5v15b", \
-  "ov2680_cht852b", \
-  "ov2680_zs2p80f1", \
-  "ov8856_f8v05a", \
-  "ov5640", \
-  "ov7251", \
-  "imx241", \
   "hi843_8909", \
   "hi259",
 #else

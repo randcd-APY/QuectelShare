@@ -29,10 +29,10 @@ public:
     virtual void onPictureFrame(ICameraFrame* frame);
 	int takePicture(uint32_t num);
 
-	int startCameraThread();
+    int startCameraThread(int camId);
 	int setParameters(int qwidth, int qheight);
 	void NV21_TO_RGB24(unsigned char *data, unsigned char *rgb, int width, int height);
-	void rotateYUV240SP(char *src,char *des,int width,int height);
+	void rotateYUV240SP(char *src,char *des,int width,int height,int camId);
 	int dumpToFile(uint8_t* data, uint32_t size, char* name, uint64_t timestamp);
 	char rgbBuf[QT_RGBBUF_SIZE];
 

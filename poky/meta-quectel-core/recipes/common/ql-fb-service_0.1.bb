@@ -14,6 +14,7 @@ SRC_DIR = "${WORKSPACE}/quectel-core/ql-fb-service"
 
 FILES_${PN} += "/lib/systemd/*"
 FILES_${PN} += "/usr/*"
+FILES_${PN} += "/etc/systemd/*"
 
 do_compile() {
 }
@@ -26,7 +27,8 @@ do_install() {
          install -m 0644 ${SRC_DIR}/lib/systemd/system/ql-fb-service.service \
          ${D}${systemd_unitdir}/system/ql-fb-service.service
 
-         install -d ${D}${systemd_unitdir}/system/multi-user.target.wants/
+         install -d ${D}${sysconfdir}/systemd/system/local-fs-pre.target.wants/
+
          ln -sf ${systemd_unitdir}/system/ql-fb-service.service \
-         ${D}${systemd_unitdir}/system/multi-user.target.wants/ql-fb-service.service
+         ${D}${sysconfdir}/systemd/system/local-fs-pre.target.wants/ql-fb-service.service
 }

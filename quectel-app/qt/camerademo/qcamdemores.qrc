@@ -5,5 +5,6 @@
         <file>take.jpg</file>
         <file>takedisable.jpg</file>
         <file>video.jpg</file>
+        <file>switch.jpg</file>
     </qresource>
 </RCC>

@@ -64,6 +64,14 @@ DemoApplication::DemoApplication(QString executableName, QString caption, QStrin
 {
     imagePath = imageName;
     appCaption = caption;
+    QFile file;
+
+    	file.setFileName("/run/quec_launch.pid");
+    	if(file.open(QIODevice::Append)){
+		file.write((executableName.split("/").last().toStdString()).c_str());
+		file.write("\n");
+		file.close();
+    	}
 
     if (executableName[0] == QLatin1Char('/'))
         executablePath = executableName;

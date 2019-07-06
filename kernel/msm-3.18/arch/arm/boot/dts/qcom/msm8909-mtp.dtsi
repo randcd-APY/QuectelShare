@@ -16,7 +16,7 @@
 #include "msm8909-camera-sensor-mtp.dtsi"
 
 &spi_0 {
-	status = "ok";
+	status = "disabled";
 	quec-spi-dev {
 		compatible = "quectel,spi-device";
 		reg = <0>;

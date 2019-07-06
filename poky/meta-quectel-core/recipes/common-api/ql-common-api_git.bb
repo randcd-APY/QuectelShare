@@ -22,3 +22,5 @@ do_install() {
 do_compile() {
 }
 
+do_package_qa() {
+}

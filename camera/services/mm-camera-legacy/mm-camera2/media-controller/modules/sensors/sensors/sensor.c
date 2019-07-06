@@ -35,6 +35,7 @@
 #define MAX_FPS_VARIANCE 1.0f
 #define ATRACE_TAG ATRACE_TAG_CAMERA
 
+#define HAS_OUTPUT_REG_ADDR_BYTE //barnett add for hi259 170731
 /*===========================================================================
 * FUNCTION - LOG_IOCTL -
 *
@@ -1873,6 +1874,51 @@ static int32_t sensor_set_resolution(void *sctrl, void *data)
     SLOW("res x %d y %d llpclk %d fl %d",
       dimension->x_output, dimension->y_output, dimension->line_length_pclk,
       dimension->frame_length_lines);
+
+	/*barnett add for hi259-->*/
+	#ifdef HAS_OUTPUT_REG_ADDR_BYTE
+    if(lib->sensor_lib_ptr->sensor_slave_info->sensor_id_info.sensor_id == 0xE103)
+    {
+        struct msm_camera_i2c_reg_array reg_array[] = {
+            {0x03,0x00},
+            {lib->sensor_lib_ptr->output_reg_addr->x_output,
+                ((dimension->x_output)&0xFF00)>>8},
+            {lib->sensor_lib_ptr->output_reg_addr->x_output+1,
+                (dimension->x_output)&0xFF},
+            {0x03,0x00},
+            {lib->sensor_lib_ptr->output_reg_addr->y_output,
+                ((dimension->y_output)&0xFF00)>>8},
+            {lib->sensor_lib_ptr->output_reg_addr->y_output+1,
+                (dimension->y_output)&0xFF},
+            {0x03,0x00},
+            {lib->sensor_lib_ptr->output_reg_addr->line_length_pclk,
+                ((dimension->line_length_pclk)&0xFF00)>>8},
+            {lib->sensor_lib_ptr->output_reg_addr->line_length_pclk+1,
+                (dimension->line_length_pclk)&0xFF},
+            {0x03,0x00},
+            {lib->sensor_lib_ptr->output_reg_addr->frame_length_lines,
+                ((((dimension->frame_length_lines * ctrl->s_data->current_fps_div)
+                / Q10))&0xFF00)>>8},
+            {lib->sensor_lib_ptr->output_reg_addr->frame_length_lines+1,
+                (((dimension->frame_length_lines * ctrl->s_data->current_fps_div)
+            / Q10))&0xFF},
+        };
+        struct msm_camera_i2c_reg_setting out_settings = {
+            reg_array,
+            12,
+            MSM_CAMERA_I2C_BYTE_ADDR,
+            MSM_CAMERA_I2C_BYTE_DATA,
+            0
+        };
+        cfg.cfg.setting = &out_settings;
+        rc = LOG_IOCTL(ctrl->s_data->fd, VIDIOC_MSM_SENSOR_CFG, &cfg);
+        if (rc < 0) {
+            SERR("failed");
+            return rc;
+        }
+    }else{
+    #endif
+	/*barnett add for hi259<--*/
     struct msm_camera_i2c_reg_array reg_array[] = {
       {lib->sensor_lib_ptr->output_reg_addr->x_output,
         dimension->x_output},
@@ -1899,6 +1945,11 @@ static int32_t sensor_set_resolution(void *sctrl, void *data)
       SERR("failed");
       return rc;
     }
+/*barnett add-->*/
+#ifdef HAS_OUTPUT_REG_ADDR_BYTE
+    }
+#endif
+/*barnett add<--*/
   }
 
   SLOW("Done mode change");

@@ -4,7 +4,6 @@ SRC_URI += "file://add-userdebug_or_eng-macro.patch \
             file://Assign-proc_t-to-proc-dir.patch \
             file://0004-selinux-update-the-getty.te-for-addressing.patch \
             file://mls-enabling-sysadmin-role-for-the-ssh-login.patch \
-            file://Restrict-console-shell-to-userdebug.patch \
             file://Add-lib-busybox-to-subs_dist.patch \
             file://common/ \
             file://${BASEMACHINE}/ \

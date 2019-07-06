@@ -6,10 +6,9 @@ const int TAKEPICTURE_TIMEOUT_MS = 5000;
 #define NS_PER_MS 1000000
 #define NS_PER_US 1000
 
-int CameraCallBack::startCameraThread()
+int CameraCallBack::startCameraThread(int camId)
 {
     int g_num_of_cameras, rc;
-    int camId = 0;
 
     pthread_cond_init(&cvPicDone, NULL);
     pthread_mutex_init(&mutexPicDone, NULL);
@@ -111,53 +110,54 @@ int CameraCallBack::dumpToFile(uint8_t* data, uint32_t size, char* name, uint64_
     return 0;
 }
 
-void CameraCallBack::rotateYUV240SP(char *src,char *des,int width,int height)
+void CameraCallBack::rotateYUV240SP(char *src,char *des,int width,int height, int camId)
 {
-#if 0
-	//NV21旋转90
-    int wh, i, j, k;
-    wh = width * height;
-    //旋转Y
-    k = 0;
-    for(i=0;i<width;i++) {
-        for(j=0;j<height;j++){
-            des[k] = src[width*j + i];
-            k++;
-        }
-     }
-
-     for(i=0;i<width;i+=2) {
-        for(j=0;j<height/2;j++){
-            des[k] = src[wh+ width*j + i];
-            des[k+1]=src[wh + width*j + i+1];
-            k+=2;
-        }
-     }
-#endif
-	 //NV21旋转270
-	int y_size = width * height;
-	int i = 0;
-	// Rotate the Y luma
-	for (int x = width - 1; x >= 0; x--){
-		int offset = 0;
-		for (int y = 0; y < height; y++){
-			des[i] = src[offset + x];
-			i++;
-			offset += width;
-		}
-	}
-	// Rotate the U and V color components
-	i = y_size;
-	for (int x = width - 1; x > 0; x = x - 2)
-	{
-		int offset = y_size;
-		for (int y = 0; y < height / 2; y++){
-			des[i] = src[offset + (x - 1)];
-			i++;
-			des[i] = src[offset + x];
-			i++;
-			offset += width;
-		}
+	if(camId){
+	   //NV21旋转90
+	   int wh, i, j, k;
+	   wh = width * height;
+	   //旋转Y
+	   k = 0;
+	   for(i=0;i<width;i++) {
+	       for(j=0;j<height;j++){
+	           des[k] = src[width*j + i];
+	           k++;
+	       }
+	    }
+	
+	    for(i=0;i<width;i+=2) {
+	       for(j=0;j<height/2;j++){
+	           des[k] = src[wh+ width*j + i];
+	           des[k+1]=src[wh + width*j + i+1];
+	           k+=2;
+	       }
+	    }
+	}else{
+	    //NV21旋转270
+	   int y_size = width * height;
+	   int i = 0;
+	   // Rotate the Y luma
+	   for (int x = width - 1; x >= 0; x--){
+	   	int offset = 0;
+	   	for (int y = 0; y < height; y++){
+	   		des[i] = src[offset + x];
+	   		i++;
+	   		offset += width;
+	   	}
+	   }
+	   // Rotate the U and V color components
+	   i = y_size;
+	   for (int x = width - 1; x > 0; x = x - 2)
+	   {
+	   	int offset = y_size;
+	   	for (int y = 0; y < height / 2; y++){
+	   		des[i] = src[offset + (x - 1)];
+	   		i++;
+	   		des[i] = src[offset + x];
+	   		i++;
+	   		offset += width;
+	   	}
+	   }
 	}
 }
 
@@ -180,9 +180,9 @@ void CameraCallBack::NV21_TO_RGB24(unsigned char *yuyv, unsigned char *rgb, int 
 			v = yuyv[nv_start + nv_index + 1];
 			
 		
-			r = y + 1.4*(v-128);//(140 * (v-128))/100;  //r
+			b = y + 1.4*(v-128);//(140 * (v-128))/100;  //r
 			g = y - (0.34*(u-128)) - (0.71*(v-128));//y - (34 * (u-128))/100 - (71 * (v-128))/100; //g
-			b = y + 1.77*(u-128);//y + (177 * (u-128))/100; //b
+			r = y + 1.77*(u-128);//y + (177 * (u-128))/100; //b
 				
 			if(r > 255)   r = 255;
 			if(g > 255)   g = 255;

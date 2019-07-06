@@ -15,22 +15,27 @@ void music_thread::threadStart()
 {
 	MainWindow * main_win = new MainWindow();
 	str = main_win->Get_port();
-	this->start();
+    this->start();
+    delete main_win;
 }
 
 void music_thread::threadPause()
 {
 	//qDebug(QString("pause :%1").arg(m_buttonState));
-	this->m_mutex.lock();
+    //this->m_mutex.lock();
 	this->m_buttonState = false;
+    QL_Audio_stopback();
+    //this->terminate();
+    //this->wait();
 	//qDebug()<<QString("pause");
 }
 
 void music_thread::threadResume()
 {
 	//qDebug()<<QString("resume :%1").arg(m_buttonState);
-	this->m_mutex.unlock();
+    //this->m_mutex.unlock();
 	this->m_buttonState = true;
+    QL_Audio_startback();
 	//qDebug()<<QString("resume");
 }
 
@@ -60,11 +65,5 @@ void music_thread::run()
 	}
 	QByteArray ba;
 	ba = str.toLatin1();
-	qDebug("music_id0 = %s", ba.data());
-	//while (1)
-	{
-
-
-	}
 	QL_Audio_Playback(audio, ba.data());
 }

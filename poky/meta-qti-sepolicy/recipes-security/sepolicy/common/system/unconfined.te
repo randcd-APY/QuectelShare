@@ -28,6 +28,8 @@ allow unconfined_t init_t:system start;
 
 gen_require(`
         type systemd_unit_t;
+        class service { status start stop restart };
+        class system { status start stop restart reload };
 ')
 
 userdebug_or_eng(`
@@ -35,7 +37,6 @@ userdebug_or_eng(`
         attribute user_data;
         attribute system_data;
         type alogd_t;
-        class service { status start };
     ')
     manage_user_data_files(unconfined_t, user_data)
     manage_system_data_files(unconfined_t, system_data)
@@ -53,4 +54,6 @@ userdebug_or_eng(`
     allow unconfined_t self:process execmem;
 ')
 
-allow unconfined_t systemd_unit_t:service { status start };
+allow unconfined_t systemd_unit_t:service { status start stop restart };
+#allow unconfined_t init_t:system { status start stop restart reload };
+allow unconfined_t init_t:system { status start stop restart reload };

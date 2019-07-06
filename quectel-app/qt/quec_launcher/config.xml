@@ -3,7 +3,7 @@
   <demos>
     <example filename="/usr/bin/camerademo" name="Camera" image="screenshots/QuecCam.jpg"/>
     <example filename="/usr/bin/PhoneApp" name="Network" image="screenshots/Data.jpg"/>
-   <example filename="/usr/bin/qlplayer" name="Video" image="screenshots/Video.jpg"/>
+   <example filename="/usr/bin/player" name="Video" image="screenshots/Video.jpg"/>
    <example filename="/usr/bin/MusicDemo" name="Audio" image="screenshots/Audio.jpg"/>
    <example filename="/usr/bin/Gallery" name="Photo" image="screenshots/Photo.jpg"/>
   <example filename="/usr/bin/Call" name="Call" image="screenshots/Call.jpg"/>

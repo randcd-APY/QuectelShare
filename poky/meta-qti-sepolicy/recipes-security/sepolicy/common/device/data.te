@@ -42,15 +42,15 @@ typeattribute data_t mountpoint;  # Can't use files_mountpoint here
 user_data_files_type(data_t)
 
 # Disallow generic reads/writes to userdata from the regular files API
-neverallow ~{
-    domain_can_read_userdata
-    domain_can_write_userdata
-    mount_t
-} user_data:file read_file_perms;
-neverallow ~{
-    domain_can_write_userdata
-    mount_t
-} user_data:file { create setattr write append rename link unlink };
+#neverallow ~{
+#    domain_can_read_userdata
+#    domain_can_write_userdata
+#    mount_t
+#} user_data:file read_file_perms;
+#neverallow ~{
+#    domain_can_write_userdata
+#    mount_t
+#} user_data:file { create setattr write append rename link unlink };
 
 attribute system_data;
 attribute domain_can_read_systemdata;
@@ -75,10 +75,10 @@ neverallow ~{
 gen_require(`
      type unconfined_t;
 ')
-neverallow { domain -unconfined_t } user_data:file { execute execute_no_trans };
-neverallow domain system_data:file { execute execute_no_trans };
+#neverallow { domain -unconfined_t } user_data:file { execute execute_no_trans };
+#neverallow domain system_data:file { execute execute_no_trans };
 type test_data_t;
 user_data_files_type(test_data_t)
 allow unconfined_t test_data_t:file exec_file_perms;
 data_filetrans(unconfined_t, test_data_t, dir, "tests")
-neverallow unconfined_t { user_data -test_data_t }:file { execute execute_no_trans };
+#neverallow unconfined_t { user_data -test_data_t }:file { execute execute_no_trans };

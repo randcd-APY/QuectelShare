@@ -26,18 +26,6 @@ static struct msm_sensor_power_setting ov5640_power_setting[] = {
     .config_val = GPIO_OUT_LOW,
     .delay = 1,
  },
- {
-    .seq_type = SENSOR_VREG,
-    .seq_val = CAM_VIO,
-    .config_val = 0,
-    .delay = 1,
-  },
-  {
-    .seq_type = SENSOR_VREG,
-    .seq_val = CAM_VANA,
-    .config_val = 0,
-    .delay = 1,
-  },
   {
     .seq_type = SENSOR_GPIO,
     .seq_val = SENSOR_GPIO_STANDBY,
