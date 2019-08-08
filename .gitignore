@@ -1,0 +1,14 @@
+*.out
+tags
+poky/build/conf/local.conf
+__pycache__
+poky/build/tmp-glibc
+poky/bitbake/lib/bb/pysh/pyshtables.py
+poky/build/bitbake-cookerdaemon.log
+poky/build/bitbake.lock
+poky/build/buildhistory/
+poky/build/cache/
+poky/build/conf/bblayers.conf
+poky/build/conf/sanity_info
+poky/build/conf/templateconf.cfg
+poky/build/sstate-cache/

@@ -851,7 +851,7 @@ void qmi_cci_flush_tx_q
 
     /* xport is flow controlled, try again later */
     if(rc == QMI_XPORT_BUSY_ERR)
-      break;
+        break;
 
     LIST_REMOVE(clnt->info.client.tx_q, txn, tx_link);
     INVALIDATE_TXN_TX_BUF(txn);
@@ -860,29 +860,29 @@ void qmi_cci_flush_tx_q
     /* Error sending txn */
     if(rc != QMI_NO_ERR)
     {
-      qmi_cci_txn_type *to_find = txn;
+        qmi_cci_txn_type *to_find = txn;
 
-      QMI_CCI_LOG_ERR("QCCI qmi_cci_flush_tx_q: Error sending TXN: svc_id: %d txn_id: %d msg_id: %d",
-                      clnt->service_obj->service_id, txn->txn_id, txn->msg_id);
-      LOCK(&clnt->info.client.txn_list_lock);
-      LIST_FIND(clnt->info.client.txn_list, txn, link, txn == to_find);
-      if(txn)
-      {
-        LIST_REMOVE(clnt->info.client.txn_list, txn, link);
-        /* Txn_list's ref count is transferred
-         * into handle_txn_error */
-        UNLOCK(&clnt->info.client.txn_list_lock);
-        handle_txn_error(clnt, txn, rc);
-        QMI_CCI_DEC_TXN_SAFE(clnt, txn);
-      }
-      else
-      {
-        UNLOCK(&clnt->info.client.txn_list_lock);
-      }
-      if (rc == QMI_SERVICE_ERR)
-      {
-	qmi_cci_xport_event_server_error(clnt, dest_addr, QMI_SERVICE_ERR);
-      }
+        QMI_CCI_LOG_ERR("QCCI qmi_cci_flush_tx_q: Error sending TXN: svc_id: %d txn_id: %d msg_id: %d",
+                clnt->service_obj->service_id, txn->txn_id, txn->msg_id);
+        LOCK(&clnt->info.client.txn_list_lock);
+        LIST_FIND(clnt->info.client.txn_list, txn, link, txn == to_find);
+        if(txn)
+        {
+            LIST_REMOVE(clnt->info.client.txn_list, txn, link);
+            /* Txn_list's ref count is transferred
+             * into handle_txn_error */
+            UNLOCK(&clnt->info.client.txn_list_lock);
+            handle_txn_error(clnt, txn, rc);
+            QMI_CCI_DEC_TXN_SAFE(clnt, txn);
+        }
+        else
+        {
+            UNLOCK(&clnt->info.client.txn_list_lock);
+        }
+        if (rc == QMI_SERVICE_ERR)
+        {
+            qmi_cci_xport_event_server_error(clnt, dest_addr, QMI_SERVICE_ERR);
+        }
     }
 
     /* Release tx_q ref count */
@@ -896,221 +896,221 @@ void qmi_cci_flush_tx_q
 
 /*===========================================================================
   FUNCTION  qmi_cci_send
-===========================================================================*/
+  ===========================================================================*/
 /*!
-@brief
+  @brief
 
   Transmit a message
 
-@return
+  @return
   None
 
-@note
+  @note
   The caller must have obtained a reference to the client handle.
   The caller should free the buffer only if this function returns error.
   The caller should provide buffers which are allocated on the heap only.
-*/
+  */
 /*=========================================================================*/
-static qmi_client_error_type qmi_cci_send
+    static qmi_client_error_type qmi_cci_send
 (
-  qmi_cci_client_type *clnt,
-  qmi_cci_txn_type *txn,
-  void *msg,
-  uint32_t len
-)
+ qmi_cci_client_type *clnt,
+ qmi_cci_txn_type *txn,
+ void *msg,
+ uint32_t len
+ )
 {
-  int flush_req = 0;
+    int flush_req = 0;
 
-  if(!txn || !len || !msg)
-  {
-    return QMI_CLIENT_PARAM_ERR;
-  }
+    if(!txn || !len || !msg)
+    {
+        return QMI_CLIENT_PARAM_ERR;
+    }
 
-  /* Check server addr validity once before sending. */
-  LOCK(&clnt->info_lock);
-  if(clnt->category != QMI_CCI_CONNECTED_CLIENT)
-  {
+    /* Check server addr validity once before sending. */
+    LOCK(&clnt->info_lock);
+    if(clnt->category != QMI_CCI_CONNECTED_CLIENT)
+    {
+        UNLOCK(&clnt->info_lock);
+        return QMI_SERVICE_ERR;
+    }
     UNLOCK(&clnt->info_lock);
-    return QMI_SERVICE_ERR;
-  }
-  UNLOCK(&clnt->info_lock);
 
-  /* Take a reference for the tx queue */
-  QMI_CCI_INC_TXN_SAFE(clnt, txn);
+    /* Take a reference for the tx queue */
+    QMI_CCI_INC_TXN_SAFE(clnt, txn);
 
-  LOCK(&clnt->info.client.tx_q_lock);
-  if(!clnt->info.client.accepting_txns)
-  {
-    QMI_CCI_LOG_ERR("QCCI qmi_cci_send: clnt has been released. svc_id: %d",
-                    clnt->service_obj->service_id);
+    LOCK(&clnt->info.client.tx_q_lock);
+    if(!clnt->info.client.accepting_txns)
+    {
+        QMI_CCI_LOG_ERR("QCCI qmi_cci_send: clnt has been released. svc_id: %d",
+                clnt->service_obj->service_id);
+        UNLOCK(&clnt->info.client.tx_q_lock);
+        /* Give up reference */
+        QMI_CCI_DEC_TXN_SAFE(clnt, txn);
+        return QMI_CLIENT_INVALID_CLNT;
+    }
+    txn->tx_buf = msg;
+    txn->tx_buf_len = len;
+    LIST_ADD(clnt->info.client.tx_q, txn, tx_link);
+    /* Flush only if this is the first packet. If another
+       packet is pending a flush, then we let the resume
+       process continue the flush */
+    flush_req = LIST_CNT(clnt->info.client.tx_q) <= 1;
+    qmi_cci_log_tx(clnt, QMI_REQUEST_CONTROL_FLAG, txn->txn_id, txn->msg_id,
+            (void *)((uint8_t *)msg + QMI_HEADER_SIZE), len - QMI_HEADER_SIZE);
     UNLOCK(&clnt->info.client.tx_q_lock);
-    /* Give up reference */
-    QMI_CCI_DEC_TXN_SAFE(clnt, txn);
-    return QMI_CLIENT_INVALID_CLNT;
-  }
-  txn->tx_buf = msg;
-  txn->tx_buf_len = len;
-  LIST_ADD(clnt->info.client.tx_q, txn, tx_link);
-  /* Flush only if this is the first packet. If another
-     packet is pending a flush, then we let the resume
-     process continue the flush */
-  flush_req = LIST_CNT(clnt->info.client.tx_q) <= 1;
-  qmi_cci_log_tx(clnt, QMI_REQUEST_CONTROL_FLAG, txn->txn_id, txn->msg_id,
-      (void *)((uint8_t *)msg + QMI_HEADER_SIZE), len - QMI_HEADER_SIZE);
-  UNLOCK(&clnt->info.client.tx_q_lock);
-  if( flush_req)
-  {
-    qmi_cci_flush_tx_q(clnt);
-  }
+    if( flush_req)
+    {
+        qmi_cci_flush_tx_q(clnt);
+    }
 
-  return QMI_NO_ERR;
+    return QMI_NO_ERR;
 }
 
 /*===========================================================================
   FUNCTION  encode_and_send
-===========================================================================*/
+  ===========================================================================*/
 /*!
-@brief
+  @brief
 
   Encode and send a message to the client
 
-@return
+  @return
   qmi_client_error_type
 
-@note
-*/
+  @note
+  */
 /*=========================================================================*/
-static qmi_client_error_type encode_and_send
+    static qmi_client_error_type encode_and_send
 (
  qmi_cci_client_type *clnt,
  qmi_cci_txn_type *txn,
  void *c_struct,
  int c_struct_len
-)
+ )
 {
-  int rc;
-  uint32_t max_msg_len;
-  uint32_t out_len, idl_c_struct_len;
-  unsigned char *msg;
-  uint8_t cntl_flag = QMI_REQUEST_CONTROL_FLAG;
-  qmi_idl_type_of_message_type msg_type = QMI_IDL_REQUEST;
+    int rc;
+    uint32_t max_msg_len;
+    uint32_t out_len, idl_c_struct_len;
+    unsigned char *msg;
+    uint8_t cntl_flag = QMI_REQUEST_CONTROL_FLAG;
+    qmi_idl_type_of_message_type msg_type = QMI_IDL_REQUEST;
 
-  rc = qmi_idl_get_message_c_struct_len(clnt->service_obj, msg_type, txn->msg_id,
-      &idl_c_struct_len);
-  if(rc != QMI_IDL_LIB_NO_ERR)
-      return rc;
-
-/* Allow users to pass c_stuct_len == 0. This is useful in cases when the c
-   structure has only optional members(thus idl_c_stuct_len would be non-zero)
-   and the user requires to send the message with all options turned off */
-  if(c_struct_len != 0 && c_struct_len != (int)idl_c_struct_len)
-    return QMI_CLIENT_PARAM_ERR;
-
-  if(c_struct && c_struct_len)
-  {
-    rc = qmi_idl_get_max_message_len(clnt->service_obj, msg_type, txn->msg_id,
-                &max_msg_len);
+    rc = qmi_idl_get_message_c_struct_len(clnt->service_obj, msg_type, txn->msg_id,
+            &idl_c_struct_len);
     if(rc != QMI_IDL_LIB_NO_ERR)
-      return rc;
+        return rc;
 
-    msg = (unsigned char *)MALLOC(max_msg_len + QMI_HEADER_SIZE);
-    if(!msg)
-      return QMI_CLIENT_ALLOC_FAILURE;
+    /* Allow users to pass c_stuct_len == 0. This is useful in cases when the c
+       structure has only optional members(thus idl_c_stuct_len would be non-zero)
+       and the user requires to send the message with all options turned off */
+    if(c_struct_len != 0 && c_struct_len != (int)idl_c_struct_len)
+        return QMI_CLIENT_PARAM_ERR;
 
-    rc = qmi_idl_message_encode(
-        clnt->service_obj,
-        msg_type,
-        txn->msg_id,
-        c_struct,
-        c_struct_len,
-        msg + QMI_HEADER_SIZE,
-        max_msg_len,
-        (uint32_t *)&out_len);
-
-    if(rc != QMI_IDL_LIB_NO_ERR)
+    if(c_struct && c_struct_len)
     {
-      FREE(msg);
-      return rc;
+        rc = qmi_idl_get_max_message_len(clnt->service_obj, msg_type, txn->msg_id,
+                &max_msg_len);
+        if(rc != QMI_IDL_LIB_NO_ERR)
+            return rc;
+
+        msg = (unsigned char *)MALLOC(max_msg_len + QMI_HEADER_SIZE);
+        if(!msg)
+            return QMI_CLIENT_ALLOC_FAILURE;
+
+        rc = qmi_idl_message_encode(
+                clnt->service_obj,
+                msg_type,
+                txn->msg_id,
+                c_struct,
+                c_struct_len,
+                msg + QMI_HEADER_SIZE,
+                max_msg_len,
+                (uint32_t *)&out_len);
+
+        if(rc != QMI_IDL_LIB_NO_ERR)
+        {
+            FREE(msg);
+            return rc;
+        }
     }
-  }
-  else
-  {
-    /* Empty message */
-    out_len = 0;
-    msg = (unsigned char *)MALLOC(QMI_HEADER_SIZE);
-    if(!msg)
-      return QMI_CLIENT_ALLOC_FAILURE;
-  }
+    else
+    {
+        /* Empty message */
+        out_len = 0;
+        msg = (unsigned char *)MALLOC(QMI_HEADER_SIZE);
+        if(!msg)
+            return QMI_CLIENT_ALLOC_FAILURE;
+    }
 
-  /* fill in header */
-  encode_header(msg, cntl_flag, txn->txn_id, txn->msg_id, (uint16_t)out_len);
+    /* fill in header */
+    encode_header(msg, cntl_flag, txn->txn_id, txn->msg_id, (uint16_t)out_len);
 
-  out_len += QMI_HEADER_SIZE;
+    out_len += QMI_HEADER_SIZE;
 
-  rc = qmi_cci_send(clnt, txn, msg, out_len);
-  if(rc != QMI_NO_ERR)
-  {
-    FREE(msg);
-  }
+    rc = qmi_cci_send(clnt, txn, msg, out_len);
+    if(rc != QMI_NO_ERR)
+    {
+        FREE(msg);
+    }
 
-  return rc;
+    return rc;
 }
 
 /*===========================================================================
   FUNCTION  handle_txn_error
-===========================================================================*/
+  ===========================================================================*/
 /*!
-@brief
+  @brief
   Handle transaction error base on its type and set return code to error
 
-@note
+  @note
   Transaction is freed in the async case. The thread waiting on a sync response
   will free the transation after waking up.
-*/
+  */
 /*=========================================================================*/
-static void handle_txn_error
+    static void handle_txn_error
 (
  qmi_cci_client_type *clnt,
  qmi_cci_txn_type *txn,
  int error
  )
 {
-  if (!txn)
-    return;
+    if (!txn)
+        return;
 
-  qmi_cci_log_rx(clnt, QMI_IDL_RESPONSE, txn->txn_id, txn->msg_id, NULL, 0, error);
+    qmi_cci_log_rx(clnt, QMI_IDL_RESPONSE, txn->txn_id, txn->msg_id, NULL, 0, error);
 
-  txn->rc = error;
+    txn->rc = error;
 
-  switch(txn->type)
-  {
-    case TXN_SYNC_MSG:
-    case TXN_SYNC_RAW:
-      /* txn freed by the waiting function */
-      QMI_CCI_OS_SIGNAL_SET(&txn->signal);
-      break;
+    switch(txn->type)
+    {
+        case TXN_SYNC_MSG:
+        case TXN_SYNC_RAW:
+            /* txn freed by the waiting function */
+            QMI_CCI_OS_SIGNAL_SET(&txn->signal);
+            break;
 
-    case TXN_ASYNC_MSG:
-      if(txn->msg_async_rx_cb)
-      {
-        txn->msg_async_rx_cb(CLIENT_HANDLE(clnt), txn->msg_id, txn->rx_buf,
-            0, txn->rx_cb_data, txn->rc);
-      }
-      break;
+        case TXN_ASYNC_MSG:
+            if(txn->msg_async_rx_cb)
+            {
+                txn->msg_async_rx_cb(CLIENT_HANDLE(clnt), txn->msg_id, txn->rx_buf,
+                        0, txn->rx_cb_data, txn->rc);
+            }
+            break;
 
-    case TXN_ASYNC_RAW:
-      if(txn->raw_async_rx_cb)
-        txn->raw_async_rx_cb(CLIENT_HANDLE(clnt), txn->msg_id, txn->rx_buf,
-            0, txn->rx_cb_data, txn->rc);
-      break;
-    default:
-      break;
-  }
+        case TXN_ASYNC_RAW:
+            if(txn->raw_async_rx_cb)
+                txn->raw_async_rx_cb(CLIENT_HANDLE(clnt), txn->msg_id, txn->rx_buf,
+                        0, txn->rx_cb_data, txn->rc);
+            break;
+        default:
+            break;
+    }
 }
 
 /*===========================================================================
  *   FUNCTION  qmi_cci_response_wait_loop
-===========================================================================*/
+ ===========================================================================*/
 /*!
  * @brief
  *
@@ -1123,32 +1123,32 @@ static void handle_txn_error
  * The caller is required to hold a reference to the client structure.
  */
 /*=========================================================================*/
-static qmi_client_error_type qmi_cci_response_wait_loop
+    static qmi_client_error_type qmi_cci_response_wait_loop
 (
-  qmi_cci_txn_type *txn,
-  unsigned int timeout_msecs
-)
+ qmi_cci_txn_type *txn,
+ unsigned int timeout_msecs
+ )
 {
-  qmi_client_error_type ret = QMI_NO_ERR;
+    qmi_client_error_type ret = QMI_NO_ERR;
 
-  do
-  {
-    QMI_CCI_OS_SIGNAL_WAIT(&txn->signal, timeout_msecs);
-    QMI_CCI_OS_SIGNAL_CLEAR(&txn->signal);
-
-    if(QMI_CCI_OS_SIGNAL_TIMED_OUT(&txn->signal))
+    do
     {
-      ret = QMI_TIMEOUT_ERR;
-      break;
-    }
+        QMI_CCI_OS_SIGNAL_WAIT(&txn->signal, timeout_msecs);
+        QMI_CCI_OS_SIGNAL_CLEAR(&txn->signal);
 
-    /* Not a stray wake-up break out */
-    if(txn->rc != QMI_TIMEOUT_ERR)
-    {
-      ret = txn->rc;
-      break;
-    }
-  } while(1);
+        if(QMI_CCI_OS_SIGNAL_TIMED_OUT(&txn->signal))
+        {
+            ret = QMI_TIMEOUT_ERR;
+            break;
+        }
+
+        /* Not a stray wake-up break out */
+        if(txn->rc != QMI_TIMEOUT_ERR)
+        {
+            ret = txn->rc;
+            break;
+        }
+    } while(1);
 
   return ret;
 }

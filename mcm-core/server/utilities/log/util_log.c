@@ -23,6 +23,7 @@ void ril_format_log_msg ( char *buf_ptr,
     if ( NULL != buf_ptr && buf_size > 0 )
     {
         vsnprintf( buf_ptr, buf_size, fmt, ap );
+	printf("alpha:%s.\n",buf_ptr);
     }
 
     va_end( ap );

@@ -435,36 +435,94 @@ void  cri_dms_core_unsol_ind_handler(int qmi_service_client_id,
     UTIL_LOG_FUNC_EXIT();
 }
 
+//Laurence.yin-2018/04/20-QCM9XOL00004C015-P01, <[DM] : add  messages async handle.>
+static void cri_dms_core_get_device_hardware_rev_id_resp_handler(int qmi_service_client_id,
+        dms_get_device_hardware_rev_resp_msg_v01 *resp_msg,
+        cri_core_context_type cri_core_context)
+{   
+    cri_core_error_type cri_core_error;
+
+    UTIL_LOG_MSG();
+
+    cri_core_error = CRI_ERR_NONE_V01;
+
+    if(resp_msg)
+    {   
+        cri_core_error = cri_core_retrieve_err_code(QMI_NO_ERR,&resp_msg->resp);
+        cri_rule_handler_rule_check(cri_core_context,cri_core_error,resp_msg);
+    }
+
+    UTIL_LOG_FUNC_EXIT();
+    return;
+}
 /***************************************************************************************************
-    @function
-    cri_dms_core_async_resp_handler
+  @function
+  cri_dms_core_get_device_serial_numbers_resp_handler
 
-    @brief
-    Handles async response from qmi.
+  @brief
+  Handles async response for QMI_DMS_GET_DEVICE_SERIAL_NUMBERS  request.
 
-    @param[in]
-        qmi_service_client_id
-            qmi client id.
-        message_id
-            message id
-        resp_data
-            indication data
-        resp_data_len
-            indication data length
-        cri_core_context
-            cri_core_context
+  @param[in]
+  qmi_service_client_id
+  qmi client id.
+  cri_core_context
+  cri_core_context
 
-    @param[out]
-        none
+  @param[out]
+  none
 
-    @retval
-    none
-***************************************************************************************************/
+  @retval
+  none
+ ***************************************************************************************************/
+static void cri_dms_core_get_device_serial_numbers_resp_handler(int qmi_service_client_id,
+        dms_get_device_serial_numbers_resp_msg_v01 *resp_msg,
+        cri_core_context_type cri_core_context)
+{
+    cri_core_error_type cri_core_error;
+
+    UTIL_LOG_MSG();
+
+    cri_core_error = CRI_ERR_NONE_V01;
+
+    if(resp_msg)
+    {
+        cri_core_error = cri_core_retrieve_err_code(QMI_NO_ERR,&resp_msg->resp);
+        cri_rule_handler_rule_check(cri_core_context,cri_core_error, resp_msg);
+    }
+
+    UTIL_LOG_FUNC_EXIT();
+    return;
+}
+/***************************************************************************************************
+  @function
+  cri_dms_core_async_resp_handler
+
+  @brief
+  Handles async response from qmi.
+
+  @param[in]
+  qmi_service_client_id
+  qmi client id.
+  message_id
+  message id
+  resp_data
+  indication data
+  resp_data_len
+  indication data length
+  cri_core_context
+  cri_core_context
+
+  @param[out]
+  none
+
+  @retval
+  none
+ ***************************************************************************************************/
 void cri_dms_core_async_resp_handler(int qmi_service_client_id,
-                                    unsigned long message_id,
-                                    void *resp_data,
-                                    int resp_data_len,
-                                    cri_core_context_type cri_core_context)
+        unsigned long message_id,
+        void *resp_data,
+        int resp_data_len,
+        cri_core_context_type cri_core_context)
 {
 
     UTIL_LOG_FUNC_ENTRY();
@@ -474,16 +532,29 @@ void cri_dms_core_async_resp_handler(int qmi_service_client_id,
         UTIL_LOG_MSG("message_id - %d", message_id);
         switch(message_id)
         {
-        case QMI_DMS_SET_OPERATING_MODE_RESP_V01:
-            UTIL_LOG_MSG("Received QMI_DMS_SET_OPERATING_MODE_RESP");
-            cri_dms_core_set_modem_resp_handler(qmi_service_client_id,
-                                                resp_data,
-                                                cri_core_context);
-        break;
+            case QMI_DMS_SET_OPERATING_MODE_RESP_V01:
+                UTIL_LOG_MSG("Received QMI_DMS_SET_OPERATING_MODE_RESP");
+                cri_dms_core_set_modem_resp_handler(qmi_service_client_id,
+                        resp_data,
+                        cri_core_context);
+                break;
+            case QMI_DMS_GET_DEVICE_SERIAL_NUMBERS_RESP_V01:
+                UTIL_LOG_MSG("Received QMI_DMS_GET_DEVICE_SERIAL_NUMBERS_RESP_V01");
+                cri_dms_core_get_device_serial_numbers_resp_handler(qmi_service_client_id,
+                        resp_data,
+                        cri_core_context);
+                break;
+            case QMI_DMS_GET_DEVICE_REV_ID_RESP_V01:
+                UTIL_LOG_MSG("Received QMI_DMS_GET_DEVICE_REV_ID_RESP_V01");
+                cri_dms_core_get_device_hardware_rev_id_resp_handler(qmi_service_client_id,
+                        resp_data,
+                        cri_core_context);
+                break;
 
-        default:
-            UTIL_LOG_MSG("unhandled async resp msg - %d",message_id);
-        break;
+
+            default:
+                UTIL_LOG_MSG("unhandled async resp msg - %d",message_id);
+                break;
 
         }
     }
@@ -494,27 +565,27 @@ void cri_dms_core_async_resp_handler(int qmi_service_client_id,
 
 
 /***************************************************************************************************
-    @function
-    cri_dms_core_set_modem_resp_handler
+  @function
+  cri_dms_core_set_modem_resp_handler
 
-    @brief
-    Handles async response for QMI_DMS_SET_OPERATING_MODE request.
+  @brief
+  Handles async response for QMI_DMS_SET_OPERATING_MODE request.
 
-    @param[in]
-        qmi_service_client_id
-            qmi client id.
-        cri_core_context
-            cri_core_context
+  @param[in]
+  qmi_service_client_id
+  qmi client id.
+  cri_core_context
+  cri_core_context
 
-    @param[out]
-        none
+  @param[out]
+  none
 
-    @retval
-    none
-***************************************************************************************************/
+  @retval
+  none
+ ***************************************************************************************************/
 void cri_dms_core_set_modem_resp_handler(int qmi_service_client_id,
-                                    dms_set_operating_mode_resp_msg_v01 *set_opr_mode_resp_msg,
-                                    cri_core_context_type cri_core_context)
+        dms_set_operating_mode_resp_msg_v01 *set_opr_mode_resp_msg,
+        cri_core_context_type cri_core_context)
 {
     cri_core_error_type cri_core_error;
 
@@ -525,10 +596,10 @@ void cri_dms_core_set_modem_resp_handler(int qmi_service_client_id,
     if(set_opr_mode_resp_msg)
     {
         cri_core_error = cri_core_retrieve_err_code(QMI_NO_ERR,
-                                                    &set_opr_mode_resp_msg->resp);
+                &set_opr_mode_resp_msg->resp);
         cri_rule_handler_rule_check(cri_core_context,
-                                    cri_core_error,
-                                    NULL);
+                cri_core_error,
+                NULL);
     }
 
     UTIL_LOG_FUNC_EXIT();

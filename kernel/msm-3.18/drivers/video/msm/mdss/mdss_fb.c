@@ -1967,7 +1967,7 @@ static int mdss_fb_blank_sub(int blank_mode, struct fb_info *info,
 			if (mdss_fb_is_power_off(mfd))
 				return 0;
 			else
-				blank_mode = FB_BLANK_POWERDOWN;
+				blank_mode = FB_BLANK_UNBLANK;//FB_BLANK_POWERDOWN;
 		}
 	}
 

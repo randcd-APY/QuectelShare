@@ -55,10 +55,6 @@ allow loc_t self:fifo_file rw_fifo_file_perms;
 allow loc_t self:process { setcap signal };
 allow loc_t self:netlink_route_socket read;
 
-#added by peeta
-allow xtwifi_agent_t cert_t:dir search;
-allow xtwifi_agent_t cert_t:file { read getattr open };
-
 # Drop from root
 allow loc_t self:capability { setuid setgid };
 kernel_read_network_state(loc_t)
@@ -118,6 +114,10 @@ allow xtwifi_agent_t self:{ udp_socket unix_dgram_socket } create_socket_perms;
 
 data_filetrans(xtwifi_agent_t, loc_data_t, file)
 manage_user_data_files(xtwifi_agent_t, loc_data_t)
+
+#added by peeta
+allow xtwifi_agent_t cert_t:dir search;
+allow xtwifi_agent_t cert_t:file { read getattr open };
 
 ### xtwifi_client
 
@@ -213,6 +213,9 @@ logging_send_syslog_msg(lowi_server_t)
 kernel_read_network_state(lowi_server_t)
 allow lowi_server_t self:{ netlink_route_socket udp_socket } create_socket_perms;
 allow lowi_server_t self:capability net_admin;
+#peeta
+allow lowi_server_t self:netlink_generic_socket { write getattr setopt read bind create };
+allow lowi_server_t self:fifo_file { write read create };
 
 files_read_etc_files(lowi_server_t)
 
@@ -233,3 +236,34 @@ device_search_sockets({ xtwifi_agent_t xtwifi_client_t xtra_daemon_t lowi_server
 allow xtwifi_client_t leprop_t:unix_stream_socket connectto;
 allow loc_t leprop_sock_t:sock_file write;
 allow loc_t leprop_t:unix_stream_socket connectto;
+
+gen_require(`
+    type default_t;
+    type device_t;
+    type sysctl_t;
+    type sysctl_vm_t;
+    type sysctl_vm_overcommit_t;
+    type diag_device_t;
+    type initrc_t;
+    type shared_log_device_t;
+    type socket_device_t;
+    type dhcpc_var_run_t;
+')
+allow xtwifi_client_t default_t:dir search;
+allow xtwifi_client_t leprop_sock_t:sock_file write;
+
+allow xtra_daemon_t default_t:dir search;
+allow xtra_daemon_t leprop_sock_t:sock_file write;
+allow loc_socket_t device_t:filesystem associate;
+allow loc_t sysctl_t:dir { search write remove_name add_name };
+allow loc_t sysctl_vm_t:dir { search write remove_name add_name };
+allow loc_t sysctl_vm_overcommit_t:file { create read open write getattr setattr };
+allow loc_hald_t default_t:dir search;
+allow loc_hald_t leprop_sock_t:sock_file { create read open write rename unlink getattr setattr };
+allow xtra_daemon_t diag_device_t:chr_file { read write ioctl open create getattr setattr };
+allow xtra_daemon_t initrc_t:unix_stream_socket connectto;
+allow xtra_daemon_t self:capability { dac_override net_raw };
+allow xtra_daemon_t self:capability2 block_suspend;
+allow xtra_daemon_t shared_log_device_t:chr_file { ioctl open create read write getattr setattr };
+allow xtra_daemon_t socket_device_t:sock_file write;
+allow xtra_daemon_t dhcpc_var_run_t:file { open ioctl create read write getattr setattr };

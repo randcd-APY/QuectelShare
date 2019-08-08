@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "%s: QL_Get_Adc_Voltage failed\n", argv[0]);
 		return -1;
 	} else
-		fprintf(stdout, "%s: adc voltage %d uV\n", adc_val);
+		printf("adc voltage %d uV\n",adc_val);
 
 	return 0;
 }

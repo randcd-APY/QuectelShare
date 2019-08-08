@@ -55,3 +55,4 @@ userdebug_or_eng(`
 allow diagrebootapp_t self:capability chown;
 allow diagrebootapp_t self:unix_dgram_socket { create connect };
 allow diagrebootapp_t sysfs_t:file setattr;
+allow diagrebootapp_t sysfs_t:lnk_file read;

@@ -203,11 +203,18 @@ rw_ipacm_data_config_files(qcmap_cm_t)
 shutdown_domtrans(qcmap_cm_t)
 
 #added by peeta
+gen_require(`
+    type default_t;
+    type persist_t;
+')
 allow qcmap_cm_t initrc_t:unix_stream_socket connectto;
 allow qcmap_cm_t socket_device_t:dir { write remove_name add_name };
 allow qcmap_cm_t socket_device_t:sock_file { write create unlink };
 allow qcmap_cm_t var_run_t:file { read getattr open };
+allow qcmap_cm_t default_t:dir search;
 
 allow NetworkManager_t initrc_t:unix_stream_socket connectto;
 allow NetworkManager_t socket_device_t:dir { write remove_name add_name };
 allow NetworkManager_t socket_device_t:sock_file { write create unlink };
+allow kmod_t persist_t:dir search;
+allow kmod_t persist_t:file { open read write create getattr setattr };

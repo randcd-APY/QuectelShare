@@ -1,0 +1,15 @@
+[Unit]
+Description=mcm ril Service
+#Wants=QCMAP_ConnectionManagerd.service
+#After=QCMAP_ConnectionManagerd.service
+
+[Service]
+Type=simple
+ExecStartPre=/bin/sleep 2
+ExecStart=/usr/bin/mcm_ril_service
+ExecStop=/sbin/start-stop-daemon -K -n /usr/bin/mcm_ril_service
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+

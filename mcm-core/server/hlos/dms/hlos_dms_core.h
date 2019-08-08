@@ -165,6 +165,26 @@ void hlos_dms_core_initiate_radio_power_process(mcm_dm_radio_mode_t_v01 mcm_dms_
     @retval
     none
 ***************************************************************************************************/
+void hlos_dms_get_device_serial_numbers_request_handler(void *event_data);
+/***************************************************************************************************
+ *     @function
+ *         hlos_dms_get_device_rev_id_request_handler
+ *
+ *             @brief
+ *                     Get device firmware revision identification
+ *
+ *                         @param[in]
+ *                                 event_data
+ *
+ *                                     @param[out]
+ *                                             none
+ *
+ *                                                 @retval
+ *                                                     none
+ *                                                     ***************************************************************************************************/
+void hlos_dms_get_device_rev_id_request_handler(void *event_data);
+
 void hlos_dms_core_query_radio_state_notify_to_client(void);
+
 
 #endif

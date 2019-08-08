@@ -82,8 +82,8 @@ gen_require(`
 #  without a unique context. Please update the file that launches the
 #  service with a unique selinux context before allowing access to these
 #  attributes.
-neverallow initrc_t { user_data -httpd_data_t -qcmap_etc_data_t }:file rw_file_perms;
-neverallow initrc_t { system_data -qcmap_etc_data_t }:file rw_file_perms;
+#neverallow initrc_t { user_data -httpd_data_t -qcmap_etc_data_t }:file rw_file_perms;
+#neverallow initrc_t { system_data -qcmap_etc_data_t }:file rw_file_perms;
 search_user_data_dir(init_t)
 search_system_data_dir(init_t)
 search_system_data_dir(initrc_t)
@@ -109,8 +109,19 @@ dontaudit init_t system_data_t:dir {read write};
 dontaudit init_t data_t:dir read;
 
 #added by peeta
+gen_require(`
+    type leprop_system_data_t;
+    type loc_data_t;
+')
+
 allow initrc_t data_t:sock_file write;
 allow initrc_t qcmap_etc_data_t:file { read getattr open };
 allow initrc_t qnetmgrd_data_t:sock_file write;
 allow initrc_t audio-server-daemon_t:binder { transfer call };
 allow initrc_t servicemanager_t:binder call;
+#dontaudit init_t data_t:file { create read write getattr setattr open };
+#dontaudit init_t leprop_system_data_t:file { create read write getattr setattr open };
+allow initrc_t data_t:file { create read write getattr setattr open };
+allow initrc_t leprop_system_data_t:file { read getattr open };
+allow initrc_t loc_data_t:dir { setattr read open read add_name remove_name write getattr search };
+allow initrc_t loc_data_t:file { create read write getattr setattr open };

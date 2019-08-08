@@ -7,12 +7,9 @@ libmmi_wifi_la_CC = @CC@
 libmmi_wifi_la_CPPFLAGS = -O2 -g -Wno-all -Wno-error -Wno-unused-parameter -I. -I$(WORKSPACE)/system/core/include $(XML2_CFLAGS) -std=c++11 -DLINUX_ENABLED $(DIAG_CFLAGS) -I../../libmmi
 libmmi_wifi_la_LDFLAGS = libcutils libutils libc libc++ ../../libmmi/libmmi.la -avoid-version
 # source to compile
-if DRONE
-#UAV project is SAP mode after poweron, so test SAP mode
-libmmi_wifi_la_SOURCES = wifi_sap.cpp
-else
+
 libmmi_wifi_la_SOURCES = wifi.cpp
-endif
+
 
 if USE_GLIB
 libmmi_wifi_la_CPPFLAGS += -DUSE_GLIB $(GLIB_CFLAGS)

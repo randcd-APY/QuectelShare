@@ -10,4 +10,4 @@ ExecStart=/usr/bin/quec_launcher
 Restart=no
 
 [Install]
-WantedBy=local-fs-pre.target
+WantedBy=multi-user.target.wants

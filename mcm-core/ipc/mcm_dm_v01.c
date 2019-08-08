@@ -65,6 +65,32 @@ static const uint8_t mcm_dm_set_radio_mode_resp_msg_data_v01[] = {
   QMI_IDL_OFFSET8(mcm_dm_set_radio_mode_resp_msg_v01, no_change)
 };
 
+//Laurence.yin-2018/04/20-QCM9XOL00004C015-P01, <[DM] : define imei meid and rev id data.>
+/*
+ * mcm_dm_get_device_serial_numbers_req_msg is empty
+ * static const uint8_t mcm_dm_get_device_serial_numbers_req_msg_data_v01[] = {
+ * };
+ */
+
+static const uint8_t mcm_dm_get_device_serial_numbers_resp_msg_data_v01[] = {
+    0x01,
+    QMI_IDL_AGGREGATE,
+    QMI_IDL_OFFSET8(mcm_dm_get_device_serial_numbers_resp_msg_v01, response),
+    QMI_IDL_TYPE88(1, 0),
+
+    QMI_IDL_TLV_FLAGS_OPTIONAL | (QMI_IDL_OFFSET8(mcm_dm_get_device_serial_numbers_resp_msg_v01, imei) - QMI_IDL_OFFSET8(mcm_dm_get_device_serial_numbers_resp_msg_v01, imei_valid)),
+    0x10,
+    QMI_IDL_FLAGS_IS_ARRAY | QMI_IDL_FLAGS_IS_VARIABLE_LEN |  QMI_IDL_STRING,
+    QMI_IDL_OFFSET8(mcm_dm_get_device_serial_numbers_resp_msg_v01, imei),
+    MCM_MAX_DMS_IMEI_V01,
+
+    QMI_IDL_TLV_FLAGS_LAST_TLV | QMI_IDL_TLV_FLAGS_OPTIONAL | (QMI_IDL_OFFSET8(mcm_dm_get_device_serial_numbers_resp_msg_v01, meid) - QMI_IDL_OFFSET8(mcm_dm_get_device_serial_numbers_resp_msg_v01, meid_valid)),
+    0x11,
+    QMI_IDL_FLAGS_IS_ARRAY | QMI_IDL_FLAGS_IS_VARIABLE_LEN |  QMI_IDL_STRING,
+    QMI_IDL_OFFSET8(mcm_dm_get_device_serial_numbers_resp_msg_v01, meid),
+    MCM_MAX_DMS_MEID_V01
+};
+
 static const uint8_t mcm_dm_event_register_req_msg_data_v01[] = {
   QMI_IDL_TLV_FLAGS_LAST_TLV | QMI_IDL_TLV_FLAGS_OPTIONAL | (QMI_IDL_OFFSET8(mcm_dm_event_register_req_msg_v01, register_radio_mode_changed_event) - QMI_IDL_OFFSET8(mcm_dm_event_register_req_msg_v01, register_radio_mode_changed_event_valid)),
   0x10,
@@ -86,6 +112,24 @@ static const uint8_t mcm_dm_radio_mode_changed_event_ind_msg_data_v01[] = {
   QMI_IDL_OFFSET8(mcm_dm_radio_mode_changed_event_ind_msg_v01, radio_mode)
 };
 
+/*
+ *  * mcm_dm_get_device_rev_id_req_msg is empty
+ *   * static const uint8_t mcm_dm_get_device_rev_id_req_msg_data_v01[] = {
+ *    * };
+ *     */
+static const uint8_t mcm_dm_get_device_rev_id_resp_msg_data_v01[] = {
+    0x01,
+    QMI_IDL_AGGREGATE,
+    QMI_IDL_OFFSET8(mcm_dm_get_device_rev_id_resp_msg_v01, response),
+    QMI_IDL_TYPE88(1, 0),
+
+    QMI_IDL_TLV_FLAGS_LAST_TLV | 0x02,
+    QMI_IDL_FLAGS_IS_ARRAY | QMI_IDL_FLAGS_IS_VARIABLE_LEN | QMI_IDL_FLAGS_SZ_IS_16 |   QMI_IDL_STRING,
+    QMI_IDL_OFFSET8(mcm_dm_get_device_rev_id_resp_msg_v01, device_rev_id),
+    ((MCM_MAX_DEVICE_REV_ID_V01) & 0xFF), ((MCM_MAX_DEVICE_REV_ID_V01) >> 8)
+};
+
+
 /* Type Table */
 /* No Types Defined in IDL */
 
@@ -95,6 +139,10 @@ static const qmi_idl_message_table_entry mcm_dm_message_table_v01[] = {
   {sizeof(mcm_dm_get_radio_mode_resp_msg_v01), mcm_dm_get_radio_mode_resp_msg_data_v01},
   {sizeof(mcm_dm_set_radio_mode_req_msg_v01), mcm_dm_set_radio_mode_req_msg_data_v01},
   {sizeof(mcm_dm_set_radio_mode_resp_msg_v01), mcm_dm_set_radio_mode_resp_msg_data_v01},
+  {sizeof(mcm_dm_get_device_serial_numbers_req_msg_v01), 0},
+  {sizeof(mcm_dm_get_device_serial_numbers_resp_msg_v01), mcm_dm_get_device_serial_numbers_resp_msg_data_v01},
+  {sizeof(mcm_dm_get_device_rev_id_req_msg_v01), 0},
+  {sizeof(mcm_dm_get_device_rev_id_resp_msg_v01), mcm_dm_get_device_rev_id_resp_msg_data_v01},
   {sizeof(mcm_dm_event_register_req_msg_v01), mcm_dm_event_register_req_msg_data_v01},
   {sizeof(mcm_dm_event_register_resp_msg_v01), mcm_dm_event_register_resp_msg_data_v01},
   {sizeof(mcm_dm_radio_mode_changed_event_ind_msg_v01), mcm_dm_radio_mode_changed_event_ind_msg_data_v01}

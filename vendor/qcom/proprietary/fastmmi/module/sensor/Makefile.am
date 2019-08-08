@@ -7,10 +7,8 @@ libmmi_sensor_la_CC = @CC@
 libmmi_sensor_la_CPPFLAGS = -O2 -g -Wno-all -Wno-error -Wno-unused-parameter -I./inc -I$(WORKSPACE)/system/core/include $(XML2_CFLAGS) -std=c++11 -DLINUX_ENABLED $(DIAG_CFLAGS) -I../../libmmi
 libmmi_sensor_la_LDFLAGS = libcutils libutils libc libc++ ../../libmmi/libmmi.la -avoid-version
 # source to compile
-if DRONE
-libmmi_sensor_la_SOURCES = sensor_uav.cpp
-libmmi_sensor_la_CPPFLAGS += -I./inc
-endif
+
+libmmi_sensor_la_SOURCES = sensor.cpp
 
 if USE_GLIB
 libmmi_sensor_la_CPPFLAGS += -DUSE_GLIB $(GLIB_CFLAGS)

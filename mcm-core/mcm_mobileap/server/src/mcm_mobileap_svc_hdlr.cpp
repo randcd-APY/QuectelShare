@@ -41,6 +41,7 @@ when        who    what, where, why
 #include "mcm_mobileap_v01.h"
 #include "mcm_service_object_v01.h"
 #include "mcm_mobileap_svc_hdlr.h"
+#include "mcm_constants.h"
 #include "diag_lsm.h"
 #include "ds_util.h"
 #include "ds_list.h"
@@ -697,6 +698,8 @@ void sighandler(int signal)
   {
     LOG_MSG_INFO1("Send succeeded in mcm callback context", 0, 0, 0);
   }
+  mcm_set_service_ready(MCM_MOBILEAP_SERVICE, 0);
+  exit(1);
 }
 
 #ifndef TARGET_IS_9615
@@ -1928,6 +1931,9 @@ int main(int argc, char **argv)
 #else
   mcm_mobileap_qcmap_client_event_buffer_t *event_buffer = NULL;
 #endif
+
+  mcm_set_service_ready(MCM_MOBILEAP_SERVICE, 0);
+
 #ifdef TARGET_IS_9615
   switch(argc)
   {
@@ -2010,6 +2016,10 @@ int main(int argc, char **argv)
   }
 #endif /* TARGET_IS_9615 */
 
+  while(mcm_ipc_get_service_is_ready() == 0) {
+    usleep(100000); 
+  }
+  mcm_set_service_ready(MCM_MOBILEAP_SERVICE, 1);
   while(1)
   {
     master_fd_set = os_params.fds;
@@ -2117,7 +2127,7 @@ int main(int argc, char **argv)
     }
   }
   qmi_csi_unregister(mcm_mobileap_svc_state.service_handle);
-
+  mcm_set_service_ready(MCM_MOBILEAP_SERVICE, 0);
   LOG_MSG_INFO1("MCM MobileAP service exiting", 0, 0, 0);
   return 0;
 }

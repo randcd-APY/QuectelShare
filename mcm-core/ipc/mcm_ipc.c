@@ -8,6 +8,8 @@
    Copyright (c) 2014 Qualcomm Technologies, Inc.  All Rights Reserved.
    Qualcomm Technologies Proprietary and Confidential. 
 ***************************************************************************************************/
+#include <stdio.h>
+#include <unistd.h>
 #include "mcm_data_srv_mgr_v01.h"
 #include "mcm_atcop_srv_mgr_v01.h"
 #include "mcm_mobileap_srv_mgr_v01.h"
@@ -16,6 +18,7 @@
 #include "qmi_idl_lib.h"
 #include "mcm_ipc.h"
 #include "mcm_client_v01.h"
+#include "mcm_constants.h"
 
 #define TRUE 1
 #define FALSE 0
@@ -33,6 +36,7 @@ typedef struct mcm_ipc_srv_info_t
 }mcm_ipc_srv_info;
 
 static mcm_ipc_srv_info mcm_ipc_service_cookie;
+static volatile int mcm_ipc_service_ready = 0; // 0-not ready 1-ready -1-error ocurred
 
 typedef struct {
     qmi_client_handle clnt;
@@ -339,6 +343,7 @@ int *mcm_ipc_srv_manager_init(void *srv_id)
     qmi_idl_service_object_type ipc_srv_obj = NULL;
 
     qmi_csi_error rc = QMI_CSI_INTERNAL_ERR;
+    mcm_ipc_service_ready = 0;
     do
     {
         switch(a)
@@ -384,7 +389,8 @@ int *mcm_ipc_srv_manager_init(void *srv_id)
         qmi_idl_get_service_id( ipc_srv_obj, &service_id);
         mcm_ipc_service_cookie.service_id = service_id;
 
-        printf("\n TEST TEST SERVICE:%x IS UP !!", service_id);
+        printf("\n SERVICE:%x IS UP !!\n", service_id);
+        mcm_ipc_service_ready = 1;
         while(1)
         {
             fds = os_params.fds;
@@ -394,6 +400,8 @@ int *mcm_ipc_srv_manager_init(void *srv_id)
         qmi_csi_unregister(sp);
 
     }while (0);
+
+    mcm_ipc_service_ready = -1;
 
     return ret_val;
 }
@@ -416,3 +424,102 @@ int mcm_ipc_srv_mgr_start( mcm_ipc_srv_mgr_exit_func *srv_down_func)
    mcm_ipc_register_exit_func(srv_down_func);
    return err_code;
 }
+
+int mcm_ipc_get_service_is_ready(void)
+{
+    return mcm_ipc_service_ready;
+}
+
+
+//=============================================================================
+// FUNCTION: mcm_get_service_flag_file
+//
+// DESCRIPTION:
+// get flag file path 
+//
+//=============================================================================
+const char * mcm_get_service_flag_file(int srv_id)
+{
+    const char *path = NULL;
+
+    switch(srv_id) {
+        case MCM_DATA_SERVICE:
+            path = MCM_DATA_SERVICE_READY_FILE;
+            break;
+        case MCM_ATCOP_SERVICE:
+            path = MCM_ATCOP_SERVICE_READY_FILE;
+            break;
+        case MCM_MOBILEAP_SERVICE:
+            path = MCM_MOBILEAP_SERVICE_READY_FILE;
+            break;
+        case MCM_LOC_SERVICE:
+            path = MCM_LOC_SERVICE_READY_FILE;
+            break;
+        case MCM_SIM_SERVICE:
+            path = MCM_SIM_SERVICE_READY_FILE; 
+            break;
+        case MCM_RIL_SERVICE: /** RIL service is ready */
+            path = MCM_SERVICE_READY_FILE;
+            break;
+        default:
+            break;
+    }
+
+    return path;
+}
+
+//=============================================================================
+// FUNCTION: mcm_set_service_reday
+//
+// DESCRIPTION:
+// mask whether service is ready
+//
+//=============================================================================
+void mcm_set_service_ready(int srv_id, int is_ready)
+{
+    const char *path = NULL;
+
+    path = mcm_get_service_flag_file(srv_id);
+
+    if(path == NULL) {
+        return;
+    }
+
+    if(is_ready) {
+        FILE *fp = fopen(path, "w");
+        if(fp) {
+            fputs("1\n", fp);
+            fflush(fp);
+            fclose(fp);
+        }
+    }
+    else {
+        unlink(path);
+    }
+}
+
+//=============================================================================
+// FUNCTION: mcm_get_service_is_ready
+//
+// DESCRIPTION:
+// check whether service is ready
+//
+//=============================================================================
+int mcm_get_service_is_ready(int srv_id)
+{
+    const char *path = NULL;
+
+    path = mcm_get_service_flag_file(srv_id);
+
+    if(path == NULL) {
+        return 0;
+    }
+
+    if(!access(path, F_OK)) {
+        return 1;
+    }
+
+    return 0;
+}
+/** add by tyler.kuang@20180502 end */
+

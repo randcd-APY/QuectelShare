@@ -7,10 +7,10 @@
 #ifndef __COMMON_H
 #define __COMMON_H
 // Redefine for LE
-#define ALOGE printf
+/* #define ALOGE printf
 #define ALOGW printf
 #define ALOGI printf
-#define ALOGD printf
+#define ALOGD printf */
 #include <unistd.h>
 #define PROPERTY_VALUE_MAX 255
 
@@ -50,9 +50,8 @@
 #define strlcpy g_strlcpy
 #endif
 
-
+#define SERIAL_LOG
 #ifdef SERIAL_LOG
-#include <stdio.h>
   #define ALOGE(fmt, args...) do { \
           fprintf(stderr, fmt"\n", ##args); \
         } while (0)
@@ -92,6 +91,8 @@ typedef void *(*thread_func_t) (void *);
 #define MMI_PCBA_SYS_CONFIG "mmi-pcba-sys.cfg"
 #define AUTOSTART_CONFIG ".autostart"
 #define MMI_LOG_FILENAME "mmi.log"
+
+#define MMI_STR(addr)                 (!addr ? "\"\"" : (!addr[0] ? "\"\"" : addr))
 
 #define MMI_RES_BASE_DIR "/etc/mmi/"
 #define MMI_RES_FONTS MMI_RES_BASE_DIR"fonts.ttf"
@@ -521,6 +522,15 @@ typedef struct exec_cmd_t {
     int *pid;
     int size;
 } exec_cmd_t;
+
+typedef struct exec_cmd_t_1 {
+    const char *cmd;
+    char **params;
+    char *result;
+    char *exit_str;
+    int pid;
+    int size;
+} exec_cmd_t_1;
 
 typedef void (*callback) (char *, int);
 

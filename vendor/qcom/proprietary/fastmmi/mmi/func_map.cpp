@@ -489,7 +489,7 @@ static void do_report(void *m) {
     }
 }
 
-static void do_reset(void *m) {
+ void do_reset(void *m) {
     ALOGI("[%s] start,", __FUNCTION__);
     int ret = -1;
     pthread_t pid;

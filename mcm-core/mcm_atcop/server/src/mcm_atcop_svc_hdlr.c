@@ -35,6 +35,7 @@ when        who    what, where, why
 #include "mcm_common_v01.h"
 #include "mcm_client_v01.h"
 #include "mcm_ipc.h"
+#include "mcm_constants.h"
 #include "mcm_ssr_util.h"
 
 #include "mcm_atcop_v01.h"
@@ -58,7 +59,7 @@ when        who    what, where, why
 
 #define MAX_BUF_LEN 2048
 #define MCM_ATCOP_SVC_HANDLE 0x65432
-#define MCM_ATCOP_DEV_FILE "/dev/smd8"
+#define MCM_ATCOP_DEV_FILE "/dev/smd11"
 #define MCM_ATCOP_SLEEP_TIMER 1 /*seconds*/
 #define MCM_ATCOP_PORT_OPEN_RETRY_COUNT 90
 
@@ -229,6 +230,7 @@ void sighandler(int signal)
         dev_fd = -1;
       }
       qmi_csi_unregister(mcm_atcop_svc_state.service_handle);
+      mcm_set_service_ready(MCM_ATCOP_SERVICE, 0);
       exit(0);
       break;
     default:
@@ -399,6 +401,7 @@ int main(int argc, char **argv)
   char buf[MAX_BUF_LEN];
   int nbytes=0, i;
   socklen_t addr_len;
+  mcm_set_service_ready(MCM_ATCOP_SERVICE, 0);
 
   /*Initialize the Diag for QXDM logs*/
   if (TRUE != Diag_LSM_Init(NULL))
@@ -426,6 +429,12 @@ int main(int argc, char **argv)
   if ( mcm_atcop_svc_init() == MCM_ERROR_INTERNAL_V01 )
     return -1;
 
+
+  while(mcm_ipc_get_service_is_ready() == 0) {
+    usleep(100000);
+  }
+  mcm_set_service_ready(MCM_ATCOP_SERVICE, 1);
+
   while(1)
   {
     master_fd_set = os_params.fds;
@@ -434,8 +443,10 @@ int main(int argc, char **argv)
       LOG_MSG_ERROR("Error in select, errno:%d", errno, 0, 0);
       if( errno == EINTR )
        continue;
-      else
-       return -1;
+      else {
+          mcm_set_service_ready(MCM_ATCOP_SERVICE, 0);
+          return -1;
+      }
     }
 
     for (i = 0; i <= os_params.max_fd; i++)
@@ -480,6 +491,7 @@ int main(int argc, char **argv)
   }
   qmi_csi_unregister(mcm_atcop_svc_state.service_handle);
 
+  mcm_set_service_ready(MCM_ATCOP_SERVICE, 0);
   LOG_MSG_INFO1("MCM ATCOP service exiting", 0, 0, 0);
   return 0;
 

@@ -1090,7 +1090,7 @@ static int jpege_engine_hybrid_event_handler(
             }
 
             // Destroy thread before creating another in start()
-            p_obj->thread_destroy(p_obj);
+            //p_obj->thread_destroy(p_obj);  //it will have free invalid pointer modify by chapin
 
             rc = p_obj->start(p_obj, p_job->p_config, p_job->p_source, &(p_job->engine_cfg));
             if (JPEG_FAILED(rc))

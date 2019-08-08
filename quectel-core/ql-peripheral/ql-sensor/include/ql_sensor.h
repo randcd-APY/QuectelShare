@@ -2,6 +2,7 @@
 #define _QL_GPIO_H_
 
 #include <stdint.h>
+#include <math.h>
 #include <sys/types.h>
 
 #define EV_SYN 0x00
@@ -17,6 +18,18 @@
 #define GYROSCOPE_CONVERT (M_PI / (180 * 16.4))
 
 #define MAX_INPUT_EVENTS 256
+
+#define ACCEL_EVENT_FILE_NAME  "/dev/input/event2"
+#define GYRO_EVENT_FILE_NAME   "/dev/input/event3"
+#define LIGHT_EVENT_FILE_NAME  "/dev/input/event5"
+#define PROX_EVENT_FILE_NAME   "/dev/input/event6"
+#define MAG_EVENT_FILE_NAME    "/dev/input/event4"
+
+#define ACCEL_ENABLE_FILE_NAME "/sys/class/sensors/MPU6050-accel/enable"
+#define GYRO_ENABLE_FILE_NAME  "/sys/class/sensors/MPU6050-gyro/enable"
+#define LIGHT_ENABLE_FILE_NAME "/sys/class/sensors/stk3x1x-light/enable"
+#define PROX_ENABLE_FILE_NAME  "/sys/class/sensors/stk3x1x-proximity/enable"
+#define MAG_ENABLE_FILE_NAME   "/sys/class/sensors/mmc3416x-mag/enable"
 
 struct input_event {
 	struct timeval time;

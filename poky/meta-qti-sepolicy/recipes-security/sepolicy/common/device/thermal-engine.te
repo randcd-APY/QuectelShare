@@ -67,3 +67,6 @@ read_thermal_config(thermal-engine_t)
 dev_rw_null(thermal-engine_t)
 dev_rw_sysfs(thermal-engine_t)
 kernel_read_system_state(thermal-engine_t)
+
+#peeta
+allow thermal_sock_t device_t:filesystem associate;

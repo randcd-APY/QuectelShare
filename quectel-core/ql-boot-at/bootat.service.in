@@ -1,0 +1,14 @@
+[Unit]
+Description=MCM AT Network Service
+#Wants=QCMAP_ConnectionManagerd.service
+After=mcmril.service
+
+[Service]
+Type=simple
+ExecStartPre=/bin/sleep 8 
+ExecStart=/usr/bin/Boot_AT
+ExecStop=/sbin/start-stop-daemon -K -n /usr/bin/Boot_AT
+#Restart=always
+
+[Install]
+WantedBy=multi-user.target

@@ -309,6 +309,100 @@ msm_boot_uart_dm_read(uint32_t base, unsigned int *data, int wait)
  * UART transmit operation
  */
 static unsigned int
+fct_msm_boot_uart_dm_read(uint32_t base, unsigned int *data, int wait)
+{
+        static int rx_last_snap_count = 0;
+        static int rx_chars_read_since_last_xfer = 0;
+
+        /*add by evan*/
+        int count = 0;
+        
+        if (data == NULL) {
+                return MSM_BOOT_UART_DM_E_INVAL;
+        }
+
+        /* We will be polling RXRDY status bit */
+        while (!(readl(MSM_BOOT_UART_DM_SR(base)) & MSM_BOOT_UART_DM_SR_RXRDY)) {
+                /* if this is not a blocking call, we'll just return */
+                if (!wait) {
+                        return MSM_BOOT_UART_DM_E_RX_NOT_READY;
+                 }
+               
+                 
+                 /*add by evan.hai*/
+                else if(wait == 2)
+                {
+                  udelay(1000);
+                  count++;
+                  if(count > 50)
+                  {
+                    count = 0;
+                    return MSM_BOOT_UART_DM_E_RX_NOT_READY;
+                  }
+                }
+         }
+
+        /* Check for Overrun error. We'll just reset Error Status */
+        if (readl(MSM_BOOT_UART_DM_SR(base)) & MSM_BOOT_UART_DM_SR_UART_OVERRUN) {
+                writel(MSM_BOOT_UART_DM_CMD_RESET_ERR_STAT, MSM_BOOT_UART_DM_CR(base));
+        }
+
+        /* RX FIFO is ready; read a word. */
+        *data = readl(MSM_BOOT_UART_DM_RF(base, 0));
+
+        /* increment the total count of chars we've read so far */
+        rx_chars_read_since_last_xfer += 4;
+
+        /* Rx transfer ends when one of the conditions is met:
+         * - The number of characters received since the end of the previous
+         *   xfer equals the value written to DMRX at Transfer Initialization
+         * - A stale event occurred
+         */
+
+        /* If RX transfer has not ended yet */
+        if (rx_last_snap_count == 0) {
+                /* Check if we've received stale event */
+                if (readl(MSM_BOOT_UART_DM_MISR(base)) & MSM_BOOT_UART_DM_RXSTALE) {
+                        /* Send command to reset stale interrupt */
+                        writel(MSM_BOOT_UART_DM_CMD_RES_STALE_INT, MSM_BOOT_UART_DM_CR(base));
+                }
+
+                /* Check if we haven't read more than DMRX value */
+                else if ((unsigned int)rx_chars_read_since_last_xfer <
+                        readl(MSM_BOOT_UART_DM_DMRX(base))) {
+                        /* We can still continue reading before initializing RX transfer */
+                        return MSM_BOOT_UART_DM_E_SUCCESS;
+                }
+
+                /* If we've reached here it means RX
+                 * xfer end conditions been met
+                 */
+
+                /* Read UART_DM_RX_TOTAL_SNAP register
+                 * to know how many valid chars
+                 * we've read so far since last transfer
+                 */
+                rx_last_snap_count = readl(MSM_BOOT_UART_DM_RX_TOTAL_SNAP(base));
+
+        }
+
+        /* If there are still data left in FIFO we'll read them before
+         * initializing RX Transfer again */
+        if ((rx_last_snap_count - rx_chars_read_since_last_xfer) >= 0) {
+                return MSM_BOOT_UART_DM_E_SUCCESS;
+        }
+
+        msm_boot_uart_dm_init_rx_transfer(base);
+        rx_last_snap_count = 0;
+        rx_chars_read_since_last_xfer = 0;
+
+        return MSM_BOOT_UART_DM_E_SUCCESS;
+}
+
+/*
+ * UART transmit operation
+ */
+static unsigned int
 msm_boot_uart_dm_write(uint32_t base, char *data, unsigned int num_of_chars)
 {
 	unsigned int tx_word_count = 0;
@@ -465,4 +559,28 @@ int uart_getc(int port, bool wait)
 	word = word >> 8;
 
 	return byte;
+}
+
+int fct_uart_getc(int port, bool wait)
+{
+      int byte;
+      static unsigned int word = 0;
+      uint32_t uart_base = port_lookup[port];
+      /* Don't do anything if UART is not initialized */
+      if (!uart_init_flag)
+         return -1;
+
+      if (!word) {
+        /* Read from FIFO only if it's a first read or all the four
+         * characters out of a word have been read */
+        if (fct_msm_boot_uart_dm_read(uart_base, &word, wait) != MSM_BOOT_UART_DM_E_SUCCESS) {
+
+           return -1;
+        }
+
+      }
+      byte = (int)word & 0xff;
+      word = word >> 8;
+
+      return byte;
 }

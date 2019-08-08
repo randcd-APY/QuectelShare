@@ -22,6 +22,7 @@ init_d_SCRIPTS = start_atfwd_daemon_quec
 bin_PROGRAMS = atfwd_quectel
 atfwd_quectel_CC = @CC@
 pkgconfigdir = $(libdir)/pkgconfig
-atfwd_quectel_SOURCES = atfwd_daemon_quectel.c
+atfwd_quectel_SOURCES = quectel_at_handle.cpp \
+						atfwd_daemon_quectel.c
 atfwd_quectel_LDFLAGS = -lpthread $(QMIFRAMEWORK_LIBS) $(QMI_LIBS)
 atfwd_quectel_LDADD = $(QMIFRAMEWORK_LIBS) $(QMI_LIBS)

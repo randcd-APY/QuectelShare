@@ -343,6 +343,8 @@ void *mcm_uim_service_init(void)
     mcm_srv_client_registered(&sim_service_cookie, NULL);
     qmi_util_log("\n SERVICE:%x IS UP !!\n", service_id);
 
+    mcm_set_service_ready(MCM_SIM_SERVICE, 1);
+
     while(1)
     {
         fds = uim_os_params.fds;
@@ -362,6 +364,7 @@ void *mcm_uim_service_init(void)
         qmi_csi_handle_event(uim_sp, &os_params_in);
     }
 
+    mcm_set_service_ready(MCM_SIM_SERVICE, 0);
     /* unregister UIM service from QMI Framework */
     qmi_csi_unregister(uim_sp);
     return NULL;
@@ -450,6 +453,8 @@ int *mcm_srv_ril_service_init(void)
     mcm_srv_client_registered(&ril_service_cookie, NULL);
 
     UTIL_LOG_MSG(" SERVICE:%x IS UP !!", service_id);
+
+    mcm_set_service_ready(MCM_RIL_SERVICE, 1);
 
     while(1)
     {
@@ -731,6 +736,8 @@ int main(void)
 {
     int ret_val;
 
+    mcm_set_service_ready(MCM_RIL_SERVICE, 0);
+    mcm_set_service_ready(MCM_SIM_SERVICE, 0);
     ret_val = Diag_LSM_Init(NULL);
     if ( !ret_val )
     {

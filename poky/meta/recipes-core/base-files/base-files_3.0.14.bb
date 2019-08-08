@@ -25,6 +25,7 @@ SRC_URI = "file://rotation \
            file://share/dot.profile \
            file://licenses/GPL-2 \
            file://environment \
+           file://build_version \
            "
 S = "${WORKDIR}"
 
@@ -58,7 +59,8 @@ volatiles = "${@'log' if oe.types.boolean('${VOLATILE_LOG_DIR}') else ''} tmp"
 conffiles = "${sysconfdir}/debian_version ${sysconfdir}/host.conf \
              ${sysconfdir}/issue /${sysconfdir}/issue.net \
              ${sysconfdir}/nsswitch.conf ${sysconfdir}/profile \
-             ${sysconfdir}/default ${sysconfdir}/environment"
+             ${sysconfdir}/default ${sysconfdir}/environment \
+             ${sysconfdir}/build_version"
 
 # By default the hostname is the machine name. If the hostname is unset then a
 # /etc/hostname file isn't written, suitable for environments with dynamic
@@ -123,6 +125,7 @@ do_install () {
 	install -m 0644 ${WORKDIR}/profile ${D}${sysconfdir}/profile
 	sed -i 's#ROOTHOME#${ROOT_HOME}#' ${D}${sysconfdir}/profile
 	install -m 0644 ${WORKDIR}/environment ${D}${sysconfdir}/environment
+	install -m 0644 ${WORKDIR}/build_version ${D}${sysconfdir}/build_version
 	install -m 0644 ${WORKDIR}/shells ${D}${sysconfdir}/shells
 	install -m 0755 ${WORKDIR}/share/dot.profile ${D}${sysconfdir}/skel/.profile
 	install -m 0755 ${WORKDIR}/share/dot.bashrc ${D}${sysconfdir}/skel/.bashrc

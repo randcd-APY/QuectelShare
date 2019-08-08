@@ -22,456 +22,553 @@
   * See the License for the specific language governing permissions and
   * limitations under the License.
   */
-#include <hardware/hardware.h>
-#include <utils/Timers.h>
 #include "mmi_module.h"
-#include <hardware/sensors.h>
-#include "sensor_interface.h"
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <poll.h>
+#include <sys/types.h>
+#include <cutils/log.h>
+//#inlcude <linux/input.h>
+//#include "InputEventReader.h"
+#include <cutils/properties.h>
+/*
+#define	EVENT_TYPE_ACCEL_X	"ABS_X"
+#define	EVENT_TYPE_ACCEL_Y	"ABS_Y"
+#define	EVENT_TYPE_ACCEL_Z	"ABS_Z"
 
-/**
-* Defined case run in mmi mode,this mode support UI.
-*
+#define	EVENT_TYPE_GYRO_X	"ABS_RX"
+#define	EVENT_TYPE_GYRO_Y	"ABS_RY"
+#define	EVENT_TYPE_GYRO_Z	"ABS_RZ"
+
+#define EVENT_TYPE_MAG_X	"ABS_X"
+#define EVENT_TYPE_MAG_Y	"ABS_Y"
+#define EVENT_TYPE_MAG_Z	"ABS_Z"
+
+#define EVENT_TYPE_LIGHT		"ABS_MISC"
+#define EVENT_TYPE_PROXIMITY		"ABS_DISTANCE"
 */
-#define CALIBRATION_NOT_SUPPORT 3
-
-static const char *subcmd_calibration = "calibration";
-
-static const char *extra_cmd_list[] = {
-    subcmd_calibration,
+static char sensor_data_type[][16] = {
+	"ABS_X",
+	"ABS_Y",
+	"ABS_Z",
+	"ABS_RX",
+	"ABS_RY",
+	"ABS_RZ",
+	"ABS_MISC",
+	"ABS_DISTANCE",
 };
 
-static struct sensors_poll_device_1 *device = NULL;
-static struct sensor_t const *sensor_list = NULL;
-static int dev_count = 0;
-static int cur_sensor_type = 0;
-static char cur_module_name[32];
-static int calibration_result = FAILED;
-static mutex_locker g_mutex;
-static bool initialized = false;
-static struct sensor_cal_module_t *sensor_cal_module = NULL;
+/* struct input_event {
+      char type;
+      char code;
+      unsigned int value;
+}; */
 
-static char const *get_sensor_name(int type) {
-    switch (type) {
-    case SENSOR_TYPE_ACCELEROMETER:
-        return "Acc";
-    case SENSOR_TYPE_MAGNETIC_FIELD:
-        return "Mag";
-    case SENSOR_TYPE_ORIENTATION:
-        return "Ori";
-    case SENSOR_TYPE_GYROSCOPE:
-        return "Gyr";
-    case SENSOR_TYPE_LIGHT:
-        return "Lux";
-    case SENSOR_TYPE_PRESSURE:
-        return "Bar";
-    case SENSOR_TYPE_TEMPERATURE:
-        return "Tmp";
-    case SENSOR_TYPE_PROXIMITY:
-        return "Prx";
-    case SENSOR_TYPE_GRAVITY:
-        return "Grv";
-    case SENSOR_TYPE_LINEAR_ACCELERATION:
-        return "Lac";
-    case SENSOR_TYPE_ROTATION_VECTOR:
-        return "Rot";
-    case SENSOR_TYPE_RELATIVE_HUMIDITY:
-        return "Hum";
-    case SENSOR_TYPE_AMBIENT_TEMPERATURE:
-        return "Tam";
-    }
-    return "ukn";
-}
+int sensor_type=0;
+char const*const SENSOR_DRI_FILE
+        = "/sys/class/sensors";
+
+static char *sensor_path[] = {
+	"MPU6050-accel",
+	"MPU6050-gyro",
+	"mmc3416x-mag",
+	"stk3x1x-light",
+	"stk3x1x-proximity",
+};
+int has_acc = 0;
+int has_compass = 0;
+int has_gyro = 0;
+int has_light = 0;
+int has_proximity = 0;
 
 static int get_sensor_type(const char *name) {
     int sensor_type = 0;
 
     if(!strncmp(name, "acc", 3))
-        sensor_type = SENSOR_TYPE_ACCELEROMETER;
+        sensor_type = 1;
     else if(!strncmp(name, "mag", 3))
-        sensor_type = SENSOR_TYPE_MAGNETIC_FIELD;
+        sensor_type = 2;
     else if(!strncmp(name, "ori", 3))
-        sensor_type = SENSOR_TYPE_ORIENTATION;
+        sensor_type = 3;
     else if(!strncmp(name, "gyr", 3))
-        sensor_type = SENSOR_TYPE_GYROSCOPE;
+        sensor_type = 4;
     else if(!strncmp(name, "lig", 3))
-        sensor_type = SENSOR_TYPE_LIGHT;
+        sensor_type = 5;
     else if(!strncmp(name, "bar", 3))
-        sensor_type = SENSOR_TYPE_PRESSURE;
+        sensor_type = 6;
     else if(!strncmp(name, "tmp", 3))
-        sensor_type = SENSOR_TYPE_TEMPERATURE;
+        sensor_type = 7;
     else if(!strncmp(name, "pro", 3))
-        sensor_type = SENSOR_TYPE_PROXIMITY;
+        sensor_type = 8;
     else if(!strncmp(name, "grv", 3))
-        sensor_type = SENSOR_TYPE_GRAVITY;
+        sensor_type = 9;
     else if(!strncmp(name, "lac", 3))
-        sensor_type = SENSOR_TYPE_LINEAR_ACCELERATION;
+        sensor_type = 10;
     else if(!strncmp(name, "rot", 3))
-        sensor_type = SENSOR_TYPE_ROTATION_VECTOR;
+        sensor_type = 11;
     else if(!strncmp(name, "hum", 3))
-        sensor_type = SENSOR_TYPE_RELATIVE_HUMIDITY;
+        sensor_type = 12;
     else if(!strncmp(name, "tam", 3))
-        sensor_type = SENSOR_TYPE_AMBIENT_TEMPERATURE;
+        sensor_type = 13;
+    else
+        ALOGE("invalid device name: %s", name);
 
     return sensor_type;
 }
 
-static int sensor_enable(int sensor_type, int delay, bool enable) {
-    int err = FAILED;
-
-    if(sensor_list == NULL || sensor_type <= 0) {
-        ALOGE("Invalid sensor number %d passed to initSensor", sensor_type);
-        return FAILED;
-    }
-
-    for(int i = 0; i < dev_count; i++) {
-        if(sensor_list[i].type == sensor_type) {
-
-            if(enable)
-                device->setDelay((sensors_poll_device_t *) device, sensor_list[i].handle, ms2ns(delay));
-
-            ALOGI("Activating/Deactiveating sensor : %s", get_sensor_name(sensor_type));
-            err = device->activate((sensors_poll_device_t *) device, sensor_list[i].handle, enable);
-            if(err != SUCCESS) {
-                ALOGE("activate() for '%s'failed (%s)\n", sensor_list[i].name, strerror(-err));
-            }
+static void get_sensors()
+{
+	char path[64], *sbuf;
+	char *str = "type";
+	int fd, id, ret;
+	
+	for (id = 0; sensor_path[id]!= NULL; id++)
+	{
+	     snprintf(path, sizeof(path), "/sys/class/sensors/%s", sensor_path[id]);
+	     fd = open(path, O_RDONLY);
+		 if (fd < 0)
+	     {
+	        printf("Quectel sensor_path : open failed\n");
+	        break;
+	     }
+		 strcat(path,str);
+         fd = open(path, O_RDONLY);		 
+	     ret = read(fd, sbuf, 1);
+		 if(ret == -1)
+         {
+            printf("Quectel sensor_path Read type Failed.\n");
             break;
-        }
-    }
-
-    return err;
+         }
+	     close(fd); 
+		 switch (*sbuf) {
+			 case 1:
+			   has_acc = 1; 
+			   break;
+			 case 4:
+			   has_gyro = 1; 
+			   break;
+			 case 5:
+			   has_light = 1; 
+			   break;
+			 case 8:
+			   has_proximity = 1; 
+			   break;
+			 case 2:
+			   has_compass = 1; 
+			   break;
+		 } 
+	}
 }
 
-static int do_calibration(int sensor_type, unordered_map < string, string > &params) {
-    int i = 0;
-    int ret = FAILED;
-    bool found = false;
-    struct sensor_cal_cmd_t cmd;
-
-    for(i = 0; i < dev_count; i++) {
-        if(sensor_list[i].type == sensor_type) {
-            switch (sensor_list[i].type) {
-            case SENSOR_TYPE_ACCELEROMETER:
-                found = true;
-                break;
-            case SENSOR_TYPE_LIGHT:
-                found = true;
-                break;
-            case SENSOR_TYPE_PROXIMITY:
-                found = true;
-                break;
-            default:
-                break;
-            }
-            break;
-        }
-    }
-    cmd.data_type = atoi(params["data_type"].c_str());
-    cmd.test_type = atoi(params["test_type"].c_str());
-
-    if(found && !sensor_enable(sensor_type, 0, false)) {
-        usleep(500 * 1000);
-        if((sensor_cal_module != NULL) && (sensor_cal_module->methods != NULL))
-            ret = sensor_cal_module->methods->calibrate((struct sensor_t *) &sensor_list[i], &cmd);
-    }
-
-    return ret;
+int ql_get_sensor_list(char const* path)		
+{
+	if (strstr(SENSOR_DRI_FILE, path))
+		get_sensors();
+	return 0;
 }
 
-static int test_event(sensors_event_t * event, unordered_map < string, string > &params) {
-    int err = FAILED;
-    double x_min, x_max, y_min, y_max, z_min, z_max, v_min, v_max;
-
-    if(event != NULL) {
-        switch (event->type) {
-        case SENSOR_TYPE_ACCELEROMETER:
-        case SENSOR_TYPE_MAGNETIC_FIELD:
-        case SENSOR_TYPE_ORIENTATION:
-        case SENSOR_TYPE_GYROSCOPE:
-        case SENSOR_TYPE_GRAVITY:
-        case SENSOR_TYPE_LINEAR_ACCELERATION:
-        case SENSOR_TYPE_ROTATION_VECTOR:
-
-            x_min = atof(params["x_min_limit"].c_str());
-            x_max = atof(params["x_max_limit"].c_str());
-            y_min = atof(params["y_min_limit"].c_str());
-            y_max = atof(params["y_max_limit"].c_str());
-            z_min = atof(params["z_min_limit"].c_str());
-            z_max = atof(params["z_max_limit"].c_str());
-
-            ALOGI("limitation for(%s):x(%5.5f,%5.5f),y(%5.5f,%5.5f),z(%5.5f,%5.5f). data(%5.5f,%5.5f,%5.5f)",
-                  get_sensor_name(event->type), x_min, x_max, y_min, y_max, z_min, z_max, event->data[0],
-                  event->data[1], event->data[2]);
-            if(inside_float(event->data[0], x_min, x_max) && inside_float(event->data[1], y_min, y_max)
-               && inside_float(event->data[2], z_min, z_max))
-                err = SUCCESS;
-            break;
-
-        case SENSOR_TYPE_LIGHT:
-        case SENSOR_TYPE_PRESSURE:
-        case SENSOR_TYPE_TEMPERATURE:
-        case SENSOR_TYPE_PROXIMITY:
-        case SENSOR_TYPE_RELATIVE_HUMIDITY:
-        case SENSOR_TYPE_AMBIENT_TEMPERATURE:
-            v_min = atof(params["min_limit"].c_str());
-            v_max = atof(params["max_limit"].c_str());
-
-            ALOGI("limitation(%s):value(%5.5f,%5.5f). data(%5.5f)", get_sensor_name(event->type), v_min, v_max,
-                  event->data[0]);
-
-            if(inside_float(event->data[0], v_min, v_max))
-                err = SUCCESS;
-
-            break;
-        default:
-            ALOGE("FFBM SENSOR: Data received, but sensor is unknown... returning");
-            break;
-        }
-    }
-
-    return err;
+int ql_enable_sensor(int num)
+{
+	int fd, ret;
+	char *wbuf = "1";
+	switch (num) {
+		case 1:
+			fd = open("/sys/class/sensors/MPU6050-accel/enable", O_RDWR);
+		    if (fd < 0)
+			{
+				printf("Quectel ql_enable_sensor acc open failed\n");
+				break;
+			}
+			ret = write(fd, wbuf, 1);
+		    if (ret < 0)
+			{
+				printf("Quectel ql_enable_sensor acc write failed\n");
+				break;
+			}
+			close(fd); 
+			break;
+		case 4:
+			fd = open("/sys/class/sensors/MPU6050-gyro/enable", O_RDWR);
+		    if (fd < 0)
+			{
+				printf("Quectel ql_enable_sensor gyro open failed\n");
+				break;
+			}
+			ret = write(fd, wbuf, 1);
+		    if (ret < 0)
+			{
+				printf("Quectel ql_enable_sensor gyro write failed\n");
+				break;
+			}
+			close(fd); 
+			break;
+		case 2:
+			fd = open("/sys/class/sensors/mmc3416x-mag/enable", O_RDWR);
+		    if (fd < 0)
+			{
+				printf("Quectel ql_enable_sensor mag open failed\n");
+				break;
+			}
+			ret = write(fd, wbuf, 1);
+		    if (ret < 0)
+			{
+				printf("Quectel ql_enable_sensor mag write failed\n");
+				break;
+			}
+			close(fd); 
+			break;
+		case 5:
+			fd = open("/sys/class/sensors/stk3x1x-light/enable", O_RDWR);
+		    if (fd < 0)
+			{
+				printf("Quectel ql_enable_sensor light open failed\n");
+				break;
+			}
+			ret = write(fd, wbuf, 1);
+		    if (ret < 0)
+			{
+				printf("Quectel ql_enable_sensor light write failed\n");
+				break;
+			}
+			close(fd); 
+			break;
+		case 8:
+			fd = open("/sys/class/sensors/stk3x1x-proximity/enable", O_RDWR);
+		    if (fd < 0)
+			{
+				printf("Quectel ql_enable_sensor proximity open failed\n");
+				break;
+			}
+			ret = write(fd, wbuf, 1);
+		    if (ret < 0)
+			{
+				printf("Quectel ql_enable_sensor proximity write failed\n");
+				break;
+			}
+			close(fd); 
+			break;
+	}
+	return ret;
 }
 
-
-static void print_event(sensors_event_t * event, const mmi_module_t * mod, bool is_pcba) {
-    int err = FAILED;
-    char print_buf[256];
-
-    if(event == NULL || mod == NULL)
-        return;
-
-    switch (event->type) {
-    case SENSOR_TYPE_ACCELEROMETER:
-    case SENSOR_TYPE_MAGNETIC_FIELD:
-    case SENSOR_TYPE_ORIENTATION:
-    case SENSOR_TYPE_GYROSCOPE:
-    case SENSOR_TYPE_GRAVITY:
-    case SENSOR_TYPE_LINEAR_ACCELERATION:
-    case SENSOR_TYPE_ROTATION_VECTOR:
-
-        snprintf(print_buf,
-                 sizeof(print_buf),
-                 "%s\nx = %5.5f\ny = %5.5f\nz = %5.5f\n", (char *) get_sensor_name(event->type),
-                 event->data[0], event->data[1], event->data[2]);
-
-        break;
-    case SENSOR_TYPE_LIGHT:
-    case SENSOR_TYPE_PRESSURE:
-    case SENSOR_TYPE_TEMPERATURE:
-    case SENSOR_TYPE_PROXIMITY:
-    case SENSOR_TYPE_RELATIVE_HUMIDITY:
-    case SENSOR_TYPE_AMBIENT_TEMPERATURE:
-        snprintf(print_buf, sizeof(print_buf), "%s\nvalue = %5.5f\n",
-                 (char *) get_sensor_name(event->type), event->data[0]);
-
-        break;
-    default:
-        ALOGE("FFBM SENSOR: Data received, but sensor is unknown... returning");
-        break;
-    }
-
-
-    if(event->type == SENSOR_TYPE_ACCELEROMETER || event->type == SENSOR_TYPE_PROXIMITY
-       || event->type == SENSOR_TYPE_LIGHT || event->type == SENSOR_TYPE_GYROSCOPE) {
-        strlcat(print_buf, "calibration result = ", sizeof(print_buf));
-        if(calibration_result == SUCCESS)
-            strlcat(print_buf, "success \n", sizeof(print_buf));
-        else if(calibration_result == CALIBRATION_NOT_SUPPORT)
-            strlcat(print_buf, "not support \n", sizeof(print_buf));
-        else
-            strlcat(print_buf, "failed \n", sizeof(print_buf));
-    }
-
-    if(!is_pcba)
-        mod->cb_print(cur_module_name, SUBCMD_MMI, print_buf, strlen(print_buf), PRINT_DATA);
-    else
-        mod->cb_print(cur_module_name, SUBCMD_PCBA, print_buf, strlen(print_buf), PRINT_DATA);
-
+int ql_disable_sensor(int num)
+{
+	int fd, ret;
+	char *wbuf = "0";
+	switch (num) {
+		case 1:
+			fd = open("/sys/class/sensors/MPU6050-accel/enable", O_RDWR);
+		    if (fd < 0)
+			{
+				printf("Quectel ql_enable_sensor acc open failed\n");
+				break;
+			}
+			ret = write(fd, wbuf, 1);
+		    if (ret < 0)
+			{
+				printf("Quectel ql_enable_sensor acc write failed\n");
+				break;
+			}
+			close(fd); 
+			break;
+		case 4:
+			fd = open("/sys/class/sensors/MPU6050-gyro/enable", O_RDWR);
+		    if (fd < 0)
+			{
+				printf("Quectel ql_enable_sensor gyro open failed\n");
+				break;
+			}
+			ret = write(fd, wbuf, 1);
+		    if (ret < 0)
+			{
+				printf("Quectel ql_enable_sensor gyro write failed\n");
+				break;
+			}
+			close(fd); 
+			break;
+		case 2:
+			fd = open("/sys/class/sensors/mmc3416x-mag/enable", O_RDWR);
+		    if (fd < 0)
+			{
+				printf("Quectel ql_enable_sensor mag open failed\n");
+				break;
+			}
+			ret = write(fd, wbuf, 1);
+		    if (ret < 0)
+			{
+				printf("Quectel ql_enable_sensor mag write failed\n");
+				break;
+			}
+			close(fd); 
+			break;
+		case 5:
+			fd = open("/sys/class/sensors/stk3x1x-light/enable", O_RDWR);
+		    if (fd < 0)
+			{
+				printf("Quectel ql_enable_sensor light open failed\n");
+				break;
+			}
+			ret = write(fd, wbuf, 1);
+		    if (ret < 0)
+			{
+				printf("Quectel ql_enable_sensor light write failed\n");
+				break;
+			}
+			close(fd); 
+			break;
+		case 8:
+			fd = open("/sys/class/sensors/stk3x1x-proximity/enable", O_RDWR);
+		    if (fd < 0)
+			{
+				printf("Quectel ql_enable_sensor proximity open failed\n");
+				break;
+			}
+			ret = write(fd, wbuf, 1);
+		    if (ret < 0)
+			{
+				printf("Quectel ql_enable_sensor proximity write failed\n");
+				break;
+			}
+			close(fd); 
+			break;
+	}
+	return ret;
 }
 
-static void get_sensor_data(int sensor_type, sensors_event_t * event) {
-    int n = 0;
-
-    if(device == NULL || event == NULL)
-        return;
-
-    while(1) {
-        n = device->poll((sensors_poll_device_t *) device, event, 1);
-        if(n > 0 && event->type == sensor_type)
-            break;
-    }
+char ql_get_sensor_data(int num, int buf[3])
+{
+	int fd, ret;
+	//char buf_one[64], buf_x[64], buf_y[64], buf_z[64];
+	struct input_event  event;
+	struct pollfd fds[1];
+	
+	switch (num) {
+		case 1:
+			fd = open("/dev/input/event4", O_RDONLY);
+		    if (fd < 0)
+			{
+				printf("Quectel ql_get_sensor_data acc open failed\n");
+				break;
+			}
+			fds[0].fd      = fd;
+			fds[0].events  = POLLIN;
+			while(1)
+			{
+				ret = poll(fds, 1, 5000);
+				if(ret  == 0)
+				{
+					printf("Quectel ql_get_sensor_data acc time out\n");
+				}
+				else
+				{
+					read(fd, &event, sizeof(event));
+					//printf("Quectel ql_get_sensor_data acc = %x\n", buffer);
+				}
+				if (event.code == sensor_data_type[0][0]) {
+					buf[0] = event.value;
+				} else if (event.code == sensor_data_type[1][0]) {
+					buf[1] = event.value;
+				} else if (event.code == sensor_data_type[2][0]) {
+					buf[2] = event.value;
+				}
+				//return buf;
+			}
+		case 2:
+			fd = open("/dev/input/event5", O_RDONLY);
+		    if (fd < 0)
+			{
+				printf("Quectel ql_get_sensor_data gyro open failed\n");
+				break;
+			}
+			fds[0].fd      = fd;
+			fds[0].events  = POLLIN;
+			while(1)
+			{
+				ret = poll(fds, 1, 5000);
+				if(ret  == 0)
+				{
+					printf("Quectel ql_get_sensor_data gyro time out\n");
+				}
+				else
+				{
+					read(fd, &event, sizeof(event));
+					//printf("Quectel ql_get_sensor_data gyro = %x\n", buffer);
+				}
+				if (event.code == sensor_data_type[3][0]) {
+					buf[0] = event.value;
+				} else if (event.code == sensor_data_type[4][0]) {
+					buf[1] = event.value;
+				} else if (event.code == sensor_data_type[5][0]) {
+					buf[2] = event.value;
+				}
+				//return buf;
+			}
+		case 4:
+			fd = open("/dev/input/event1", O_RDONLY);
+		    if (fd < 0)
+			{
+				printf("Quectel ql_get_sensor_data mag open failed\n");
+				break;
+			}
+			fds[0].fd      = fd;
+			fds[0].events  = POLLIN;
+			while(1)
+			{
+				ret = poll(fds, 1, 5000);
+				if(ret  == 0)
+				{
+					printf("Quectel ql_get_sensor_data mag time out\n");
+				}
+				else
+				{
+					read(fd, &event, sizeof(event));
+					//printf("Quectel ql_get_sensor_data mag = %x\n", buffer);
+				}
+				if (event.code == sensor_data_type[0][0]) {
+					buf[0] = event.value;
+				} else if (event.code == sensor_data_type[1][0]) {
+					buf[1] = event.value;
+				} else if (event.code == sensor_data_type[2][0]) {
+					buf[2] = event.value;
+				}
+				//return buf;
+			}
+		case 5:
+			fd = open("/dev/input/event5", O_RDONLY);
+		    if (fd < 0)
+			{
+				printf("Quectel ql_get_sensor_data light open failed\n");
+				break;
+			}
+			fds[0].fd      = fd;
+			fds[0].events  = POLLIN;
+			while(1)
+			{
+				ret = poll(fds, 1, 5000);
+				if(ret  == 0)
+				{
+					printf("Quectel ql_get_sensor_data light time out\n");
+				}
+				else
+				{
+					printf("Quectel ql_get_sensor_data light\n");
+					read(fd, &event, sizeof(event));
+				/* 	read(fd, a, sizeof(a));
+					printf("Quectel ql_get_sensor_data light %x\n",a); */
+					//strcpy(buf[0],a);
+				//	break;
+				//	printf("Quectel ql_get_sensor_data light = %s\n", event.value);
+				}
+			//	if (event.code == sensor_data_type[6][0])
+					buf[0] = event.value;
+				//return buf;
+				break;
+			}
+			break;
+		case 8:
+			fd = open("/dev/input/event3", O_RDONLY);
+		    if (fd < 0)
+			{
+				printf("Quectel ql_get_sensor_data proximity open failed\n");
+				break;
+			}
+			fds[0].fd      = fd;
+			fds[0].events  = POLLIN;
+			while(1)
+			{
+				ret = poll(fds, 1, 5000);
+				if(ret  == 0)
+				{
+					printf("Quectel ql_get_sensor_data proximity time out\n");
+				}
+				else
+				{
+					read(fd, &event, sizeof(event));
+					//printf("Quectel ql_get_sensor_data proximity = %x\n", buffer);
+				}
+			    if (event.code == sensor_data_type[7][0])
+					buf[0] = event.value;
+				//return buf;
+			}
+	}
+	return 0;
 }
 
 static void *run_test(void *mod) {
-    signal(SIGUSR1, signal_handler);
-    sensors_event_t event;
     mmi_module_t *module = (mmi_module_t *) mod;
-
-    if(module == NULL) {
-        ALOGE("%s NULL for cb function ", __FUNCTION__);
-        return NULL;
-    }
-
-    while(1) {
-        get_sensor_data(cur_sensor_type, &event);
-        print_event(&event, module, false);
-    }
-
+	signal(SIGUSR1, signal_handler);
+    int buf[3];
+	char sensor_buf[256]={0};
+    while(1)
+    {
+    ql_get_sensor_data(sensor_type,buf);
+    ALOGI("THE LIGHT SENSOR DATA=%d",buf[0]);
+	if(buf[0]<1000)
+	{
+		snprintf(sensor_buf, sizeof(sensor_buf), "the light sensor num= %d pass", buf[0]);
+	}
+	else
+	{
+		snprintf(sensor_buf, sizeof(sensor_buf), "the light sensor num= %d", buf[0]);
+	}
+	
+	module->cb_print(NULL, SUBCMD_MMI, sensor_buf, strlen(sensor_buf), PRINT_DATA);
+	usleep(1000);
+    } 
     return NULL;
 }
 
-static int32_t module_run_calibration(const mmi_module_t * module, unordered_map < string, string > &params) {
-    int ret = FAILED;
-
-    cur_sensor_type = get_sensor_type(params["type"].c_str());
-    calibration_result = do_calibration(cur_sensor_type, params);
-    usleep(1000 * 1000);
-
-    sensor_enable(cur_sensor_type, atoi(params["delay"].c_str()), true);
-
-    return calibration_result;
-}
-
 static int32_t module_run_mmi(const mmi_module_t * module, unordered_map < string, string > &params) {
-    ALOGI("%s start ", __FUNCTION__);
-    int ret = FAILED;
-
-    cur_sensor_type = get_sensor_type(params["type"].c_str());
-    calibration_result = do_calibration(cur_sensor_type, params);
-    usleep(1000 * 1000);
-    strlcpy(cur_module_name, params[KEY_MODULE_NAME].c_str(), sizeof(cur_module_name));
-
-    ret = sensor_enable(cur_sensor_type, atoi(params["delay"].c_str()), true);
-    if(ret != SUCCESS) {
-        ALOGE("FFBM SENSOR : fail to initialize");
-        return ret;
-    }
-
-    ret = pthread_create((pthread_t *) & module->run_pid, NULL, run_test, (void *) module);
-    if(ret < 0) {
-        ALOGE("%s:Can't create pthread: %s\n", __FUNCTION__, strerror(errno));
-        return FAILED;
-    }
-
-    return SUCCESS;
+    ALOGI("run mmi start for module:[%s]", module->name);
+	int ret = FAILED;
+	sensor_type=get_sensor_type(params["type"].c_str());
+    ql_enable_sensor(sensor_type);
+	pthread_create((pthread_t *) & module->run_pid, NULL, run_test, (void *) module);
+	ret=SUCCESS;
+	return ret;
 }
 
 /**
-* Defined case run in PCBA mode, fully automatically.
+* Defined case run in mmi mode,this mode support UI.
 *
 */
-static int32_t module_run_pcba(const mmi_module_t * module, unordered_map < string, string > &params) {
-    ALOGI("%s start", __FUNCTION__);
-
-    int ret = FAILED, tried = 3;
-    sensors_event_t event;
-
-    cur_sensor_type = get_sensor_type(params["type"].c_str());
-    strlcpy(cur_module_name, params[KEY_MODULE_NAME].c_str(), sizeof(cur_module_name));
-
-    /**open sensor*/
-    ret = sensor_enable(cur_sensor_type, atoi(params["delay"].c_str()), true);
-    if(ret != SUCCESS) {
-        ALOGE("FFBM SENSOR : fail to initialize");
-        return FAILED;
-    }
-
-    /**Test several data, if any of them correct will returen succesful*/
-    while(tried-- > 0) {
-        get_sensor_data(cur_sensor_type, &event);
-        ret = test_event(&event, params);
-        if(ret == SUCCESS)
-            break;
-    }
-
-    /**Close sensor*/
-    sensor_enable(cur_sensor_type, 0, false);
-    ALOGI("%s  finished", __FUNCTION__);
-    print_event(&event, module, true);
-
-    return ret;
-}
-
-static void sensor_init() {
-    ALOGI("%s start sensor initial", __FUNCTION__);
-    struct sensors_module_t *hal_mod = NULL;
-    void *libsnscal = NULL;
-    int i = 0;
-    int err = FAILED;
-
-    if(initialized) {
-        ALOGI("%s Sensor already initialized success ,dev_count=%d", __FUNCTION__, dev_count);
-        return;
-    }
-
-    err = hw_get_module(SENSORS_HARDWARE_MODULE_ID, (hw_module_t const **) &hal_mod);
-    if(err != 0) {
-        ALOGE("FFBM SENSOR: hw_get_module() failed (%s)\n", strerror(-err));
-        return;
-    }
-
-    err = sensors_open(&hal_mod->common, (struct sensors_poll_device_t **) &device);
-    if(err != 0) {
-        ALOGE("FFBM SENSOR: sensors_open() failed (%s)\n", strerror(-err));
-        return;
-    }
-
-
-    dev_count = hal_mod->get_sensors_list(hal_mod, &sensor_list);
-    for(i = 0; i < dev_count; i++) {
-        ALOGI("FFBM SENSOR: Deactivating all sensor after open,current index: %d", i);
-        err = device->activate((sensors_poll_device_t *) device, sensor_list[i].handle, 0);
-        if(err != SUCCESS)
-            ALOGE("FFBM SENSOR: deactivate() for '%s'failed (%s)\n", sensor_list[i].name, strerror(-err));
-    }
-
-    ALOGI("%s Sensor initialize success ,dev_count=%d", __FUNCTION__, dev_count);
-    initialized = true;
-    libsnscal = dlopen("sensor_calibrate.so", RTLD_NOW);
-    if(!libsnscal) {
-        ALOGE("FFBM SENSOR: could not dlopen: %s\n", dlerror());
-        return;
-    }
-    sensor_cal_module = (struct sensor_cal_module_t *) dlsym(libsnscal, SENSOR_CAL_MODULE_INFO_STR);
-    if(!sensor_cal_module) {
-        ALOGE("FFBM SENSOR:  could not dlsym \n");
-        dlclose(libsnscal);
-        return;
-    }
-}
-
 static int32_t module_init(const mmi_module_t * module, unordered_map < string, string > &params) {
-    ALOGI("%s start sensor", __FUNCTION__);
-
     if(module == NULL) {
-        ALOGE("%s NULL point  received ", __FUNCTION__);
+        ALOGE("NULL point received");
         return FAILED;
     }
+    ALOGI("module init start for module:[%s]", module->name);
 
+    ALOGI("module init finished for module:[%s]", module->name);
     return SUCCESS;
 }
+
 
 static int32_t module_deinit(const mmi_module_t * module) {
-    ALOGI("%s start.", __FUNCTION__);
     if(module == NULL) {
-        ALOGE("%s NULL point  received ", __FUNCTION__);
+        ALOGE("NULL point received");
         return FAILED;
     }
-    initialized = false;
+    ALOGI("module deinit start for module:[%s]", module->name);
 
+    ALOGI("module deinit finished for module:[%s]", module->name);
     return SUCCESS;
 }
 
+
 static int32_t module_stop(const mmi_module_t * module) {
-    ALOGI("%s start.", __FUNCTION__);
     if(module == NULL) {
-        ALOGE("%s NULL point  received ", __FUNCTION__);
+        ALOGE("NULL point received");
         return FAILED;
     }
-    pthread_kill(module->run_pid, SIGUSR1);
-    pthread_join(module->run_pid, NULL);
-    ALOGI("FFBM MMI test thread exit, disable the sensor(%s) unlock", get_sensor_name(cur_sensor_type));
-    sensor_enable(cur_sensor_type, 0, false);
-
+    ALOGI("module stop start for module:[%s]", module->name);
+	kill_thread(module->run_pid);
+    ALOGI("module stop finished for module:[%s]", module->name);
     return SUCCESS;
 }
 
@@ -480,31 +577,20 @@ static int32_t module_stop(const mmi_module_t * module) {
 * the "cmd" passd in MUST be defined in cmd_list ,mmi_agent will validate the cmd before run.
 *
 */
-static int32_t module_run(const mmi_module_t * module, const char *cmd, unordered_map < string, string > &params) {
+static int32_t module_run(const mmi_module_t * module, const char *cmd, unordered_map < string, string > &params) 
+{
     int ret = FAILED;
-
-    if(!module || !cmd) {
-        ALOGE("%s NULL point received ", __FUNCTION__);
+    if(!module || !cmd) 
+    {
+        ALOGE("NULL point received");
         return FAILED;
     }
-    ALOGI("%s start.command : %s", __FUNCTION__, cmd);
-
-    mutex_locker::autolock _L(g_mutex);
-    sensor_init();
-
+    ALOGI("module run start for module:[%s], subcmd=%s", module->name, MMI_STR(cmd));
     if(!strcmp(cmd, SUBCMD_MMI))
+    {
         ret = module_run_mmi(module, params);
-    else if(!strcmp(cmd, SUBCMD_PCBA))
-        ret = module_run_pcba(module, params);
-    else if(!strcmp(cmd, subcmd_calibration))
-        ret = module_run_calibration(module, params);
-    else {
-        ALOGE("%s Invalid command: %s  received ", __FUNCTION__, cmd);
-        ret = FAILED;
     }
-
-   /** Default RUN mmi*/
-    return ret;
+	return ret;
 }
 
 /**
@@ -529,8 +615,8 @@ mmi_module_t MMI_MODULE_INFO_SYM = {
     .author = "Qualcomm Technologies, Inc.",
     .methods = &module_methods,
     .module_handle = NULL,
-    .supported_cmd_list = extra_cmd_list,
-    .supported_cmd_list_size = sizeof(extra_cmd_list) / sizeof(char *),
+    .supported_cmd_list = NULL,
+    .supported_cmd_list_size = 0,
     .cb_print = NULL, /**it is initialized by mmi agent*/
     .run_pid = -1,
 };

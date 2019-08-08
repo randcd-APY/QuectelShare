@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2017, Qualcomm Technologies, Inc.
+ * Copyright (c) 2014-2016, Qualcomm Technologies, Inc.
  * All Rights Reserved.
  * Confidential and Proprietary - Qualcomm Technologies, Inc.
  */
@@ -9,14 +9,13 @@
 * Defined case run in mmi mode,this mode support UI.
 *
 */
-static exec_cmd_t execmd;
+static exec_cmd_t_1 execmd;
 
 #define PCBA_REPLY_STR "Test finished, please check the result\n"
 #define PCBA_EXTERNAL_LOOPBACK_PASS "External Loopback Test Pass"
 #define PCBA_EXTERNAL_LOOPBACK_FAIL "External Loopback Test Fail"
 #define PCBA_EXTERNAL_LOOPBACK_POWER "Power"
 
-static int g_pid = -1;
 
 static void get_ftm_test_config(char *config, int size) {
     char soundCardInfo[256] = { 0 };
@@ -48,12 +47,8 @@ static int32_t module_run_mmi(const mmi_module_t * module, unordered_map < strin
     int ret = FAILED;
     char result[SIZE_2K] = { 0 };
     char ftm_config_file[256] = { 0 };
-    exec_cmd_t execmd;
-
     get_ftm_test_config(ftm_config_file, sizeof(ftm_config_file));
     args[i++] = get_value("mm_audio_ftm");
-    args[i++] = "-c";
-    args[i++] = ftm_config_file;
     args[i++] = "-tc";
     args[i++] = params["tc"].c_str();
     args[i++] = "-d";
@@ -76,10 +71,9 @@ static int32_t module_run_mmi(const mmi_module_t * module, unordered_map < strin
     }
     args[i] = NULL;
 
-    memset(&execmd, 0, sizeof(exec_cmd_t));
+    memset(&execmd, 0, sizeof(exec_cmd_t_1));
     execmd.cmd = get_value("mm_audio_ftm");
-    execmd.pid = &g_pid;
-    execmd.exit_str = NULL;
+    execmd.pid = -1;
     execmd.result = result;
     execmd.size = sizeof(result);
     execmd.params = (char **) args;
@@ -89,7 +83,7 @@ static int32_t module_run_mmi(const mmi_module_t * module, unordered_map < strin
             snprintf(temp_agrs + strlen(temp_agrs), sizeof(temp_agrs) - strlen(temp_agrs), "%s ", args[j]);
         ALOGI("exec command:'%s', args:%s", execmd.cmd, temp_agrs);
     }
-    ret = exe_cmd(NULL, &execmd);
+    ret = exe_cmd_1(NULL, &execmd);
     if(ret != SUCCESS) {
         ALOGE("command(%s) exec fail", execmd.cmd);
     }
@@ -103,10 +97,9 @@ static int32_t module_run_mmi(const mmi_module_t * module, unordered_map < strin
 
     if(!strcmp(params["type"].c_str(), "mic")) {
         ALOGI("start to play the record file");
-        memset(&execmd, 0, sizeof(exec_cmd_t));
+        memset(&execmd, 0, sizeof(exec_cmd_t_1));
         execmd.cmd = get_value("mm_audio_ftm");
-        execmd.pid = &g_pid;
-        execmd.exit_str = NULL;
+        execmd.pid = -1;
         execmd.result = result;
         execmd.size = sizeof(result);
         execmd.params = (char **) args_play;
@@ -116,7 +109,7 @@ static int32_t module_run_mmi(const mmi_module_t * module, unordered_map < strin
                 snprintf(temp_agrs + strlen(temp_agrs), sizeof(temp_agrs) - strlen(temp_agrs), "%s ", args_play[j]);
             ALOGI("exec command:'%s', args:%s", execmd.cmd, temp_agrs);
         }
-        ret = exe_cmd(NULL, &execmd);
+        ret = exe_cmd_1(NULL, &execmd);
         if(ret != SUCCESS) {
             ALOGE("command(%s) exec fail", execmd.cmd);
         }
@@ -140,15 +133,14 @@ static int32_t module_run_pcba(const mmi_module_t * module, unordered_map < stri
     char ftm_config_file[256] = { 0 };
     int ret = FAILED;
     bool power_pass = false;
-    exec_cmd_t execmd;
 
     get_ftm_test_config(ftm_config_file, sizeof(ftm_config_file));
 
    /**Before start kill the previous*/
-    if(g_pid > 0) {
-        kill(g_pid, SIGTERM);
+    if(execmd.pid > 0) {
+        kill(execmd.pid, SIGTERM);
         usleep(100);
-        kill_proc(g_pid);
+        kill_proc(execmd.pid);
     }
     args[i++] = get_value("mm_audio_ftm");
     args[i++] = "-c";
@@ -194,10 +186,9 @@ static int32_t module_run_pcba(const mmi_module_t * module, unordered_map < stri
     }
     args[i] = NULL;
 
-    memset(&execmd, 0, sizeof(exec_cmd_t));
+    memset(&execmd, 0, sizeof(exec_cmd_t_1));
     execmd.cmd = get_value("mm_audio_ftm");
-    execmd.pid = &g_pid;
-    execmd.exit_str = NULL;
+    execmd.pid = -1;
     execmd.result = result;
     execmd.size = sizeof(result);
     execmd.params = (char **) args;
@@ -207,7 +198,7 @@ static int32_t module_run_pcba(const mmi_module_t * module, unordered_map < stri
             snprintf(temp_agrs + strlen(temp_agrs), sizeof(temp_agrs) - strlen(temp_agrs), "%s ", args[j]);
         ALOGI("exe command:'%s', args:%s", execmd.cmd, temp_agrs);
     }
-    ret = exe_cmd(NULL, &execmd);
+    ret = exe_cmd_1(NULL, &execmd);
     if(ret != SUCCESS) {
         ALOGE("command(%s) exec fail", execmd.cmd);
         return FAILED;
@@ -215,7 +206,6 @@ static int32_t module_run_pcba(const mmi_module_t * module, unordered_map < stri
 
     char *p = result;
     char *ptr;
-    char *tokptr = NULL;
 
     while(*p != '\0') {         /*print every line of scan result information */
         ptr = tmp;
@@ -230,16 +220,16 @@ static int32_t module_run_pcba(const mmi_module_t * module, unordered_map < stri
         ptr = strstr(tmp, PCBA_EXTERNAL_LOOPBACK_POWER);
         if(ptr != NULL) {
             strlcat(buf, tmp, strlen(tmp));
-            ptr = strtok_r(tmp, ":d", &tokptr);
+            ptr = strtok(tmp, ":d");
             if(ptr != NULL)
-                ptr = strtok_r(NULL, ":d", &tokptr);
+                ptr = strtok(NULL, ":d");
             if(!params["power"].empty() && (NULL != ptr) && (atof(ptr) > atof(params["power"].c_str())))
                 power_pass = true;
         }
         ptr = strstr(tmp, PCBA_EXTERNAL_LOOPBACK_PASS);
         if(ptr != NULL) {
             strlcat(buf, PCBA_EXTERNAL_LOOPBACK_PASS, strlen(PCBA_EXTERNAL_LOOPBACK_PASS));
-            module->cb_print(params[KEY_MODULE_NAME].c_str(), SUBCMD_PCBA, buf, strlen(buf), PRINT_DATA);
+         //   module->cb_print(params[KEY_MODULE_NAME].c_str(), SUBCMD_PCBA, buf, strlen(buf), PRINT_DATA);
             if(!params["power"].empty() && !power_pass) {
                 ALOGE("module:[%s] test fail", module->name);
                 return FAILED;
@@ -251,12 +241,12 @@ static int32_t module_run_pcba(const mmi_module_t * module, unordered_map < stri
         ptr = strstr(tmp, PCBA_EXTERNAL_LOOPBACK_FAIL);
         if(ptr != NULL) {
             strlcat(buf, PCBA_EXTERNAL_LOOPBACK_FAIL, strlen(PCBA_EXTERNAL_LOOPBACK_FAIL));
-            module->cb_print(params[KEY_MODULE_NAME].c_str(), SUBCMD_PCBA, buf, strlen(buf), PRINT_DATA);
+         //   module->cb_print(params[KEY_MODULE_NAME].c_str(), SUBCMD_PCBA, buf, strlen(buf), PRINT_DATA);
             ALOGE("module:[%s] test fail", module->name);
             return FAILED;
         }
     }
-    module->cb_print(params[KEY_MODULE_NAME].c_str(), SUBCMD_PCBA, PCBA_REPLY_STR, strlen(PCBA_REPLY_STR), PRINT);
+ //   module->cb_print(params[KEY_MODULE_NAME].c_str(), SUBCMD_PCBA, PCBA_REPLY_STR, strlen(PCBA_REPLY_STR), PRINT);
 
     ALOGE("module:[%s] test fail", module->name);
     ALOGI("run pcba finished for module: %s", module->name);
@@ -264,11 +254,10 @@ static int32_t module_run_pcba(const mmi_module_t * module, unordered_map < stri
 }
 
 static int32_t module_init(const mmi_module_t * module, unordered_map < string, string > &params) {
-    ALOGI("%s start ", __FUNCTION__);
     int ret = FAILED;
 
     if(module == NULL) {
-        ALOGE("%s NULL point  received ", __FUNCTION__);
+        ALOGE("NULL point received");
         return FAILED;
     }
     ALOGI("module init start for module:[%s]", module->name);
@@ -278,9 +267,8 @@ static int32_t module_init(const mmi_module_t * module, unordered_map < string, 
 }
 
 static int32_t module_deinit(const mmi_module_t * module) {
-    ALOGI("%s start.", __FUNCTION__);
     if(module == NULL) {
-        ALOGE("%s NULL point  received ", __FUNCTION__);
+        ALOGE("NULL point received");
         return FAILED;
     }
     ALOGI("module deinit start for moudle:[%s]", module->name);
@@ -290,14 +278,18 @@ static int32_t module_deinit(const mmi_module_t * module) {
 }
 
 static int32_t module_stop(const mmi_module_t * module) {
-    ALOGI("%s start.", __FUNCTION__);
     if(module == NULL) {
-        ALOGE("%s NULL point  received ", __FUNCTION__);
+        ALOGE("NULL point received");
         return FAILED;
     }
+    ALOGI("module stop start for module:[%s]", module->name);
 
-    kill_proc(g_pid);
-    kill_thread(module->run_pid);
+    if(execmd.pid > 0) {
+        kill(execmd.pid, SIGTERM);
+        ALOGI("extra command(cmd=%s, pid=%ld) be killed", execmd.cmd, execmd.pid);
+    }
+
+  //  kill_thread(module->run_pid);
 
     ALOGI("module stop finished for module:[%s]", module->name);
     return SUCCESS;
@@ -312,20 +304,21 @@ static int32_t module_run(const mmi_module_t * module, const char *cmd, unordere
     int ret = FAILED;
 
     if(!module || !cmd) {
-        ALOGE("%s NULL point  received ", __FUNCTION__);
+        ALOGE("NULL point received");
         return FAILED;
     }
-    ALOGI("%s start.command : %s", __FUNCTION__, cmd);
+    ALOGI("module run start for module:[%s], subcmd=%s", module->name, MMI_STR(cmd));
 
     if(!strcmp(cmd, SUBCMD_MMI))
         ret = module_run_mmi(module, params);
     else if(!strcmp(cmd, SUBCMD_PCBA))
         ret = module_run_pcba(module, params);
     else {
-        ALOGE("%s Invalid command: %s  received ", __FUNCTION__, cmd);
+        ALOGE("Received invalid command: %s", MMI_STR(cmd));
         ret = FAILED;
     }
 
+    ALOGI("module run finished for module:[%s], subcmd=%s", module->name, MMI_STR(cmd));
    /** Default RUN mmi*/
     return ret;
 }
@@ -355,5 +348,5 @@ mmi_module_t MMI_MODULE_INFO_SYM = {
     .supported_cmd_list = NULL,
     .supported_cmd_list_size = 0,
     .cb_print = NULL, /**it is initialized by mmi agent*/
-    .run_pid = 0,
+    .run_pid = -1,
 };

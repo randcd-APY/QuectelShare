@@ -386,7 +386,7 @@ uint32 mcm_internal_get_srv_id_for_msg_id
     int iter;
     uint32 ret_val = MCM_SUCCESS_V01;
 
-
+    LOG_MSG_INFO("alpha MAX: %x",MCM_RIL_DMS_SERVICE_MAX);
     int tbl_size = sizeof(mcm_msg_srv_id_map_tbl)/sizeof(mcm_msg_service_id_map);
     for (iter = 0; iter < tbl_size; iter ++)
     {

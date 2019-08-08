@@ -387,6 +387,7 @@ void module_cleanup(module_info * mod) {
     ALOGI("%s[%s]:start,g_module_tid=%d", __FUNCTION__, mod->module, g_module_tid);
     /*Send command to stop test */
     send_stop(mod);
+    usleep(100000);
 
     if(is_camera_module(mod)) {
         usleep(500 * 1000);

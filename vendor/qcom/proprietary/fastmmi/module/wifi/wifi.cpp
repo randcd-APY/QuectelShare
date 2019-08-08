@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Qualcomm Technologies, Inc.
+ * Copyright (c) 2014-2016, Qualcomm Technologies, Inc.
  * All Rights Reserved.
  * Confidential and Proprietary - Qualcomm Technologies, Inc.
  */
@@ -10,17 +10,15 @@
 *
 */
 static const mmi_module_t *g_module = NULL;
-static int g_pid = -1;
-
+static exec_cmd_t_1 execmd;
 static pthread_mutex_t g_mutex;
 
 #define KEY_WORD_CHANNEL "Channel:"
 #define KEY_WORD_ESSID "ESSID:"
+#define KEY_WORD_COMPLETED "COMPLETED"
 #define KEY_WORD_SIGNAL_LEVEL "Signal level"
-#define KEY_WORD_SSID "SSID"
-#define KEY_WORD_SIGNAL "signal"
-#define KEY_WORD_FREQ "freq"
 #define DRIVER_PATH "/usr/lib/modules/%s/extra/wlan.ko"
+
 
 typedef struct {
     char channel[64];
@@ -47,6 +45,7 @@ static char *get_driver_path(char* path) {
     ALOGE("%s *******%s******\n", __FUNCTION__, path);
     return path;
 }
+
 static void load_driver() {
     char temp[256] = { 0 };
     char driver_path[256] = { 0 };
@@ -75,52 +74,100 @@ static void config_wlan() {
     ALOGI("exec '%s' to config wifi", temp);
 }
 
-static int exec_wifi_cmd(exec_cmd_t *cmd, char *result, int result_size) {
+static int start_test(char *buf, uint32_t size) {
+    char result[500 * SIZE_1K] = { 0 };
+    char tmp[256] = { 0 };
+    wifi_info wifi_result;
     int ret = FAILED;
-    char *args[4];
-    int i = 0;
+    bool found = false;
 
-    if(check_file_exist(get_value("wifi_iw"))) {
-        args[i++] = (char *) get_value("wifi_iw");
-        args[i++] = (char *) "wlan0";
-        args[i++] = (char *) "scan";
-        args[i] = (char *) NULL;
-        cmd->cmd = (char *) get_value("wifi_iw");
-    } else if(check_file_exist(get_value("wifi_iwlist"))) {
-        args[i++] = (char *) get_value("wifi_iwlist");
-        args[i++] = (char *) "wlan0";
-        args[i++] = (char *) "scanning";
-        args[i] = (char *) NULL;
-        cmd->cmd = (char *) get_value("wifi_iwlist");
-    } else {
-        ALOGE("Cannot find WIFI tool to scan device");
-        return ret;
+    if(!check_file_exist(get_value("wifi_driver")) || !check_file_exist(get_value("wifi_ifconfig"))
+       || !check_file_exist(get_value("wifi_iwlist")))
+        return FAILED;
+
+    load_driver();
+    config_wlan();
+
+    int loop = 0;
+    system("/usr/sbin/wpa_supplicant -B -iwlan0 -Dnl80211 -c/etc/mmi/wpa_supplicant.conf -O/var/run/wpa_supplicant -ddd &");
+    sleep(2);	
+    system("wpa_cli -i wlan0 -p /var/run/wpa_supplicant scan");
+    sleep(2);
+	
+for(loop = 0; loop < 6; loop ++)
+	{
+	    memset(result, 0 ,SIZE_1K);
+	    memset(buf, 0 ,SIZE_1K);
+           memset(tmp, 0 ,256);
+	    sleep(5);
+	    char *args[] = {(char *)"/usr/sbin/wpa_cli", (char *)"-i", (char *)"wlan0", (char *)"-p", (char *)"/var/run/wpa_supplicant", (char *)"stat", NULL};
+	    execmd.cmd = "/usr/sbin/wpa_cli";
+	    execmd.params = args;
+	    execmd.pid = -1;
+	    execmd.result = result;
+	    execmd.size = sizeof(result);
+	    ret = exe_cmd_1(cb_function, &execmd);
+
+
+	    if(ret != SUCCESS)
+	        return FAILED;
+
+	char *p = result;
+	char *ptr;
+
+	while(*p != '\0') { 		/*print every line of scan result information */
+		ptr = tmp;
+		while(*p != '\n' && *p != '\0') {
+			*ptr++ = *p++;
+		}
+
+		p++;
+		*ptr++ = '\n';
+		*ptr = '\0';
+		strlcat(buf, tmp, size);
+		ptr = strstr(tmp, KEY_WORD_COMPLETED);
+		if(ptr != NULL) {
+			//ptr = strstr(tmp, ":");
+			//ptr++;
+			//snprintf(tmp, sizeof(tmp), "ESSID: = %s \n", ptr);
+			//strlcat(buf, tmp, size);
+			found = true;
+			unload_driver();
+			return SUCCESS;
+		}
+
+	}
     }
-    cmd->params = args;
-    cmd->pid = &g_pid;
-    cmd->exit_str = NULL;
-    cmd->result = result;
-    cmd->size = result_size;
+unload_driver();
+return FAILED;
+/*
+
+    char *args[4] = { (char *) get_value("wifi_iwlist"), (char *) "wlan0", (char *) "scanning", NULL };
+    execmd.cmd = (char *) get_value("wifi_iwlist");
+    execmd.params = args;
+    execmd.pid = -1;
+    execmd.result = result;
+    execmd.size = sizeof(result);
     {
         char temp_agrs[512] = { 0 };
         for(int j = 1; (j < sizeof(args) / sizeof(char *)) && (NULL != args[j]); j++)
             snprintf(temp_agrs + strlen(temp_agrs), sizeof(temp_agrs) - strlen(temp_agrs), "%s ", args[j]);
-        ALOGI("exec command:'%s', args:%s", cmd->cmd, temp_agrs);
+        ALOGI("exec command:'%s', args:%s", execmd.cmd, temp_agrs);
     }
-    ret = exe_cmd(cb_function, cmd);
-    return ret;
-}
+    ret = exe_cmd(cb_function, &execmd);
+    unload_driver();
 
-static bool parse_exec_result(char *result, char *buf, uint32_t size) {
-    wifi_info wifi_result;
-    char tmp[256] = { 0 };
+    if(ret != SUCCESS) {
+        ALOGE("command:'%s' exec failed", execmd.cmd);
+        return FAILED;
+    }
+
     char *p = result;
     char *ptr;
     char *ptr_end;
-    bool found = false;
-
-    while(*p != '\0') {         /*print every line of scan result information */
-        ptr = tmp;
+*/
+  //  while(*p != '\0') {         /*print every line of scan result information */
+    /*    ptr = tmp;
         while(*p != '\n' && *p != '\0') {
             *ptr++ = *p++;
         }
@@ -128,50 +175,26 @@ static bool parse_exec_result(char *result, char *buf, uint32_t size) {
         p++;
         *ptr = '\0';
 
-        if(check_file_exist(get_value("wifi_iw"))) {
-            if(strstr(tmp, KEY_WORD_FREQ) != NULL) {
-                ptr = strstr(tmp, ":");
-                ptr++;
-                memset(wifi_result.channel, 0, sizeof(wifi_result.channel));
-                snprintf(wifi_result.channel, sizeof(wifi_result.channel), "Channel:%s;", ptr);
-            } else if(strstr(tmp, KEY_WORD_SIGNAL) != NULL) {
-                ptr = strstr(tmp, ":");
-                ptr++;
-                memset(wifi_result.signal_level, 0, sizeof(wifi_result.signal_level));
-                snprintf(wifi_result.signal_level, sizeof(wifi_result.signal_level), "Signal level:%s;", ptr);
-            } else if(strstr(tmp, KEY_WORD_SSID) != NULL) {
-                ptr = strstr(tmp, ":");
-                ptr++;
-                memset(wifi_result.essid, 0, sizeof(wifi_result.essid));
-                snprintf(wifi_result.essid, sizeof(wifi_result.essid), "AP=ESSID:%s;", ptr);
-                found = true;
-                strlcat(buf, wifi_result.essid, size);
-                strlcat(buf, wifi_result.channel, size);
-                strlcat(buf, wifi_result.signal_level, size);
-                strlcat(buf, "\n", size);
-            }
-        } else if(check_file_exist(get_value("wifi_iwlist"))) {
-            if(strstr(tmp, KEY_WORD_CHANNEL) != NULL) {
-                ptr = strstr(tmp, ":");
-                ptr++;
-                memset(wifi_result.channel, 0, sizeof(wifi_result.channel));
-                snprintf(wifi_result.channel, sizeof(wifi_result.channel), "Channel:%s;", ptr);
-            } else if(strstr(tmp, KEY_WORD_ESSID) != NULL) {
-                ptr = strstr(tmp, ":");
-                ptr++;
-                memset(wifi_result.essid, 0, sizeof(wifi_result.essid));
-                snprintf(wifi_result.essid, sizeof(wifi_result.essid), "AP=ESSID:%s;", ptr);
-                found = true;
-            } else if(strstr(tmp, KEY_WORD_SIGNAL_LEVEL) != NULL) {
-                ptr = strstr(tmp, KEY_WORD_SIGNAL_LEVEL);
-                ptr_end = strstr(tmp, "Noise level");
-                memset(wifi_result.signal_level, 0, sizeof(wifi_result.signal_level));
-                snprintf(wifi_result.signal_level, (ptr_end - ptr), "Signal level:%s;", (ptr + 13));
-                strlcat(buf, wifi_result.essid, size);
-                strlcat(buf, wifi_result.channel, size);
-                strlcat(buf, wifi_result.signal_level, size);
-                strlcat(buf, "\n", size);
-            }
+        if(strstr(tmp, KEY_WORD_CHANNEL) != NULL) {
+            ptr = strstr(tmp, ":");
+            ptr++;
+            memset(wifi_result.channel, 0, sizeof(wifi_result.channel));
+            snprintf(wifi_result.channel, sizeof(wifi_result.channel), "Channel:%s;", ptr);
+        } else if(strstr(tmp, KEY_WORD_ESSID) != NULL) {
+            ptr = strstr(tmp, ":");
+            ptr++;
+            memset(wifi_result.essid, 0, sizeof(wifi_result.essid));
+            snprintf(wifi_result.essid, sizeof(wifi_result.essid), "AP=ESSID:%s;", ptr);
+            found = true;
+        } else if(strstr(tmp, KEY_WORD_SIGNAL_LEVEL) != NULL) {
+            ptr = strstr(tmp, KEY_WORD_SIGNAL_LEVEL);
+            ptr_end = strstr(tmp, "Noise level");
+            memset(wifi_result.signal_level, 0, sizeof(wifi_result.signal_level));
+            snprintf(wifi_result.signal_level, (ptr_end - ptr), "Signal level:%s;", (ptr + 13));
+            strlcat(buf, wifi_result.essid, size);
+            strlcat(buf, wifi_result.channel, size);
+            strlcat(buf, wifi_result.signal_level, size);
+            strlcat(buf, "\n", size);
         }
     }
 
@@ -181,47 +204,13 @@ static bool parse_exec_result(char *result, char *buf, uint32_t size) {
         ALOGE("wifi test fail");
     }
 
-    return found;
-}
-
-static int start_test(char *buf, uint32_t size) {
-    char result[800 * SIZE_1K] = { 0 };
-    char tmp[256] = { 0 };
-    char driver_path[256] = { 0 };
-    char *args[4];
-    int ret = FAILED;
-    bool found = false;
-    int i = 0;
-    exec_cmd_t execmd;
-
-    get_driver_path(driver_path);
-    if (NULL == driver_path)
-	    return FAILED;
-
-    if(!check_file_exist(driver_path) || !check_file_exist(get_value("wifi_ifconfig"))
-       || (!check_file_exist(get_value("wifi_iwlist")) && !check_file_exist(get_value("wifi_iw"))))
-        return FAILED;
-
-    load_driver();
-    config_wlan();
-    ret = exec_wifi_cmd(&execmd, result, sizeof(result));
-    unload_driver();
-
-    if(ret != SUCCESS) {
-        ALOGE("command:'%s' exec failed", execmd.cmd);
-        return FAILED;
-    }
-
-    found = parse_exec_result(result, buf, size);
-
     return found ? SUCCESS : FAILED;
+*/
 }
 
 static int32_t module_init(const mmi_module_t * module, unordered_map < string, string > &params) {
-    ALOGI("%s start ", __FUNCTION__);
-
     if(module == NULL) {
-        ALOGE("%s NULL point  received ", __FUNCTION__);
+        ALOGE("NULL point received");
         return FAILED;
     }
     ALOGI("module init start for module:[%s]", module->name);
@@ -234,7 +223,6 @@ static int32_t module_init(const mmi_module_t * module, unordered_map < string, 
 }
 
 static int32_t module_deinit(const mmi_module_t * module) {
-    ALOGI("%s start.", __FUNCTION__);
     if(module == NULL) {
         ALOGE("NULL point received");
         return FAILED;
@@ -246,14 +234,13 @@ static int32_t module_deinit(const mmi_module_t * module) {
 }
 
 static int32_t module_stop(const mmi_module_t * module) {
-    ALOGI("%s start.", __FUNCTION__);
     if(module == NULL) {
         ALOGE("NULL point received");
         return FAILED;
     }
     ALOGI("module stop start for module:[%s]", module->name);
 
-    kill_proc(g_pid);
+    kill_proc(execmd.pid);
     kill_thread(module->run_pid);
 
     ALOGI("module stop finished for module:[%s]", module->name);
@@ -270,22 +257,27 @@ static int32_t module_run(const mmi_module_t * module, const char *cmd, unordere
     char buf[SIZE_1K] = { 0 };
 
     if(!module || !cmd) {
-        ALOGE("%s NULL point  received ", __FUNCTION__);
+        ALOGE("NULL point received");
         return FAILED;
     }
-    ALOGI("%s start.command :waiting ... %s", __FUNCTION__, cmd);
+    ALOGI("module run start for module:[%s], subcmd=%s", module->name, MMI_STR(cmd));
     g_module = module;
 
     pthread_mutex_lock(&g_mutex);
     ret = start_test(buf, sizeof(buf));
+
+   // ALOGI("module:[%s] test %s", module->name, MMI_TEST_RESULT(ret));
     pthread_mutex_unlock(&g_mutex);
 
-    if(!strcmp(cmd, SUBCMD_MMI)) {
+   /*  if(!strcmp(cmd, SUBCMD_MMI)) {
         module->cb_print(params[KEY_MODULE_NAME].c_str(), SUBCMD_MMI, buf, strlen(buf), PRINT_DATA);
     } else if(!strcmp(cmd, SUBCMD_PCBA)) {
         module->cb_print(params[KEY_MODULE_NAME].c_str(), SUBCMD_PCBA, buf, strlen(buf), PRINT_DATA);
-    }
+    } else {
+        ALOGE("Received invalid command: %s", MMI_STR(cmd));
+    } */
 
+    ALOGI("module run finished for module:[%s], subcmd=%s", module->name, MMI_STR(cmd));
    /** Default RUN mmi*/
     return ret;
 }
@@ -315,5 +307,5 @@ mmi_module_t MMI_MODULE_INFO_SYM = {
     .supported_cmd_list = NULL,
     .supported_cmd_list_size = 0,
     .cb_print = NULL, /**it is initialized by mmi agent*/
-    .run_pid = 0,
+    .run_pid = -1,
 };

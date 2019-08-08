@@ -56,7 +56,7 @@
 #define MCM_SRV_MANAGER           0x407
 
 #define MCM_RIL_DMS_SERVICE_MIN   0x0201
-#define MCM_RIL_DMS_SERVICE_MAX   0x0206
+#define MCM_RIL_DMS_SERVICE_MAX   0x02FF
 
 #define MCM_RIL_NAS_SERVICE_MIN   0x0500
 #define MCM_RIL_NAS_SERVICE_MAX   0x05FF
@@ -85,5 +85,11 @@
 #define MCM_SRV_MANAGER_MIN    0x0800
 #define MCM_SRV_MANAGER_MAX    0x0802
 
+#define MCM_SERVICE_READY_FILE             "/tmp/mcm_service_ready.flag"
+#define MCM_DATA_SERVICE_READY_FILE        "/tmp//mcm_data_service_ready.flag"
+#define MCM_LOC_SERVICE_READY_FILE         "/tmp/mcm_loc_service_ready.flag"
+#define MCM_ATCOP_SERVICE_READY_FILE       "/tmp/mcm_atcop_service_ready.flag"
+#define MCM_MOBILEAP_SERVICE_READY_FILE    "/tmp/mcm_mobileap_service_ready.flag"
+#define MCM_SIM_SERVICE_READY_FILE         "/tmp/mcm_sim_service_ready.flag"
 
 #endif // MCM_CONSTANTS_H

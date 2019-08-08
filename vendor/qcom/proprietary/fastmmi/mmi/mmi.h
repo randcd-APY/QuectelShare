@@ -34,6 +34,7 @@ void flush_result() ;
 void set_boot_mode(boot_mode_type mode);
 void switch_home_screen(bool is_next);
 bool is_cur_home_screen();
+void reset_data_result();
 
 layout *get_main_layout();
 bool is_main_screen();

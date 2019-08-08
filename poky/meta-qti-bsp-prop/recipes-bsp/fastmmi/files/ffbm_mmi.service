@@ -4,12 +4,16 @@
 
 [Unit]
 Description=ffbm mmi Service
-SourcePath=/usr/bin/mmi
-After=qti_system_daemon.service leprop.service
+Wants=ql-fb-service.service
+After=ql-fb-service.service 
+
 
 [Service]
-Restart=always
-ExecStart=/usr/bin/mmi
+Type=simple
+EnvironmentFile=-/etc/environment
+ExecStart=/usr/bin/FCT
+Restart=no
+
 
 [Install]
 WantedBy=ffbm.target

@@ -513,7 +513,7 @@ static void jpege_engine_sw_destroy(
         // Abort and wait until engine is done with current encoding
         // todo
         (void)jpege_engine_sw_abort(p_obj);
-        jpege_engine_sw_thread_destroy(p_obj);
+        //jpege_engine_sw_thread_destroy(p_obj);  //it will have free invalid pointer, modify by chapin
 
         // Release allocated memory
         if (p_engine)

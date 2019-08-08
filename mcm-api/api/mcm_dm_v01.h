@@ -26,6 +26,14 @@ extern "C" {
 /**
     @}
   */
+    /**  Max array limit */
+#define MCM_MAX_DMS_IMEI_V01 32
+
+    /**  Max array limit  */
+#define MCM_MAX_DMS_MEID_V01 32
+    /**  Max device rev id limit  */
+#define MCM_MAX_DEVICE_REV_ID_V01 256
+
 
 /** @addtogroup mcm_dm_enums
     @{
@@ -143,6 +151,63 @@ typedef struct {
 /**
     @}
   */
+typedef struct {
+    /* This element is a placeholder to prevent the declaration of
+     *     an empty struct.  DO NOT USE THIS FIELD UNDER ANY CIRCUMSTANCE */
+    char __placeholder;
+}mcm_dm_get_device_serial_numbers_req_msg_v01;
+
+/* Message */
+/**
+ *   @}
+ *    */
+
+/** @addtogroup mcm_dm_qmi_messages
+ *   @{
+ *    */
+/** Response Message; Gets the device serial numbers. */
+typedef struct {
+
+    /* Mandatory */
+    mcm_response_t_v01 response;
+    /**<   Result code.*/
+
+    /* Optional */
+    uint8_t imei_valid;  /**< Must be set to true if imei is being passed */
+    char imei[MCM_MAX_DMS_IMEI_V01 + 1];
+    /**<   imei.*/
+
+    /* Optional */
+    uint8_t meid_valid;  /**< Must be set to true if meid is being passed */
+    char meid[MCM_MAX_DMS_MEID_V01 + 1];
+    /**<   meid.*/
+}mcm_dm_get_device_serial_numbers_resp_msg_v01;  /* Message */
+
+typedef struct {
+    /* This element is a placeholder to prevent the declaration of
+     *        an empty struct.  DO NOT USE THIS FIELD UNDER ANY CIRCUMSTANCE */
+    char __placeholder;
+}mcm_dm_get_device_rev_id_req_msg_v01;
+
+/* Message */
+/**
+ *   @}
+ *    */
+
+/** @addtogroup mcm_dm_qmi_messages
+ *   @{
+ *    */
+/** Response Message; Gets the device firmware revision identification. */
+typedef struct {
+
+    /* Mandatory */
+    mcm_response_t_v01 response;
+    /**<   Result code.*/
+
+  /* Mandatory */
+    char device_rev_id[MCM_MAX_DEVICE_REV_ID_V01 + 1];
+    /**<   device rev id.*/
+}mcm_dm_get_device_rev_id_resp_msg_v01;  /* Message */
 
 
 
@@ -156,6 +221,10 @@ typedef struct {
 #define MCM_DM_EVENT_REGISTER_REQ_V01 0x0203
 #define MCM_DM_EVENT_REGISTER_RESP_V01 0x0203
 #define MCM_DM_RADIO_MODE_CHANGED_EVENT_IND_V01 0x0204
+#define MCM_DM_GET_DEVICE_SERIAL_NUMBERS_REQ_V01 0x02A0
+#define MCM_DM_GET_DEVICE_SERIAL_NUMBERS_RESP_V01 0x02A0
+#define MCM_DM_GET_DEVICE_REV_ID_REQ_V01 0x02A1
+#define MCM_DM_GET_DEVICE_REV_ID_RESP_V01 0x02A1
 /**
  @}
  */

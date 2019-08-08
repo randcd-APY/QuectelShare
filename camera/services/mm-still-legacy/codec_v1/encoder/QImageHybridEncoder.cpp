@@ -1693,10 +1693,10 @@ void encoder_event_handler(void *p_user_data,
   // If it is not a warning event, encoder has stopped; Signal
   // main thread to clean up
   if (event == JPEG_EVENT_DONE || event == JPEG_EVENT_ERROR) {
-    os_mutex_lock(&p_thread_arg->output_handler_args.mutex);
+//    os_mutex_lock(&p_thread_arg->output_handler_args.mutex);  //it will have mutex data owner failed in qtbase with opengl
     p_thread_arg->encoding = false;
     os_cond_signal(&p_thread_arg->output_handler_args.cond);
-    os_mutex_unlock(&p_thread_arg->output_handler_args.mutex);
+//    os_mutex_unlock(&p_thread_arg->output_handler_args.mutex);
   }
 }
 
@@ -1711,22 +1711,22 @@ int encoder_output_handler(void *p_user_data, void *p_arg,
   os_timer_t os_timer;
   int diff = 0;
 
-  os_mutex_lock(&p_output_args->mutex);
+  //os_mutex_lock(&p_output_args->mutex);
   if (!p_output_args->fout) {
     QIDBG_ERROR("%s:%d] invalid p_arg \n", __func__, __LINE__ );
-    os_mutex_unlock(&p_output_args->mutex);
+    //os_mutex_unlock(&p_output_args->mutex);
     return JPEGERR_EFAILED;
   }
 
   if (JPEG_FAILED(jpeg_buffer_get_actual_size(buffer, &buf_size))) {
     QIDBG_ERROR("%s:%d] failed \n", __func__, __LINE__ );
-    os_mutex_unlock(&p_output_args->mutex);
+    //os_mutex_unlock(&p_output_args->mutex);
     return JPEGERR_EFAILED;
   }
   if (JPEG_FAILED(jpeg_buffer_get_addr(buffer, &buf_ptr))) {
     QIDBG_ERROR("%s:%d] jpeg_buffer_get_addr failed \n",
       __func__, __LINE__ );
-    os_mutex_unlock(&p_output_args->mutex);
+    //os_mutex_unlock(&p_output_args->mutex);
     return JPEGERR_EFAILED;
   }
   if (!p_output_args->nowrite) {
@@ -1736,7 +1736,7 @@ int encoder_output_handler(void *p_user_data, void *p_arg,
   }
   p_output_args->size += buf_size;
   p_output_args->fout = (void *)((uint32_t)p_output_args->fout + buf_size);
-  os_mutex_unlock(&p_output_args->mutex);
+  //os_mutex_unlock(&p_output_args->mutex);
 
   if (last_buf_flag) {
     QIDBG_HIGH("%s:%d] encoder_output_handler: \

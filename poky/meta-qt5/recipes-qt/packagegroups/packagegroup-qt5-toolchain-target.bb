@@ -69,7 +69,6 @@ RDEPENDS_${PN} += " \
     ${@bb.utils.contains('DISTRO_FEATURES', 'opengl', 'qtlocation-qmlplugins', '', d)} \
     qttranslations-qtlocation \
     qtmultimedia-dev \
-    qtmultimedia-mkspecs \
     qtmultimedia-plugins \
     ${@bb.utils.contains('DISTRO_FEATURES', 'opengl', 'qtmultimedia-qmlplugins', '', d)} \
     qttranslations-qtmultimedia \

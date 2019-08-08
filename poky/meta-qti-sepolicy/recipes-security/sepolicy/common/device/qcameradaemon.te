@@ -42,6 +42,7 @@ gen_require(`
        type sysfs_t;
        type gpu_device_t;
        type sysctl_vm_t;
+       type tracefs_t;
   ')
 
 type qcameradaemon_t;
@@ -72,3 +73,4 @@ allow qcameradaemon_t sysctl_vm_t:dir search ;
 allow qcameradaemon_t self:capability dac_override;
 allow qcameradaemon_t self:unix_dgram_socket { read write bind };
 allow qcameradaemon_t self:fifo_file { read write open };
+allow qcameradaemon_t tracefs_t:filesystem mount;

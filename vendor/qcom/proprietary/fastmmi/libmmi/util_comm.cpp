@@ -162,9 +162,22 @@ bool is_proc_exist(int pid) {
 }
 
 void kill_thread(pthread_t tid) {
-    if(tid > 0 && pthread_kill(tid, 0) == 0) {
-        pthread_kill(tid, SIGUSR1);
-    }
+	ALOGI("Start to kill thread with the ID:%lu", tid);
+
+    //if(tid > 0) {
+        int ret = pthread_kill(tid, 0);
+        ALOGI("pthread kill with the ID:%lu,ret is %d", tid, ret);
+
+        if(ret == ESRCH)
+            ALOGI("No thread with the ID: ", (unsigned int) tid);
+        else if(ret == EINVAL)
+            ALOGI("An invalid signal was specified ");
+        else {
+            pthread_kill(tid, SIGUSR1);
+            pthread_join(tid, NULL);
+            ALOGI("thread(thread id=%lu) be killed\n", tid);
+        }
+   // }
 }
 
 void kill_proc(int pid) {

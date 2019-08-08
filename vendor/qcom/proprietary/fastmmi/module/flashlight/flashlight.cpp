@@ -6,36 +6,26 @@
 #include "mmi_module.h"
 
 static unordered_map < string, string > paras;
+static char module_name[64] = { 0 };
 
+static char *p_module_name = NULL;
+#define SYS_FLASHLIGHT "/sys/class/leds/flashlight/brightness"
 /**
 * Defined case run in mmi mode,this mode support UI.
 *
 */
 static void light_on(bool enable) {
-    if(enable) {
-        if(!paras["type"].empty()) {
-            if(!strncmp(paras["type"].c_str(), "flash_0", 7))
-                write_file(get_value("flashlight_torch_0"), "200");
-            else if(!strncmp(paras["type"].c_str(), "flash_1", 7))
-                write_file(get_value("flashlight_torch_1"), "200");
-        }
-        write_file(get_value("leds_switch"), "1");
-    } else {
-        if(!paras["type"].empty()) {
-            if(!strncmp(paras["type"].c_str(), "flash_0", 7))
-                write_file(get_value("flashlight_torch_0"), "1");
-            else if(!strncmp(paras["type"].c_str(), "flash_1", 7))
-                write_file(get_value("flashlight_torch_1"), "1");
-        }
-        write_file(get_value("leds_switch"), "0");
-    }
+    if(enable)
+        write_file(SYS_FLASHLIGHT, "1");
+    else
+        write_file(SYS_FLASHLIGHT, "0");
 }
 
 static void *run_test(void *mod) {
     int delay = 0;
 
     if(mod == NULL) {
-        ALOGE("%s NULL for cb function ", __FUNCTION__);
+        ALOGE("NULL for cb function");
         return NULL;
     }
     delay = atoi(paras["delay"].c_str());
@@ -44,10 +34,12 @@ static void *run_test(void *mod) {
 
     while(1) {
         light_on(true);
-        ((mmi_module_t *) mod)->cb_print(NULL, SUBCMD_MMI, "flashlight on", 13, PRINT);
+         ((mmi_module_t *) mod)->cb_print(NULL, SUBCMD_MMI, "flashlight on", 13, PRINT);
+        ((mmi_module_t *) mod)->cb_print(p_module_name, SUBCMD_MMI, "flashlight on", 13, PRINT);
         usleep(delay * 1000);
         light_on(false);
-        ((mmi_module_t *) mod)->cb_print(NULL, SUBCMD_MMI, "flashlight off", 14, PRINT);
+         ((mmi_module_t *) mod)->cb_print(NULL, SUBCMD_MMI, "flashlight off", 14, PRINT);
+        ((mmi_module_t *) mod)->cb_print(p_module_name, SUBCMD_MMI, "flashlight off", 14, PRINT);
         usleep(delay * 1000);
     }
 
@@ -55,19 +47,21 @@ static void *run_test(void *mod) {
 }
 
 static int32_t module_run_mmi(const mmi_module_t * module, unordered_map < string, string > &params) {
-    ALOGI("%s start ", __FUNCTION__);
+    ALOGI("run mmi start for module:[%s]", module->name);
     int ret = FAILED;
 
     paras = params;
 
     ret = pthread_create((pthread_t *) & module->run_pid, NULL, run_test, (void *) module);
     if(ret < 0) {
-        ALOGE("%s:Can't create pthread: %s\n", __FUNCTION__, strerror(errno));
+        ALOGE("Can't create pthread, error=%s\n", strerror(errno));
         return FAILED;
     } else {
+        ALOGD("create thread(thread id=%d) for module:[%s]\n", module->run_pid, module->name);
         pthread_join(module->run_pid, NULL);
     }
 
+    ALOGI("run mmi finished for module:[%s]", module->name);
     return ret;
 }
 
@@ -76,47 +70,52 @@ static int32_t module_run_mmi(const mmi_module_t * module, unordered_map < strin
 *
 */
 static int32_t module_run_pcba(const mmi_module_t * module, unordered_map < string, string > &params) {
-    ALOGI("%s start", __FUNCTION__);
+    ALOGI("run pcba start for module:[%s]", module->name);
 
     paras = params;
     light_on(true);
-    module->cb_print(NULL, SUBCMD_PCBA, "flashlight on", 13, PRINT);
+    // module->cb_print(NULL, SUBCMD_PCBA, "flashlight on", 13, PRINT);
+    module->cb_print(p_module_name, SUBCMD_PCBA, "flashlight on", 13, PRINT);
 
+    ALOGI("run pcba finished for module:[%s]", module->name);
     return ERR_UNKNOW;
 }
 
 static int32_t module_init(const mmi_module_t * module, unordered_map < string, string > &params) {
-    ALOGI("%s start ", __FUNCTION__);
-
     if(module == NULL) {
-        ALOGE("%s NULL point  received ", __FUNCTION__);
+        ALOGE("NULL point received");
         return FAILED;
     }
+    ALOGI("module init start for module:[%s]", module->name);
 
+    ALOGI("module init finished for module:[%s]", module->name);
     return SUCCESS;
 }
 
 static int32_t module_deinit(const mmi_module_t * module) {
-    ALOGI("%s start.", __FUNCTION__);
-
     if(module == NULL) {
-        ALOGE("%s NULL point  received ", __FUNCTION__);
+        ALOGE("NULL point received");
         return FAILED;
     }
+    ALOGI("module deinit start for module:[%s]", module->name);
 
+    ALOGI("module deinit finished for module:[%s]", module->name);
     return SUCCESS;
 }
 
 static int32_t module_stop(const mmi_module_t * module) {
-    ALOGI("%s start.", __FUNCTION__);
-
     if(module == NULL) {
-        ALOGE("%s NULL point  received ", __FUNCTION__);
+        ALOGE("NULL point received ");
         return FAILED;
     }
+    ALOGI("module stop start for module:[%s]", module->name);
 
     light_on(false);
-    pthread_kill(module->run_pid, SIGUSR1);
+
+    kill_thread(module->run_pid);
+
+    ALOGI("thread(thread id=%lu) be killed for module:[%s]", module->run_pid, module->name);
+    ALOGI("module stop finished for module:[%s]", module->name);
     return SUCCESS;
 }
 
@@ -129,20 +128,28 @@ static int32_t module_run(const mmi_module_t * module, const char *cmd, unordere
     int ret = FAILED;
 
     if(!module || !cmd) {
-        ALOGE("%s NULL point  received ", __FUNCTION__);
+        ALOGE("NULL point received");
         return FAILED;
     }
-    ALOGI("%s start.command : %s", __FUNCTION__, cmd);
+    ALOGI("module run start for module:[%s], subcmd=%s", module->name, MMI_STR(cmd));
+
+    if(!params[KEY_MODULE_NAME].empty()) {
+        snprintf(module_name, sizeof(module_name), "%s", params[KEY_MODULE_NAME].c_str());
+        p_module_name = module_name;
+    } else {
+        p_module_name = NULL;
+    }
 
     if(!strcmp(cmd, SUBCMD_MMI))
         ret = module_run_mmi(module, params);
     else if(!strcmp(cmd, SUBCMD_PCBA))
         ret = module_run_pcba(module, params);
     else {
-        ALOGE("%s Invalid command: %s  received ", __FUNCTION__, cmd);
+        ALOGE("Received invalid command: %s", MMI_STR(cmd));
         ret = FAILED;
     }
 
+    ALOGI("module run finished for module:[%s], subcmd=%s", module->name, MMI_STR(cmd));
    /** Default RUN mmi*/
     return ret;
 }

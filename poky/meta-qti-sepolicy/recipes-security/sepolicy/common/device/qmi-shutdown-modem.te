@@ -43,3 +43,10 @@ dev_read_input(qmi_shutdown_modem_t)
 allow qmi_shutdown_modem_t self:fifo_file rw_fifo_file_perms;
 allow qmi_shutdown_modem_t self:{ socket unix_dgram_socket } create_socket_perms;
 allow qmi_shutdown_modem_t sysfs_t:file write;
+
+gen_require(`
+    type default_t;
+    type shared_log_device_t;
+')
+allow qmi_shutdown_modem_t default_t:dir search;
+allow qmi_shutdown_modem_t shared_log_device_t:chr_file { create read open write ioctl getattr setattr };

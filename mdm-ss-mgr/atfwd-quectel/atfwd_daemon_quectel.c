@@ -59,7 +59,8 @@ when       who      what, where, why
 #include <qmi_atcop_srvc.h>
 #include <string.h>
 #include <cutils/properties.h>
-#include "common_log.h"
+//#include "common_log.h"
+#include "quectel_at_handle.h"
 //#include "AtCmdFwd.h"
 //#include "mdm_detect.h"
 
@@ -77,11 +78,10 @@ when       who      what, where, why
 #define ATFWD_MAX_RETRY_ATTEMPTS          5
 #define ATFWD_RETRY_DELAY                 5  /* Retry delay in sec */
 
-#define LOGI(...) fprintf(stderr, "I:" __VA_ARGS__)
+//#define LOGI(...) fprintf(stderr, "I:" __VA_ARGS__)
 
 //#define QUECTEL_AT_QAPSUB_FEATURE 
 #define QUECTEL_FCT_TEST  
-//#define QUECTEL_QGMR_CMD
 
 #define MAX_DIGITS 10
 #define DEFAULT_QMI_PORT QMI_PORT_RMNET_SDIO_0
@@ -124,19 +124,6 @@ typedef enum {
     INIT_MAX
 } atfwd_init_type_t;
 
-typedef struct {
-    int opcode;
-    char *name;
-    int ntokens;
-    char **tokens;
-} AtCmd;
-
-typedef struct {
-    int result;
-    char *response;
-}AtCmdResponse;
-
-
 /*qmi message library handle*/
 int qmiHandle = QMI_INVALID_CLIENT_HANDLE;
 
@@ -154,7 +141,21 @@ qmi_atcop_abort_type abortType; //AT command abort type
 const char *qmiPort = NULL;
 const char *secondaryPort = NULL;
 qmi_atcop_at_cmd_fwd_req_type atCmdFwdReqType[] = {
-#if defined QUECTEL_AT_QAPSUB_FEATURE
+    { //AT command fwd type	// add for QFCT baron 20160328
+        1, // Number of commands
+        {
+            { QMI_ATCOP_AT_CMD_NOT_ABORTABLE, "+QFCT"},
+        }
+    },
+#if defined QUECTEL_QGMR_CMD
+	{ //AT command fwd type //add for qgmr by klcib 20180224
+        1, // Number of commands
+        {
+            { QMI_ATCOP_AT_CMD_NOT_ABORTABLE, "+QGMR"},
+        }
+    },
+#endif
+#if defined QUECTEL_QAPSUB_CMD
     { //AT command fwd type	// add for QAPSUB by ben,20180710
         1, // Number of commands
         {
@@ -162,18 +163,22 @@ qmi_atcop_at_cmd_fwd_req_type atCmdFwdReqType[] = {
         }
     },
 #endif
-	{ //AT command fwd type //add for qgmr by klcib 20180224
+#if defined QUECTEL_QAPCMD_CMD
+    { //AT command fwd type	// add for QAPCMD by ben,20180710
         1, // Number of commands
         {
-            { QMI_ATCOP_AT_CMD_NOT_ABORTABLE, "+QGMR"},
+            { QMI_ATCOP_AT_CMD_NOT_ABORTABLE, "+QAPCMD"},
         }
     },
-    { //AT command fwd type	// add for QFCT baron 20160328
+#endif
+#if defined QUECTEL_QDEVINFO_CMD
+    { //AT command fwd type	// add for QAPCMD by ben,20180710
         1, // Number of commands
         {
-            { QMI_ATCOP_AT_CMD_NOT_ABORTABLE, "+QFCT"},
+            { QMI_ATCOP_AT_CMD_NOT_ABORTABLE, "+QDEVINFO"},
         }
     },
+#endif
 };
 
 qmi_idl_service_object_type qmi_at_svc_obj;
@@ -263,7 +268,7 @@ atfwd_sig_handler_t atfwd_sig_handler_tbl[] =
 
 */
 /*=========================================================================*/
-void parseInput()
+void parseInput(void)
 {
     int i;
     fwdcmd.opcode = request.op_code;
@@ -381,7 +386,7 @@ bool is_supported_qcci(void)
   None
 */
 /*=========================================================================*/
-void sendSuccessResponse()
+void sendSuccessResponse(void)
 {
     //responseStatus = QMI_ATCOP_SUCCESS;
     responseResult = QMI_ATCOP_RESULT_OK;
@@ -489,7 +494,7 @@ void sendResponse(AtCmdResponse *response)
   None
 */
 /*=========================================================================*/
-void sendInvalidCommandResponse()
+void sendInvalidCommandResponse(void)
 {
     unsigned char resp_msg[QMI_AT_MAX_RESP_MSG_SIZE];
     unsigned char qmi_msg_resp_buf[QMI_AT_MAX_RESP_MSG_SIZE];
@@ -636,7 +641,7 @@ static void atCommandCb(int userHandle, qmi_service_id_type serviceID,
     return target;
 }   */
 
-char* getDefaultPort()
+char* getDefaultPort(void)
 {
     char *defaultQmiPort = NULL;
 
@@ -684,7 +689,7 @@ void initAtCopServiceByPort(const char *port, int *handle) {
     return;
 }
 
-void stopSelf() {
+void stopSelf(void) {
     printf("Stop the daemon....");
    // property_set("radio.atfwd.start", "false");
     return;
@@ -846,7 +851,7 @@ static void at_fwd_sys_up_handler
     switch ( service_event)
     {
     case QMI_CLIENT_SERVICE_COUNT_INC:
-        LOGI("QMI AT service is back up.", (int) service_event);
+        LOGI("QMI AT service is back up: %d", (int) service_event);
         // There is only one port when using QMI_CLIENT_INIT_INSTANCE_ANY
         // reusing regForPrimaryPort for signalling.
         pthread_mutex_lock(&ctrMutex);
@@ -856,12 +861,12 @@ static void at_fwd_sys_up_handler
         LOGI("regForPrimaryPort signalled.");
         break;
     case QMI_CLIENT_SERVICE_COUNT_DEC:
-        LOGI("QMI AT service is down.", (int) service_event);
+        LOGI("QMI AT service is down: %d", (int) service_event);
         //no need to release again. QCCI error_cb should have provided
         //this info already.
         break;
     default:
-        LOGI("Recvd unsupported event from QCCI notifier.", (int) service_event);
+        LOGI("Recvd unsupported event from QCCI notifier: %d", (int) service_event);
         break;
     }
 }
@@ -895,6 +900,7 @@ static void at_fwd_sys_up_handler
 static void at_fwd_sys_down_evt_handler
 (
   qmi_client_type       clnt,
+  qmi_client_error_type error,
   void                 *error_cb_data
 )
 {
@@ -958,7 +964,7 @@ void qmi_at_unsol_ind_cb
 static void atfwdSysEventHandler (qmi_sys_event_type event_id,
         const qmi_sys_event_info_type *event_info, void *user_data) {
 
-    QCRIL_NOTUSED(user_data);
+    //QCRIL_NOTUSED(user_data);
     int ret;
     const char* devId;
 
@@ -1099,7 +1105,7 @@ void tryInit (atfwd_init_type_t type, int *result) {
     return;
 }
 
-int isNewCommandAvailable() {
+int isNewCommandAvailable(void) {
     if (newRequest || regForPrimaryPort || regForSecondaryPort || regForServiceUp ) {
         return 1;
     }
@@ -1153,8 +1159,6 @@ void regForServiceUpEvent(void)
 #ifdef QUECTEL_FCT_TEST
 
 #define ARRARY_SIZE(a) (sizeof(a)/sizeof(a[0]))
-#define RESP_BUF_SIZE (380*2) // RESP_BUF_SIZE msut less than the QMI_ATCOP_AT_RESP_MAX_LEN in the file vendor/qcom/proprietary/qmi/inc/qmi_atcop_srvc.h,
-			  // Maybe you should change QMI_ATCOP_AT_RESP_MAX_LEN for your requirement
 
 //#define QUECTEL_FCT_TEST_DEBUG // for print debug log info
 #ifdef QUECTEL_FCT_TEST_DEBUG
@@ -1179,7 +1183,7 @@ fct_item_type fct_items_all[]=
 	{"SPEAKER LOOP", 0},
         {"LIGHT SENSOR",0},
 	{"SDCARD", 0},
-	{"STORAGE", 0},
+	{"EMMC", 0},
         {"SIMCARD1",0},
         {"SIMCARD2",0},
 	{"WIFI", 0},
@@ -1297,7 +1301,7 @@ int read_file(const char *filepath, char *buf, int size){
 
 void quec_qfct_handle(AtCmdResponse *response)
 {
-	#define FCT_RESULT_FILE	 "/mmi.res"
+	#define FCT_RESULT_FILE	 "/data/FTM_AP/mmi.res"
 	int total_items;
 	char line_text[64] = {0};
 	FILE *fp = NULL;
@@ -1398,29 +1402,35 @@ void quec_qfct_handle(AtCmdResponse *response)
   None.
 */
 /*=========================================================================*/
- AtCmdResponse *sendit(const AtCmd *cmd)
+AtCmdResponse *sendit(const AtCmd *cmd)
 {
+   	printf("\nATFWD: cmd->name : %s\n",cmd->name);
     AtCmdResponse *result;
 	result = malloc(RESP_BUF_SIZE);
+    result->response = malloc(256 * sizeof(char));
     if (!cmd) return NULL;
-   	LOGI("ques cmd->name : %s",cmd->name);
 #ifdef QUECTEL_QGMR_CMD                            //
-		if(strcasecmp(cmd->name, "+QGMR")==0)
-		{
-			LOGI("ques QGMR cmd");
-			quec_qgmr_handle(cmd,result);      
+		if (strcasecmp(cmd->name, "+QGMR") == 0) {
+			quec_qgmr_handle(cmd, result);      
 		}
 #endif
-#ifdef QUECTEL_AT_QAPSUB_FEATURE
-		if( strcasecmp(cmd->name, "+QAPSUB")==0 )
-		{
-			LOGI("ques QAPSUB cmd");
-			quec_qapsub_handle(result);
+#ifdef QUECTEL_QAPSUB_CMD
+		if (strcasecmp(cmd->name, "+QAPSUB") == 0) {
+			quec_qapsub_handle(cmd, result);
+		}
+#endif
+#ifdef QUECTEL_QAPCMD_CMD
+		if (strcasecmp(cmd->name, "+QAPCMD") == 0) {
+			quec_qapcmd_handle(cmd, result);
+		}
+#endif
+#ifdef QUECTEL_QDEVINFO_CMD
+		if (strcasecmp(cmd->name, "+QDEVINFO") == 0) {
+			quec_qdevinfo_handle(cmd, result);
 		}
 #endif
 #ifdef QUECTEL_FCT_TEST
-		if(strcasecmp(cmd->name, "+QFCT")==0)
-		{
+		if (strcasecmp(cmd->name, "+QFCT") == 0) {
 			LOGI("ques QFCT cmd");
 			quec_qfct_handle(result);
 		}
@@ -1491,7 +1501,7 @@ int main (int argc, char **argv)
     }
 
     printf("init all signals\n");
-    signalInit();
+    //signalInit();
 
     pthread_mutexattr_t attr;
     pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);

@@ -123,5 +123,10 @@ AC_CONFIG_FILES([      \
       module/audio/Makefile
       module/bluetooth/Makefile
       module/camera/Makefile
+      module/vibrator/Makefile
+      module/sim/Makefile
+      module/key/Makefile
+      module/gps/Makefile
+      module/flashlight/Makefile
       ])
 AC_OUTPUT

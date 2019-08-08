@@ -71,6 +71,10 @@ corecmd_exec_shell(qtether_t)
 kernel_read_system_state(qtether_t)
 
 #added by peeta
+gen_require(`
+    type default_t;
+')
 allow qtether_t shared_log_device_t:chr_file { read write };
 allow qtether_t data_t:file { write open };
 allow qtether_t shared_log_device_t:chr_file { ioctl open };
+allow qtether_t default_t:dir search;

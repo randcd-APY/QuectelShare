@@ -10,7 +10,7 @@ set -e
 case "$1" in
   start)
         echo -n "Starting MCM_atcop_svc: "
-        echo 10 > /sys/class/tty/smd8/open_timeout
+        echo 10 > /sys/class/tty/smd11/open_timeout
         start-stop-daemon -S -b -a MCM_atcop_svc
         echo "done"
         ;;

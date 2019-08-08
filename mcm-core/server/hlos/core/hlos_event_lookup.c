@@ -29,6 +29,8 @@ core_event_lookup_map_type hlos_request_map[] =
 {
    {MCM_DM_SET_RADIO_MODE_REQ_V01, hlos_dms_set_modem_request_handler},
    {MCM_DM_GET_RADIO_MODE_REQ_V01, hlos_dms_get_modem_status_request_handler},
+   {MCM_DM_GET_DEVICE_SERIAL_NUMBERS_REQ_V01, hlos_dms_get_device_serial_numbers_request_handler},
+   {MCM_DM_GET_DEVICE_REV_ID_REQ_V01, hlos_dms_get_device_rev_id_request_handler},
    {MCM_NW_SCAN_REQ_V01, hlos_nas_network_scan_request_handler},
    {MCM_NW_GET_OPERATOR_NAME_REQ_V01, hlos_nas_get_operator_name_request_handler},
    {MCM_NW_SET_CONFIG_REQ_V01, hlos_nas_network_config_request_handler},

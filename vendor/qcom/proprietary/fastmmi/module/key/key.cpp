@@ -2,251 +2,165 @@
  * Copyright (c) 2014, Qualcomm Technologies, Inc. All Rights Reserved.
  * Qualcomm Technologies Proprietary and Confidential.
  */
-#include <linux/input.h>
 #include "mmi_module.h"
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <poll.h>
+#include <sys/types.h>
+#include <cutils/log.h>
+#include <cutils/properties.h>
 
-static key_map_t key_map[] = {
-    {KEY_STR_HOME, NULL, KEY_HOME, false, false},
-    {KEY_STR_MENU, NULL, KEY_MENU, false, false},
-    {KEY_STR_BACK, NULL, KEY_BACK, false, false},
-    {KEY_STR_VOLUMEDOWN, NULL, KEY_VOLUMEDOWN, false, false},
-    {KEY_STR_VOLUMEUP, NULL, KEY_VOLUMEUP, false, false},
-    {KEY_STR_POWER, NULL, KEY_POWER, false, false},
-    {KEY_STR_SNAPSHOT, NULL, KEY_CAMERA_SNAPSHOT, false, false},
-};
 
-static mmi_module_t *g_module = NULL;
-static char module_name[32] = { 0 };
 
-static bool pcba_success = false;
-static sem_t semaphore_key_success;
 
-static int32_t module_stop(const mmi_module_t * module);
+
+
+bool is_module=true;
+
+char ql_get_key_data(int buf[3])
+{
+	int fd, ret;
+	//char buf_one[64], buf_x[64], buf_y[64], buf_z[64];
+	struct input_event  event;
+	struct pollfd fds[1];
+    fd = open("/dev/input/event7", O_RDONLY);
+    if (fd < 0)
+    {
+        printf("Quectel ql_get_sensor_data light open failed\n");
+        return -1;
+    }
+    fds[0].fd      = fd;
+    fds[0].events  = POLLIN;
+    while(1)
+    {
+        ret = poll(fds, 1, 5000);
+        if(ret  == 0)
+        {
+            printf("Quectel ql_get_sensor_data light time out\n");
+        }
+        else
+        {
+            printf("Quectel ql_get_sensor_data light\n");
+            read(fd, &event, sizeof(event));
+        }
+        buf[0] = event.type;
+        buf[1] = event.code;
+        buf[2] = event.value;
+        return 0;
+    }
+		
+}
+
+
 
 /**
 * Defined case run in mmi mode,this mode support UI.
-* @return, 0 -success; -1
-*/
-static int key_input_callback(int fd, uint32_t revents, void *data) {
-    struct input_event ev;
-    char tmp[SIZE_512] = { 0 };
-    char buf[SIZE_512] = { 0 };
-    int retval = 0;
-    unsigned int i = 0;
-
-    retval = ev_get_input(fd, revents, &ev);
-    if(retval < 0)
-        return -1;
-
-    if(ev.type == EV_KEY) {
-        for(i = 0; i < (sizeof(key_map) / sizeof(key_map_t)); i++) {
-            if((ev.code == key_map[i].key_code) && (ev.value == 0)) {
-                key_map[i].tested = true;
-            }
-        }
-    }
-    for(i = 0; i < (sizeof(key_map) / sizeof(key_map_t)); i++) {
-        if((key_map[i].exist) && (key_map[i].tested))
-            pcba_success = true;
-        else if((key_map[i].exist) && !(key_map[i].tested)) {
-            pcba_success = false;
-            break;
-        }
-    }
-
-    if(pcba_success) {
-        for(i = 0; i < (sizeof(key_map) / sizeof(key_map_t)); i++) {
-            if(key_map[i].exist && key_map[i].tested) {
-                snprintf(buf, sizeof(buf), "%s = detected\n", key_map[i].key_name);
-                strlcat(tmp, buf, sizeof(tmp));
-            }
-        }
-        snprintf(buf, sizeof(buf), "Key PCBA test Pass\n%s", tmp);
-        g_module->cb_print(module_name, SUBCMD_PCBA, buf, strlen(buf), PRINT_DATA);
-        sem_post(&semaphore_key_success);
-    } else if((ev.type == EV_KEY) && (ev.value == 0)) {
-        for(i = 0; i < (sizeof(key_map) / sizeof(key_map_t)); i++) {
-            if(key_map[i].exist && key_map[i].tested) {
-                snprintf(buf, sizeof(buf), "%s = detected\n", key_map[i].key_name);
-                strlcat(tmp, buf, sizeof(tmp));
-            } else if(key_map[i].exist && !key_map[i].tested) {
-                snprintf(buf, sizeof(buf), "%s = not detected\n", key_map[i].key_name);
-                strlcat(tmp, buf, sizeof(tmp));
-            }
-        }
-        snprintf(buf, sizeof(buf), "Key PCBA test Fail\n%s", tmp);
-        g_module->cb_print(module_name, SUBCMD_PCBA, buf, strlen(buf), PRINT_DATA);
-    }
-
-    return 0;
-}
-
-static void *run_test(void *mod) {
-    signal(SIGUSR1, signal_handler);
-    if(mod == NULL)
-        return NULL;
-
-    while(!pcba_success) {
-        if(!ev_wait(-1))
-            ev_dispatch();
-    }
-
-    return NULL;
-}
-
-static int init(unordered_map < string, string > &params) {
-    unsigned int i = 0;
-    char tmp[SIZE_512] = { 0 };
-    char buf[SIZE_512] = { 0 };
-
-    pcba_success = false;
-
-    for(i = 0; i < (sizeof(key_map) / sizeof(key_map_t)); i++) {
-        key_map[i].tested = false;
-        if(strstr(params["keys"].c_str(), key_map[i].key_name) != NULL) {
-            key_map[i].exist = true;
-        }
-    }
-
-    if(sem_init(&semaphore_key_success, 0, 0) != 0) {
-        ALOGE("KEY FFBM :semaphore_key_success creation failed \n");
-        return FAILED;
-    }
-
-    for(i = 0; i < (sizeof(key_map) / sizeof(key_map_t)); i++) {
-        if(key_map[i].exist) {
-            snprintf(buf, sizeof(buf), "%s = not detected\n", key_map[i].key_name);
-            strlcat(tmp, buf, sizeof(tmp));
-        }
-    }
-    snprintf(buf, sizeof(buf), "Key PCBA test Fail\n%s", tmp);
-    g_module->cb_print(module_name, SUBCMD_PCBA, buf, strlen(buf), DATA);
-
-    return SUCCESS;
-}
-
-static int32_t module_run_mmi(const mmi_module_t * module, unordered_map < string, string > &params) {
-    ALOGI("[%s]start", __FUNCTION__);
-    if(module == NULL) {
-        ALOGE("%s NULL point  received ", __FUNCTION__);
-        return FAILED;
-    }
-    return ERR_UNKNOW;
-}
-
-/**
-* Defined case run in PCBA mode, fully automatically.
 *
 */
-static int32_t module_run_pcba(const mmi_module_t * module, unordered_map < string, string > &params) {
-    ALOGI("[%s] start", __FUNCTION__);
-    int ret = FAILED;
-    char tmp[SIZE_512] = { 0 };
-    char buf[SIZE_512] = { 0 };
-    unsigned int i = 0;
-    struct timespec time_sec;
-    int sem_status;
-
-    if(module == NULL) {
-        ALOGE("%s NULL point  received ", __FUNCTION__);
-        return FAILED;
-    }
-
-    ret = init(params);
-    if(ret != SUCCESS) {
-        ALOGE("%s key pcba test initialization failed", __FUNCTION__);
-        return FAILED;
-    }
-
-    ret = pthread_create((pthread_t *) & module->run_pid, NULL, run_test, (void *) module);
-    if(ret < 0) {
-        ALOGE("%s:Can't create pthread: %s\n", __FUNCTION__, strerror(errno));
-        return FAILED;
-    }
-
-    if(clock_gettime(CLOCK_REALTIME, &time_sec) == -1)
-        ALOGI("get clock_gettime error");
-    time_sec.tv_sec += atoi(params["timeout"].c_str());;
-
-    sem_status = sem_timedwait(&semaphore_key_success, &time_sec);
-    pthread_kill(module->run_pid, SIGUSR1);
-    if(sem_status == -1) {
-        ALOGI("%s detect key timeout, fail to test key in pcba", __FUNCTION__);
-        return FAILED;
-    } else
-        return SUCCESS;
-
-    return ERR_UNKNOW;
-}
-
 static int32_t module_init(const mmi_module_t * module, unordered_map < string, string > &params) {
-    ALOGI("[%s]start", __FUNCTION__);
     if(module == NULL) {
-        ALOGE("%s NULL point  received ", __FUNCTION__);
+        ALOGE("NULL point received");
         return FAILED;
     }
+    ALOGI("module init start for module:[%s]", module->name);
 
-    g_module = (mmi_module_t *) module;
-    strlcpy(module_name, params[KEY_MODULE_NAME].c_str(), sizeof(module_name));
-    ev_init(key_input_callback, NULL);
-
+    ALOGI("module init finished for module:[%s]", module->name);
     return SUCCESS;
 }
+
 
 static int32_t module_deinit(const mmi_module_t * module) {
-    ALOGI("[%s] start.", __FUNCTION__);
     if(module == NULL) {
-        ALOGE("%s NULL point  received ", __FUNCTION__);
+        ALOGE("NULL point received");
         return FAILED;
     }
+    ALOGI("module deinit start for module:[%s]", module->name);
+
+    ALOGI("module deinit finished for module:[%s]", module->name);
     return SUCCESS;
 }
 
+
 static int32_t module_stop(const mmi_module_t * module) {
-    ALOGI("[%s] start.", __FUNCTION__);
     if(module == NULL) {
-        ALOGE("%s NULL point  received ", __FUNCTION__);
+        ALOGE("NULL point received");
         return FAILED;
     }
-    pthread_kill(module->run_pid, SIGUSR1);
+    ALOGI("module stop start for module:[%s]", module->name);
+	is_module=false;
+    ALOGI("module stop finished for module:[%s]", module->name);
     return SUCCESS;
 }
 
 /**
 * Before call Run function, caller should call module_init first to initialize the module.
 * the "cmd" passd in MUST be defined in cmd_list ,mmi_agent will validate the cmd before run.
-* Attention: the UI mode running in MMI application, no need implementation in module.
+*
 */
-static int32_t module_run(const mmi_module_t * module, const char *cmd, unordered_map < string, string > &params) {
-    ALOGI("%s start.command : %s", __FUNCTION__, cmd);
-    int ret = -1;
+static int32_t module_run(const mmi_module_t * module, const char *cmd, unordered_map < string, string > &params) 
+{
+    int ret = FAILED;
+	signal(SIGUSR1, signal_handler);
+    int buf[3];
+    int value[5]={0};
+    is_module=true;
+    while(is_module)
+    {
+    ql_get_key_data(buf);
+    ALOGI("THE KEY TYPE=%d",buf[0]);
+    ALOGI("THE KEY CODE=%d",buf[1]);
+    ALOGI("THE KEY VALUE=%d",buf[2]);
 
-    if(!module || !cmd) {
-        ALOGE("%s NULL point  received ", __FUNCTION__);
-        return FAILED;
+    if(buf[1]==139 && buf[2]==1)
+    {
+        value[0]=1;
+        module->cb_print(NULL, SUBCMD_MMI, "menu", strlen("menu"), PRINT_DATA);
+        ALOGI("the menu key press down");
     }
-
-    if(!strncmp(cmd, SUBCMD_PCBA, strlen(cmd)))
-        ret = module_run_pcba(module, params);
-    else {
-        ALOGE("%s Invalid command: %s  received ", __FUNCTION__, cmd);
-        ret = FAILED;
+    if(buf[1]==158 && buf[2]==1)
+    {
+        value[1]=1;
+        module->cb_print(NULL, SUBCMD_MMI, "back", strlen("back"), PRINT_DATA);
+        ALOGI("the back key press down");
     }
-
-   /** Default RUN mmi*/
-    return ret;
+    if(buf[1]==102 && buf[2]==1)
+    {
+        value[2]=1;
+        module->cb_print(NULL, SUBCMD_MMI, "home", strlen("home"), PRINT_DATA);
+        ALOGI("the home key press down");
+    }
+    if(buf[1]==115 && buf[2]==1)
+    {
+        value[3]=1;
+        module->cb_print(NULL, SUBCMD_MMI, "vol_up", strlen("vol_up"), PRINT_DATA);
+        ALOGI("the vol_up key press down");
+    }
+    if(buf[1]==114 && buf[2]==1)
+    {
+        value[4]=1;
+        module->cb_print(NULL, SUBCMD_MMI, "vol_down", strlen("vol_down"), PRINT_DATA);
+        ALOGI("the vol_down key press down");
+    }
+    if(value[0]==1 && value[1]==1 && value[2]==1 &&  value[3]==1 &&  value[4]==1)
+    {
+        ret=SUCCESS;
+        break;
+    } 
+    }
+	return ret;
 }
 
-/**
-* Methods must be implemented by module.
-*/
 static struct mmi_module_methods_t module_methods = {
     .module_init = module_init,
     .module_deinit = module_deinit,
     .module_run = module_run,
     .module_stop = module_stop,
 };
-
 /**
 * Every mmi module must have a data structure named MMI_MODULE_INFO_SYM
 * and the fields of this data structure must be initialize in strictly sequence as definition,

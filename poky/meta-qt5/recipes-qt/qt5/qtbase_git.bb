@@ -20,6 +20,7 @@ LIC_FILES_CHKSUM = " \
 # 5.9.meta-qt5-shared.6
 SRC_URI += "\
     file://0001-Add-linux-oe-g-platform.patch \
+	file://0001_1-support-opengl-offscreen-in-linuxfb.patch \
     file://0002-cmake-Use-OE_QMAKE_PATH_EXTERNAL_HOST_BINS.patch \
     file://0003-qlibraryinfo-allow-to-set-qt.conf-from-the-outside-u.patch \
     file://0004-configure-bump-path-length-from-256-to-512-character.patch \
@@ -35,6 +36,9 @@ SRC_URI += "\
 # LGPL-3.0 is used only in src/plugins/platforms/android/extract.cpp
 
 # for syncqt
+DEPENDS += "libcutils liblog system-core"
+DEPENDS += "libhardware"
+DEPENDS += "libui"
 RDEPENDS_${PN}-tools += "perl"
 
 # workaround for gold bug:
@@ -70,7 +74,7 @@ PACKAGECONFIG_DISTRO ?= ""
 PACKAGECONFIG_RELEASE ?= "release"
 # This is in qt5.inc, because qtwebkit-examples are using it to enable ca-certificates dependency
 # PACKAGECONFIG_OPENSSL ?= "openssl"
-PACKAGECONFIG_DEFAULT ?= "dbus udev evdev widgets tools libs freetype tests linuxfb no-opengl examples"
+PACKAGECONFIG_DEFAULT ?= "dbus udev evdev widgets tools libs freetype tests linuxfb gles2 examples"
 
 PACKAGECONFIG ?= " \
     ${PACKAGECONFIG_RELEASE} \
@@ -110,12 +114,12 @@ PACKAGECONFIG[zlib] = "-system-zlib,-qt-zlib,zlib"
 PACKAGECONFIG[pcre] = "-system-pcre,-qt-pcre,pcre"
 PACKAGECONFIG[eglfs] = "-eglfs,-no-eglfs,drm"
 PACKAGECONFIG[gl] = "-opengl desktop,,virtual/libgl"
-PACKAGECONFIG[gles2] = "-opengl es2,,virtual/libgles2 virtual/egl"
+PACKAGECONFIG[gles2] = "-opengl es2,,adreno"
 PACKAGECONFIG[no-opengl] = "-no-opengl"
 PACKAGECONFIG[tslib] = "-tslib,-no-tslib,tslib"
 PACKAGECONFIG[cups] = "-cups,-no-cups,cups"
 PACKAGECONFIG[dbus] = "-dbus,-no-dbus,dbus"
-PACKAGECONFIG[xcb] = "-xcb -xcb-xlib -system-xcb,-no-xcb,libxcb xcb-util-wm xcb-util-image xcb-util-keysyms xcb-util-renderutil"
+#PACKAGECONFIG[xcb] = "-xcb -xcb-xlib -system-xcb,-no-xcb,libxcb xcb-util-wm xcb-util-image xcb-util-keysyms xcb-util-renderutil"
 PACKAGECONFIG[sql-ibase] = "-sql-ibase,-no-sql-ibase"
 PACKAGECONFIG[sql-mysql] = "-sql-mysql -mysql_config ${STAGING_BINDIR_CROSS}/mysql_config,-no-sql-mysql,mysql5"
 PACKAGECONFIG[sql-psql] = "-sql-psql,-no-sql-psql,postgresql"
@@ -136,8 +140,8 @@ PACKAGECONFIG[fontconfig] = "-fontconfig,-no-fontconfig,fontconfig"
 PACKAGECONFIG[gtk] = "-gtk,-no-gtk,gtk+3"
 PACKAGECONFIG[directfb] = "-directfb,-no-directfb,directfb"
 PACKAGECONFIG[linuxfb] = "-linuxfb,-no-linuxfb"
-PACKAGECONFIG[kms] = "-kms,-no-kms,drm virtual/egl"
-PACKAGECONFIG[gbm] = "-gbm,-no-gbm,virtual/mesa"
+#PACKAGECONFIG[kms] = "-kms,-no-kms,drm virtual/egl"
+#PACKAGECONFIG[gbm] = "-gbm,-no-gbm,virtual/mesa"
 PACKAGECONFIG[icu] = "-icu,-no-icu,icu"
 PACKAGECONFIG[udev] = "-libudev,-no-libudev,udev"
 PACKAGECONFIG[openssl] = "-openssl,-no-openssl,openssl,libssl"

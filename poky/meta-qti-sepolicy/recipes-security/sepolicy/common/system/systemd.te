@@ -71,7 +71,10 @@ userdebug_or_eng(`
              type initrc_t;
              type systemd_logind_var_run_t;
         ')
+        #peeta
+        allow systemd_logind_t init_var_run_t:file { create read open write rename unlink getattr setattr };
+        allow systemd_logind_t init_var_run_t:dir { read open read add_name remove_name write getattr search };
         allow systemd_logind_t init_var_run_t:sock_file write;
         allow systemd_logind_t initrc_t:unix_stream_socket connectto;
         allow systemd_logind_t systemd_logind_var_run_t:sock_file write;
- ')
+')

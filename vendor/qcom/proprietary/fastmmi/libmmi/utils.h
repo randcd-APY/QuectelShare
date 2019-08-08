@@ -55,6 +55,7 @@ int delete_file(const char *file,int limit);
 int copy_file(char *src, char *dest);
 bool check_file_exist(const char *path);
 int exe_cmd(callback cb, exec_cmd_t * exec_cmd);
+int exe_cmd_1(callback cb, exec_cmd_t_1 * exec_cmd) ;
 int fork_daemon(const char *filepath,char **args,int* cid);
 
 bool is_proc_exist(int pid);

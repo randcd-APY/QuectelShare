@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014,2016, Qualcomm Technologies, Inc.
+ * Copyright (c) 2014-2017, Qualcomm Technologies, Inc.
  * All Rights Reserved.
  * Confidential and Proprietary - Qualcomm Technologies, Inc.
  */
@@ -16,7 +16,7 @@ static char input_file[PATH_MAX];
 static char output[PATH_MAX];
 static char output_file[PATH_MAX];
 
-static exec_cmd_t execmd;
+static int g_pid = -1;
 static pthread_mutex_t g_mutex;
 static int sim_state[MAX_SIM_NUM];
 
@@ -25,15 +25,19 @@ static int prepare_params() {
     char str[256] = "card status";
 
     fp = fopen(input_file, "w");
-    if(fp == NULL)
+    if(fp == NULL) {
+        ALOGE("file(%s) open fail, error=%s", input_file, strerror(errno));
         return -1;
+    }
 
     fwrite(str, 1, strlen(str), fp);
     fclose(fp);
     /*output file empty */
     fp = fopen(output_file, "w");
-    if(fp == NULL)
+    if(fp == NULL) {
+        ALOGE("file(%s) open fail, error=%s", output_file, strerror(errno));
         return -1;
+    }
     fclose(fp);
     return 0;
 }
@@ -41,14 +45,18 @@ static int prepare_params() {
 static void parse_sim_state() {
     char line[1024] = { 0, };
     bool found = false;
+    bool simExist = false;
     int index = 0;
 
+    ALOGI("start parse simcard state");
     FILE *file = fopen(output_file, "r");
 
     if(file == NULL) {
-        ALOGE("%s,open fail", output_file);
+        ALOGE("file(%s) open fail, error=%s", output_file, strerror(errno));
         return;
     }
+
+    memset(sim_state, 0, sizeof(sim_state));
 
     while(fgets(line, sizeof(line), file) != NULL) {
 
@@ -58,20 +66,27 @@ static void parse_sim_state() {
 
         if(found) {
             found = false;
-            ALOGE("found one card : %s\n", line);
             if(strstr(line, JUSTIFY_KEY) != NULL) {
-                sim_state[index] = 1;
+                simExist = true;
+                if(index >= 0 && index < MAX_SIM_NUM) {
+                    sim_state[index] = 1;
+                    ALOGI("FFBM SIM: found simcard%d\n", index);
+                } else {
+                    ALOGE("Sim card not found, index error: ", index);
+                }
             }
         }
 
         if(!strncmp(line, "CARD", 4)) {
-            ALOGI("FFBM SIM: card found : %s\n", line);
             get_device_index(line, "CARD", &index);
             found = true;
             continue;
         }
     }
 
+    if(!simExist) {
+        ALOGE("FFBM SIM: no found simcard\n");
+    }
     fclose(file);
 }
 
@@ -80,73 +95,99 @@ static void *thread_test(void *) {
 
     int ret = FAILED;
     char buf[SIZE_1K] = { 0 };
+    exec_cmd_t execmd;
 
     if(!check_file_exist(get_value("qmi_simple_ril_test"))) {
+        ALOGE("file(%s) not exist\n", get_value("qmi_simple_ril_test"));
         return NULL;
     }
     char *args[4] = { (char *) get_value("qmi_simple_ril_test"), input, output, NULL };
     execmd.cmd = get_value("qmi_simple_ril_test");
     execmd.params = args;
-    execmd.pid = -1;
+    execmd.pid = &g_pid;
+    execmd.exit_str = NULL;
     execmd.result = buf;
     execmd.size = sizeof(buf);
+    {
+        char temp_agrs[512] = { 0 };
+        for(int j = 1; j < sizeof(args) / sizeof(char *) && NULL != args[j]; j++)
+            snprintf(temp_agrs + strlen(temp_agrs), sizeof(temp_agrs) - strlen(temp_agrs), "%s ", args[j]);
+        ALOGI("exec command:'%s', args:%s", execmd.cmd, temp_agrs);
+    }
     exe_cmd(NULL, &execmd);
+    ALOGI("'%s' exec result: %s", execmd.cmd, MMI_STR(execmd.result));
+
     return NULL;
 }
+static bool is_thread_created = false;
 
 static void start_test(const mmi_module_t * module) {
-    ALOGI("%s,start\n", __FUNCTION__);
+    ALOGI("start test for module:[%s]\n", module->name);
     int ret = -1;
-
+	is_thread_created = false;
     prepare_params();
     ret = pthread_create((pthread_t *) & module->run_pid, NULL, thread_test, NULL);
-    if(ret < 0)
+    if(ret < 0) {
+        ALOGE("Thread create fail, error=%s\n", strerror(errno));
         return;
+    }
+	is_thread_created = true;
+    ALOGD("create thread(thread id=%lu) for module:[%s]", module->run_pid, module->name);
 
     /**waiting sometime and then kill the process*/
     usleep(1000 * 3000);
-
-    if(execmd.pid > 0)
-        kill_proc(execmd.pid);
+    kill_proc(g_pid);
 
     pthread_join(module->run_pid, NULL);
     /**parse output file*/
     parse_sim_state();
-    ALOGI("%s,finished\n", __FUNCTION__);
 }
 
 static int32_t module_init(const mmi_module_t * module, unordered_map < string, string > &params) {
-    ALOGI("%s start ", __FUNCTION__);
     if(module == NULL) {
-        ALOGE("%s NULL point  received ", __FUNCTION__);
+        ALOGE("NULL point received");
         return FAILED;
     }
+    ALOGI("module init start for module:[%s]", module->name);
+
     pthread_mutex_init(&g_mutex, NULL);
     snprintf(input_file, sizeof(input_file), "%s%s", get_value(KEY_FTM_AP_DIR), SIM_INPUT_FILE);
     snprintf(output_file, sizeof(output_file), "%s%s", get_value(KEY_FTM_AP_DIR), SIM_OUTPUT_FILE);
     snprintf(input, sizeof(input), "input=%s", input_file);
     snprintf(output, sizeof(output), "output=%s", output_file);
-    ALOGI("module_init over , input:%s. output:%s",input,output);
+    ALOGI("input file: '%s' for module:[%s]", input_file, module->name);
+    ALOGI("output file: '%s' for module:[%s]", output_file, module->name);
+
+    ALOGI("module init finished for module:[%s]", module->name);
     return SUCCESS;
 }
 
 static int32_t module_deinit(const mmi_module_t * module) {
-    ALOGI("%s start.", __FUNCTION__);
     if(module == NULL) {
-        ALOGE("%s NULL point  received ", __FUNCTION__);
+        ALOGE("NULL point received");
         return FAILED;
     }
+    ALOGI("module deinit start for module:[%s]", module->name);
+
+    ALOGI("module deinit finished for module:[%s]", module->name);
     return SUCCESS;
 }
 
 static int32_t module_stop(const mmi_module_t * module) {
-    ALOGI("%s start.", __FUNCTION__);
     if(module == NULL) {
-        ALOGE("%s NULL point  received ", __FUNCTION__);
+        ALOGE("NULL point received");
         return FAILED;
     }
+    ALOGI("module stop start for module:[%s]", module->name);
 
-    pthread_kill(module->run_pid, SIGUSR1);
+    kill_proc(g_pid);
+	if(is_thread_created)
+		kill_thread(module->run_pid);
+	else
+		ALOGE("NULL Thread for module:[%s]", module->name);
+
+    ALOGI("test thread(thread id=%lu) be killed for module:[%s]", module->run_pid, module->name);
+    ALOGI("module stop finished for module:[%s]", module->name);
     return SUCCESS;
 }
 
@@ -160,17 +201,17 @@ static int32_t module_run(const mmi_module_t * module, const char *cmd, unordere
     char buf[SIZE_1K] = { 0 };
 
     if(!module || !cmd) {
-        ALOGE("%s NULL point  received ", __FUNCTION__);
+        ALOGE("NULL point received");
         return FAILED;
     }
-    ALOGI("%s start.command : %s", __FUNCTION__, cmd);
+    ALOGI("module run start for module:[%s], subcmd=%s", module->name, MMI_STR(cmd));
 
     pthread_mutex_lock(&g_mutex);
     start_test(module);
     pthread_mutex_unlock(&g_mutex);
 
     for(int i = 0; i < MAX_SIM_NUM; i++)
-        ALOGI("%s card[%d] status: [%s]", __FUNCTION__, i, sim_state[i] ? "present" : "absent");
+        ALOGI("simCard%d status: %s", i, sim_state[i] ? "present" : "absent");
 
     if(!strcmp(params["sub"].c_str(), "0")) {
         if(sim_state[0])
@@ -180,14 +221,19 @@ static int32_t module_run(const mmi_module_t * module, const char *cmd, unordere
         if(sim_state[1])
             ret = SUCCESS;
         snprintf(buf, sizeof(buf), "status = %s  \n", sim_state[1] ? "detected" : "not detected");
+    } else {
+        ALOGE("invalid sub parameter, sub=%s", MMI_STR(params["sub"].c_str()));
     }
 
     if(!strcmp(cmd, SUBCMD_MMI)) {
         module->cb_print(params[KEY_MODULE_NAME].c_str(), SUBCMD_MMI, buf, strlen(buf), PRINT_DATA);
     } else if(!strcmp(cmd, SUBCMD_PCBA)) {
         module->cb_print(params[KEY_MODULE_NAME].c_str(), SUBCMD_PCBA, buf, strlen(buf), PRINT_DATA);
+    } else {
+        ALOGE("Received invalid command: %s", MMI_STR(cmd));
     }
 
+    ALOGI("module run finished for module:[%s], subcmd=%s", module->name, MMI_STR(cmd));
    /** Default RUN mmi*/
     return ret;
 }

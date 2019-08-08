@@ -307,6 +307,7 @@ static int restore_result(char *filepath) {
             parse_module(line, module, sizeof(module));
             cur_mod = g_modules_map[(string) module];
             ALOGD("[%s]\n", module);
+            
             if(cur_mod != NULL)
                 memset(cur_mod->data, 0, sizeof(cur_mod->data));    //initial the data field
             continue;
@@ -338,6 +339,7 @@ static int restore_result(char *filepath) {
     fclose(file);
     return 0;
 }
+
 
 static module_info *get_module_by_name(char *module_name) {
     module_info *mod = NULL;
@@ -495,7 +497,8 @@ static int msg_waiting() {
                 int ret = TEMP_FAILURE_RETRY(recv(fd, msg, sizeof(msg_t), MSG_WAITALL));
 
                 i++;
-                ALOGD("module=%s num=%d size=%d\n", msg->module, i, ret);
+                ALOGD("module=%s num=%d msg=%s size=%d\n", msg->module, i,msg->msg, ret);
+                
                 if(ret <= 0) {
                     close(mod->socket_fd);
                     mod->socket_fd = -1;
@@ -731,7 +734,7 @@ static void launch_controller() {
         ALOGE("fork failed\n");
     } else if(pid > 0) {
         mod->pid = pid;
-        ALOGD("child_pid=%d\n", pid);
+        ALOGD("child_pid=%d", pid);
     }
 }
 
@@ -744,6 +747,7 @@ static void launch_clients() {
 
         if(mod != NULL) {
             fork_launch_module(mod);
+            ALOGD("launch module=%s", mod->module);
         }
     }
 }
@@ -1057,16 +1061,23 @@ static bool pre_config() {
 
     create_func_map();
     ALOGI("mmi gr_init complete.");
-
-    if(!check_file_exist(MMI_XML_FILE)) {
-        if(SUCCESS != copy_config_file()) {
+    
+     ALOGI("@@@@@@@@@@@@@@@ %s\n",MMI_XML_FILE);
+    if(!check_file_exist(MMI_XML_FILE)) 
+    {
+        if(SUCCESS != copy_config_file()) 
+        {
+         ALOGI("start mmi now,enjoy it  xxxxxx!");   
             return false;
         }
     }
+    
     else if(true == is_create_mmi_cfg() && SUCCESS != create_mmi_cfg()) {
+        ALOGI("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
         return false;
     }
 
+     ALOGI("start mmi now,enjoy it  xxxxxx!");
     return true;
 }
 
@@ -1145,6 +1156,7 @@ int main(int argc, char **argv) {
     }
 
     /*Initialize configuration */
+     ALOGI("start mmi now,enjoy it  xxxxxx!\n");
     ret = init_config(MMI_PCBA_CONFIG);
     if(ret < 0)
         return -1;
@@ -1163,7 +1175,7 @@ int main(int argc, char **argv) {
     start_threads();
 
     /*Launch threads */
-    launch_controller();
+   launch_controller();
     launch_clients();
 
     /*Start Background Test */
@@ -1173,5 +1185,6 @@ int main(int argc, char **argv) {
     sem_wait(&g_sem_exit);
     write_file(WAKE_UNLOCK, "mmi");
   out:sem_close(&g_sem_exit);
-    return 0;
+   return 0; 
+   
 }

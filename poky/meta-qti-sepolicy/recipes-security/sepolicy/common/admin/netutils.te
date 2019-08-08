@@ -28,3 +28,14 @@
 init_use_inherited_script_ptys(ping_t)
 init_write_utmp(ping_t)
 init_read_utmp(ping_t)
+
+#============= Peeta:ping_t ==============
+gen_require(`
+        type gpu_device_t;
+        type ion_device_t;
+        type shared_log_device_t;
+')
+allow ping_t gpu_device_t:chr_file { read write };
+allow ping_t initrc_t:unix_stream_socket { read write };
+allow ping_t ion_device_t:chr_file read;
+allow ping_t shared_log_device_t:chr_file { read write };

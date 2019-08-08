@@ -155,6 +155,85 @@ int exe_cmd(callback cb, exec_cmd_t * exec_cmd) {
     return SUCCESS;
 }
 
+int exe_cmd_1(callback cb, exec_cmd_t_1 * exec_cmd) {
+    int pipefd[2];
+    int cpid, i = 0, j = 0, ret = FAILED;
+    char line[SIZE_1K] = { 0 };
+
+    if(exec_cmd == NULL) {
+        ALOGE("input cmd is NULL");
+        return ret;
+    }
+
+    if(pipe(pipefd) == -1) {
+        ALOGE("create pipe file fail, error=%s\n", strerror(errno));
+        return FAILED;
+    }
+
+    cpid = fork();
+    if(cpid == -1) {
+        ALOGE("fork fail, error=%s\n", strerror(errno));
+        return FAILED;
+    } else if(cpid == 0) {      /* Child stdout from pipe */
+        close(pipefd[0]);
+
+        if(dup2(pipefd[1], STDOUT_FILENO) == -1) {
+            ALOGE("fail to redirect std output and exit, error=%s\n", strerror(errno));
+            _exit(100);
+        }
+
+        if(dup2(pipefd[1], STDERR_FILENO) == -1) {
+            ALOGE("fail to redirect std err and exit, error=%s\n", strerror(errno));
+            _exit(100);
+        }
+
+        ALOGI("start exec command:'%s', pid=%d\n", exec_cmd->cmd, getpid());
+        ret = execv(exec_cmd->cmd, exec_cmd->params);
+        if(ret == FAILED) {
+            ALOGE("execv command(%s) fail and exit, error=%s\n", exec_cmd->cmd, strerror(errno));
+            _exit(100);
+        }
+    } else {                    /* Parent read */
+        signal(SIGCHLD, SIG_IGN);
+        exec_cmd->pid = cpid;
+        close(pipefd[1]);
+        while((read(pipefd[0], &line[i], 1) > 0) && (j < exec_cmd->size)) {
+            if(i < SIZE_1K - 1 && line[i++] == '\n') {
+                /**ignore space line*/
+                if(strlen(line) > 1)
+                    strlcat(exec_cmd->result, line, exec_cmd->size);
+
+                if(cb != NULL)
+                    cb(exec_cmd->result, strlen(exec_cmd->result));
+
+                /**Check if need to force exit*/
+                if(exec_cmd->exit_str != NULL && strstr(line, exec_cmd->exit_str) != NULL) {
+                    ALOGI("'%s' need to force exit\n", exec_cmd->cmd);
+                    break;
+                }
+
+                memset(line, 0, sizeof(line));
+                i = 0;
+            }
+            j++;
+        }
+
+        ALOGI("kill command '%s'(pid=%d)\n", exec_cmd->cmd, cpid);
+        kill(cpid, SIGTERM);
+
+        do {
+            ret = waitpid(cpid, NULL, 0);
+            if(cpid == ret) {
+                ALOGI("'%s'(pid=%d) exit\n", exec_cmd->cmd, cpid);
+            }
+        } while(ret == FAILED && errno == EINTR);
+
+        close(pipefd[0]);
+    }
+
+    return SUCCESS;
+}
+
 int get_device_index(char *device, const char *path, int *deviceIndex) {
     if(device == NULL || path == NULL)
         return -1;

@@ -27,8 +27,8 @@ do_install() {
          install -m 0644 ${SRC_DIR}/lib/systemd/system/ql-fb-service.service \
          ${D}${systemd_unitdir}/system/ql-fb-service.service
 
-         install -d ${D}${sysconfdir}/systemd/system/local-fs-pre.target.wants/
+         install -d ${D}${sysconfdir}/systemd/system/multi-user.target.wants
 
          ln -sf ${systemd_unitdir}/system/ql-fb-service.service \
-         ${D}${sysconfdir}/systemd/system/local-fs-pre.target.wants/ql-fb-service.service
+         ${D}${sysconfdir}/systemd/system/multi-user.target.wants/ql-fb-service.service
 }

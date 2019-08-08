@@ -51,6 +51,8 @@ CXXFLAGS_append += "-I${STAGING_KERNEL_BUILDDIR}/usr/include/media \
 
 FILES_${PN}-dbg  = "${libdir}/.debug/* ${bindir}/.debug/*"
 FILES_${PN} += "/data/FTM_AP"
+FILES_${PN} += "/vendor/etc"
+FILES_${PN} += "/system/bin"
 FILES_${PN} += "${libdir}/*.so"
 FILES_${PN}-dev  = "${libdir}/*.la ${includedir}"
 
@@ -59,13 +61,21 @@ do_install_append() {
     install -m 0755 -d ${D}${dest}
     # create FTM_AP folder
     install -dm0755 ${D}/data/FTM_AP
+	install -dm0755 ${D}/vendor/etc
     # Add mmi.xml file
-    install -m 0755 ${S}/res/config/le/mmi.xml -D ${D}${dest}/mmi.xml
+    #install -m 0755 ${S}/res/config/le/mmi.xml -D ${D}${dest}/mmi.xml
     install -m 0755 ${S}/res/values/path_config_le.xml -D ${D}${dest}/path_config.xml
     install -d ${D}${dest}/layout
     install -m 0755 ${S}/res/layout/*.xml -D ${D}${dest}/layout
     install -m 0755 ${S}/res/values/* -D ${D}${dest}
     install -m 0755 ${S}/res/raw/* -D ${D}${dest}
+	install -m 0755 ${S}/res/audio_config/ftm_test_config -D ${D}/vendor/etc/ftm_test_config
+	install -m 0755 ${S}/res/audio_config/mm-audio-ftm -D ${D}/usr/bin/mm-audio-ftm
+	install -m 0755 ${S}/res/sim_config/qmi_simple_ril_test -D ${D}/system/bin/qmi_simple_ril_test
+	install -m 0755 ${S}/res/listview_config/mmi.cfg -D ${D}/data/FTM_AP/mmi.cfg
+	install -m 0755 ${S}/res/listview_config/mmi-auto.cfg -D ${D}/data/FTM_AP/mmi-auto.cfg
+    install -m 0755 ${S}/res/wifi_config/wpa_supplicant.conf -D ${D}/etc/mmi
+	
     if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
         install -d ${D}${systemd_unitdir}/system/
         install -m 0644 ${WORKDIR}/ffbm_mmi.service -D ${D}${systemd_unitdir}/system/ffbm_mmi.service

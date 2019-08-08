@@ -160,7 +160,10 @@ void target_early_init(void)
 	* is RCM.
 	*/
 	if( board_hardware_id()!= HW_PLATFORM_RCM )
+	{
 		uart_dm_init(1, 0, BLSP1_UART0_BASE);
+		uart_dm_init(2, 0, BLSP1_UART1_BASE);
+	}
 	else
 		return;
 #endif

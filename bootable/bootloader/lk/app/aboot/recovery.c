@@ -34,7 +34,9 @@
 #include <arch/ops.h>
 #include <arch/defines.h>
 #include <malloc.h>
-
+#include <ctype.h>
+	
+#include <platform/timer.h>
 #include <dev/flash.h>
 #include <lib/ptable.h>
 #include <dev/keys.h>
@@ -60,7 +62,7 @@ unsigned boot_into_recovery = 0;
 extern uint32_t get_page_size();
 extern void reset_device_info();
 extern void set_device_root();
-
+extern int fct_uart_getc(int port, bool wait);
 int get_recovery_message(struct recovery_message *out)
 {
 	struct ptentry *ptn;
@@ -369,6 +371,82 @@ static int emmc_get_recovery_msg(struct recovery_message *in)
 	return 0;
 }
 
+/*	
+*value 0 is dbg uart	
+*value 1 is main uart	
+*/	
+static int is_enter_fctmode(int value)	
+{	
+  int i = 0;	
+  int return_value = 0;	
+  int index =0;	
+  int count = 0;	
+  int uart_num = value;	
+  char temp_ch;	
+  char readbuf[64]={0};		
+ printf("input FCT : enter instruction mode\n");	
+  int size = sizeof(readbuf);	
+//  printf("FCT test.\n");	
+#if 1	
+   while(i < 10)	
+   {	
+   //   mdelay(10);	
+     // return_value = getc(&temp_ch);	    	
+     // printf("i = %d, return_value = %d, temp_ch = %d\n",i,return_value, temp_ch);	
+   //   if(return_value == 0 && temp_ch == 0x04)	
+      if(return_value == 0)	
+      { 	
+      //  while(1)	        	
+       //   mdelay(30);	        	
+          temp_ch = fct_uart_getc(uart_num, 2);	          	
+           dprintf(CRITICAL,"%s ch:%c\n", __func__,temp_ch);
+			
+          if((index < size) && ((temp_ch >= 'A' && temp_ch <= 'Z') || (temp_ch >= 'a' && temp_ch <= 'z') || temp_ch == 0x0d || temp_ch == 0x1B)){	
+             if(0x0d == temp_ch){	
+               readbuf[index]='\0';
+		
+               if(0 == strstr(readbuf, "FCT")){	
+                  printf("enter fct\n");	
+                  return 1;	
+               }else{	
+                  count++;	
+                  if(count < 10){	
+                     printf("Please input again, remaining times is %d\n", 10 - count);	
+                     index = 0;	
+                     memset(readbuf , 0 , sizeof(readbuf));	
+                     continue;	
+                  }	
+                  else{	
+                      printf("exit fct\n");	
+                     return 0;	
+                  }	
+              }	
+	            }else if(0x1B == temp_ch){	
+                printf("exit fct: temp_ch = %d\n", temp_ch);	
+               return 0;	
+            }	
+            else{	
+               printf("index = %d\n",index);	
+               readbuf[index++] = toupper(temp_ch);	
+            }	
+          }else{	
+             printf("enter next loop\n");	
+             index = 0;	
+            // i++;	
+             memset(readbuf , 0 , sizeof(readbuf));	
+             break;	
+          }	
+       }	  	
+ else{	
+        i++;	
+     }		
+  }	
+  	
+#endif	
+  printf(" out fct instruction mode\n");	
+  return 0;	
+}
+
 int _emmc_recovery_init(void)
 {
 	int update_status = 0;
@@ -387,6 +465,14 @@ int _emmc_recovery_init(void)
 			free(msg);
 		return -1;
 	}
+
+		if(keys_get_state(KEY_VOLUMEUP) || is_enter_fctmode(1))
+	{//FCT
+		dprintf(INFO,"FFBM MODE CMD\n");
+		memset(msg->command, 0, 32*sizeof(char));
+		strcpy(msg->command,"ffbm-01");
+		emmc_set_recovery_msg(msg);
+    }
 
 	msg->command[sizeof(msg->command)-1] = '\0'; //Ensure termination
 	if (msg->command[0] != 0 && msg->command[0] != 255) {

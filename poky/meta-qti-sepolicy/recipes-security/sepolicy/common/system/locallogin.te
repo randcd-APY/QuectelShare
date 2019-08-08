@@ -37,3 +37,6 @@ auth_allow_fileops_shadow(local_login_t)
 userdom_allow_fileops(local_login_t)
 init_udgram_socket_set(local_login_t)
 files_rw_var_files(local_login_t)
+
+#peeta
+allow local_login_t var_run_t:file { read getattr open write lock };

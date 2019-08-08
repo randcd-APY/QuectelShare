@@ -244,6 +244,8 @@ case "$1" in
 	then
 		pid=`cat /etc/usb/boot_hsusb_comp`
 		/sbin/usb/compositions/$pid n
+		sleep 1
+		/sbin/usb/compositions/90B6 n
 
 		if [ "$SOFTAP_W_DUN" == "Y" ]
 		then

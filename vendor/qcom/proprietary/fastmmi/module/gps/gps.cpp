@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014,2016, Qualcomm Technologies, Inc.
+ * Copyright (c) 2014-2016, Qualcomm Technologies, Inc.
  * All Rights Reserved.
  * Confidential and Proprietary - Qualcomm Technologies, Inc.
  */
@@ -16,7 +16,7 @@ static char loc_longitude[] = "LON";
 #define EXIT_STR "Exiting GARDEn"
 
 static const mmi_module_t *g_module = NULL;
-static exec_cmd_t execmd;
+static exec_cmd_t_1 execmd;
 static pthread_mutex_t g_mutex;
 
 static void cb_function(char *str, int size) {
@@ -35,8 +35,8 @@ static int start_test(char *buf, uint32_t size, unordered_map < string, string >
     int ret = FAILED;
     bool found = false;
 
-    char *args[12] = { (char *) get_value("garden_app"), (char *) "-z", (char *) "0", (char *) "-u", (char *) "0",
-        (char *) "-q", (char *) "0", (char *) "-A", (char *) params["SVs"].c_str(), (char *) "-B",
+    char *args[10] = { (char *) get_value("garden_app"), (char *) "-z", (char *) "0", (char *) "-u", (char *) "0",
+         (char *) "-A", (char *) params["SVs"].c_str(), (char *) "-B",
         (char *) params["SNR"].c_str(), NULL
     };
     execmd.cmd = get_value("garden_app");
@@ -45,9 +45,18 @@ static int start_test(char *buf, uint32_t size, unordered_map < string, string >
     execmd.result = result;
     execmd.size = sizeof(result);
     execmd.exit_str = EXIT_STR;
-    ret = exe_cmd(cb_function, &execmd);
-    if(ret != SUCCESS)
+    {
+        char temp_agrs[512] = { 0 };
+        for(int j = 1; j < sizeof(args) / sizeof(char *) && NULL != args[j]; j++)
+            snprintf(temp_agrs + strlen(temp_agrs), sizeof(temp_agrs) - strlen(temp_agrs), "%s ", args[j]);
+        ALOGI("exec command:'%s', args:%s", execmd.cmd, temp_agrs);
+    }
+    ret = exe_cmd_1(cb_function, &execmd);
+    if(ret != SUCCESS) {
+        ALOGE("command:'%s' exec fail", execmd.cmd);
         return FAILED;
+    }
+    ALOGI("command:'%s' exec result=%s", execmd.cmd, MMI_STR(execmd.result));
 
     char *p = result;
     char *ptr;
@@ -73,43 +82,49 @@ static int start_test(char *buf, uint32_t size, unordered_map < string, string >
         strlcat(buf, tmp, size);
     }
 
+    ALOGI("GPS test %s", found ? "pass" : "fail");
     return found ? SUCCESS : FAILED;
 }
 
 static int32_t module_init(const mmi_module_t * module, unordered_map < string, string > &params) {
-    ALOGI("%s start ", __FUNCTION__);
-
     if(module == NULL) {
-        ALOGE("%s NULL point  received ", __FUNCTION__);
+        ALOGE("NULL point received");
         return FAILED;
     }
+    ALOGI("module init start for module:[%s]", module->name);
+
     g_module = module;
     pthread_mutex_init(&g_mutex, NULL);
 
+    ALOGI("module init finished for module:[%s]", module->name);
     return SUCCESS;
 }
 
 static int32_t module_deinit(const mmi_module_t * module) {
-    ALOGI("%s start.", __FUNCTION__);
     if(module == NULL) {
-        ALOGE("%s NULL point  received ", __FUNCTION__);
+        ALOGE("NULL point received");
         return FAILED;
     }
+    ALOGI("module deinit start for module:[%s]", module->name);
+
+    ALOGI("module deinit finished for module:[%s]", module->name);
     return SUCCESS;
 }
 
 static int32_t module_stop(const mmi_module_t * module) {
-    ALOGI("%s start.", __FUNCTION__);
     if(module == NULL) {
-        ALOGE("%s NULL point  received ", __FUNCTION__);
+        ALOGE("NULL point received");
         return FAILED;
     }
+    ALOGI("module stop start for module:[%s]", module->name);
 
-    if(execmd.pid > 0)
+    if(execmd.pid > 0) {
         kill_proc(execmd.pid);
+    }
 
     kill_thread(module->run_pid);
 
+    ALOGI("module stop finished for module:[%s]", module->name);
     return SUCCESS;
 }
 
@@ -119,15 +134,15 @@ static int32_t module_stop(const mmi_module_t * module) {
 *
 */
 static int32_t module_run(const mmi_module_t * module, const char *cmd, unordered_map < string, string > &params) {
-
     int ret = FAILED;
     char buf[SIZE_1K] = { 0 };
 
     if(!module || !cmd) {
-        ALOGE("%s NULL point  received ", __FUNCTION__);
+        ALOGE("NULL point received");
         return FAILED;
     }
-    ALOGI("%s start.command :waiting ... %s", __FUNCTION__, cmd);
+    ALOGI("module run start for module:[%s], subcmd=%s", module->name, MMI_STR(cmd));
+
     g_module = module;
 
     if(execmd.pid > 0)
@@ -136,13 +151,14 @@ static int32_t module_run(const mmi_module_t * module, const char *cmd, unordere
     pthread_mutex_lock(&g_mutex);
     ret = start_test(buf, sizeof(buf), params);
     pthread_mutex_unlock(&g_mutex);
-
+/* 
     if(!strcmp(cmd, SUBCMD_MMI)) {
         module->cb_print(params[KEY_MODULE_NAME].c_str(), SUBCMD_MMI, buf, strlen(buf), PRINT_DATA);
     } else if(!strcmp(cmd, SUBCMD_PCBA)) {
         module->cb_print(params[KEY_MODULE_NAME].c_str(), SUBCMD_PCBA, buf, strlen(buf), PRINT_DATA);
-    }
+    } */
 
+    ALOGI("module run finished for module:[%s], subcmd=%s", module->name, MMI_STR(cmd));
    /** Default RUN mmi*/
     return ret;
 }

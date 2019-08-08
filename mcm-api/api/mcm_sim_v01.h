@@ -1606,6 +1606,7 @@ typedef struct {
 #define MCM_SIM_EVENT_REGISTER_RESP_V01 0x0B0F
 #define MCM_SIM_CARD_STATUS_EVENT_IND_V01 0x0B10
 #define MCM_SIM_REFRESH_EVENT_IND_V01 0x0B11
+#define MCM_SMS_STORAGE_IND_V01 0x070A
 
 /** @} */ /* end_namegroup */
 

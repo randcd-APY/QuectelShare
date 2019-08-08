@@ -36,6 +36,7 @@ when       who     what, where, why
 #include <signal.h>
 #include "mcm_client_v01.h"
 #include "mcm_ipc.h"
+#include "mcm_constants.h"
 #include "mcm_ssr_util.h"
 #include "data_port_mapper_v01.h"
 
@@ -458,6 +459,8 @@ int main
   socklen_t addr_len = sizeof(server_addr);
   int32 rc;
 
+  mcm_set_service_ready(MCM_DATA_SERVICE, 0);
+
   /* Set mcm_data_inited to FALSE */
   qmi_mcm_data_msgr_state.mcm_data_inited = FALSE;
   qmi_mcm_data_msgr_state.mcm_data_notifier_inited = FALSE;
@@ -478,6 +481,12 @@ int main
     MCM_DATA_LOG_ERROR("mcm_data_init_srv: Failed with error %d", rc);
     return rc;
   }
+
+  while(mcm_ipc_get_service_is_ready() == 0) {
+    usleep(100000);
+  }
+
+  mcm_set_service_ready(MCM_DATA_SERVICE, 1);
 
   while (1)
   {
@@ -556,6 +565,8 @@ int main
       }
     }
   }
+  mcm_set_service_ready(MCM_DATA_SERVICE, 0);
+
   return MCM_DATA_SUCCESS;
 }
 
@@ -2982,6 +2993,7 @@ static void mcm_data_sig_hdlr
       MCM_DATA_LOG_ERROR("Received unexpected signal %d", signal);
       break;
   }
+  mcm_set_service_ready(MCM_DATA_SERVICE, 0);
   mcm_data_cleanup();
   MCM_DATA_LOG_FUNC_EXIT();
   exit(0);

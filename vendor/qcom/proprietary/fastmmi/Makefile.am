@@ -7,9 +7,13 @@ if AARCH64_32COMPILER
 SUBDIRS = libmmi mmi module/camera
 else
 if ARM64
-SUBDIRS = libmmi mmi qti-system-daemon module/cpu module/battery module/memory module/storage module/wifi module/sysinfo module/usb module/bluetooth module/lcd
-else
+SUBDIRS = libmmi mmi  qti-system-daemon module/cpu module/battery module/memory \
+             module/storage module/wifi module/sysinfo module/sensor module/bluetooth \
+                   module/lcd module/sim module/vibrator module/audio module/key module/gps   module/flashlight     
+else  
 #For 32 bits machine, only compile it directly.
-SUBDIRS = libmmi mmi qti-system-daemon module/cpu module/battery module/memory module/storage module/wifi module/sysinfo module/usb module/bluetooth module/lcd
-endif
+SUBDIRS = libmmi mmi  qti-system-daemon module/cpu module/battery module/memory \
+             module/storage module/wifi module/sysinfo module/sensor module/bluetooth \
+              module/lcd module/sim module/vibrator module/audio module/key  module/gps   module/flashlight               
+endif  
 endif

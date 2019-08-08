@@ -29,8 +29,8 @@ do_install() {
          install -m 0644 ${WORKDIR}/quectel-app/qt/quec_launcher/quec_launcher.service.in \
          ${D}${systemd_unitdir}/system/quec_launcher.service
 
-         install -d ${D}${sysconfdir}/systemd/system/local-fs-pre.target.wants/
+         install -d ${D}${sysconfdir}/systemd/system/multi-user.target.wants/
 
          ln -sf ${systemd_unitdir}/system/quec_launcher.service \
-         ${D}${sysconfdir}/systemd/system/local-fs-pre.target.wants/quec_launcher.service
+         ${D}${sysconfdir}/systemd/system/multi-user.target.wants/quec_launcher.service
 }

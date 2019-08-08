@@ -71,7 +71,14 @@ data_filetrans(qnetmgrd_t, qnetmgrd_data_t, { dir sock_file })
 manage_user_data_files(qnetmgrd_t, qnetmgrd_data_t)
 
 #added by peeta
+gen_require(`
+    type default_t;
+    type shared_log_device_t;
+')
+
 allow qnetmgrd_t initrc_t:unix_stream_socket connectto;
 allow qnetmgrd_t self:tcp_socket { create ioctl };
 allow qnetmgrd_t socket_device_t:dir { write remove_name add_name };
 allow qnetmgrd_t socket_device_t:sock_file { write create unlink };
+allow qnetmgrd_t default_t:dir { search write remove_name add_name getattr };
+allow qnetmgrd_t shared_log_device_t:chr_file { open read write create ioctl getattr setattr };
