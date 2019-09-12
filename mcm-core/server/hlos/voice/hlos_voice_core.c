@@ -164,7 +164,7 @@ void hlos_voice_ind_hdlr_all_call_status_ind()
     mcm_voice_call_ind_msg_v01       hlos_resp;
     cri_voice_call_list_type        *call_list_ptr = NULL;
     cri_voice_call_obj_type         *call_obj_ptr  = NULL;
-    uint8 i, j = 0;
+    uint8_t i, j = 0;
 
     memset(&hlos_resp, NIL, sizeof(mcm_voice_call_ind_msg_v01));
 
@@ -2238,7 +2238,7 @@ void hlos_voice_get_calls_request_handler
     hlos_core_hlos_request_data_type  *hlos_core_hlos_request_data = NULL;
 
     cri_core_error_type                ret_val       = CRI_ERR_GENERAL_V01;
-    uint8 i, j = 0;
+    uint8_t i, j = 0;
 
     UTIL_LOG_MSG("\n hlos_voice_get_calls_request_handler ENTER\n");
 
@@ -2329,7 +2329,7 @@ void hlos_voice_get_call_status_request_handler
     cri_voice_call_obj_type                 *call_obj_ptr                = NULL;
 
     cri_core_error_type                      ret_val                     = CRI_ERR_GENERAL_V01;
-    uint8 i;
+    uint8_t i;
 
     UTIL_LOG_MSG("\n hlos_voice_get_call_status_request_handler ENTER\n");
 
@@ -2438,7 +2438,7 @@ void hlos_voice_mute_request_handler
     hlos_core_hlos_request_data_type        *hlos_core_hlos_request_data = NULL;
 
     cri_core_error_type                      ret_val                     = CRI_ERR_GENERAL_V01;
-    uint8 i;
+    uint8_t i;
 
     int mute_status_changed = 0;
     mcm_voice_mute_ind_msg_v01               hlos_ind;
@@ -3885,7 +3885,7 @@ void hlos_voice_get_e911_state_info_handler
     hlos_core_hlos_request_data_type  *hlos_core_hlos_request_data = NULL;
 
     cri_core_error_type                ret_val       = CRI_ERR_NONE_V01;
-    uint8 i, j = 0;
+    uint8_t i, j = 0;
 
     UTIL_LOG_MSG("\n hlos_voice_get_e911_state_info_handler ENTER\n");
 

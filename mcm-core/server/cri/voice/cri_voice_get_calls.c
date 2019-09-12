@@ -18,7 +18,7 @@ cri_core_error_type cri_voice_get_calls_request_get_current_all_calls(cri_voice_
 
        if (NULL != (*call_list_dptr))
        {
-          uint32 num_of_calls;
+          uint32_t num_of_calls;
           cri_voice_call_obj_type** call_obj_dptr;
 
           cri_voice_cache_type *call_info_ptr = cri_voice_core_get_call_info();
@@ -36,7 +36,7 @@ cri_core_error_type cri_voice_get_calls_request_get_current_all_calls(cri_voice_
               if (NULL != ((*call_list_dptr)->calls_dptr) &&
                   NULL != call_obj_dptr)
               {
-                 uint32 i;
+                 uint32_t i;
                  for (i=0; i<num_of_calls; i++)
                  {
                      (*call_list_dptr)->calls_dptr[i] = (call_obj_dptr[i]);
@@ -67,7 +67,7 @@ cri_core_error_type cri_voice_get_calls_request_get_current_specific_calls(cri_v
            (*call_list_dptr)->num_of_calls = tmp_call_list_ptr->num_of_calls;
            if (is_specific_call_checker)
            {
-               uint32 i;
+               uint32_t i;
                for (i=0; i<tmp_call_list_ptr->num_of_calls; i++)
                {
                    if (!is_specific_call_checker(tmp_call_list_ptr->calls_dptr[i]))
@@ -81,8 +81,8 @@ cri_core_error_type cri_voice_get_calls_request_get_current_specific_calls(cri_v
            {
                (*call_list_dptr)->calls_dptr = util_memory_alloc(sizeof(cri_voice_call_obj_type *) * (*call_list_dptr)->num_of_calls);
 
-               uint32 iter = 0;
-               uint32 i;
+               uint32_t iter = 0;
+               uint32_t i;
 
                if (NULL != ((*call_list_dptr)->calls_dptr))
                {
@@ -124,7 +124,7 @@ cri_core_error_type cri_voice_get_calls_request_get_current_specific_calls_with_
            (*call_list_dptr)->num_of_calls = tmp_call_list_ptr->num_of_calls;
            if (is_specific_call_checker)
            {
-               uint32 i;
+               uint32_t i;
                for (i=0; i<tmp_call_list_ptr->num_of_calls; i++)
                {
                    if (!is_specific_call_checker(tmp_call_list_ptr->calls_dptr[i], param))
@@ -140,8 +140,8 @@ cri_core_error_type cri_voice_get_calls_request_get_current_specific_calls_with_
 
                if (NULL != ((*call_list_dptr)->calls_dptr))
                {
-                   uint32 iter = 0;
-                   uint32 i;
+                   uint32_t iter = 0;
+                   uint32_t i;
                    for (i=0; i<tmp_call_list_ptr->num_of_calls; i++)
                    {
                       if ( !is_specific_call_checker || is_specific_call_checker(tmp_call_list_ptr->calls_dptr[i], param) )

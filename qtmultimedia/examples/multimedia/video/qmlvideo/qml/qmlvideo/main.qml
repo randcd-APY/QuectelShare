@@ -205,9 +205,10 @@ Rectangle {
                             sceneSource = ""
                         } else {
                             scene.parent = root
-                            scene.color = root.bgColor
+                            scene.color = "black"
                             scene.buttonHeight = d.buttonHeight
                             scene.source1 = source1
+                            console.log("[qmlvideo] VideoItem"  + source1)
                             scene.source2 = source2
                             scene.volume = volume
                             scene.anchors.fill = root

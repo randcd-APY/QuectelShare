@@ -40,8 +40,8 @@ cri_voice_call_obj_type* cri_voice_call_list_find_by_call_bit(const util_list_in
 
 // get call objects
 typedef boolean (*cri_voice_call_obj_filter_type)(const cri_voice_call_obj_type*);
-void cri_voice_call_list_get_filtered_call_objects(const util_list_info_type* call_list_ptr, cri_voice_call_obj_filter_type filter, uint32 *num_of_calls, cri_voice_call_obj_type*** call_obj_tptr);
-void cri_voice_call_list_get_filtered_call_objects_with_filter_param(const util_list_info_type* call_list_ptr, boolean (*filter)(const cri_voice_call_obj_type*, const void* filter_param), const void* filter_param, uint32 *num_of_calls, cri_voice_call_obj_type*** call_obj_tptr);
+void cri_voice_call_list_get_filtered_call_objects(const util_list_info_type* call_list_ptr, cri_voice_call_obj_filter_type filter, uint32_t *num_of_calls, cri_voice_call_obj_type*** call_obj_tptr);
+void cri_voice_call_list_get_filtered_call_objects_with_filter_param(const util_list_info_type* call_list_ptr, boolean (*filter)(const cri_voice_call_obj_type*, const void* filter_param), const void* filter_param, uint32_t *num_of_calls, cri_voice_call_obj_type*** call_obj_tptr);
 
 // logging
 void cri_voice_call_list_dump_by_cri_call_id(const util_list_info_type* call_list_ptr, uint8_t cri_call_id);

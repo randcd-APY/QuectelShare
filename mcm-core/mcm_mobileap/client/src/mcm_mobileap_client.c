@@ -45,10 +45,10 @@ QCMAP Client Implementation
 
 mcm_mobileap_cb_t mcm_mobileap_config;
 int token_id =0 ;
-uint8 services_available = FALSE;
-uint8 deinit_called = FALSE;
-uint8 SIGTERM_received = FALSE;
-uint16 service_list = MCM_MOBILEAP_V01;
+uint8_t services_available = FALSE;
+uint8_t deinit_called = FALSE;
+uint8_t SIGTERM_received = FALSE;
+uint16_t service_list = MCM_MOBILEAP_V01;
 mcm_mobileap_enable_resp_msg_v01 *mcm_mobileap_enable_resp_msg = NULL;
 mcm_mobileap_disable_resp_msg_v01 *mcm_mobileap_disable_resp_msg = NULL;
 mcm_mobileap_bring_up_wwan_resp_msg_v01 *mcm_mobileap_bring_up_wwan_resp_msg = NULL;
@@ -64,32 +64,32 @@ mcm_client_not_require_resp_msg_v01  *mcm_client_not_require_resp_msg = NULL;
 void mcm_mobileap_async_cb
 (
   mcm_client_handle_type hndl,
-  uint32                 msg_id,
+  uint32_t                 msg_id,
   void                  *resp_c_struct,
-  uint32                 resp_len,
+  uint32_t                 resp_len,
   void                  *token_id
  );
 
 static void mcm_mobileap_ind_cb
 (
   mcm_client_handle_type hndl,
-  uint32                 msg_id,
+  uint32_t                 msg_id,
   void                  *ind_c_struct,
-  uint32                 ind_len
+  uint32_t                 ind_len
 );
 
 
-int16 mcm_mobileap_check_port (uint32 sport);
+int16_t mcm_mobileap_check_port (uint32_t sport);
 
-int16 check_port (uint32 sport);
+int16_t check_port (uint32_t sport);
 
-int16 check_proto (uint8 sport);
+int16_t check_proto (uint8_t sport);
 
-int16 check_tos (uint8 tos);
+int16_t check_tos (uint8_t tos);
 
-int mcm_mobileap_srv_mgr_service_handle (int handle, int require_flag, uint16 service_list);
+int mcm_mobileap_srv_mgr_service_handle (int handle, int require_flag, uint16_t service_list);
 
-int16 mcm_mobileap_check_port (uint32 sport)
+int16_t mcm_mobileap_check_port (uint32_t sport)
 {
   if((sport > MCM_MOBILEAP_PORT_MAX_VALUE) || (sport < 1) )
   {
@@ -115,7 +115,7 @@ int16 mcm_mobileap_check_port (uint32 sport)
  @sideefects
    None
 =========================================================================*/
-int16 check_port (uint32 sport)
+int16_t check_port (uint32_t sport)
 {
   if((sport > MCM_MOBILEAP_PORT_MAX_VALUE) || (sport < 1) )
   {
@@ -141,7 +141,7 @@ int16 check_port (uint32 sport)
  @sideefects
    None
 =========================================================================*/
-int16 check_proto (uint8 sport)
+int16_t check_proto (uint8_t sport)
 {
   if( sport > MAX_PROTO_VALUE )
   {
@@ -167,7 +167,7 @@ int16 check_proto (uint8 sport)
  @sideefects
    None
 =========================================================================*/
-int16 check_tos (uint8 tos)
+int16_t check_tos (uint8_t tos)
 {
   if( tos > MAX_TOS_VALUE )
   {
@@ -254,7 +254,7 @@ int mcm_mobileap_srv_mgr_service_handle
 (
   int           handle,
   int           require_flag,
-  uint16        service_list
+  uint16_t        service_list
 )
 {
   int ret_val = MCM_ERROR_GENERIC_V01;
@@ -382,9 +382,9 @@ int mcm_mobileap_srv_mgr_service_handle
 void mcm_mobileap_async_cb
 (
   mcm_client_handle_type hndl,
-  uint32                 msg_id,
+  uint32_t                 msg_id,
   void                  *resp_c_struct,
-  uint32                 resp_c_struct_len,
+  uint32_t                 resp_c_struct_len,
   void                  *token_id
  )
 {
@@ -659,9 +659,9 @@ switch(msg_id)
 static void mcm_mobileap_ind_cb
 (
   mcm_client_handle_type hndl,
-  uint32                 msg_id,
+  uint32_t                 msg_id,
   void                  *ind_data,
-  uint32                 ind_buf_len
+  uint32_t                 ind_buf_len
 )
 {
   mcm_mobileap_unsol_event_ind_msg_v01 *ind_msg = (mcm_mobileap_unsol_event_ind_msg_v01 *)ind_data;
@@ -819,8 +819,8 @@ int main(int argc, char **argv)
 {
 
   char scan_string[MCM_MOBILEAP_MAX_FILE_PATH_LEN] = {0};
-  uint8 type;
-  uint32 error_num, opt= 0, num_entries, tmp_input;
+  uint8_t type;
+  uint32_t error_num, opt= 0, num_entries, tmp_input;
 
   /* Register the sighandlers, so the app may be shutdown with a
      kill command.*/
@@ -1070,7 +1070,7 @@ int main(int argc, char **argv)
       LOG_MSG_INFO1("Entered case: %d:", opt, 0,0);
       mcm_mobileap_disable_req_msg_v01 mcm_mobileap_disable_req_msg;
       mcm_error_t_v01 mcm_error = 0;
-      uint32 resp_cb_data = 2;
+      uint32_t resp_cb_data = 2;
 
       mcm_mobileap_disable_resp_msg = (mcm_mobileap_disable_resp_msg_v01 *)malloc(sizeof(mcm_mobileap_disable_resp_msg_v01));
 
@@ -1287,7 +1287,7 @@ int main(int argc, char **argv)
         if ( check_proto(tmp_input) == 0 )
           break;
       }
-      add_static_nat_req_msg.nat_entry_config.port_fwding_protocol = (uint8)tmp_input;
+      add_static_nat_req_msg.nat_entry_config.port_fwding_protocol = (uint8_t)tmp_input;
       while (TRUE)
       {
         printf("   Please input port_fwding_private_ip(xxx.xxx.xxx.xxx)   : ");
@@ -1314,7 +1314,7 @@ int main(int argc, char **argv)
         if(check_port (tmp_input) == 0 )
           break;
       }
-      add_static_nat_req_msg.nat_entry_config.port_fwding_private_port = (uint16)tmp_input;
+      add_static_nat_req_msg.nat_entry_config.port_fwding_private_port = (uint16_t)tmp_input;
 
       while (TRUE)
       {
@@ -1328,10 +1328,10 @@ int main(int argc, char **argv)
         if(check_port (tmp_input) == 0 )
           break;
       }
-      add_static_nat_req_msg.nat_entry_config.port_fwding_global_port = (uint16)tmp_input;
+      add_static_nat_req_msg.nat_entry_config.port_fwding_global_port = (uint16_t)tmp_input;
 
       mcm_error_t_v01 mcm_error;
-      uint32 mcm_err_num;
+      uint32_t mcm_err_num;
 
       MCM_MOBILEAP_LOG_FUNC_ENTRY();
 
@@ -1485,7 +1485,7 @@ int main(int argc, char **argv)
         if ( check_proto(tmp_input) == 0 )
         break;
       }
-      delete_static_nat_req_msg.snat_entry.port_fwding_protocol = (uint8)tmp_input;
+      delete_static_nat_req_msg.snat_entry.port_fwding_protocol = (uint8_t)tmp_input;
       while (TRUE)
       {
         printf("   Please input port_fwding_private_ip(xxx.xxx.xxx.xxx)   : ");
@@ -1511,7 +1511,7 @@ int main(int argc, char **argv)
           break;
       }
 
-      delete_static_nat_req_msg.snat_entry.port_fwding_private_port = (uint16)tmp_input;
+      delete_static_nat_req_msg.snat_entry.port_fwding_private_port = (uint16_t)tmp_input;
 
       while (TRUE)
       {
@@ -1525,7 +1525,7 @@ int main(int argc, char **argv)
           break;
       }
 
-      delete_static_nat_req_msg.snat_entry.port_fwding_global_port = (uint16)tmp_input;
+      delete_static_nat_req_msg.snat_entry.port_fwding_global_port = (uint16_t)tmp_input;
 
       MCM_MOBILEAP_LOG_FUNC_ENTRY();
 
@@ -1710,7 +1710,7 @@ int main(int argc, char **argv)
     {
       mcm_mobileap_set_nat_type_req_msg_v01 set_nat_type_req_msg;
       mcm_error_t_v01 mcm_error;
-      uint32 mcm_err_num;
+      uint32_t mcm_err_num;
       LOG_MSG_INFO1("Entered case: %d:", opt, 0,0);
       while (TRUE)
       {
@@ -1861,12 +1861,12 @@ int main(int argc, char **argv)
       struct in6_addr                     ip6_dst_addr;
       int                                 input_len;
       int                                 inc;
-      uint32                             result;
+      uint32_t                             result;
       int                                 ip4_res;
       int                                 ip6_res;
       int                                 ip4_result;
       int                                 ip6_result;
-      uint8                             next_hdr_prot = 0;
+      uint8_t                             next_hdr_prot = 0;
       char                              scan_string[32];
       char                              ip4_input[32];
       char                              ip6_input[48];
@@ -1997,7 +1997,7 @@ int main(int argc, char **argv)
                ip4_result ==50 || ip4_result ==253)
             {
               add_firewall_config_req_msg_v01.next_hdr_prot_valid = TRUE;
-              add_firewall_config_req_msg_v01.next_hdr_prot = (uint8)ip4_result;
+              add_firewall_config_req_msg_v01.next_hdr_prot = (uint8_t)ip4_result;
               next_hdr_prot = add_firewall_config_req_msg_v01.next_hdr_prot;
              break;
             }
@@ -2026,7 +2026,7 @@ int main(int argc, char **argv)
               {
                 add_firewall_config_req_msg_v01.ip6_src_addr_valid = TRUE;
                 memcpy( add_firewall_config_req_msg_v01.ip6_src_addr.addr,
-                        ip6_src_addr.s6_addr, MCM_MOBILEAP_IPV6_ADDR_LEN_V01*sizeof(uint8));
+                        ip6_src_addr.s6_addr, MCM_MOBILEAP_IPV6_ADDR_LEN_V01*sizeof(uint8_t));
                 break;
               }
             }
@@ -2039,7 +2039,7 @@ int main(int argc, char **argv)
             fgets(ip6_input, sizeof(ip6_input), stdin);
             if ( ip6_input[0] != '\n' )
             {
-              add_firewall_config_req_msg_v01.ip6_src_addr.prefix_len = (uint8)atoi(ip6_input);
+              add_firewall_config_req_msg_v01.ip6_src_addr.prefix_len = (uint8_t)atoi(ip6_input);
               LOG_MSG_INFO1("IPv6 Source Prefix Length : %d",
                             add_firewall_config_req_msg_v01.ip6_src_addr.prefix_len,0,0);
               break;
@@ -2065,7 +2065,7 @@ int main(int argc, char **argv)
               {
                 add_firewall_config_req_msg_v01.ip6_dst_addr_valid = TRUE;
                 memcpy( add_firewall_config_req_msg_v01.ip6_dst_addr.addr,
-                        ip6_dst_addr.s6_addr, MCM_MOBILEAP_IPV6_ADDR_LEN_V01*sizeof(uint8));
+                        ip6_dst_addr.s6_addr, MCM_MOBILEAP_IPV6_ADDR_LEN_V01*sizeof(uint8_t));
                 break;
               }
             }
@@ -2078,7 +2078,7 @@ int main(int argc, char **argv)
             fgets(ip6_input, sizeof(ip6_input), stdin);
             if ( ip6_input[0] != '\n')
             {
-              add_firewall_config_req_msg_v01.ip6_dst_addr.prefix_len = (uint8)atoi(ip6_input);
+              add_firewall_config_req_msg_v01.ip6_dst_addr.prefix_len = (uint8_t)atoi(ip6_input);
               LOG_MSG_INFO1("IPv6 Dst Prefix Length : ",
                             add_firewall_config_req_msg_v01.ip6_dst_addr.prefix_len,0,0);
               break;
@@ -2091,7 +2091,7 @@ int main(int argc, char **argv)
         if ( ip6_input[0]!='\n')
         {
           add_firewall_config_req_msg_v01.ip6_trf_cls_valid = TRUE;
-          add_firewall_config_req_msg_v01.ip6_trf_cls.value = (uint8)atoi(ip6_input);
+          add_firewall_config_req_msg_v01.ip6_trf_cls.value = (uint8_t)atoi(ip6_input);
           LOG_MSG_INFO1("IPv6 Traffic class value : ",
                         add_firewall_config_req_msg_v01.ip6_trf_cls.value,0,0);
         }
@@ -2100,7 +2100,7 @@ int main(int argc, char **argv)
         fgets(ip6_input, sizeof(ip6_input), stdin);
         if( ip6_input[0] != '\n')
         {
-          add_firewall_config_req_msg_v01.ip6_trf_cls.mask = (uint8)atoi(ip6_input);
+          add_firewall_config_req_msg_v01.ip6_trf_cls.mask = (uint8_t)atoi(ip6_input);
           LOG_MSG_INFO1("IPv6 Traffic class mask : ",
                         add_firewall_config_req_msg_v01.ip6_trf_cls.mask,0,0);
         }
@@ -2117,7 +2117,7 @@ int main(int argc, char **argv)
                ip6_result ==50 || ip6_result ==253)
             {
               add_firewall_config_req_msg_v01.next_hdr_prot_valid = TRUE;
-              add_firewall_config_req_msg_v01.next_hdr_prot = (uint8)ip6_result;
+              add_firewall_config_req_msg_v01.next_hdr_prot = (uint8_t)ip6_result;
               next_hdr_prot = add_firewall_config_req_msg_v01.next_hdr_prot;
               break;
             }
@@ -2145,7 +2145,7 @@ int main(int argc, char **argv)
         if ( next_hdr_input[0] != '\n')
         {
           add_firewall_config_req_msg_v01.tcp_udp_src_valid = TRUE;
-          add_firewall_config_req_msg_v01.tcp_udp_src.port = (uint16)tmp_input;
+          add_firewall_config_req_msg_v01.tcp_udp_src.port = (uint16_t)tmp_input;
           LOG_MSG_INFO1("TCP Source Port : %d",
                         add_firewall_config_req_msg_v01.tcp_udp_src.port,0,0);
         }
@@ -2154,7 +2154,7 @@ int main(int argc, char **argv)
         fgets(next_hdr_input, sizeof(next_hdr_input), stdin);
         if ( next_hdr_input [0]!= '\n')
         {
-          add_firewall_config_req_msg_v01.tcp_udp_src.range = (uint16)atoi(next_hdr_input);
+          add_firewall_config_req_msg_v01.tcp_udp_src.range = (uint16_t)atoi(next_hdr_input);
           LOG_MSG_INFO1("TCP Source Port Range : %d",
                         add_firewall_config_req_msg_v01.tcp_udp_src.range,0,0);
         }
@@ -2170,7 +2170,7 @@ int main(int argc, char **argv)
         if ( next_hdr_input[0]!= '\n')
         {
           add_firewall_config_req_msg_v01.tcp_udp_dst_valid = TRUE;
-          add_firewall_config_req_msg_v01.tcp_udp_dst.port = (uint16)tmp_input;
+          add_firewall_config_req_msg_v01.tcp_udp_dst.port = (uint16_t)tmp_input;
           LOG_MSG_INFO1("TCP Destination Port : %d",
                         add_firewall_config_req_msg_v01.tcp_udp_dst.port,0,0);
         }
@@ -2179,7 +2179,7 @@ int main(int argc, char **argv)
         fgets(next_hdr_input, sizeof(next_hdr_input), stdin);
         if ( next_hdr_input[0] != '\n')
         {
-          add_firewall_config_req_msg_v01.tcp_udp_dst.range = (uint16)atoi(next_hdr_input);
+          add_firewall_config_req_msg_v01.tcp_udp_dst.range = (uint16_t)atoi(next_hdr_input);
           LOG_MSG_INFO1("TCP Dst Range : %d",
                         add_firewall_config_req_msg_v01.tcp_udp_dst.range,0,0);
         }
@@ -2199,7 +2199,7 @@ int main(int argc, char **argv)
         if ( next_hdr_input[0]!= '\n')
         {
           add_firewall_config_req_msg_v01.tcp_udp_src_valid = TRUE;
-          add_firewall_config_req_msg_v01.tcp_udp_src.port = (uint16)tmp_input;
+          add_firewall_config_req_msg_v01.tcp_udp_src.port = (uint16_t)tmp_input;
           LOG_MSG_INFO1("UDP Source Port : %d",
                         add_firewall_config_req_msg_v01.tcp_udp_src.port,0,0);
         }
@@ -2208,7 +2208,7 @@ int main(int argc, char **argv)
         fgets(next_hdr_input, sizeof(next_hdr_input), stdin);
         if ( next_hdr_input[0]!= '\n')
         {
-          add_firewall_config_req_msg_v01.tcp_udp_src.range = (uint16)atoi(next_hdr_input);
+          add_firewall_config_req_msg_v01.tcp_udp_src.range = (uint16_t)atoi(next_hdr_input);
           LOG_MSG_INFO1("UDP Source Port Range : %d",
                         add_firewall_config_req_msg_v01.tcp_udp_src.range,0,0);
         }
@@ -2224,7 +2224,7 @@ int main(int argc, char **argv)
         if ( next_hdr_input[0]!= '\n')
         {
           add_firewall_config_req_msg_v01.tcp_udp_dst_valid = TRUE;
-          add_firewall_config_req_msg_v01.tcp_udp_dst.port = (uint16)tmp_input;
+          add_firewall_config_req_msg_v01.tcp_udp_dst.port = (uint16_t)tmp_input;
           LOG_MSG_INFO1("UDP Dst Port : %d",
                         add_firewall_config_req_msg_v01.tcp_udp_dst.port,0,0);
         }
@@ -2233,7 +2233,7 @@ int main(int argc, char **argv)
         fgets(next_hdr_input, sizeof(next_hdr_input), stdin);
         if ( next_hdr_input[0]!= '\n')
         {
-          add_firewall_config_req_msg_v01.tcp_udp_dst.range = (uint16)atoi(next_hdr_input);
+          add_firewall_config_req_msg_v01.tcp_udp_dst.range = (uint16_t)atoi(next_hdr_input);
           LOG_MSG_INFO1("UDP Dst Range : %d",
                         add_firewall_config_req_msg_v01.tcp_udp_dst.range,0,0);
         }
@@ -2256,7 +2256,7 @@ int main(int argc, char **argv)
         if ( next_hdr_input[0]!= '\n')
         {
           add_firewall_config_req_msg_v01.tcp_udp_src_valid = TRUE;
-          add_firewall_config_req_msg_v01.tcp_udp_src.port = (uint16)tmp_input;
+          add_firewall_config_req_msg_v01.tcp_udp_src.port = (uint16_t)tmp_input;
           LOG_MSG_INFO1("TCP_UDP Source Port : %d",
                         add_firewall_config_req_msg_v01.tcp_udp_src.port,0,0);
         }
@@ -2265,7 +2265,7 @@ int main(int argc, char **argv)
         fgets(next_hdr_input, sizeof(next_hdr_input), stdin);
         if ( next_hdr_input[0]!= '\n')
         {
-          add_firewall_config_req_msg_v01.tcp_udp_src.range = (uint16)atoi(next_hdr_input);
+          add_firewall_config_req_msg_v01.tcp_udp_src.range = (uint16_t)atoi(next_hdr_input);
           LOG_MSG_INFO1("TCP_UDP Source Range : %d",
                         add_firewall_config_req_msg_v01.tcp_udp_src.range,0,0);
         }
@@ -2281,7 +2281,7 @@ int main(int argc, char **argv)
         if ( next_hdr_input[0]!= '\n')
         {
           add_firewall_config_req_msg_v01.tcp_udp_dst_valid = TRUE;
-          add_firewall_config_req_msg_v01.tcp_udp_dst.port = (uint16)tmp_input;
+          add_firewall_config_req_msg_v01.tcp_udp_dst.port = (uint16_t)tmp_input;
           LOG_MSG_INFO1("TCP_UDP Dst Port : %d",
                         add_firewall_config_req_msg_v01.tcp_udp_dst.port,0,0);
         }
@@ -2290,7 +2290,7 @@ int main(int argc, char **argv)
         fgets(next_hdr_input, sizeof(next_hdr_input), stdin);
         if ( next_hdr_input[0]!= '\n')
         {
-          add_firewall_config_req_msg_v01.tcp_udp_dst.range = (uint16)atoi(next_hdr_input);
+          add_firewall_config_req_msg_v01.tcp_udp_dst.range = (uint16_t)atoi(next_hdr_input);
           LOG_MSG_INFO1("TCP_UDP Dst Range : %d",
                         add_firewall_config_req_msg_v01.tcp_udp_dst.range,0,0);
         }
@@ -2303,7 +2303,7 @@ int main(int argc, char **argv)
         if ( next_hdr_input[0]!= '\n')
         {
           add_firewall_config_req_msg_v01.icmp_type_valid = TRUE;
-          add_firewall_config_req_msg_v01.icmp_type = (uint8)atoi(next_hdr_input);
+          add_firewall_config_req_msg_v01.icmp_type = (uint8_t)atoi(next_hdr_input);
           LOG_MSG_INFO1("ICMP Type : %d",
                         add_firewall_config_req_msg_v01.icmp_type,0,0);
         }
@@ -2313,7 +2313,7 @@ int main(int argc, char **argv)
         if ( next_hdr_input[0]!= '\n')
         {
           add_firewall_config_req_msg_v01.icmp_code_valid = TRUE;
-          add_firewall_config_req_msg_v01.icmp_code = (uint8)atoi(next_hdr_input);
+          add_firewall_config_req_msg_v01.icmp_code = (uint8_t)atoi(next_hdr_input);
           LOG_MSG_INFO1("ICMP Code : %d",
                         add_firewall_config_req_msg_v01.icmp_code,0,0);
         }
@@ -2384,8 +2384,8 @@ int main(int argc, char **argv)
       LOG_MSG_INFO1("Entered case: %d:", opt, 0,0);
       mcm_mobileap_get_firewall_entries_handle_list_req_msg_v01 get_firewall_entries_handle_list_req_msg;
       mcm_mobileap_get_firewall_entries_handle_list_resp_msg_v01 get_firewall_entries_handle_list_resp_msg;
-      uint32 result;
-      uint32 index = 0;
+      uint32_t result;
+      uint32_t index = 0;
       struct in_addr addr;
       mcm_error_t_v01 mcm_error;
 
@@ -2495,8 +2495,8 @@ break;
       LOG_MSG_INFO1("Entered case: %d:", opt, 0,0);
       mcm_mobileap_get_firewall_entries_handle_list_req_msg_v01 get_firewall_entries_handle_list_req_msg;
       mcm_mobileap_get_firewall_entries_handle_list_resp_msg_v01 get_firewall_entries_handle_list_resp_msg;
-      uint32                result;
-      uint32                index = 0;
+      uint32_t                result;
+      uint32_t                index = 0;
       char*                 output;
       struct in_addr addr;
       mcm_error_t_v01 mcm_error;
@@ -2576,7 +2576,7 @@ break;
       int ret = 0;
       mcm_mobileap_get_firewall_entry_req_msg_v01 get_firewall_req;
       mcm_mobileap_get_firewall_entry_resp_msg_v01 get_firewall_resp;
-      uint32 i;
+      uint32_t i;
       int next_hdr_prot;
       char v6_addr[48];
 
@@ -2798,7 +2798,7 @@ break;
 
     case 17:
     {
-      uint8 enable_firewall, pkts_allowed;
+      uint8_t enable_firewall, pkts_allowed;
       printf("   Please input Firewall State          : ");
       fgets(scan_string, sizeof(scan_string), stdin);
       if (enable_firewall = atoi(scan_string))
@@ -2929,7 +2929,7 @@ break;
 
     case 19:
     {
-      uint32 dmz_ip=0;
+      uint32_t dmz_ip=0;
       struct in_addr addr;
       mcm_mobileap_delete_dmz_req_msg_v01 delete_dmz_req_msg;
       mcm_mobileap_delete_dmz_resp_msg_v01 delete_dmz_resp_msg;
@@ -2997,7 +2997,7 @@ break;
 
     case 20:
     {
-      uint32 dmz_ip=0;
+      uint32_t dmz_ip=0;
       struct in_addr addr;
       char *dmz_ip_reply;
       LOG_MSG_INFO1("Entered case: %d:", opt, 0,0);
@@ -3243,7 +3243,7 @@ break;
       dhcpd_config_req_msg.mcm_mobileap_handle = mcm_mobileap_config.mcm_mobileap_handle;
 
       struct in_addr start, end;
-      uint32 leasetime;
+      uint32_t leasetime;
       int intf = 0;
       long val = 0;
       char *endptr;
@@ -4036,7 +4036,7 @@ break;
 #ifdef TARGET_IS_9615
       printf("   Please input WLAN State : ");
       fgets(scan_string, sizeof(scan_string), stdin);
-      uint32 wlan_state = atoi(scan_string);
+      uint32_t wlan_state = atoi(scan_string);
       if (wlan_state)
       {
         while (TRUE)

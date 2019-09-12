@@ -10,15 +10,21 @@ S = "${WORKDIR}/quectel-core/ql-wifi"
 
 DEPENDS = "wpa-supplicant-qcacld"
 
-
+PACKAGES = "${PN}"
 FILES_${PN} += "${libdir}/" 
-
+FILES_${PN}-dbg += "${libdir}/.debug/*"
+FILES_${PN} += "${includedir}/*"
 FILES_SOLIBSDEV = ""
+INSANE_SKIP_${PN} = "dev-so"
 
+BBCLASSEXTEND = "native nativesdk"
 
 do_install() {
     install -d ${D}${libdir}
     install -m 0755 lib/* ${D}${libdir}
+
+    install -d ${D}${includedir}/wifi
+    install -m 0644 ${WORKSPACE}/quectel-core/ql-wifi/inc/ql_wifi.h ${D}${includedir}/wifi
 }
 
 do_package_qa() {

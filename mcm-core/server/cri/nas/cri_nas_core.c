@@ -4259,9 +4259,9 @@ void cri_nas_core_update_data_system_status()
                                     NIL);
 }
 
-uint8 cri_nas_core_sib16_acquired_status()
+uint8_t cri_nas_core_sib16_acquired_status()
 {
-    uint8 sib16_acquired = FALSE;
+    uint8_t sib16_acquired = FALSE;
 
     if(cri_nas_nw_lte_sib16_network_time_info)
     {
@@ -4479,10 +4479,10 @@ void cri_nas_core_fill_nitz_time_resp(uint8_t *nitz_time_valid, char *nitz_time,
     }while(FALSE);
 }
 
-uint8 cri_nas_core_fill_network_time_ind(uint8_t *nitz_time_valid, char *nitz_time, uint8_t *abs_time_valid, uint64_t *abs_time, uint8_t *leap_sec_valid, int8_t *leap_sec)
+uint8_t cri_nas_core_fill_network_time_ind(uint8_t *nitz_time_valid, char *nitz_time, uint8_t *abs_time_valid, uint64_t *abs_time, uint8_t *leap_sec_valid, int8_t *leap_sec)
 {
-    uint8 nitz_updated = FALSE;
-    uint8 sib16_acquired = FALSE;
+    uint8_t nitz_updated = FALSE;
+    uint8_t sib16_acquired = FALSE;
     int time_zone=0, time_zone_west=FALSE, daylight=0;
 
     do
@@ -4526,9 +4526,9 @@ uint8 cri_nas_core_fill_network_time_ind(uint8_t *nitz_time_valid, char *nitz_ti
     return nitz_updated;
 }
 
-uint8 cri_nas_core_fill_sib16_network_time_ind(uint8_t *nitz_time_valid, char *nitz_time, uint8_t *abs_time_valid, uint64_t *abs_time, uint8_t *leap_sec_valid, int8_t *leap_sec)
+uint8_t cri_nas_core_fill_sib16_network_time_ind(uint8_t *nitz_time_valid, char *nitz_time, uint8_t *abs_time_valid, uint64_t *abs_time, uint8_t *leap_sec_valid, int8_t *leap_sec)
 {
-    uint8 nitz_updated = FALSE;
+    uint8_t nitz_updated = FALSE;
     int time_zone=0, time_zone_west=FALSE, daylight=0;
 
     do

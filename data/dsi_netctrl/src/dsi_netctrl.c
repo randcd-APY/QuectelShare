@@ -49,6 +49,7 @@ when       who     what, where, why
 #include <netdb.h> /* struct addrinfo */
 
 #include "dsi_netctrl.h"
+#include "dsi_netctrli.h"
 #include "assert.h"
 #include "dsi_netctrli.h" /* declarations shared internally */
 #include "dsi_netctrl_cb_thrd.h"
@@ -778,6 +779,10 @@ int dsi_start_data_call
   DSI_LOG_VERBOSE( "%s", "test mode, fail data call" );
   goto err_label;
 #endif
+
+  /** add by tyler.kuang@20181214 start : adjust modem apn */
+  dsi_profile_adjust(st_hndl);
+  /** add by tyler.kuang@20181214 end */
 
   /* this do..while loop decides the overall return value.
      set ret to ERROR at the beginning. set ret to SUCCESS

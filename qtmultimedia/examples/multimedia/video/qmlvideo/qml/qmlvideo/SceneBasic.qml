@@ -74,20 +74,21 @@ Scene {
             bottom: parent.bottom
             margins: 20
         }
-        text: content.started ? "Tap the screen to stop content"
-                              : "Tap the screen to start content"
+        text: content.started ? "tap the screen to stop content"
+                              : "tap the screen to start content"
         color: "#e0e0e0"
         z: 2.0
     }
 
+
     MouseArea {
         anchors.fill: parent
-        onClicked: {
-            if (content.started)
-                content.stop()
-            else
-                content.start()
-        }
+//        onClicked: {
+//            if (content.started)
+//                content.stop()
+//            else
+//                content.start()
+//        }
     }
 
     Component.onCompleted: root.content = content

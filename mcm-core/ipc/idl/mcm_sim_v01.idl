@@ -244,18 +244,18 @@ struct {
 } mcm_sim_plmn_t;  //!< SIM PLMN.
 
 struct {
-  uint16 offset;
+  uint16_t offset;
   //!< Offset is only required for write file access where data length is indicated.
-  uint8 record_num;
+  uint8_t record_num;
   //!< Number of records involved in file access. A record number of 0 indicates transparent file access.
   char path<MCM_SIM_CHAR_PATH_MAX>;
   //!< File path in ASCII characters.
 } mcm_sim_file_access_t;  //!< SIM file access.
 
 struct {
-  uint8 sw1;
+  uint8_t sw1;
   //!< SW1 received from the card.
-  uint8 sw2;
+  uint8_t sw2;
   //!< SW2 received from the card.
 } mcm_sim_card_result_t;  //!< SIM card result.
 
@@ -267,11 +267,11 @@ struct {
          - 0xB02 -- Cyclic
          - 0xB03 -- Linear fixed
   */
-  uint16 file_size;
+  uint16_t file_size;
   //!< Size of transparent files.
-  uint16 record_size;
+  uint16_t record_size;
   //!< Size of each cyclic or linear fixed file record.
-  uint16 record_count;
+  uint16_t record_count;
   //!< Number of cyclic or linear fixed file records.
 } mcm_sim_file_info_t;
 
@@ -320,16 +320,16 @@ struct {
 struct {
   mcm_sim_network_perso_t network;
   //!< MCC and MNC network information.
-  uint8 gid1;
+  uint8_t gid1;
   //!< Service provider code found in GID1.
 } mcm_sim_gw_sp_perso_t;
 
 struct {
   mcm_sim_network_perso_t network;
   //!< MCC and MNC network information.
-  uint8 gid1;
+  uint8_t gid1;
   //!< Service provider code found in GID1.
-  uint8 gid2;
+  uint8_t gid2;
   //!< Corporate customer code found in GID2.
 } mcm_sim_gw_corporate_perso_t;
 
@@ -346,9 +346,9 @@ struct {
 } mcm_sim_1x_network_type2_perso_t;
 
 struct {
-  uint8 verify_left;
+  uint8_t verify_left;
   //!< Number of the remaining attempts to verify the personalization.
-  uint8 unblock_left;
+  uint8_t unblock_left;
   //!< Number of the remaining attempts to unblock the personalization.
 } mcm_sim_perso_retries_left_t;
 
@@ -359,21 +359,21 @@ struct {
   /**< Current state of the application. */
   mcm_sim_perso_feature_t perso_feature;
   /**< Current personalization state and feature enabled. */
-  uint8 perso_retries;
+  uint8_t perso_retries;
   /**< Number of personalization retries. */
-  uint8 perso_unblock_retries;
+  uint8_t perso_unblock_retries;
   /**< Number of personalization unblock retries. */
   mcm_sim_pin_state_t pin1_state;
   /**< Current PIN 1 state. */
-  uint8 pin1_num_retries;
+  uint8_t pin1_num_retries;
   /**< Number of PIN 1 retries. */
-  uint8 puk1_num_retries;
+  uint8_t puk1_num_retries;
   /**< Number of PUK 1 retries. */
   mcm_sim_pin_state_t pin2_state;
   /**< Current PIN 2 state. */
-  uint8 pin2_num_retries;
+  uint8_t pin2_num_retries;
   /**< Number of PIN 2 retries. */
-  uint8 puk2_num_retries;
+  uint8_t puk2_num_retries;
   /**< Number of PUK 2 retries. */
 } mcm_sim_app_info_t;
 
@@ -1044,7 +1044,7 @@ message {
   //! Verify Retries Remaining
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  optional uint8 retries_left;
+  optional uint8_t retries_left;
   /**< Retries remaining. */
 } mcm_sim_verify_pin_resp_msg;
 
@@ -1142,7 +1142,7 @@ message {
   //! Verify Retries Remaining
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  optional uint8 retries_left;
+  optional uint8_t retries_left;
   /**< Retries remaining. */
 } mcm_sim_change_pin_resp_msg;
 
@@ -1242,7 +1242,7 @@ message {
   //! Unblock Retries Remaining
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  optional uint8 retries_left;
+  optional uint8_t retries_left;
   /**< Unblock retries remaining. */
 } mcm_sim_unblock_pin_resp_msg;
 
@@ -1336,7 +1336,7 @@ message {
   //! Verify Retries Remaining
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  optional uint8 retries_left;
+  optional uint8_t retries_left;
   /**< Retries remaining. */
 } mcm_sim_enable_pin_resp_msg;
 
@@ -1429,7 +1429,7 @@ message {
   //! Verify Retries Remaining
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  optional uint8 retries_left;
+  optional uint8_t retries_left;
   /**< Retries remaining. */
 } mcm_sim_disable_pin_resp_msg;
 

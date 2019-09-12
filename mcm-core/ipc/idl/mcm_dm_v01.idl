@@ -101,7 +101,7 @@ message {
 //----------------------------------------------------------------------------
 message {
  mandatory mcm_response_t response; //!< Result code.
- optional uint8 no_change; //!< No change.
+ optional uint8_t no_change; //!< No change.
 }  mcm_dm_set_radio_mode_resp_msg;
 /** @ERROR
     MCM_SUCCESS

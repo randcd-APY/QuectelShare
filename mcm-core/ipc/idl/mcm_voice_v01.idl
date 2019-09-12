@@ -248,11 +248,11 @@ enum {
 struct {
    mcm_voice_uus_type_t  type; //!< UUS type; range -- 0 to 6.
    mcm_voice_uus_dcs_type_t  dcs;  //!< UUS data coding scheme; range -- 0 to 4.
-   uint8   uus_data<MCM_MAX_UUS_DATA>;  //!< Voice call UUS data.
+   uint8_t   uus_data<MCM_MAX_UUS_DATA>;  //!< Voice call UUS data.
 } mcm_voice_uusdata_t;  //!< User-to-user signaling information; defined in 3GPP 23.087 v8.0.
 
 struct {
-   uint32 call_id; //!< Call ID associated with this call.
+   uint32_t call_id; //!< Call ID associated with this call.
    mcm_voice_call_state_t state; //!< Current call state (mcm_voice_call_state).
    mcm_voice_tech_t tech; //!< Technology (mcm_tech).
    string   number<MCM_MAX_PHONE_NUMBER>; //!< Phone number.
@@ -263,7 +263,7 @@ struct {
 } mcm_voice_call_record_t; //!< Voice call record; connection paramters.
 
 struct {
-   uint32 call_id; //!< Call ID associated with this DTMF event.
+   uint32_t call_id; //!< Call ID associated with this DTMF event.
    mcm_voice_dtmf_event_type_t dtmf_event; //!< DTMF event type.
    char digit<MCM_MAX_DTMF_LENGTH>; //!< DTMF character.
 }mcm_voice_dtmf_info_t;	 //!< DTMF information.
@@ -332,7 +332,7 @@ message {
  optional mcm_voice_call_type_t call_type; //!< Connection (call) details, or NULL.
  optional mcm_voice_uusdata_t uusdata; //!< Token ID used to track this command; NULL is OK.
  optional mcm_voice_emergency_cat_t emergency_cat; //!< Emergency call category.
- optional uint8 ecall_msd<MCM_MAX_ECALL_MSD>; //!<Minimum Set of Data in ASN.1 PER unaligned format
+ optional uint8_t ecall_msd<MCM_MAX_ECALL_MSD>; //!<Minimum Set of Data in ASN.1 PER unaligned format
                                               //!< as per CEN EN 15722. Only honored when
                                               //!< call_type is MCM_VOICE_CALL_TYPE_ECALL_AUTO or
                                               //!< MCM_VOICE_CALL_TYPE_ECALL_MANUAL. Ignored otherwise.
@@ -344,7 +344,7 @@ message {
 //-----------------------------------------------------------------------------
 message {
  mandatory mcm_response_t response;	//!< Result code.
- optional uint32 call_id; //!<Call ID.
+ optional uint32_t call_id; //!<Call ID.
 }mcm_voice_dial_resp_msg;
 /** @ERROR
     MCM_SUCCESS
@@ -367,7 +367,7 @@ message {
 //! @SENDER Control point
 //-----------------------------------------------------------------------------
 message {
- mandatory uint32 call_id; //!< Call ID of the connection to query.
+ mandatory uint32_t call_id; //!< Call ID of the connection to query.
 }mcm_voice_get_call_status_req_msg;
 
 //! @MSG MCM_VOICE_GET_CONNECTION_STATUS_RESP
@@ -431,7 +431,7 @@ message {
 //! @SENDER Control point
 //-----------------------------------------------------------------------------
 message {
- mandatory uint32 call_id; /**<Call ID.*/
+ mandatory uint32_t call_id; /**<Call ID.*/
  mandatory char   digit; /**< DTMF character to be sent.
                            Valid DTMF characters are 0-9, A-D, '*', '#'.*/
 }mcm_voice_start_dtmf_req_msg;
@@ -442,7 +442,7 @@ message {
 //-----------------------------------------------------------------------------
 message {
  mandatory mcm_response_t response;	//!< Result code.
- optional  uint32         call_id;	//!< Call ID.
+ optional  uint32_t         call_id;	//!< Call ID.
 }mcm_voice_start_dtmf_resp_msg;
 //=============================================================================
 
@@ -459,7 +459,7 @@ message {
 //! @SENDER Control point
 //-----------------------------------------------------------------------------
 message {
- mandatory uint32 call_id;	//!< Call ID.
+ mandatory uint32_t call_id;	//!< Call ID.
 }mcm_voice_stop_dtmf_req_msg;
 
 //! @MSG MCM_VOICE_STOP_DTMF_RESP
@@ -468,7 +468,7 @@ message {
 //-----------------------------------------------------------------------------
 message {
  mandatory mcm_response_t response;	//!< Result code.
- optional  uint32         call_id; 	//!< Call ID.
+ optional  uint32_t         call_id; 	//!< Call ID.
 }mcm_voice_stop_dtmf_resp_msg;
 //=============================================================================
 
@@ -485,7 +485,7 @@ message {
 //! @SENDER Control point
 //-----------------------------------------------------------------------------
 message {
- mandatory uint32 call_id; //!< Call ID of the connection to mute/unmute.
+ mandatory uint32_t call_id; //!< Call ID of the connection to mute/unmute.
  mandatory mcm_voice_mute_type_t mute_type; //!< Mute or unmute the voice call.
 }mcm_voice_mute_req_msg;
 
@@ -556,7 +556,7 @@ message {
 //! @SENDER Control point
 //-----------------------------------------------------------------------------
 message {
- mandatory uint32 call_id; //!< Call ID associated with the connection.
+ mandatory uint32_t call_id; //!< Call ID associated with the connection.
 }mcm_voice_hangup_req_msg;
 
 //! @MSG MCM_VOICE_HANGUP_RESP
@@ -589,8 +589,8 @@ message {
 //-----------------------------------------------------------------------------
 message {
   mandatory mcm_voice_call_operation_t call_operation;	//!< Call operation.
-  optional uint32 call_id; 	//!< Call ID.
-  optional uint32 cause;  	//!< Cause.
+  optional uint32_t call_id; 	//!< Call ID.
+  optional uint32_t cause;  	//!< Cause.
 } mcm_voice_command_req_msg;
 
 
@@ -618,7 +618,7 @@ message {
 //-----------------------------------------------------------------------------
 message {
   mandatory mcm_voice_auto_answer_type_t auto_answer_type;	//!< Auto-answer type.
-  optional uint32 anto_answer_timer;  	//!< Auto-answer timer.
+  optional uint32_t anto_answer_timer;  	//!< Auto-answer timer.
 } mcm_voice_auto_answer_req_msg;
 
 
@@ -1035,7 +1035,7 @@ message {
     optional mcm_voice_call_type_t call_type; //!< Connection (call) details, or NULL,
     optional mcm_voice_uusdata_t uusdata; //!< Token ID used to track this command; NULL is OK.
     optional mcm_voice_emergency_cat_t emergency_cat; //!< Emergency call category.
-    optional uint8 ecall_msd<MCM_MAX_ECALL_MSD>; //!<Minimum Set of Data in ASN.1 PER unaligned format
+    optional uint8_t ecall_msd<MCM_MAX_ECALL_MSD>; //!<Minimum Set of Data in ASN.1 PER unaligned format
                                                  //!< as per CEN EN 15722. Only honored when
                                                  //!< call_type is MCM_VOICE_CALL_TYPE_ECALL_AUTO or
                                                  //!< MCM_VOICE_CALL_TYPE_ECALL_MANUAL. Ignored otherwise.
@@ -1053,7 +1053,7 @@ message {
     optional mcm_voice_common_dial_type_t req_changed_to_type; //!< If SS, check optional SS fields. If not present, the voice call went through.
 
     // Voice support.
-    optional uint32 call_id;   //!< Call ID.
+    optional uint32_t call_id;   //!< Call ID.
 
     // SS support.
     optional mcm_voice_call_forwarding_status_t       ss_get_cf_status;	 //!< Get call forwarding status.
@@ -1079,7 +1079,7 @@ message {
 //! @SENDER Client
 //-----------------------------------------------------------------------------
 message {
-    optional uint8 ecall_msd<MCM_MAX_ECALL_MSD>; //!<Minimum Set of Data. in ASN.1 PER unaligned format.
+    optional uint8_t ecall_msd<MCM_MAX_ECALL_MSD>; //!<Minimum Set of Data. in ASN.1 PER unaligned format.
 } mcm_voice_update_msd_req_msg;
 
 //-----------------------------------------------------------------------------

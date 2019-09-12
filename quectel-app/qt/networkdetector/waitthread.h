@@ -5,7 +5,7 @@
 #include <QProcess>
 #include <QDebug>
 
-#include <ql_in.h>
+#include <ql-mcm-api/ql_in.h>
 
 #define NETWORK_BEGINE_STEP             0
 #define NETWORK_INIT_START              1
@@ -41,17 +41,24 @@ public:
     void setNetworkState(int state);
     void setNetworkAddress(QString address);
 
+    int getDnsAddress(void);
+    void setDnsAddress(QString address);
+
 protected:
     virtual void run();
 
 signals:
     void singalNetworkState(int state);
     void singalPingAvgTime(const QString t);
+    void singalPrimaryDNS(const QString priDns);
+    void singalSecondDNS(const QString secDns);
 
 private:
     int m_mobap;
     int m_state;
     QString m_networkAddress;
+    QString m_primaryDNS;
+    QString m_secondDNS;
 };
 
 #endif // WAITTHREAD_H

@@ -35,7 +35,7 @@ cri_voice_call_obj_type* cri_voice_call_list_add_new_call_object(
     cri_voice_call_obj_bit_field_type bit
 )
 {
-    uint8 cri_call_id = CRI_VOICE_INVALID_CALL_ID;
+    uint8_t cri_call_id = CRI_VOICE_INVALID_CALL_ID;
     cri_voice_call_obj_type* call_obj_ptr = NULL;
 
     do
@@ -138,7 +138,7 @@ cri_voice_call_obj_type* cri_voice_call_list_find_call_obj(const util_list_info_
 int cri_voice_compare_call_obj_cri_call_id(const util_list_node_data_type* node_data_ptr, void* cri_call_id_param)
 {
     int ret = FALSE;
-    uint8 cri_call_id = (uint8)((uint32)cri_call_id_param);
+    uint8_t cri_call_id = (uint8_t)((uint32_t)cri_call_id_param);
     if (node_data_ptr && node_data_ptr->user_data)
     {
         cri_voice_call_obj_type *call_obj_ptr = (cri_voice_call_obj_type *)node_data_ptr->user_data;
@@ -149,13 +149,13 @@ int cri_voice_compare_call_obj_cri_call_id(const util_list_node_data_type* node_
 
 cri_voice_call_obj_type* cri_voice_call_list_find_by_cri_call_id(const util_list_info_type* call_list_ptr, uint8_t cri_call_id)
 {
-    return cri_voice_call_list_find_call_obj(call_list_ptr, cri_voice_compare_call_obj_cri_call_id, (void*)((uint32)cri_call_id));
+    return cri_voice_call_list_find_call_obj(call_list_ptr, cri_voice_compare_call_obj_cri_call_id, (void*)((uint32_t)cri_call_id));
 }
 
 int cri_voice_compare_call_obj_qmi_voice_call_id(const util_list_node_data_type* node_data_ptr, void* cri_call_id_param)
 {
     int ret = FALSE;
-    uint8 qmi_call_id = (uint8)((uint32)cri_call_id_param);
+    uint8_t qmi_call_id = (uint8_t)((uint32_t)cri_call_id_param);
     if (node_data_ptr && node_data_ptr->user_data)
     {
         cri_voice_call_obj_type *call_obj_ptr = (cri_voice_call_obj_type *)node_data_ptr->user_data;
@@ -167,7 +167,7 @@ int cri_voice_compare_call_obj_qmi_voice_call_id(const util_list_node_data_type*
 cri_voice_call_obj_type* cri_voice_call_list_find_by_qmi_call_id(const util_list_info_type* call_list_ptr, uint8_t qmi_call_id)
 {
     // TODO: HANDLE csvt
-    return cri_voice_call_list_find_call_obj(call_list_ptr, cri_voice_compare_call_obj_qmi_voice_call_id, (void*)((uint32)qmi_call_id));
+    return cri_voice_call_list_find_call_obj(call_list_ptr, cri_voice_compare_call_obj_qmi_voice_call_id, (void*)((uint32_t)qmi_call_id));
 }
 
 int cri_voice_compare_call_obj_qmi_call_state(const util_list_node_data_type* node_data_ptr, void* param)
@@ -184,7 +184,7 @@ int cri_voice_compare_call_obj_qmi_call_state(const util_list_node_data_type* no
 
 cri_voice_call_obj_type* cri_voice_call_list_find_by_qmi_call_state(const util_list_info_type* call_list_ptr, call_state_enum_v02 qmi_call_state)
 {
-    return cri_voice_call_list_find_call_obj(call_list_ptr, cri_voice_compare_call_obj_qmi_call_state, (void*)((uint32)qmi_call_state));
+    return cri_voice_call_list_find_call_obj(call_list_ptr, cri_voice_compare_call_obj_qmi_call_state, (void*)((uint32_t)qmi_call_state));
 }
 
 int cri_voice_compare_call_obj_cri_call_state(const util_list_node_data_type* node_data_ptr, void* param)
@@ -201,10 +201,10 @@ int cri_voice_compare_call_obj_cri_call_state(const util_list_node_data_type* no
 
 cri_voice_call_obj_type* cri_voice_call_list_find_by_cri_call_state(const util_list_info_type* call_list_ptr, cri_voice_call_state_type cri_call_state)
 {
-    return cri_voice_call_list_find_call_obj(call_list_ptr, cri_voice_compare_call_obj_cri_call_state, (void*)((uint32)cri_call_state));
+    return cri_voice_call_list_find_call_obj(call_list_ptr, cri_voice_compare_call_obj_cri_call_state, (void*)((uint32_t)cri_call_state));
 }
 
-void cri_voice_call_list_get_filtered_call_objects(const util_list_info_type* call_list_ptr, cri_voice_call_obj_filter_type filter, uint32 *num_of_calls, cri_voice_call_obj_type*** call_obj_tptr)
+void cri_voice_call_list_get_filtered_call_objects(const util_list_info_type* call_list_ptr, cri_voice_call_obj_filter_type filter, uint32_t *num_of_calls, cri_voice_call_obj_type*** call_obj_tptr)
 {
     *call_obj_tptr = NULL;
     *num_of_calls = 0;
@@ -228,7 +228,7 @@ void cri_voice_call_list_get_filtered_call_objects(const util_list_info_type* ca
         *call_obj_tptr = util_memory_alloc(sizeof(cri_voice_call_obj_type *) * (*num_of_calls));
         if (*call_obj_tptr)
         {
-            uint32 idx = 0;
+            uint32_t idx = 0;
             iter = call_list_ptr->list_head;
             while (iter)
             {
@@ -244,7 +244,7 @@ void cri_voice_call_list_get_filtered_call_objects(const util_list_info_type* ca
     QCRIL_LOG_FUNC_RETURN();
 }
 
-void cri_voice_call_list_get_filtered_call_objects_with_filter_param(const util_list_info_type* call_list_ptr, boolean (*filter)(const cri_voice_call_obj_type*, const void* filter_param), const void* filter_param, uint32 *num_of_calls, cri_voice_call_obj_type*** call_obj_tptr)
+void cri_voice_call_list_get_filtered_call_objects_with_filter_param(const util_list_info_type* call_list_ptr, boolean (*filter)(const cri_voice_call_obj_type*, const void* filter_param), const void* filter_param, uint32_t *num_of_calls, cri_voice_call_obj_type*** call_obj_tptr)
 {
     *call_obj_tptr = NULL;
     *num_of_calls = 0;
@@ -268,7 +268,7 @@ void cri_voice_call_list_get_filtered_call_objects_with_filter_param(const util_
         *call_obj_tptr = util_memory_alloc(sizeof(cri_voice_call_obj_type *) * (*num_of_calls));
         if (*call_obj_tptr)
         {
-            uint32 idx = 0;
+            uint32_t idx = 0;
             iter = call_list_ptr->list_head;
             while (iter)
             {
@@ -288,7 +288,7 @@ cri_voice_call_obj_type* cri_voice_call_list_find_by_call_bit(const util_list_in
 {
     cri_voice_call_obj_type* ret = NULL;
 
-    uint32 num_of_calls;
+    uint32_t num_of_calls;
     cri_voice_call_obj_type **call_obj_dptr;
     cri_voice_call_list_get_filtered_call_objects_with_filter_param(
         call_list_ptr,
@@ -341,7 +341,7 @@ void cri_voice_call_list_dump(const util_list_info_type* call_list_ptr)
 cri_core_error_type cri_voice_call_list_delete_call_by_cri_call_id(util_list_info_type* call_list_ptr, uint8_t cri_call_id)
 {
     QCRIL_LOG_FUNC_ENTRY();
-    util_list_node_data_type *node_ptr = cri_voice_call_list_find_node(call_list_ptr, cri_voice_compare_call_obj_cri_call_id, (void*)((uint32)cri_call_id));
+    util_list_node_data_type *node_ptr = cri_voice_call_list_find_node(call_list_ptr, cri_voice_compare_call_obj_cri_call_id, (void*)((uint32_t)cri_call_id));
     QCRIL_LOG_INFO("cri_call_id: %d, node_ptr: %p", cri_call_id, node_ptr);
     util_list_delete(call_list_ptr, node_ptr, NULL);
     QCRIL_LOG_FUNC_RETURN();

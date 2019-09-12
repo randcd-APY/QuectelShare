@@ -86,9 +86,9 @@
 typedef enum {
     CRI_NAS_RTE_UNKNOWN = 0,
     CRI_NAS_RTE_GSM,
-    CRI_NAS_RTE_WCDMA,
     CRI_NAS_RTE_TDSCDMA,
     CRI_NAS_RTE_LTE,
+    CRI_NAS_RTE_WCDMA,
     CRI_NAS_RTE_CDMA,
     CRI_NAS_RTE_HDR,
     CRI_NAS_RTE_MAX
@@ -274,11 +274,11 @@ void cri_nas_unsol_ind_handler(int qmi_service_client_id,
 void* cri_nas_retrieve_voice_rte(cri_nas_rte_type *rte);
 void* cri_nas_retrieve_data_rte(cri_nas_rte_type *rte);
 void cri_nas_update_data_system_status();
-uint8 cri_nas_sib16_acquired_status();
+uint8_t cri_nas_sib16_acquired_status();
 void cri_nas_fetch_update_lte_sib16_nitz_time_info();
 void cri_nas_fetch_update_nitz_time_info();
 void cri_nas_fill_nitz_time_resp(uint8_t *nitz_time_valid, char *nitz_time, uint8_t *abs_time_valid, uint64_t *abs_time, uint8_t *leap_sec_valid, int8_t *leap_sec);
-uint8 cri_nas_fill_network_time_ind(uint8_t *nitz_time_valid, char *nitz_time, uint8_t *abs_time_valid, uint64_t *abs_time, uint8_t *leap_sec_valid, int8_t *leap_sec);
-uint8 cri_nas_fill_sib16_network_time_ind(uint8_t *nitz_time_valid, char *nitz_time, uint8_t *abs_time_valid, uint64_t *abs_time, uint8_t *leap_sec_valid, int8_t *leap_sec);
+uint8_t cri_nas_fill_network_time_ind(uint8_t *nitz_time_valid, char *nitz_time, uint8_t *abs_time_valid, uint64_t *abs_time, uint8_t *leap_sec_valid, int8_t *leap_sec);
+uint8_t cri_nas_fill_sib16_network_time_ind(uint8_t *nitz_time_valid, char *nitz_time, uint8_t *abs_time_valid, uint64_t *abs_time, uint8_t *leap_sec_valid, int8_t *leap_sec);
 
 #endif

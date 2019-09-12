@@ -21,7 +21,7 @@ void mcm_util_memory_free
     void** to_be_freed_memory_ptr
 );
 
-uint32 convert_qmi_err_to_mcm
+uint32_t convert_qmi_err_to_mcm
 (
     qmi_client_error_type client_err
 );

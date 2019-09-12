@@ -26,7 +26,6 @@ extern "C" {
 #include <sys/epoll.h>
 #include <sys/select.h>
 #include <dirent.h>
-#include <comdef.h>
 #include <pthread.h>
 #include <signal.h>
 #include <semaphore.h>

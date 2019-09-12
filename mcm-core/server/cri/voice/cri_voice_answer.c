@@ -168,7 +168,7 @@ int cri_voice_answer_incoming_call_rule_checker(void *rule_data)
 {
     int ret_code = FALSE;
 
-    int8 qmi_call_id = (int) rule_data;
+    int8_t qmi_call_id = (int) rule_data;
     cri_voice_call_obj_type* call_obj_ptr = cri_voice_call_list_find_by_qmi_call_id(cri_voice_core_get_call_list(), qmi_call_id);
 
     QCRIL_LOG_INFO("qmi_call_id: %d, call_obj_ptr: %p", qmi_call_id, call_obj_ptr);

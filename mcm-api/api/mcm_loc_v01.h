@@ -56,7 +56,7 @@
 /** @defgroup mcm_loc_qmi_version Constant values for versioning information */
 
 #include <stdint.h>
-#include "qmi_idl_lib.h"
+#include <qmi/qmi_idl_lib.h>
 #include "mcm_common_v01.h"
 
 

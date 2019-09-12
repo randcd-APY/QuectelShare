@@ -117,12 +117,14 @@ when       who      what, where, why
 #define ATFWD_DATA_PROP_SIZE (PROPERTY_VALUE_MAX)
 #define ATFWD_ATCOP_PORTS    2
 
+
 typedef enum {
     INIT_QMI = 0,
     INIT_QMI_SRVC,
     INIT_ATFWD_SRVC,
     INIT_MAX
 } atfwd_init_type_t;
+
 
 /*qmi message library handle*/
 int qmiHandle = QMI_INVALID_CLIENT_HANDLE;
@@ -1389,6 +1391,76 @@ void quec_qfct_handle(AtCmdResponse *response)
 #endif
 
 /*===========================================================================
+  the tool of process operation
+===========================================================================*/
+pid_t getProcessPidByName(const char *proc_name)
+{
+    FILE *fp;
+    char buf[100];
+    char cmd[200] = {'\0'};
+    pid_t pid = -1;
+    sprintf(cmd, "pidof %s", proc_name);
+    if((fp = popen(cmd, "r")) != NULL)
+    {
+        if(fgets(buf, 255, fp) != NULL)
+        {
+            pid = atoi(buf);
+        }
+    }
+    printf("pid = %d \n", pid);
+    pclose(fp);
+    return pid;
+}
+
+bool is_proc_exist(int pid)
+{
+    return kill(pid, 0) == 0;
+}
+
+void kill_proc(int pid) 
+{
+    int stat;
+    if(pid > 0 && is_proc_exist(pid))
+   {
+        kill(pid, SIGKILL);
+        waitpid(pid, &stat, 0);
+        if(WIFSIGNALED(stat))
+            printf("Child process(pid=%d) received signal(%d) and exit\n", pid, WTERMSIG(stat));
+
+    }
+}
+
+/*===========================================================================
+  start and stop wifi 
+===========================================================================*/
+void start_wifi()
+{
+  system("ptt_socket_app -v -d -f &");
+}
+
+void stop_wifi()
+{
+    int pid=-1;
+    pid=getProcessPidByName("ptt_socket_app");
+    kill_proc(pid);
+}
+
+/*===========================================================================
+  start and stop bluetooth
+===========================================================================*/
+void start_bluetooth()
+{
+  system("ftmdaemon -n &");
+}
+
+void stop_bluetooth()
+{
+    int pid=-1;
+    pid=getProcessPidByName("ftmdaemon");
+    kill_proc(pid);
+}
+
+/*===========================================================================
   FUNCTION  sendit
 ===========================================================================*/
 /*!
@@ -1430,9 +1502,53 @@ AtCmdResponse *sendit(const AtCmd *cmd)
 		}
 #endif
 #ifdef QUECTEL_FCT_TEST
-		if (strcasecmp(cmd->name, "+QFCT") == 0) {
-			LOGI("ques QFCT cmd");
-			quec_qfct_handle(result);
+		if (strcasecmp(cmd->name, "+QFCT") == 0) 
+        {
+            if(NULL != cmd->tokens)
+		    {   
+                if(cmd->ntokens == 0 || cmd->tokens[0] == NULL)
+                {
+                    LOGI("ATFWD AtCmdFwd Tokens[0] is NULL");
+                    quec_qfct_handle(result);
+                }
+                else if(0 == strncmp("wifi-start",cmd->tokens[0],strlen("wifi-start")))
+                {
+                    printf("ATFWD AtCmdFwd:%s",cmd->tokens[0]);
+                // property_set("wifi.p_socket_app", "true");
+                    start_wifi();
+                    result->result = 1; // success
+                }
+                else if(0 == strncmp("wifi-end",cmd->tokens[0],strlen("wifi-end")))
+                {
+                    printf("ATFWD AtCmdFwd:%s",cmd->tokens[0]);
+                //  property_set("wifi.p_socket_app", "false");
+                    stop_wifi();
+                    result->result = 1; // success
+                }
+                else if(0 == strncmp("ble-start",cmd->tokens[0],strlen("ble-start")))
+                {	
+                    printf("ATFWD AtCmdFwd:%s",cmd->tokens[0]);
+                // property_set("bt.start", "true");
+                    start_bluetooth();
+                    result->result = 1; // success
+                }else if(0 == strncmp("ble-end",cmd->tokens[0],strlen("ble-end")))
+                {
+                    printf("ATFWD AtCmdFwd:%s",cmd->tokens[0]);
+                //  property_set("bt.start", "false");
+                    stop_bluetooth();
+                    result->result = 1; // success
+                }
+                else
+                {
+                    printf("ATFWD AtCmdFwd QFCT");
+                    quec_qfct_handle(result);
+                }	
+            }
+            else
+            {
+                LOGI("ATFWD AtCmdFwd Tokens is NULL");
+                quec_qfct_handle(result);		
+            }	
 		}
 #else
     result = gAtCmdFwdService->processCommand(*cmd);

@@ -6,7 +6,7 @@
 Description=ffbm mmi Service
 Wants=ql-fb-service.service
 After=ql-fb-service.service 
-
+After=thermal-engine.service
 
 [Service]
 Type=simple

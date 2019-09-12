@@ -39,7 +39,7 @@ pthread_mutexattr_t client_token_mutexattr;
 //       user_handle for the client
 //
 //=============================================================================
-uint32 mcm_client_mutex_init()
+uint32_t mcm_client_mutex_init()
 {
     int ret_val = MCM_SUCCESS_V01;
 
@@ -285,16 +285,16 @@ void *mcm_loc_init()
 //    MCM_SUCCESS -- 0 is success\n
 //    MCM_ERROR_TBD...
 //=============================================================================
-uint32 mcm_client_init
+uint32_t mcm_client_init
 (
     mcm_client_handle_type      *client_handle,
     mcm_client_ind_cb            client_ind_cb,
     mcm_client_async_cb          client_resp_cb
 )
 {
-    uint32            ret_val = MCM_SUCCESS_V01;
+    uint32_t            ret_val = MCM_SUCCESS_V01;
     int               mcm_handle;
-    uint32            fail_count = 0;
+    uint32_t            fail_count = 0;
     qmi_client_type   user_handle;
     log_util_type_e local_log_status = LOG_UTIL_NONE;
 
@@ -430,7 +430,7 @@ uint32 mcm_client_init
 }
 
 
-uint32 mcm_client_execute_command_async
+uint32_t mcm_client_execute_command_async
 (
     mcm_client_handle_type        client_handle,
     int                           msg_id,
@@ -519,7 +519,7 @@ uint32 mcm_client_execute_command_async
 
 }
 
-uint32 mcm_client_execute_command_sync
+uint32_t mcm_client_execute_command_sync
 (
     mcm_client_handle_type      client_handle,
     int                         msg_id,
@@ -551,7 +551,7 @@ uint32 mcm_client_execute_command_sync
 }
 
 
-uint32 mcm_client_execute_command_sync_ex
+uint32_t mcm_client_execute_command_sync_ex
 (
     mcm_client_handle_type      client_handle,
     int                         msg_id,
@@ -559,7 +559,7 @@ uint32 mcm_client_execute_command_sync_ex
     int                         req_c_struct_len,
     void                       *resp_c_struct,
     int                         resp_c_struct_len,
-    uint32                      timeout
+    uint32_t                      timeout
 )
 {
     qmi_client_type user_handle;
@@ -623,9 +623,9 @@ uint32 mcm_client_execute_command_sync_ex
 //    MCM_SUCCESS -- 0 is success\n
 //    MCM_ERROR_TBD...
 //=============================================================================
-uint32 mcm_client_release(mcm_client_handle_type handle)
+uint32_t mcm_client_release(mcm_client_handle_type handle)
 {
-    uint32 ret_val = MCM_SUCCESS_V01;
+    uint32_t ret_val = MCM_SUCCESS_V01;
     ret_val = mcm_internal_client_release(handle);
     log_util_close();
     return ret_val;

@@ -457,7 +457,7 @@ int main(int argc, char **argv)
         if(i == dev_fd)
         {
           /*do a sample read and check if file is intact*/
-          if((nbytes = read(dev_fd, (uint8 *)(&(buf)), MAX_BUF_LEN - 1)) < 0 )
+          if((nbytes = read(dev_fd, (uint8_t *)(&(buf)), MAX_BUF_LEN - 1)) < 0 )
           {
             if (errno == ENETRESET || errno == EIO)
             {
@@ -837,7 +837,7 @@ static qmi_csi_cb_error  mcm_atcop_handle_req
     return QMI_CSI_CB_NO_ERR;
   }
 
-  if ( !first_client )
+  if ( 0 )
   {
     /*if it is first client, disable the "echo" */
     strlcpy(no_echo_req, MCM_ATCOP_ECHO_DISABLE, MCM_ATCOP_ECHO_DISABLE_LEN);
@@ -998,7 +998,7 @@ mcm_error_t_v01 mcm_atcop_process_req(char *cmd_req, int cmd_len, char *cmd_resp
                     " Return with whatever obtained.", 0, 0, 0);
       return MCM_SUCCESS_V01;
     }
-    if((nbytes = read(dev_fd, (uint8 *)(&(buffer)), MAX_BUF_LEN - 1)) < 0 )
+    if((nbytes = read(dev_fd, (uint8_t *)(&(buffer)), MAX_BUF_LEN - 1)) < 0 )
     {
       LOG_MSG_ERROR("ATCOP Command response reception failed. errno: %d ", errno,0,0);
       if (errno == ENETRESET || errno == EIO)
@@ -1037,7 +1037,7 @@ mcm_error_t_v01 mcm_atcop_process_req(char *cmd_req, int cmd_len, char *cmd_resp
     do
     {
       memset(buffer, 0, sizeof(buffer));
-      if ((nbytes = read(dev_fd, (uint8 *)(&(buffer)), MAX_BUF_LEN - 1)) < 0)
+      if ((nbytes = read(dev_fd, (uint8_t *)(&(buffer)), MAX_BUF_LEN - 1)) < 0)
       {
         LOG_MSG_ERROR("ATCOP Command response reception failed. errno: %d ",
                       errno,0,0);

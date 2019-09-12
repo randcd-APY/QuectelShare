@@ -757,7 +757,7 @@ int main(int argc, char *argv[])
     DPRINTF(FTM_DBG_TRACE, "FTMDaemon: Diag_LSM_Init succesful\n");
 
 #ifdef CONFIG_FTM_BT
-    soc_type = get_bt_soc_type();
+    //soc_type = get_bt_soc_type();
 #endif
 
 #ifdef CONFIG_FTM_FM

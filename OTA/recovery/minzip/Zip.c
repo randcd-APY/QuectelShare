@@ -557,7 +557,7 @@ static bool processDeflatedEntry(const ZipArchive *pArchive,
             (zerr == Z_STREAM_END && zstream.avail_out != sizeof(procBuf)))
         {
             long procSize = zstream.next_out - procBuf;
-            LOGVV("+++ processing %d bytes\n", (int) procSize);
+            //LOGVV("+++ processing %d bytes\n", (int) procSize);
             bool ret = processFunction(procBuf, procSize, cookie);
             if (!ret) {
                 LOGW("Process function elected to fail (in inflate)\n");

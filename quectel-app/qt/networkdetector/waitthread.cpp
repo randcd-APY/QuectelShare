@@ -3,6 +3,8 @@
 WaitThread::WaitThread(QObject *parent) : QThread(parent)
 {
     m_mobap = -1;
+    m_primaryDNS = "";
+    m_secondDNS = "";
     setNetworkState(NETWORK_BEGINE_STEP);
 }
 
@@ -104,6 +106,9 @@ int WaitThread::connectNetwork(void)
     E_QL_ERROR_CODE_T ret;
     mobap_client_handle_type h_mobap;
 
+    m_primaryDNS = "";
+    m_secondDNS = "";
+
     h_mobap = m_mobap;
     for (int i = 0; i < 5; ++i) {
         setNetworkState(NETWORK_CONNECT_START);
@@ -160,6 +165,54 @@ void WaitThread::setNetworkAddress(QString address)
     m_networkAddress = address;
 }
 
+int WaitThread::getDnsAddress()
+{
+    char command[128];
+    struct in_addr addr;
+    QL_MOBAP_IPV4_WWAN_CONFIG_INFO_T    t_wwan_cfg = {0};
+    E_QL_ERROR_CODE_T ret;
+    mobap_client_handle_type h_mobap;
+
+    if (!m_primaryDNS.isNull() && !m_primaryDNS.isEmpty())
+        return -2;
+
+    h_mobap = m_mobap;
+    for (int i = 0; i < 5; ++i) {
+        ret = QL_MCM_MobileAP_GetIPv4WWANCfg(h_mobap, &t_wwan_cfg);
+        printf("QL_MCM_MobileAP_GetIPv4WWANCfg ret = %d, IPV4 Config Info:...\n", ret);
+        if(ret == 0) {
+            addr.s_addr = ntohl(t_wwan_cfg.v4_addr);
+            printf("v4_addr_valid:%d v4_addr:%s\n",t_wwan_cfg.v4_addr_valid,inet_ntoa(addr));
+            addr.s_addr = ntohl(t_wwan_cfg.v4_prim_dns_addr);
+            if (m_primaryDNS.compare(QString(inet_ntoa(addr))) == 0)
+                return 0;
+            m_primaryDNS = QString(inet_ntoa(addr));
+            emit singalPrimaryDNS(m_primaryDNS);
+            printf("v4_prim_dns_addr_valid:%d v4_prim_dns_addr:%s\n",t_wwan_cfg.v4_prim_dns_addr_valid, m_primaryDNS);
+            snprintf(command, sizeof(command), "echo 'nameserver %s' > /etc/resolv.conf",inet_ntoa(addr));
+            system(command);
+
+            addr.s_addr = ntohl(t_wwan_cfg.v4_sec_dns_addr);
+            m_secondDNS = QString(inet_ntoa(addr));
+            emit singalSecondDNS(m_secondDNS);
+            printf("v4_sec_dns_addr_valid:%d v4_sec_dns_addr:%s\n",t_wwan_cfg.v4_sec_dns_addr_valid, inet_ntoa(addr));
+            snprintf(command, sizeof(command), "echo 'nameserver %s' >> /etc/resolv.conf", inet_ntoa(addr));
+            system(command);
+            return 0;
+        } else {
+            msleep(100);
+            continue;
+        }
+    }
+
+    return -1;
+}
+
+void WaitThread::setDnsAddress(QString address)
+{
+    m_primaryDNS = address;
+}
+
 void WaitThread::run()
 {
     int fault_times = 0;
@@ -169,7 +222,6 @@ void WaitThread::run()
     arguments << "-c" << "2" << tempAddress;
 
     QRegExp rx("");
-    int pos;
     QProcess *myProcess = new QProcess(this);
     myProcess->setProcessChannelMode(QProcess::MergedChannels);
     while (1) {
@@ -233,6 +285,7 @@ void WaitThread::run()
                         emit singalPingAvgTime("RTT: " + rx.cap(3) + " ms");
                         emit singalNetworkState(NETWORK_BLINK_END);
                         fault_times = 0;
+                        getDnsAddress();
                     }
                 } else if (list.at(i).contains("unreachable")) {
                     emit singalPingAvgTime("Ping: Unreachable");
@@ -264,6 +317,10 @@ void WaitThread::run()
             emit singalPingAvgTime("Ping: Timeout/Unreachable");
             emit singalNetworkState(NETWORK_CONNECT_BREAK);
             fault_times++;
+            if (fault_times > 10) {
+                m_primaryDNS = "";
+                m_secondDNS = "";
+            }
 //            if (fault_times++ > 10){ //fix network
 //                fault_times = 0;
 //                if (disconnectNetwork() == 0) {

@@ -23,11 +23,11 @@ qmi_client_error_type mcm_qmi_multi_process_init
     qmi_client_type                         *user_handle
 )
 {
-    uint32               num_services, num_entries;
+    uint32_t               num_services, num_entries;
     qmi_client_type  mcm_ril_client, client_notifier;
-    uint32               retry_count = 0;
-    uint32               retry_timeout = MCM_MAX_FIRST_RETRY_TIMEOUT;
-    uint32               is_service_up = FALSE;
+    uint32_t               retry_count = 0;
+    uint32_t               retry_timeout = MCM_MAX_FIRST_RETRY_TIMEOUT;
+    uint32_t               is_service_up = FALSE;
     int rc = QMI_NO_ERR;
 
     LOG_MSG_INFO("mcm_qmi_multi_process_init ENTER");

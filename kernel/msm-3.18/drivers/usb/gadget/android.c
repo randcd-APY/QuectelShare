@@ -4040,6 +4040,7 @@ static int android_bind(struct usb_composite_dev *cdev)
 	strlcpy(serial_string, "0123456789ABCDEF", sizeof(serial_string) - 1);
 
 	id = usb_string_id(cdev);
+	id =0;    //banson add for adb devices display ???????
 	if (id < 0)
 		return id;
 	strings_dev[STRING_SERIAL_IDX].id = id;

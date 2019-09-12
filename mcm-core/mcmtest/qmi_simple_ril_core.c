@@ -157,7 +157,7 @@
 #define SIMPLE_RIL_REQUEST_ID_BLOCK_COND_VAR_WAIT  (QMI_UTIL_RESERVED_1_REQUEST_ID)
 #define SIMPLE_RIL_REQUEST_ID_BLOCK_COND_VAR_CHECK (QMI_UTIL_RESERVED_2_REQUEST_ID)
 
-uint32 mcm_client_handle = -1;
+uint32_t mcm_client_handle = -1;
 extern mcm_voice_call_id;
 
 static void* qmi_simle_ril_engine_thread_func(void *param);
@@ -1197,9 +1197,9 @@ void qmi_simple_ril_test_client_init_event(qmi_simple_ril_cmd_input_info* cmd_pa
 void simple_ril_ind_cb
 (
     mcm_client_handle_type  clnt_hndl,
-    uint32                  msg_id,
+    uint32_t                  msg_id,
     void                    *ind_c_struct,
-    uint32                  ind_c_struct_len
+    uint32_t                  ind_c_struct_len
 )
 {
 
@@ -1426,9 +1426,9 @@ int qmi_simple_ril_help
 void simple_ril_async_cb
 (
     mcm_client_handle_type clnt_handle,
-    uint32      msg_id,
+    uint32_t      msg_id,
     void             *resp_c_struct,
-    uint32               resp_c_struct_len,
+    uint32_t               resp_c_struct_len,
     void             *token_id
 )
 {

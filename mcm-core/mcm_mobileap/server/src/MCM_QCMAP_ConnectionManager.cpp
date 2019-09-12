@@ -1289,8 +1289,8 @@ boolean MCM_QCMAP_ConnectionManager::DisableWLAN
 boolean MCM_QCMAP_ConnectionManager::SetDualAPConfig
 (
   boolean enable,
-  uint32 a5_ip_addr,
-  uint32 sub_net_mask,
+  uint32_t a5_ip_addr,
+  uint32_t sub_net_mask,
   mcm_error_t_v01 *mcm_err_num
 )
 {
@@ -1946,7 +1946,7 @@ boolean MCM_QCMAP_ConnectionManager::ConnectBackHaul
   int ret_val;
   int rc = 0;
   struct timespec ts;
-  uint32 public_ip = 0, pri_dns_addr = 0, sec_dns_addr = 0;
+  uint32_t public_ip = 0, pri_dns_addr = 0, sec_dns_addr = 0;
   struct in_addr addr;
   char command[MAX_COMMAND_STR_LEN];
 
@@ -1995,7 +1995,7 @@ boolean MCM_QCMAP_ConnectionManager::EnableDNS()
   int ret_val;
   int rc = 0;
   struct timespec ts;
-  uint32 public_ip = 0, pri_dns_addr = 0, sec_dns_addr = 0;
+  uint32_t public_ip = 0, pri_dns_addr = 0, sec_dns_addr = 0;
   struct in_addr addr;
   char command[MAX_COMMAND_STR_LEN];
 
@@ -2198,7 +2198,7 @@ int MCM_QCMAP_ConnectionManager::GetStaticNatEntry
   return ret_entry;
 }
 
-boolean MCM_QCMAP_ConnectionManager::AddDMZ(uint32 dmz_ip, mcm_error_t_v01 *mcm_err_num)
+boolean MCM_QCMAP_ConnectionManager::AddDMZ(uint32_t dmz_ip, mcm_error_t_v01 *mcm_err_num)
 {
   int qcmap_cm_errno = QCMAP_CM_ESUCCESS;
   int ret_val;
@@ -2224,11 +2224,11 @@ boolean MCM_QCMAP_ConnectionManager::AddDMZ(uint32 dmz_ip, mcm_error_t_v01 *mcm_
   return true;
 }
 
-boolean MCM_QCMAP_ConnectionManager::DeleteDMZ(uint32 dmz_ip, mcm_error_t_v01 *mcm_err_num)
+boolean MCM_QCMAP_ConnectionManager::DeleteDMZ(uint32_t dmz_ip, mcm_error_t_v01 *mcm_err_num)
 {
   int qcmap_cm_errno = QCMAP_CM_ESUCCESS;
   int ret_val;
-  uint32 check_dmz;
+  uint32_t check_dmz;
 
   if ( GetDMZ(&check_dmz, mcm_err_num) )
   {
@@ -2264,7 +2264,7 @@ boolean MCM_QCMAP_ConnectionManager::DeleteDMZ(uint32 dmz_ip, mcm_error_t_v01 *m
 
 boolean MCM_QCMAP_ConnectionManager::GetDMZ
 (
-  uint32 *dmz_ip,
+  uint32_t *dmz_ip,
   mcm_error_t_v01 *mcm_err_num
 )
 {
@@ -2293,7 +2293,7 @@ boolean MCM_QCMAP_ConnectionManager::GetDMZ
 /* Set NAT Time out */
 boolean MCM_QCMAP_ConnectionManager::SetNATEntryTimeout
 (
-  uint16 timeout,
+  uint16_t timeout,
   mcm_error_t_v01 *mcm_err_num
 )
 {
@@ -2317,7 +2317,7 @@ boolean MCM_QCMAP_ConnectionManager::SetNATEntryTimeout
 
 boolean MCM_QCMAP_ConnectionManager::GetNATEntryTimeout
 (
-  uint16 *timeout,
+  uint16_t *timeout,
   mcm_error_t_v01 *mcm_err_num
 )
 {
@@ -2340,7 +2340,7 @@ boolean MCM_QCMAP_ConnectionManager::SetIPSECVpnPassThrough(boolean enable, mcm_
 {
   int qcmap_cm_errno = QCMAP_CM_ESUCCESS;
   int ret_val;
-  uint8 vpn_value = (enable) ? 1 : 0;
+  uint8_t vpn_value = (enable) ? 1 : 0;
 
   if (!this->sta_connected)
   {
@@ -2369,7 +2369,7 @@ boolean MCM_QCMAP_ConnectionManager::SetIPSECVpnPassThrough(boolean enable, mcm_
 
 boolean MCM_QCMAP_ConnectionManager::GetIPSECVpnPassThrough
 (
-  uint8 *vpn_value,
+  uint8_t *vpn_value,
   mcm_error_t_v01 *mcm_err_num
 )
 {
@@ -2397,7 +2397,7 @@ boolean MCM_QCMAP_ConnectionManager::SetL2TPVpnPassThrough(boolean enable, mcm_e
 {
   int qcmap_cm_errno = QCMAP_CM_ESUCCESS;
   int ret_val;
-  uint8 vpn_value = (enable) ? 1 : 0;
+  uint8_t vpn_value = (enable) ? 1 : 0;
 
   if (!this->sta_connected)
   {
@@ -2426,7 +2426,7 @@ boolean MCM_QCMAP_ConnectionManager::SetL2TPVpnPassThrough(boolean enable, mcm_e
 
 boolean MCM_QCMAP_ConnectionManager::GetL2TPVpnPassThrough
 (
-  uint8 *vpn_value,
+  uint8_t *vpn_value,
   mcm_error_t_v01 *mcm_err_num
 )
 {
@@ -2454,7 +2454,7 @@ boolean MCM_QCMAP_ConnectionManager::SetPPTPVpnPassThrough(boolean enable, mcm_e
 {
   int qcmap_cm_errno = QCMAP_CM_ESUCCESS;
   int ret_val;
-  uint8 vpn_value = (enable) ? 1 : 0;
+  uint8_t vpn_value = (enable) ? 1 : 0;
 
   if (!this->sta_connected)
   {
@@ -2483,7 +2483,7 @@ boolean MCM_QCMAP_ConnectionManager::SetPPTPVpnPassThrough(boolean enable, mcm_e
 
 boolean MCM_QCMAP_ConnectionManager::GetPPTPVpnPassThrough
 (
-  uint8 *vpn_value,
+  uint8_t *vpn_value,
   mcm_error_t_v01 *mcm_err_num
 )
 {
@@ -2518,7 +2518,7 @@ boolean MCM_QCMAP_ConnectionManager::SetFirewall
   int qcmap_cm_errno = QCMAP_CM_ESUCCESS;
   int ret_val;
   char command[MAX_COMMAND_STR_LEN];
-  uint8 pkts_allowed_value = pkts_allowed;
+  uint8_t pkts_allowed_value = pkts_allowed;
 
   if (enable)
   {
@@ -2728,8 +2728,8 @@ boolean MCM_QCMAP_ConnectionManager::ResetWWANStatistics(
 boolean MCM_QCMAP_ConnectionManager::SetDHCPDConfig
 (
   int intf,
-  uint32 start,
-  uint32 end,
+  uint32_t start,
+  uint32_t end,
   char * leasetime,
   mcm_error_t_v01 *mcm_err_num
 )
@@ -3068,7 +3068,7 @@ boolean MCM_QCMAP_ConnectionManager::ModifyExtdFirewallEntryOnA5
 )
 {
   char command[MAX_COMMAND_STR_LEN],command_sec[MAX_COMMAND_STR_LEN];
-  uint8 next_hdr_prot;
+  uint8_t next_hdr_prot;
   char tmp_buf[50];
   struct in6_addr ip6_addr;
   char ip6_addr_buf[48];
@@ -3174,7 +3174,7 @@ boolean MCM_QCMAP_ConnectionManager::ModifyExtdFirewallEntryOnA5
     {
       memcpy(ip6_addr.s6_addr,
             firewall_entry->filter_spec.ip_hdr.v6.src.addr.in6_u.u6_addr8,
-            QCMAP_IPV6_ADDR_LEN_V01*sizeof(uint8));
+            QCMAP_IPV6_ADDR_LEN_V01*sizeof(uint8_t));
       snprintf(tmp_buf, 47,"-s %s/%d ",
                inet_ntop(AF_INET6,&ip6_addr,ip6_addr_buf,sizeof(ip6_addr_buf)),
                firewall_entry->filter_spec.ip_hdr.v6.src.prefix_len);
@@ -3188,7 +3188,7 @@ boolean MCM_QCMAP_ConnectionManager::ModifyExtdFirewallEntryOnA5
     {
       memcpy(ip6_addr.s6_addr,
              firewall_entry->filter_spec.ip_hdr.v6.dst.addr.in6_u.u6_addr8,
-             QCMAP_IPV6_ADDR_LEN_V01*sizeof(uint8));
+             QCMAP_IPV6_ADDR_LEN_V01*sizeof(uint8_t));
       snprintf(tmp_buf, 47,"-d %s/%d ",
                inet_ntop(AF_INET6,&ip6_addr,ip6_addr_buf,sizeof(ip6_addr_buf)),
                firewall_entry->filter_spec.ip_hdr.v6.dst.prefix_len);
@@ -3389,13 +3389,13 @@ boolean MCM_QCMAP_ConnectionManager::GetExtdFireWallEntry
 {
   int qcmap_cm_errno = QCMAP_CM_ESUCCESS;
   int ret_val,i;
-  uint8 next_hdr_prot;
+  uint8_t next_hdr_prot;
 
   if(!this->sta_connected)
   {
     for (i = 0; i < this->cfg.nat_config.num_extd_firewall_entries; i++)
     {
-      /* Do not compare the handle value, the last uint32 bytes of the struct. */
+      /* Do not compare the handle value, the last uint32_t bytes of the struct. */
       if (extd_firewall_conf->extd_firewall_entry.firewall_handle ==
           this->cfg.nat_config.extd_firewall_entries[i].extd_firewall_entry.firewall_handle)
       {
@@ -3499,7 +3499,7 @@ boolean MCM_QCMAP_ConnectionManager::DeleteExtdFireWallEntry
   if(!this->sta_connected)
     for (i = 0; i < this->cfg.nat_config.num_extd_firewall_entries; i++)
     {
-      /* Do not compare the handle value, the last uint32 bytes of the struct. */
+      /* Do not compare the handle value, the last uint32_t bytes of the struct. */
       if (extd_firewall_entry->extd_firewall_handle.handle ==
           this->cfg.nat_config.extd_firewall_entries[i].extd_firewall_entry.firewall_handle)
       {
@@ -3661,7 +3661,7 @@ boolean MCM_QCMAP_ConnectionManager::DeleteSNATEntryOnA5
 
 boolean MCM_QCMAP_ConnectionManager::AddDMZOnA5
 (
-  uint32 dmzIP,
+  uint32_t dmzIP,
   mcm_error_t_v01 *mcm_err_num
 )
 {
@@ -3771,7 +3771,7 @@ boolean MCM_QCMAP_ConnectionManager::SetPPTPVpnPassThroughOnA5
 
 boolean MCM_QCMAP_ConnectionManager::DeleteDMZOnA5
 (
-  uint32 dmzIP,
+  uint32_t dmzIP,
   mcm_error_t_v01 *mcm_err_num
 )
 {
@@ -4063,9 +4063,9 @@ boolean MCM_QCMAP_ConnectionManager::GetStaIP(char *staIP, int staIPBufLen, char
 
 boolean MCM_QCMAP_ConnectionManager::GetIPv4WWANNetworkConfiguration
 (
-  uint32 *public_ip,
-  uint32 *primary_dns,
-  uint32 *secondary_dns,
+  uint32_t *public_ip,
+  uint32_t *primary_dns,
+  uint32_t *secondary_dns,
   mcm_error_t_v01 *mcm_err_num
 )
 {

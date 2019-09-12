@@ -1,4 +1,4 @@
-#include <ql_in.h>
+#include <ql-mcm-api/ql_in.h>
 #include "test_base.h"
 
 static int    h_sim   = 0;

@@ -146,18 +146,18 @@ struct
    mcm_mobileap_wwan_call_end_type_t wwan_call_end_reason_type;
    /**< WWAN call end type. */
 
-   int32 wwan_call_end_reason_code;
+   int32_t wwan_call_end_reason_code;
    /**< WWAN call end reason code. */
 } mcm_mobileap_wwan_call_end_reason_t;
 
 
 
 struct {
-  uint32 addr;
+  uint32_t addr;
   /**< IPv4 address as specified in the IPv4 protocol
        specification (RFC 791 \hyperref{S2,[S2]}).
   */
-  uint32 subnet_mask;
+  uint32_t subnet_mask;
   /**< IPv4 subnet mask as specified in the IPv4
        protocol specification (RFC 791 \hyperref{S2,[S2]}).
   */
@@ -165,11 +165,11 @@ struct {
 
 
 struct  {
-  uint8 addr[MCM_MOBILEAP_IPV6_ADDR_LEN];
+  uint8_t addr[MCM_MOBILEAP_IPV6_ADDR_LEN];
   /**< IPv6 address as specified in the IPv6
        protocol specification (RFC 2460 \hyperref{S5,[S5]}).
   */
-  uint8 prefix_len;
+  uint8_t prefix_len;
   /**< IPv6 prefix length as specified in the IPv6
        protocol specification (RFC 3513 \hyperref{S6,[S6]}).
   */
@@ -177,12 +177,12 @@ struct  {
 
 
 struct  {
-  uint16 port;
+  uint16_t port;
   /**< TCP/UDP port as specified in the
        TCP and UDP protocols (RFC 793 \hyperref{S4,[S4]},
        RFC 768 \hyperref{S1,[S1]}).
   */
-  uint16 range;
+  uint16_t range;
   /**< TCP/UDP port range as specified in the
        TCP and UDP protocols (RFC 793 \hyperref{S4,[S4]},
        RFC 768 \hyperref{S1,[S1]}).
@@ -191,56 +191,56 @@ struct  {
 
 
 struct  {
-  uint8 value;
+  uint8_t value;
   /**< TOS value as specified in the IPv4 protocol
        (RFC 791 \hyperref{S2,[S2]}). */
-  uint8 mask;
+  uint8_t mask;
   /**< IPv4 TOS mask */
 } mcm_mobileap_ip4_tos_t; /**< Data structure for IPv4 type of service. */
 
 
 struct  {
-  uint8 value;
+  uint8_t value;
   /**< IPv6 traffic class value as specified in the IPv6 protocol
        (RFC 2460 \hyperref{S5,[S5]}). */
-  uint8 mask;
+  uint8_t mask;
   /**< IPv6 traffic class mask */
 } mcm_mobileap_ip6_traffic_class_t; /**< Data structure for IPv6 traffic class. */
 
 struct {
-  uint32   port_fwding_private_ip;    /**< Private IP. */
-  uint16   port_fwding_private_port;  /**< Private port. */
-  uint16   port_fwding_global_port;   /**< Global port. */
-  uint8    port_fwding_protocol;      /**< Protocol. */
+  uint32_t   port_fwding_private_ip;    /**< Private IP. */
+  uint16_t   port_fwding_private_port;  /**< Private port. */
+  uint16_t   port_fwding_global_port;   /**< Global port. */
+  uint8_t    port_fwding_protocol;      /**< Protocol. */
 }mcm_mobileap_static_nat_entry_conf_t; //!< Static NAT entry configuration.
 
 
 struct {
-  uint64     bytes_rx;         /**< Rx bytes. */
-  uint64     bytes_tx;         /**< Tx bytes. */
-  uint32     pkts_rx;          /**< Rx packets. */
-  uint32     pkts_tx;          /**< Tx packets. */
-  uint32     pkts_dropped_rx;  /**< Rx packets dropped. */  
-  uint32     pkts_dropped_tx;  /**< Tx packets dropped. */
+  uint64_t     bytes_rx;         /**< Rx bytes. */
+  uint64_t     bytes_tx;         /**< Tx bytes. */
+  uint32_t     pkts_rx;          /**< Rx packets. */
+  uint32_t     pkts_tx;          /**< Tx packets. */
+  uint32_t     pkts_dropped_rx;  /**< Rx packets dropped. */  
+  uint32_t     pkts_dropped_tx;  /**< Tx packets dropped. */
 } mcm_mobileap_wwan_statistics_t; //!< Mobile AP WWAN statistics.
 
 struct {
-  uint32 intf;     /**< Interface. */
-  uint32 start;    /**< Start. */
-  uint32 end;      /**< End. */
+  uint32_t intf;     /**< Interface. */
+  uint32_t start;    /**< Start. */
+  uint32_t end;      /**< End. */
   char leasetime[MCM_MOBILEAP_LEASE_TIME_LEN];  /**< Lease time length. */
 } mcm_mobileap_dhcpd_config_t; //!< DHCP configuration.
 
 
 struct {
   boolean enable;        /**< Enable dual AP. */
-  uint32 a5_ip_address;  /**< A5 IP address. */
-  uint32 sub_net_mask;   /**< Subnet mask. */
+  uint32_t a5_ip_address;  /**< A5 IP address. */
+  uint32_t sub_net_mask;   /**< Subnet mask. */
 } mcm_mobileap_dualap_config_t; //!< Dual AP configuration
 
 enum {
   MCM_MOBILEAP_STA_CONNECTION_MIN_FORCE_TO_32_BIT = -2147483647,
-                  // Minimum signed uint32 number, to force Enum to be 4 Byte
+                  // Minimum signed uint32_t number, to force Enum to be 4 Byte
   MCM_MOBILEAP_STA_CONNECTION_DYNAMIC = 0,  /**< Dynamic connection. */
   MCM_MOBILEAP_STA_CONNECTION_STATIC,       /**< Static connection. */
   MCM_MOBILEAP_STA_CONNECTION_MAX_FORCE_TO_32_BIT = 2147483647
@@ -248,10 +248,10 @@ enum {
 
 
 struct {
-  uint32 ip_addr;   /**< IP address. */
-  uint32 gw_ip;     /**< GSM/WCDMA IP. */
-  uint32 netmask;   /**< Net mask. */
-  uint32 dns_addr;  /**< DNS address. */
+  uint32_t ip_addr;   /**< IP address. */
+  uint32_t gw_ip;     /**< GSM/WCDMA IP. */
+  uint32_t netmask;   /**< Net mask. */
+  uint32_t dns_addr;  /**< DNS address. */
 } mcm_mobileap_sta_static_ip_config_t; //!< Station mode static IP configuration.
 
 struct {
@@ -299,7 +299,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  optional uint32 mcm_mobileap_handle;  //!< Mobile AP handle.
+  optional uint32_t mcm_mobileap_handle;  //!< Mobile AP handle.
   /* techpubs: spaces after _s for formatting.  */
 } mcm_mobileap_enable_resp_msg;
 
@@ -339,7 +339,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 mcm_mobileap_handle;
+  mandatory uint32_t mcm_mobileap_handle;
   /**< Handle identifying the mobile AP call instance.
        The value must be the handle previously returned by
        MCM_MOBILEAP_ENABLE_REQ.
@@ -392,7 +392,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 mcm_mobileap_handle;
+  mandatory uint32_t mcm_mobileap_handle;
   /**< Handle identifying the mobile AP call instance.
        The value must be the handle previously returned by
        MCM_MOBILEAP_ENABLE_REQ.
@@ -457,7 +457,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 mcm_mobileap_handle;
+  mandatory uint32_t mcm_mobileap_handle;
   /**< Handle identifying the mobile AP call instance.
        The value must be the handle previously returned by
        MCM_MOBILEAP_ENABLE_REQ.
@@ -521,7 +521,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 mcm_mobileap_handle;
+  mandatory uint32_t mcm_mobileap_handle;
   /**< Handle identifying the mobile AP call instance.
        The value must be the handle previously returned by
        MCM_MOBILEAP_ENABLE_REQ.
@@ -587,7 +587,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 mcm_mobileap_handle;
+  mandatory uint32_t mcm_mobileap_handle;
   /**< Handle identifying the mobile AP call instance.
        The value must be the handle previously returned by
        MCM_MOBILEAP_MOBILEAP_ENABLE_REQ.
@@ -595,7 +595,7 @@ message {
   //! Max SNAT Entries.
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 max_entries;
+  mandatory uint32_t max_entries;
   /**< Maximum number of SNAT entries requested by the client.
   */
   /* techpubs note: space added for table formatting */
@@ -657,7 +657,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 mcm_mobileap_handle;
+  mandatory uint32_t mcm_mobileap_handle;
   /**< Handle identifying the mobile AP call instance.
        The value must be the handle previously returned by
        MCM_MOBILEAP_ENABLE_REQ.
@@ -716,7 +716,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 mcm_mobileap_handle;
+  mandatory uint32_t mcm_mobileap_handle;
   /**< Handle identifying the mobile AP call instance.
        The value must be the handle previously returned by
        MCM_MOBILEAP_ENABLE_REQ.
@@ -732,7 +732,7 @@ message {
   //! NAT Timeout Value
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 timeout_value;
+  mandatory uint32_t timeout_value;
   /**< NAT timeout value to be used, in seconds.
   */
 
@@ -789,7 +789,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 mcm_mobileap_handle;
+  mandatory uint32_t mcm_mobileap_handle;
   /**< Handle identifying the mobile AP call instance.
        The value must be the handle previously returned by
        MCM_MOBILEAP_ENABLE_REQ.
@@ -819,7 +819,7 @@ message {
   //! NAT Timeout Value
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  optional uint32 timeout_value;
+  optional uint32_t timeout_value;
   /**< NAT timeout value used, in seconds.
   */
 } mcm_mobileap_get_nat_timeout_resp_msg;
@@ -862,7 +862,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 mcm_mobileap_handle;
+  mandatory uint32_t mcm_mobileap_handle;
   /**< Handle identifying the mobile AP call instance.
        The value must be the handle previously returned by
        mcm_mobileap_ENABLE_REQ.
@@ -929,7 +929,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 mcm_mobileap_handle;
+  mandatory uint32_t mcm_mobileap_handle;
   /**< Handle identifying the mobile AP call instance.
     The value must be the handle previously returned by
     MCM_MOBILEAP_ENABLE_REQ.
@@ -995,7 +995,7 @@ message {
     //! Mobile AP Handle
     //! @VERSION_INTRODUCED 1.0
     //! @VERSION 1.0
-    mandatory uint32 mcm_mobileap_handle;
+    mandatory uint32_t mcm_mobileap_handle;
     /**< Handle identifying the mobile AP call instance.
          The value must be the handle previously returned by
          MCM_MOBILEAP_ENABLE_REQ.
@@ -1013,7 +1013,7 @@ message {
     //! Next Protocol Header After the IP Header
     //! @VERSION_INTRODUCED 1.0
     //! @VERSION 1.0
-    optional uint8 next_hdr_prot;
+    optional uint8_t next_hdr_prot;
     /**< IPv4/IPv6 next header protocol. */
 
     //! TCP, UDP, and TCP_UDP Source Port
@@ -1031,21 +1031,21 @@ message {
     //! ICMP Type
     //! @VERSION_INTRODUCED 1.0
     //! @VERSION 1.0
-    optional  uint8  icmp_type;
+    optional  uint8_t  icmp_type;
     /**< ICMP type, as specified in the ICMP protocol
          (RFC 792 \hyperref{S3,[S3]}). */
 
     //! ICMP Code
     //! @VERSION_INTRODUCED 1.0
     //! @VERSION 1.0
-    optional  uint8  icmp_code;
+    optional  uint8_t  icmp_code;
     /**< ICMP code as specified in the ICMP protocol
          (RFC 792 \hyperref{S3,[S3]}). */
 
     //! ESP Security Parameter Index
     //! @VERSION_INTRODUCED 1.0
     //! @VERSION 1.0
-    optional  uint32 esp_spi;
+    optional  uint32_t esp_spi;
     /**< Security parameter index, as specified in the ESP protocol
         (RFC 4303 \hyperref{S7,[S7]}). */
 
@@ -1102,7 +1102,7 @@ message {
     //! Firewall Handle
     //! @VERSION_INTRODUCED 1.0
     //! @VERSION 1.0
-    optional uint32 firewall_handle;
+    optional uint32_t firewall_handle;
     /**< Identifies the handle for the added firewall rule. */
 
 } mcm_mobileap_add_firewall_entry_resp_msg;
@@ -1149,7 +1149,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 mcm_mobileap_handle ;
+  mandatory uint32_t mcm_mobileap_handle ;
   /**< Handle identifying the mobile AP call instance.
        Value must be the handle previously returned by
        MCM_MOBILEAP_ENABLE_REQ.
@@ -1178,7 +1178,7 @@ message {
   //! Firewall Handle List
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  optional uint32 firewall_handle_list<MCM_MOBILEAP_MAX_FIREWALL_ENTRIES>;
+  optional uint32_t firewall_handle_list<MCM_MOBILEAP_MAX_FIREWALL_ENTRIES>;
   /**< Handles identifying the firewall entry. The value must be the handle
        previously returned by MCM_MOBILEAP_ADD_FIREWALL_ENTRY_RESP.
    */
@@ -1221,7 +1221,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 mcm_mobileap_handle;
+  mandatory uint32_t mcm_mobileap_handle;
   /**< Handle identifying the mobile AP call instance.
        The value must be the handle previously returned by
        MCM_MOBILEAP_ENABLE_REQ.
@@ -1230,7 +1230,7 @@ message {
   //! Firewall Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 firewall_handle;
+  mandatory uint32_t firewall_handle;
   /**< Handle identifying the firewall entry. The value must be the handle
        previously returned by
        MCM_MOBILEAP_ADD_FIREWALL_ENTRY_RESP or
@@ -1259,7 +1259,7 @@ message {
   //! Next Header Protocol
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  optional uint8 next_hdr_prot;
+  optional uint8_t next_hdr_prot;
   /**< IPv4/IPv6 next header protocol. */
 
   //! TCP, UDP, and TCP_UDP Source Port
@@ -1277,21 +1277,21 @@ message {
   //! ICMP Type
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  optional  uint8  icmp_type;
+  optional  uint8_t  icmp_type;
   /**< ICMP type, as specified in the ICMP protocol
        (RFC 792 \hyperref[S3]{[S3]}). */
 
   //! ICMP Code
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  optional  uint8  icmp_code;
+  optional  uint8_t  icmp_code;
   /**< ICMP code, as specified in the ICMP protocol
        (RFC 792 \hyperref[S3]{[S3]}). */
 
   //! ESP Security Parameter Index
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  optional  uint32 esp_spi;
+  optional  uint32_t esp_spi;
   /**< Security parameter index, as specified in the ESP protocol
        (RFC 4303 \hyperref[S7]{[S7]}). */
 
@@ -1370,7 +1370,7 @@ message {
 	//! Mobile AP Handle
     //! @VERSION_INTRODUCED 1.0
     //! @VERSION 1.0
-    mandatory uint32 mcm_mobileap_handle;
+    mandatory uint32_t mcm_mobileap_handle;
     /**< Handle identifying the mobile AP call instance.
          Value must be the handle previously returned by
          MCM_MOBILEAP_ENABLE_REQ.
@@ -1380,7 +1380,7 @@ message {
     //! Firewall Handle
     //! @VERSION_INTRODUCED 1.0
     //! @VERSION 1.0
-    mandatory uint32 firewall_handle;
+    mandatory uint32_t firewall_handle;
     /**< Handle identifying the firewall entry.
     */
 
@@ -1435,7 +1435,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 mcm_mobileap_handle;
+  mandatory uint32_t mcm_mobileap_handle;
   /**< Handle identifying the mobile AP call instance.
        The value must be the handle previously returned by
        MCM_MOBILEAP_ENABLE_REQ.
@@ -1504,7 +1504,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 mcm_mobileap_handle;
+  mandatory uint32_t mcm_mobileap_handle;
   /**< Handle identifying the mobile AP call instance.
        The value must be the handle previously returned by
        MCM_MOBILEAP_ENABLE_REQ.
@@ -1513,7 +1513,7 @@ message {
   //! DMZ IP Address
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 dmz_ip_addr;
+  mandatory uint32_t dmz_ip_addr;
   /**< DMZ IP address. */
 
 } mcm_mobileap_add_dmz_req_msg;
@@ -1566,7 +1566,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 mcm_mobileap_handle;
+  mandatory uint32_t mcm_mobileap_handle;
   /**< Handle identifying the mobile AP call instance.
        The value must be the handle previously returned by
        MCM_MOBILEAP_ENABLE_REQ.
@@ -1588,7 +1588,7 @@ message {
   //! DMZ IP Address
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  optional uint32 dmz_ip_addr;
+  optional uint32_t dmz_ip_addr;
   /**< DMZ IP address. */
 
 } mcm_mobileap_get_dmz_resp_msg;
@@ -1633,7 +1633,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 mcm_mobileap_handle;
+  mandatory uint32_t mcm_mobileap_handle;
   /**< Handle identifying the mobile AP call instance.
        The value must be the handle previously returned by
        MCM_MOBILEAP_ENABLE_REQ.
@@ -1642,7 +1642,7 @@ message {
   //! DMZ IP Address
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 dmz_ip_addr;
+  mandatory uint32_t dmz_ip_addr;
   /**< DMZ IP address. */
   /* techpubs note: space added for table formatting */
 
@@ -1698,7 +1698,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 mcm_mobileap_handle;
+  mandatory uint32_t mcm_mobileap_handle;
   /**< Handle identifying the mobile AP call instance.
        The value must be the handle previously returned by
        MCM_MOBILEAP_ENABLE_REQ.
@@ -1719,19 +1719,19 @@ message {
   //! IPv4 Address
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  optional uint32 v4_addr;
+  optional uint32_t v4_addr;
   /**< IPv4 address. */
 
   //! IPv4 Primary DNS Address
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  optional uint32 v4_prim_dns_addr;
+  optional uint32_t v4_prim_dns_addr;
   /**< IPv4 primary DNS address. */
 
   //! IPv4 Secondary DNS Address
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  optional uint32 v4_sec_dns_addr;
+  optional uint32_t v4_sec_dns_addr;
   /**< IPv4 secondary DNS address. */
 
 } mcm_mobileap_get_ipv4_wwan_config_resp_msg;
@@ -1777,7 +1777,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 mcm_mobileap_handle;
+  mandatory uint32_t mcm_mobileap_handle;
   /**< Handle identifying the mobile AP call instance.
        The value must be the handle previously returned by
        MCM_MOBILEAP_ENABLE_REQ.
@@ -1851,7 +1851,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 mcm_mobileap_handle;
+  mandatory uint32_t mcm_mobileap_handle;
   /**< Handle identifying the mobile AP call instance.
        The value must be the handle previously returned by
        MCM_MOBILEAP_ENABLE_REQ.
@@ -1916,7 +1916,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 mcm_mobileap_handle;
+  mandatory uint32_t mcm_mobileap_handle;
   /**< Handle identifying the mobile AP call instance.
        The value must be the handle previously returned by
        MCM_MOBILEAP_ENABLE_REQ.
@@ -1977,7 +1977,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 mcm_mobileap_handle;
+  mandatory uint32_t mcm_mobileap_handle;
   /**< Handle identifying the mobile AP call instance.
        The value must be the handle previously returned by
        MCM_MOBILEAP_MOBILEAP_ENABLE_REQ.
@@ -2029,7 +2029,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 mcm_mobileap_handle;
+  mandatory uint32_t mcm_mobileap_handle;
   /**< Handle identifying the mobile AP call instance.
        The value must be the handle previously returned by
        MCM_MOBILEAP_MOBILEAP_ENABLE_REQ.
@@ -2083,7 +2083,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 mcm_mobileap_handle;
+  mandatory uint32_t mcm_mobileap_handle;
   /**< Handle identifying the mobile AP call instance.
        The value must be the handle previously returned by
        MCM_MOBILEAP_ENABLE_REQ.
@@ -2147,7 +2147,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 mcm_mobileap_handle;
+  mandatory uint32_t mcm_mobileap_handle;
   /**< Handle identifying the mobile AP call instance.
        The value must be the handle previously returned by
        MCM_MOBILEAP_ENABLE_REQ.
@@ -2211,7 +2211,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 mcm_mobileap_handle;
+  mandatory uint32_t mcm_mobileap_handle;
   /**< Handle identifying the mobile AP call instance.
        The value must be the handle previously returned by
        MCM_MOBILEAP_ENABLE_REQ.
@@ -2276,7 +2276,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 mcm_mobileap_handle;
+  mandatory uint32_t mcm_mobileap_handle;
   /**< Handle identifying the mobile AP call instance.
        The value must be the handle previously returned by
        MCM_MOBILEAP_ENABLE_REQ.
@@ -2340,7 +2340,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 mcm_mobileap_handle;
+  mandatory uint32_t mcm_mobileap_handle;
   /**< Handle identifying the mobile AP call instance.
        The value must be the handle previously returned by
        MCM_MOBILEAP_ENABLE_REQ.
@@ -2405,7 +2405,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 mcm_mobileap_handle;
+  mandatory uint32_t mcm_mobileap_handle;
   /**< Handle identifying the mobile AP call instance.
        The value must be the handle previously returned by
        MCM_MOBILEAP_ENABLE_REQ.
@@ -2468,7 +2468,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 mcm_mobileap_handle;
+  mandatory uint32_t mcm_mobileap_handle;
   /**< Handle identifying the mobile AP call instance.
        The value must be the handle previously returned by
        MCM_MOBILEAP_ENABLE_REQ.
@@ -2534,7 +2534,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 mcm_mobileap_handle;
+  mandatory uint32_t mcm_mobileap_handle;
   /**< Handle identifying the mobile AP call instance.
        The value must be the handle previously returned by
        MCM_MOBILEAP_ENABLE_REQ.
@@ -2600,7 +2600,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 mcm_mobileap_handle;
+  mandatory uint32_t mcm_mobileap_handle;
   /**< Handle identifying the mobile AP call instance.
        The value must be the handle previously returned by
        MCM_MOBILEAP_ENABLE_REQ.
@@ -2670,7 +2670,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 mcm_mobileap_handle;
+  mandatory uint32_t mcm_mobileap_handle;
   /**< Handle identifying the mobile AP call instance.
        The value must be the handle previously returned by
        MCM_MOBILEAP_ENABLE_REQ.
@@ -2734,7 +2734,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 mcm_mobileap_handle;
+  mandatory uint32_t mcm_mobileap_handle;
   /**< Handle identifying the mobile AP call instance.
        The value must be the handle previously returned by
        MCM_MOBILEAP_MSGR_MOBILE_AP_ENABLE_REQ.
@@ -2805,7 +2805,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 mcm_mobileap_handle;
+  mandatory uint32_t mcm_mobileap_handle;
   /**< Handle identifying the mobile AP call instance.
        The value must be the handle previously returned by
        MCM_MOBILEAP_ENABLE_REQ.
@@ -2878,7 +2878,7 @@ message {
   //! Mobile AP Handle
   //! @VERSION_INTRODUCED 1.0
   //! @VERSION 1.0
-  mandatory uint32 mcm_mobileap_handle;
+  mandatory uint32_t mcm_mobileap_handle;
   /**< Handle identifying the mobile AP call instance.
        The value must be the handle previously returned by
        MCM_MOBILEAP_ENABLE_REQ.
@@ -3048,7 +3048,7 @@ message {
 //! @SENDER  Control point
 //----------------------------------------------------------------------------
 message {
-    mandatory int32 event_id;
+    mandatory int32_t event_id;
     /**< Event ID thats gets populated. Values: \n
         - 0x8000L -- MCM_MOBILEAP_ENABLED_EV
         - 0x8001L -- MCM_MOBILEAP_LAN_CONNECTING_EV

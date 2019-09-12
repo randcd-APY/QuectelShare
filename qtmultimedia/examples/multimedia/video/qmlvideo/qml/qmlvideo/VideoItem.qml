@@ -80,6 +80,21 @@ VideoOutput {
             }
         }
     }
+    Rectangle {
+            color: "white"
+            anchors.fill: parent
+
+            MediaPlayer {
+                source: source1
+                autoPlay: true
+            }
+
+            VideoOutput {
+                id: video
+                anchors.fill: parent
+                source: mediaPlayer
+            }
+        }
 
     function start() { mediaPlayer.play() }
     function stop() { mediaPlayer.stop() }

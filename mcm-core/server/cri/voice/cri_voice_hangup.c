@@ -13,7 +13,7 @@
 #include "voice_service_v02.h"
 #include "cri_rule_handler.h"
 
-static cri_core_error_type cri_voice_hangup_with_call_cri_id(cri_core_context_type cri_core_context, const void* user_data, uint8 hlos_call_id);
+static cri_core_error_type cri_voice_hangup_with_call_cri_id(cri_core_context_type cri_core_context, const void* user_data, uint8_t hlos_call_id);
 static cri_core_error_type cri_voice_hangup_background(cri_core_context_type cri_core_context, const void* user_data);
 static cri_core_error_type cri_voice_hangup_foreground_resume_background(cri_core_context_type cri_core_context, const void* user_data);
 static void cri_voice_hangup_resp_wapper(cri_core_context_type context,
@@ -70,7 +70,7 @@ int cri_voice_hangup_end_call_rule_checker(void *rule_data)
 {
     int ret_code = FALSE;
 
-    int8 qmi_call_id = (int) rule_data;
+    int8_t qmi_call_id = (int) rule_data;
     cri_voice_call_obj_type* call_obj_ptr = cri_voice_call_list_find_by_qmi_call_id(cri_voice_core_get_call_list(), qmi_call_id);
 
     QCRIL_LOG_INFO("qmi_call_id: %d, call_obj_ptr: %p", qmi_call_id, call_obj_ptr);
@@ -128,7 +128,7 @@ static cri_core_error_type cri_voice_hangup_all_calls
     cri_core_error_type err_3gpp2 = 0;
     cri_voice_call_summary_type call_summary;
     cri_voice_call_obj_type ** call_obj_dptr = NULL;
-    uint32 num_of_calls;
+    uint32_t num_of_calls;
 
     cri_voice_call_summary_get_modom_call_summary(cri_voice_core_get_call_list(), &call_summary);
 
@@ -199,7 +199,7 @@ cri_core_error_type cri_voice_hangup_req_handler(cri_core_context_type cri_core_
     boolean call_uri_valid = req_message->call_uri_valid;
     const char* call_uri = req_message->call_uri;
     boolean call_hlos_id_valid = req_message->call_hlos_id_valid;
-    uint8   call_hlos_id = req_message->call_hlos_id;
+    uint8_t   call_hlos_id = req_message->call_hlos_id;
     boolean hangup_cause_valid = req_message->hangup_cause_valid;
     int hangup_cause  = req_message->hangup_cause;
 
@@ -299,14 +299,14 @@ cri_core_error_type cri_voice_hangup_foreground_resume_background(cri_core_conte
 
         if (1 == call_summary.nof_calls_overall)
         {
-            uint32 num_of_calls;
+            uint32_t num_of_calls;
             cri_voice_call_obj_type** call_obj_dptr;
             cri_voice_call_list_get_filtered_call_objects(cri_voice_core_get_call_list(), cri_voice_call_obj_is_modem_call, &num_of_calls, &call_obj_dptr);
             if (num_of_calls && call_obj_dptr)
             {
                 if (1 == num_of_calls)
                 {
-                    uint8 qmi_id = call_obj_dptr[0]->qmi_call_id;
+                    uint8_t qmi_id = call_obj_dptr[0]->qmi_call_id;
                     err = cri_voice_core_send_end_call_request(cri_core_context, user_data, cri_voice_hangup_resp_wapper, qmi_id);
                     QCRIL_LOG_INFO("send end_call request result: %d", err);
                 }
@@ -355,14 +355,14 @@ cri_core_error_type cri_voice_hangup_background(cri_core_context_type cri_core_c
 
         if (1 == call_summary.nof_calls_overall)
         {
-            uint32 num_of_calls;
+            uint32_t num_of_calls;
             cri_voice_call_obj_type** call_obj_dptr;
             cri_voice_call_list_get_filtered_call_objects(cri_voice_core_get_call_list(), cri_voice_call_obj_is_modem_call, &num_of_calls, &call_obj_dptr);
             if (num_of_calls && call_obj_dptr)
             {
                 if (1 == num_of_calls)
                 {
-                    uint8 qmi_id = call_obj_dptr[0]->qmi_call_id;
+                    uint8_t qmi_id = call_obj_dptr[0]->qmi_call_id;
                     err = cri_voice_core_send_end_call_request(cri_core_context, user_data, cri_voice_hangup_resp_wapper, qmi_id);
                     QCRIL_LOG_INFO("send end_call request result: %d", err);
                 }
@@ -393,7 +393,7 @@ cri_core_error_type cri_voice_hangup_background(cri_core_context_type cri_core_c
     return err;
 }
 
-cri_core_error_type cri_voice_hangup_with_call_cri_id(cri_core_context_type cri_core_context, const void* user_data, uint8 cri_call_id)
+cri_core_error_type cri_voice_hangup_with_call_cri_id(cri_core_context_type cri_core_context, const void* user_data, uint8_t cri_call_id)
 {
     cri_core_error_type err = 0;
     

@@ -4,7 +4,8 @@
 #include <arpa/inet.h>
 #include <getopt.h>
 #include <unistd.h>
-#include "ql_power.h"
+
+#include <ql_power/ql_power.h>
 
 int main(int argc, char *argv[])
 {

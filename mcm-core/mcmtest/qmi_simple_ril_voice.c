@@ -123,7 +123,7 @@ int qmi_simple_ril_voice_call_state_resp_handler (qmi_util_service_message_info*
 
 #endif
 
-uint32 mcm_voice_dial_ecall(int handle, char *phone_num, int manual)
+uint32_t mcm_voice_dial_ecall(int handle, char *phone_num, int manual)
 {
    int ret_val = MCM_ERROR_GENERIC_V01;
    int token_id;
@@ -164,7 +164,7 @@ uint32 mcm_voice_dial_ecall(int handle, char *phone_num, int manual)
    }
    return ret_val;
 }
-uint32 mcm_voice_dial_request(int handle, char *phone_num)
+uint32_t mcm_voice_dial_request(int handle, char *phone_num)
 {
    int ret_val = MCM_ERROR_GENERIC_V01;
    int token_id;
@@ -201,7 +201,7 @@ uint32 mcm_voice_dial_request(int handle, char *phone_num)
    return ret_val;
 }
 
-uint32 mcm_voice_register_indication(int handle)
+uint32_t mcm_voice_register_indication(int handle)
 {
    qmi_util_log("\n mcm_voice_register_indication\n");
    int ret_val = MCM_ERROR_GENERIC_V01;
@@ -236,7 +236,7 @@ uint32 mcm_voice_register_indication(int handle)
    return ret_val;
 }
 
-uint32 mcm_voice_unregister_indication(int handle)
+uint32_t mcm_voice_unregister_indication(int handle)
 {
    qmi_util_log("\n mcm_voice_register_indication\n");
    int ret_val = MCM_ERROR_GENERIC_V01;
@@ -296,7 +296,7 @@ int hex2bytes(unsigned char *dst, const char *hex, size_t dst_len)
    return di / 2;
 }
 
-uint32 mcm_voice_update_msd(int handle, const char *hex_msd)
+uint32_t mcm_voice_update_msd(int handle, const char *hex_msd)
 {
    uint8_t msd[MCM_MAX_ECALL_MSD_V01];
    int res = MCM_ERROR_GENERAL_V01;
@@ -357,7 +357,7 @@ uint32 mcm_voice_update_msd(int handle, const char *hex_msd)
    } while(FALSE);
    return res;
 }
-uint32 mcm_voice_hangup_request(int handle)
+uint32_t mcm_voice_hangup_request(int handle)
 {
    qmi_util_log("\n mcm_voice_hangup_request\n");
    int ret_val = MCM_ERROR_GENERAL_V01;
@@ -386,7 +386,7 @@ uint32 mcm_voice_hangup_request(int handle)
    return ret_val;
 }
 
-uint32 mcm_voice_command_request(int handle, mcm_voice_call_operation_t_v01 mcm_voice_call_op)
+uint32_t mcm_voice_command_request(int handle, mcm_voice_call_operation_t_v01 mcm_voice_call_op)
 {
    qmi_util_log("\n mcm_voice_conference_call_request\n");
    int ret_val     = MCM_ERROR_GENERAL_V01;
@@ -415,7 +415,7 @@ uint32 mcm_voice_command_request(int handle, mcm_voice_call_operation_t_v01 mcm_
                 resp_msg->response.error);
    return ret_val;
 }
-uint32 mcm_voice_test_bar(int handle)
+uint32_t mcm_voice_test_bar(int handle)
 {
    qmi_util_log("\n mcm_voice_test_bar\n");
    mcm_voice_change_call_barring_password_req_msg_v01  *bar_req = NULL;
@@ -442,7 +442,7 @@ uint32 mcm_voice_test_bar(int handle)
    }
    return ret_val;
 }
-uint32 mcm_voice_mute_request(int handle, mcm_voice_mute_type_t_v01 mute_type)
+uint32_t mcm_voice_mute_request(int handle, mcm_voice_mute_type_t_v01 mute_type)
 {
    qmi_util_log("\n mcm_voice_mute_request\n");
 
@@ -464,7 +464,7 @@ uint32 mcm_voice_mute_request(int handle, mcm_voice_mute_type_t_v01 mute_type)
    qmi_util_log("\n result:%d error:%d\n", mute_resp->response.result, mute_resp->response.error);
    return ret_val;
 }
-uint32 mcm_voice_auto_answer_request(int handle, mcm_voice_auto_answer_type_t_v01 answer_type)
+uint32_t mcm_voice_auto_answer_request(int handle, mcm_voice_auto_answer_type_t_v01 answer_type)
 {
    qmi_util_log("\n mcm_voie_auto_answer_request\n");
 
@@ -614,7 +614,7 @@ qmi_simple_ril_voice_get_call_state_str(
    return res;
 }
 
-uint32 mcm_voice_get_call_status(int handle, char *call_id)
+uint32_t mcm_voice_get_call_status(int handle, char *call_id)
 {
    qmi_util_log("\n mcm_voice_get_calls_status\n");
    mcm_voice_get_calls_req_msg_v01         *get_calls_req_msg;
@@ -1032,9 +1032,9 @@ int qmi_simple_ril_voice_ecall_msd_handler
 }
 int qmi_simple_ril_dial_handler(qmi_simple_ril_cmd_input_info* cmd_params, qmi_simple_ril_cmd_ack_info* ack_info)
 {
-   uint32 token;
-   uint32 ret_code = 0;
-   uint32 done = 0;
+   uint32_t token;
+   uint32_t ret_code = 0;
+   uint32_t done = 0;
 
    mcm_voice_call_operation_t_v01     mcm_voice_call_op;
    memset(&mcm_voice_call_op, 0, sizeof(mcm_voice_call_op));

@@ -8,6 +8,7 @@ Type=simple
 Restart=always
 ExecStartPre=/bin/sleep 1
 ExecStart=/usr/bin/ql_manager_server
+ExecStartPost=/bin/sh -c 'setprop sys.boot_completed 1'
 RestartSec=2
 
 [Install]

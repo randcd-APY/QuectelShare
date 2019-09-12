@@ -12,7 +12,7 @@
 extern "C" {
 #endif
 
-uint32 mcm_client_init
+uint32_t mcm_client_init
 (
   mcm_client_handle_type   *hndl,
   mcm_client_ind_cb         ind_cb,
@@ -22,7 +22,7 @@ uint32 mcm_client_init
   return MCM_SUCCESS_V01;
 }
 
-uint32 mcm_client_execute_command_async
+uint32_t mcm_client_execute_command_async
 (
   mcm_client_handle_type     hndl,
   int                        msg_id,
@@ -37,7 +37,7 @@ uint32 mcm_client_execute_command_async
   return MCM_SUCCESS_V01;
 }
 
-uint32 mcm_client_execute_command_sync
+uint32_t mcm_client_execute_command_sync
 (
   mcm_client_handle_type      hndl,
   int                         msg_id,
@@ -50,7 +50,7 @@ uint32 mcm_client_execute_command_sync
   return MCM_SUCCESS_V01;
 }
 
-uint32 mcm_client_release(mcm_client_handle_type hndl)
+uint32_t mcm_client_release(mcm_client_handle_type hndl)
 {
   return MCM_SUCCESS_V01;
 }

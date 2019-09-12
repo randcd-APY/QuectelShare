@@ -29,9 +29,9 @@
 
 int airplane_mode_on  = 1;
 int airplane_mode_off = 0;
-extern uint32 mcm_client_handle;
+extern uint32_t mcm_client_handle;
 
-uint32 mcm_dm_get_power(int handle, uint32 *radio_power)
+uint32_t mcm_dm_get_power(int handle, uint32_t *radio_power)
 {
     int ret_val = MCM_ERROR_GENERIC_V01;
 
@@ -58,7 +58,7 @@ uint32 mcm_dm_get_power(int handle, uint32 *radio_power)
                                                                                  resp_msg->response.error);
         if (resp_msg->radio_mode_valid == 1 /*TRUE*/ )
         {
-            *radio_power = (uint32)resp_msg->radio_mode;
+            *radio_power = (uint32_t)resp_msg->radio_mode;
             qmi_util_log("\n\nCurrent Modem Status - %d\n\n",*radio_power);
         }
     }
@@ -70,7 +70,7 @@ uint32 mcm_dm_get_power(int handle, uint32 *radio_power)
     return ret_val;
 }
 
-uint32 mcm_dm_airplane_mode(int handle, uint32 airplane_mode)
+uint32_t mcm_dm_airplane_mode(int handle, uint32_t airplane_mode)
 {
    int ret_val = MCM_ERROR_GENERIC_V01;
 
@@ -119,7 +119,7 @@ uint32 mcm_dm_airplane_mode(int handle, uint32 airplane_mode)
    return ret_val;
 }
 
-uint32 mcm_dm_register_indication(int register_flag,int handle)
+uint32_t mcm_dm_register_indication(int register_flag,int handle)
 {
    qmi_util_log("\n mcm_dm_register_indication\n");
    int ret_val = MCM_ERROR_GENERIC_V01;
@@ -156,10 +156,10 @@ uint32 mcm_dm_register_indication(int register_flag,int handle)
 
 int qmi_simple_ril_modem_handler(qmi_simple_ril_cmd_input_info* cmd_params, qmi_simple_ril_cmd_ack_info* ack_info)
 {
-   uint32 token;
-   uint32 curr_radio_status;
-   uint32 ret_code = 0;
-   uint32 done = 0;
+   uint32_t token;
+   uint32_t curr_radio_status;
+   uint32_t ret_code = 0;
+   uint32_t done = 0;
 
    qmi_util_logln0("qmi_simple_ril_modem_handler Enter\n");
 

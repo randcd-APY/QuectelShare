@@ -187,11 +187,11 @@ struct {
    string   mcc<3>; //!< Mobile country code.
    string   mnc<3>; //!< Mobile network code.
    mcm_nw_roam_state_t  roaming; //!< 0 -- Off, 1 -- Roaming (3GPP2 has extended values).
-   uint8  forbidden; //!< Forbidden: 0 -- No, 1 -- Yes.
-   uint32 cid; //!< Cell id for the registered 3GPP system.
-   uint16 lac; //!< Locatin area code for the registered 3GPP system.
-   uint16 psc; //!< Primary scrambling code (WCDMA only); 0 -- None.
-   uint16 tac; //!< Tracking area code information for LTE.
+   uint8_t  forbidden; //!< Forbidden: 0 -- No, 1 -- Yes.
+   uint32_t cid; //!< Cell id for the registered 3GPP system.
+   uint16_t lac; //!< Locatin area code for the registered 3GPP system.
+   uint16_t psc; //!< Primary scrambling code (WCDMA only); 0 -- None.
+   uint16_t tac; //!< Tracking area code information for LTE.
 }mcm_nw_3gpp_registration_t;  //!< Registration details for a 3GPP system.
                                 //!< Registration details are available for a registered system.
 
@@ -204,12 +204,12 @@ struct {
    string   mcc<3>; //!< Mobile country code.
    string  mnc<3>; //!< Mobile network code.
    mcm_nw_roam_state_t  roaming; //!< Roaming status @ref mcm_nw_roam_state.
-   uint8  forbidden; //!< Forbidden: 0 -- No, 1 -- Yes.
-   uint8  inPRL; //!< 0 -- Not in PRL, 1 -- In PRL.
-   uint8  css;  //!< Concurrent services supported: 0 -- No, 1 -- Yes.
-   uint16 sid; //!< CDMA system ID.
-   uint16 nid; //!< CDMA network ID.
-   uint16 bsid; //!< Base station ID.
+   uint8_t  forbidden; //!< Forbidden: 0 -- No, 1 -- Yes.
+   uint8_t  inPRL; //!< 0 -- Not in PRL, 1 -- In PRL.
+   uint8_t  css;  //!< Concurrent services supported: 0 -- No, 1 -- Yes.
+   uint16_t sid; //!< CDMA system ID.
+   uint16_t nid; //!< CDMA network ID.
+   uint16_t bsid; //!< Base station ID.
 }mcm_nw_3gpp2_registration_t; //!< Registration details for a 3GPP2 system.
                                 //!< Registration details are available for a registered system.
 
@@ -221,49 +221,49 @@ struct {
 }mcm_nw_selection_t; //!< Network selection details for a 3GPP system.
 
 struct {
-	int8 rssi; //!< RSSI in dBm. Indicates received signal strength.
+	int8_t rssi; //!< RSSI in dBm. Indicates received signal strength.
                //!< A signed value; -125 or lower indicates no signal.
 }mcm_nw_gsm_sig_info_t; //!< GSM singal information.
 
 struct {
-	int8 rssi; //!< RSSI in dBm. Indicates forward link pilot Ec.
+	int8_t rssi; //!< RSSI in dBm. Indicates forward link pilot Ec.
                //!< A signed value; -125 or lower indicates no signal.
-	int16 ecio; //!< Ec/Io value representing negative 0.5 dB increments, e.g., 2 means -1 dbm.
+	int16_t ecio; //!< Ec/Io value representing negative 0.5 dB increments, e.g., 2 means -1 dbm.
 }mcm_nw_wcdma_sig_info_t; //!< WCDMA signal strength information.
 
 struct {
-  int8 rssi;  //!< RSSI in dBm. Indicates forward link pilot Ec.
+  int8_t rssi;  //!< RSSI in dBm. Indicates forward link pilot Ec.
               //!< a signed value; -125 or lower indicates no signal.
-  int8 rscp; //!< RSCP in dBm.
-  int16 ecio; //!< Ec/Io value representing negative 0.5 dB increments, e.g., 2 means -1 dbm.
-  int8 sinr; //!< Measured SINR in dB.
+  int8_t rscp; //!< RSCP in dBm.
+  int16_t ecio; //!< Ec/Io value representing negative 0.5 dB increments, e.g., 2 means -1 dbm.
+  int8_t sinr; //!< Measured SINR in dB.
 }mcm_nw_tdscdma_sig_info_t; //!< TDSCDMA signal strength information.
 
 struct {
-  int8 rssi; //!< RSSI in dBm. Indicates forward link pilot Ec.
+  int8_t rssi; //!< RSSI in dBm. Indicates forward link pilot Ec.
              //!< A signed value; -125 or lower indicates no signal.
-  int8 rsrq; //!< RSRQ value in dB (signed integer value), as measured by L1.
+  int8_t rsrq; //!< RSRQ value in dB (signed integer value), as measured by L1.
 			 //!< Range: -3 to -20 (-3 means -3 dB, -20 means -20 dB).
-  int16 rsrp; //!< Current RSRP in dBm, as measured by L1.
+  int16_t rsrp; //!< Current RSRP in dBm, as measured by L1.
 			 //!< Range: -44 to -140 (-44 means -44 dBm, -140 means -140 dBm).
-  int16 snr;  //!< SNR level as a scaled integer in units of 0.1 dB;
+  int16_t snr;  //!< SNR level as a scaled integer in units of 0.1 dB;
 		     //!< e.g., -16 dB has a value of -160 and 24.6 dB has a value of 246.
 }mcm_nw_lte_sig_info_t; //!< LTE signal strength information.
 
 
 struct {
-  int8 rssi;  //!< RSSI in dBm. Indicates forward link pilot Power (AGC) + Ec/Io.
+  int8_t rssi;  //!< RSSI in dBm. Indicates forward link pilot Power (AGC) + Ec/Io.
               //!< A signed value; -125 or lower indicates no signal.
-  int16 ecio; //!< Ec/Io value representing negative 0.5 dB increments, e.g., 2 means -1 dbm.
+  int16_t ecio; //!< Ec/Io value representing negative 0.5 dB increments, e.g., 2 means -1 dbm.
 }mcm_nw_cdma_sig_info_t; //!< CDMA signal strength information.
 
 
 struct {
-  int8 rssi;  //!< RSSI in dBm. Indicates forward link pilot Power (AGC) + Ec/Io.
+  int8_t rssi;  //!< RSSI in dBm. Indicates forward link pilot Power (AGC) + Ec/Io.
               //!< A signed value; -125 or lower indicates no signal.
-  int16 ecio; //!< Ec/Io value representing negative 0.5 dB increments, e.g., 2 means -1 dbm.
-  int8 sinr;  //!< SINR level.
-  int32 io;   //!< Received IO in dBm.
+  int16_t ecio; //!< Ec/Io value representing negative 0.5 dB increments, e.g., 2 means -1 dbm.
+  int8_t sinr;  //!< SINR level.
+  int32_t io;   //!< Received IO in dBm.
 }mcm_nw_hdr_sig_info_t; //!< HDR signal strength information.
 
 struct {
@@ -291,7 +291,7 @@ message {
   //! Network registration details
   //! Technology dependent network registration details
 
-  optional uint64  preferred_nw_mode; //!< Preferred network mode for connections;
+  optional uint64_t  preferred_nw_mode; //!< Preferred network mode for connections;
                                //!< a bitmask of mcm_nw_mode.
   optional mcm_nw_roam_state_t roaming_pref;  //!< Roaming preference.
 } mcm_nw_set_config_req_msg;
@@ -330,7 +330,7 @@ message {
   //! Network registration details
   //! Technology dependent network registration details
 
-  optional uint64  preferred_nw_mode; //!< Preferred network mode for connections;
+  optional uint64_t  preferred_nw_mode; //!< Preferred network mode for connections;
                       //!< a bitmask of mcm_nw_mode.
   optional mcm_nw_roam_state_t roaming_pref;  //!< Roaming preference
 } mcm_nw_get_config_resp_msg;
@@ -420,7 +420,7 @@ message {
 //! @SENDER Control point
 //-----------------------------------------------------------------------------
 message {
- mandatory uint8 turn_off_screen;  //!< Turn the screen off.
+ mandatory uint8_t turn_off_screen;  //!< Turn the screen off.
 }mcm_nw_screen_on_off_req_msg;
 
 //! @MSG MCM_NW_SCREEN_ON_OFF_RESP
@@ -540,8 +540,8 @@ message {
 message {
  mandatory mcm_response_t response;  //!< Result code.
  optional mcm_nw_nitz_time_t nw_nitz_time;
- optional uint64 abs_time;
- optional int8 leap_sec;
+ optional uint64_t abs_time;
+ optional int8_t leap_sec;
 } mcm_nw_get_nitz_time_info_resp_msg;
 
 //=============================================================================
@@ -694,6 +694,6 @@ message {
 message {
  optional mcm_nw_nitz_time_t nw_nitz_time;
  /**< NITZ Time update. */
- optional uint64 abs_time;
- optional int8 leap_sec;
+ optional uint64_t abs_time;
+ optional int8_t leap_sec;
 } mcm_nw_nitz_time_ind_msg;

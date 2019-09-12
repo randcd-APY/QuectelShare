@@ -88,6 +88,6 @@ qmi_client_error_type server_execute_async
 );
 
 mcm_query_qmi_handle(mcm_client_handle_type mcm_clnt_hndl);
-uint32 mcm_qmi_client_mutex_init();
+uint32_t mcm_qmi_client_mutex_init();
 
 #endif // MCM_QMI_CLIENT_H

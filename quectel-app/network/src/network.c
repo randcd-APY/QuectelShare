@@ -13,7 +13,7 @@
 #include <arpa/inet.h>
 #include <getopt.h>
 #include <unistd.h>
-#include "ql_wwan_v2.h"
+#include <ql_common_api/ql_wwan_v2.h>
 
 static bool g_dail_cb_recv = false;
 //static int g_err = 0;

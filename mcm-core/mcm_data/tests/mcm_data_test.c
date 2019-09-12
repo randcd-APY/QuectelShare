@@ -90,13 +90,13 @@ typedef  unsigned char      boolean;     /* Boolean value type. */
 boolean mcm_data_inited = FALSE;
 
 typedef struct mcm_data_call_config_s {
-  uint32 ip_family;                          ///< IP family requested
+  uint32_t ip_family;                          ///< IP family requested
   char apn_name[MCM_DATA_MAX_APN_LEN_V01];       ///< APN name requested
   char user_name[MCM_DATA_MAX_USERNAME_LEN_V01]; ///< Username for APN
   char password[MCM_DATA_MAX_PASSWORD_LEN_V01];  ///< Password for APN
-  uint32 tech_pref;                          ///< Technology preference
+  uint32_t tech_pref;                          ///< Technology preference
                                              ///< (3GPP / 3GPP2)
-  uint32 profile;                            ///< Profile call_id (optional)
+  uint32_t profile;                            ///< Profile call_id (optional)
 } mcm_data_call_config;
 
 typedef struct {
@@ -136,11 +136,11 @@ static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 
 mcm_data_call_config mcm_data_test_config;
-uint32 mcm_data_test_call_tech;
-uint32 mcm_data_test_req_call_cnt;
-uint32 mcm_data_test_rsp_call_cnt;
+uint32_t mcm_data_test_call_tech;
+uint32_t mcm_data_test_req_call_cnt;
+uint32_t mcm_data_test_rsp_call_cnt;
 
-int32 call_id_list[MAX_DATA_CALLS];
+int32_t call_id_list[MAX_DATA_CALLS];
 
 mcm_data_pkt_stats_t_v01 mcm_data_test_pkt_stats;
 mcm_data_channel_rate_t_v01 *mcm_data_test_channel_rate;
@@ -158,7 +158,7 @@ int mcm_data_srv_mgr_service_handle
 (
   int    handle,
   int    require_flag,
-  uint16 service_list
+  uint16_t service_list
 );
 
 int mcm_data_test_input_string
@@ -167,12 +167,12 @@ int mcm_data_test_input_string
   unsigned int len
 );
 
-uint8 mcm_data_test_is_num
+uint8_t mcm_data_test_is_num
 (
   char *word
 );
 
-int32 mcm_data_test_init
+int32_t mcm_data_test_init
 (
   void
 );
@@ -216,19 +216,19 @@ void mcm_data_test_display_call_config
   void
 );
 
-int32 mcm_data_test_request_start_data_call
+int32_t mcm_data_test_request_start_data_call
 (
   void
 );
 
-int32 mcm_data_test_get_device_address
+int32_t mcm_data_test_get_device_address
 (
-  uint32 *callid_p
+  uint32_t *callid_p
 );
 
-int32 mcm_data_test_get_device_address_count
+int32_t mcm_data_test_get_device_address_count
 (
-  uint32 *callid_p
+  uint32_t *callid_p
 );
 
 void mcm_data_test_display_pkt_stats
@@ -241,7 +241,7 @@ void mcm_data_test_display_channel_rate
   mcm_data_channel_rate_t_v01 *mcm_data_test_channel_rate
 );
 
-uint32 mcm_data_test_add_route
+uint32_t mcm_data_test_add_route
 (
   void
 );
@@ -275,7 +275,7 @@ int execute_cli_args
 static void mcm_data_test_cli_ind_cb
 (
   mcm_client_handle_type hndl,         /* QMI user handle       */
-  uint32                 msg_id,       /* Indicator message ID  */
+  uint32_t                 msg_id,       /* Indicator message ID  */
   void                   *ind_data,    /* Raw indication data   */
   unsigned int           ind_buf_len   /* Raw data length       */
 );
@@ -283,13 +283,13 @@ static void mcm_data_test_cli_ind_cb
 static void mcm_data_test_async_cb
 (
   mcm_client_handle_type hndl,
-  uint32                 msg_id,
+  uint32_t                 msg_id,
   void                  *resp_c_struct,
-  uint32                 resp_c_struct_len,
+  uint32_t                 resp_c_struct_len,
   void                  *token_id
 );
 
-uint32 mcm_data_test_event_register
+uint32_t mcm_data_test_event_register
 (
   boolean *events
 );
@@ -328,7 +328,7 @@ char mcm_data_test_input
   return ch;
 }
 
-uint8 mcm_data_test_is_num
+uint8_t mcm_data_test_is_num
 (
   char *word
 )
@@ -340,12 +340,12 @@ uint8 mcm_data_test_is_num
   return 1;
 }
 
-int32 mcm_data_test_list_and_get_call_id
+int32_t mcm_data_test_list_and_get_call_id
 (
   void
 )
 {
-  uint32 call_id, i;
+  uint32_t call_id, i;
 
   MCM_DATA_TEST_LOG("\n=== Active Call Ids ===\n");
   for(i=0; i< MAX_DATA_CALLS; i++)
@@ -400,7 +400,7 @@ int mcm_data_srv_mgr_service_handle
 (
   int    handle,
   int    require_flag,
-  uint16 service_list
+  uint16_t service_list
 )
 {
   int ret_val = MCM_ERROR_GENERIC_V01;
@@ -487,7 +487,7 @@ int mcm_data_srv_mgr_service_handle
 static void mcm_data_test_cli_ind_cb
 (
   mcm_client_handle_type hndl,         /* QMI user handle       */
-  uint32                 msg_id,       /* Indicator message ID  */
+  uint32_t                 msg_id,       /* Indicator message ID  */
   void                   *ind_data,    /* Raw indication data   */
   unsigned int           ind_buf_len   /* Raw data length       */
 )
@@ -495,7 +495,7 @@ static void mcm_data_test_cli_ind_cb
   MCM_DATA_TEST_LOG_FUNC_ENTRY();
 
   mcm_data_unsol_event_ind_msg_v01 *ind_msg = (mcm_data_unsol_event_ind_msg_v01 *)ind_data;
-  uint32 i;
+  uint32_t i;
 
   switch (ind_msg->event_id)
   {
@@ -559,15 +559,15 @@ static void mcm_data_test_cli_ind_cb
 static void mcm_data_test_async_cb
 (
   mcm_client_handle_type hndl,
-  uint32                 msg_id,
+  uint32_t                 msg_id,
   void                  *resp_c_struct,
-  uint32                 resp_c_struct_len,
+  uint32_t                 resp_c_struct_len,
   void                  *token_id
 )
 {
   MCM_DATA_TEST_LOG_FUNC_ENTRY();
 
-  uint32 i;
+  uint32_t i;
   mcm_data_start_data_call_rsp_msg_v01 *start_call_rsp_msg;
   mcm_data_stop_data_call_rsp_msg_v01  *stop_call_rsp_msg;
   mcm_client_require_resp_msg_v01      *service_require_rsp_msg;
@@ -680,7 +680,7 @@ static void mcm_data_test_async_cb
   MCM_DATA_TEST_LOG_FUNC_EXIT();
 }
 
-int32 mcm_data_test_init
+int32_t mcm_data_test_init
 (
   void
 )
@@ -688,7 +688,7 @@ int32 mcm_data_test_init
   MCM_DATA_TEST_LOG_FUNC_ENTRY();
 
   mcm_error_t_v01 mcm_error;
-  uint16 service_list = MCM_DATA_V01;
+  uint16_t service_list = MCM_DATA_V01;
 
   if(mcm_data_config.mcm_client_handle != 0)
   {
@@ -889,7 +889,7 @@ void mcm_data_test_set_call_configs
 {
   char ch;
   int continue_config = 1;
-  int32 result = MCM_DATA_SUCCESS;
+  int32_t result = MCM_DATA_SUCCESS;
 
   while ( continue_config )
   {
@@ -951,7 +951,7 @@ void mcm_data_test_set_call_configs
   }
 }
 
-int32 mcm_data_test_request_start_data_call
+int32_t mcm_data_test_request_start_data_call
 (
   void
 )
@@ -959,7 +959,7 @@ int32 mcm_data_test_request_start_data_call
   MCM_DATA_TEST_LOG_FUNC_ENTRY();
 
   mcm_error_t_v01 mcm_error = MCM_SUCCESS_V01;
-  int32 return_val = MCM_DATA_SUCCESS;
+  int32_t return_val = MCM_DATA_SUCCESS;
   mcm_data_start_data_call_req_msg_v01 start_data_call_req_msg;
   mcm_data_start_data_call_rsp_msg_v01 *start_data_call_rsp_msg;
 
@@ -1038,9 +1038,9 @@ BAIL:
   return return_val;
 }
 
-int32 mcm_data_test_request_stop_data_call
+int32_t mcm_data_test_request_stop_data_call
 (
-  uint32 *callid_p
+  uint32_t *callid_p
 )
 {
   MCM_DATA_TEST_LOG_FUNC_ENTRY();
@@ -1048,8 +1048,8 @@ int32 mcm_data_test_request_stop_data_call
   mcm_data_stop_data_call_req_msg_v01 stop_data_call_req_msg;
   mcm_data_stop_data_call_rsp_msg_v01 *stop_data_call_rsp_msg;
   mcm_error_t_v01 mcm_error = MCM_SUCCESS_V01;
-  uint32 call_id, i;
-  int32 return_val = MCM_DATA_SUCCESS;
+  uint32_t call_id, i;
+  int32_t return_val = MCM_DATA_SUCCESS;
 
   if(callid_p == NULL)
   {
@@ -1115,7 +1115,7 @@ BAIL:
   return return_val;
 }
 
-int32 mcm_data_test_deinit
+int32_t mcm_data_test_deinit
 (
   void
 )
@@ -1123,8 +1123,8 @@ int32 mcm_data_test_deinit
   MCM_DATA_TEST_LOG_FUNC_ENTRY();
 
   mcm_error_t_v01 mcm_error = MCM_SUCCESS_V01;
-  int32 return_val = MCM_DATA_SUCCESS;
-  uint16 service_list = MCM_DATA_V01;
+  int32_t return_val = MCM_DATA_SUCCESS;
+  uint16_t service_list = MCM_DATA_V01;
 
   if (mcm_data_config.mcm_client_handle == 0)
   {
@@ -1153,18 +1153,18 @@ BAIL:
   return return_val;
 }
 
-int32 mcm_data_test_get_data_call_status
+int32_t mcm_data_test_get_data_call_status
 (
-  uint32 *callid_p
+  uint32_t *callid_p
 )
 {
   MCM_DATA_TEST_LOG_FUNC_ENTRY();
 
-  int32 return_val = MCM_DATA_SUCCESS;
+  int32_t return_val = MCM_DATA_SUCCESS;
   mcm_error_t_v01 mcm_error = MCM_SUCCESS_V01;
   mcm_data_get_call_status_req_msg_v01 req_msg;
   mcm_data_get_call_status_rsp_msg_v01 rsp_msg;
-  uint32 call_id;
+  uint32_t call_id;
 
   if(callid_p == NULL)
   {
@@ -1222,18 +1222,18 @@ BAIL:
   return return_val;
 }
 
-int32 mcm_data_test_get_data_call_tech
+int32_t mcm_data_test_get_data_call_tech
 (
-  uint32 *callid_p
+  uint32_t *callid_p
 )
 {
   MCM_DATA_TEST_LOG_FUNC_ENTRY();
 
-  int32 return_val = MCM_DATA_SUCCESS;
+  int32_t return_val = MCM_DATA_SUCCESS;
   mcm_error_t_v01 mcm_error = MCM_SUCCESS_V01;
   mcm_data_get_call_tech_req_msg_v01 req_msg;
   mcm_data_get_call_tech_rsp_msg_v01 rsp_msg;
-  uint32 call_id;
+  uint32_t call_id;
 
   if(callid_p == NULL)
   {
@@ -1281,18 +1281,18 @@ BAIL:
   return return_val;
 }
 
-int32 mcm_data_test_get_device_name
+int32_t mcm_data_test_get_device_name
 (
-  uint32 *callid_p
+  uint32_t *callid_p
 )
 {
   MCM_DATA_TEST_LOG_FUNC_ENTRY();
 
-  int32 return_val = MCM_DATA_SUCCESS;
+  int32_t return_val = MCM_DATA_SUCCESS;
   mcm_error_t_v01 mcm_error = MCM_SUCCESS_V01;
   mcm_data_get_device_name_req_msg_v01 req_msg;
   mcm_data_get_device_name_rsp_msg_v01 rsp_msg;
-  uint32 call_id;
+  uint32_t call_id;
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
   if(callid_p == NULL){
@@ -1340,21 +1340,21 @@ int32 mcm_data_test_get_device_name
 BAIL:
   return  return_val;
 }
-int32 mcm_data_test_get_device_address
+int32_t mcm_data_test_get_device_address
 (
-  uint32 *callid_p
+  uint32_t *callid_p
 )
 {
-  int32 return_val = MCM_DATA_SUCCESS;
+  int32_t return_val = MCM_DATA_SUCCESS;
   /* No. of address available.*/
-  uint32 count = 0;
-  uint32 i=0;
+  uint32_t count = 0;
+  uint32_t i=0;
 
   mcm_error_t_v01 mcm_error = MCM_SUCCESS_V01;
   mcm_data_get_device_addr_req_msg_v01 req_msg;
   mcm_data_get_device_addr_rsp_msg_v01 rsp_msg;
   mcm_data_addr_info *address;
-  uint32 call_id;
+  uint32_t call_id;
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
   if(callid_p == NULL)
   {
@@ -1425,19 +1425,19 @@ BAIL:
   return return_val;
 }
 
-int32 mcm_data_test_get_device_address_count
+int32_t mcm_data_test_get_device_address_count
 (
-  uint32 *callid_p
+  uint32_t *callid_p
 )
 {
-  int32 return_val = MCM_DATA_SUCCESS;
+  int32_t return_val = MCM_DATA_SUCCESS;
   /* No. of address available.*/
-  uint32 count = 0;
+  uint32_t count = 0;
 
   mcm_error_t_v01 mcm_error = MCM_SUCCESS_V01;
   mcm_data_get_device_addr_count_req_msg_v01 req_msg;
   mcm_data_get_device_addr_count_rsp_msg_v01 rsp_msg;
-  uint32 call_id;
+  uint32_t call_id;
 
   if(callid_p == NULL)
   {
@@ -1485,18 +1485,18 @@ BAIL:
   return return_val;
 }
 
-int32 mcm_data_test_get_pkt_stats
+int32_t mcm_data_test_get_pkt_stats
 (
-  uint32 *callid_p
+  uint32_t *callid_p
 )
 {
   MCM_DATA_TEST_LOG_FUNC_ENTRY();
 
-  int32 return_val = MCM_DATA_SUCCESS;
+  int32_t return_val = MCM_DATA_SUCCESS;
   mcm_error_t_v01 mcm_error = MCM_SUCCESS_V01;
   mcm_data_get_pkt_stats_req_msg_v01         req_msg;
   mcm_data_get_pkt_stats_rsp_msg_v01         rsp_msg;
-  uint32 call_id;
+  uint32_t call_id;
 
   if(callid_p == NULL)
   {
@@ -1546,16 +1546,16 @@ BAIL:
 }
 
 
-int32 mcm_data_test_reset_pkt_stats( uint32 *callid_p )
+int32_t mcm_data_test_reset_pkt_stats( uint32_t *callid_p )
 {
   MCM_DATA_TEST_LOG_FUNC_ENTRY();
 
-  int32 return_val = MCM_DATA_SUCCESS;
+  int32_t return_val = MCM_DATA_SUCCESS;
   mcm_error_t_v01 mcm_error = MCM_SUCCESS_V01;
   mcm_data_reset_pkt_stats_req_msg_v01         req_msg;
   mcm_data_reset_pkt_stats_rsp_msg_v01         rsp_msg;
 
-  uint32 call_id;
+  uint32_t call_id;
 
   if(callid_p == NULL)
   {
@@ -1593,14 +1593,14 @@ int32 mcm_data_test_reset_pkt_stats( uint32 *callid_p )
 BAIL:
   return return_val;
 }
-int32 mcm_data_test_get_reg_status
+int32_t mcm_data_test_get_reg_status
 (
   void
 )
 {
   MCM_DATA_TEST_LOG_FUNC_ENTRY();
 
-  int32 return_val = MCM_DATA_SUCCESS;
+  int32_t return_val = MCM_DATA_SUCCESS;
   mcm_error_t_v01 mcm_error = MCM_SUCCESS_V01;
   mcm_data_get_reg_status_req_msg_v01         req_msg;
   mcm_data_get_reg_status_rsp_msg_v01         rsp_msg;
@@ -1648,19 +1648,19 @@ int32 mcm_data_test_get_reg_status
 BAIL:
   return return_val;
 }
-int32 mcm_data_test_get_data_channel_rate
+int32_t mcm_data_test_get_data_channel_rate
 (
-  uint32 *callid_p
+  uint32_t *callid_p
 )
 {
   MCM_DATA_TEST_LOG_FUNC_ENTRY();
 
-  int32 return_val = MCM_DATA_SUCCESS;
+  int32_t return_val = MCM_DATA_SUCCESS;
   mcm_error_t_v01 mcm_error = MCM_SUCCESS_V01;
   mcm_data_get_channel_rate_req_msg_v01         req_msg;
   mcm_data_get_channel_rate_rsp_msg_v01         rsp_msg;
 
-  uint32 call_id;
+  uint32_t call_id;
 
   if(callid_p == NULL)
   {
@@ -1763,12 +1763,12 @@ void mcm_data_test_display_channel_rate
     MCM_DATA_TEST_LOG("\n==========================================");
 }
 
-uint32 mcm_data_test_add_route
+uint32_t mcm_data_test_add_route
 (
   void
 )
 {
-  int32 return_val = MCM_DATA_SUCCESS;
+  int32_t return_val = MCM_DATA_SUCCESS;
   char ip_addr[16];
   char *iface_name;
   int ret_val;
@@ -1802,12 +1802,12 @@ uint32 mcm_data_test_add_route
   return return_val;
 }
 
-uint32 mcm_data_test_data_transfer
+uint32_t mcm_data_test_data_transfer
 (
   void
 )
 {
-  uint32 return_val = MCM_DATA_SUCCESS;
+  uint32_t return_val = MCM_DATA_SUCCESS;
   char ip_addr[16], cmd[50], n[100];
   MCM_DATA_TEST_LOG("Enter number of pings:");
   mcm_data_test_input_string((char *)n, 100);
@@ -1856,16 +1856,16 @@ int active_call_count
   return cnt;
 }
 
-uint32 mcm_data_test_event_register
+uint32_t mcm_data_test_event_register
 (
   boolean *events
 )
 {
-  int32 return_val = MCM_DATA_SUCCESS;
+  int32_t return_val = MCM_DATA_SUCCESS;
   mcm_error_t_v01 mcm_error = MCM_SUCCESS_V01;
   mcm_data_event_register_req_msg_v01      req_msg;
   mcm_data_event_register_resp_msg_v01     rsp_msg;
-  uint32 num_events_to_register, x, i;
+  uint32_t num_events_to_register, x, i;
   memset(&req_msg,0,sizeof(req_msg));
   if(!events){
       MCM_DATA_TEST_LOG("\n========= List of Event Types Available =========");
@@ -1951,7 +1951,7 @@ void mcm_data_test_app_init
   void
 )
 {
-  uint8 i = 0;
+  uint8_t i = 0;
 
   memset((mcm_data_call_config *)&mcm_data_test_config, 0x00,
                             sizeof(mcm_data_call_config));
@@ -1986,7 +1986,7 @@ void mcm_data_test_main_menu
 )
 {
   char ch;
-  int32 result = MCM_DATA_SUCCESS;
+  int32_t result = MCM_DATA_SUCCESS;
   int continue_test = 1;
   char *mcm_data_test_menu = "\n========= Main Menu =========\n"
                              "\n1 : mcm_data_init\n"
@@ -2126,7 +2126,7 @@ int execute_cli_args
   }
 
   mcm_data_call_config config_list[n];
-  uint32 up_seq[n], down_seq[n];
+  uint32_t up_seq[n], down_seq[n];
 
   memset(config_list, 0x00, n*sizeof(mcm_data_call_config));
   for(i=0;i<n;i++)

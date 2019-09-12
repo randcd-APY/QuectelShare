@@ -29,5 +29,10 @@ do_install_append () {
     ${D}${systemd_unitdir}/system/multi-user.target.wants/mcmril.service
 }
 
+#PACKAGES = "${PN}"
 FILES_${PN} += "/lib/systemd/*"
 FILES_${PN} += "/etc/*"
+FILES_${PN} += "${include}/*"
+FILES_${PN}-dbg += "${libdir}/.debug"
+
+BBCLASSEXTEND = "native nativesdk"

@@ -26,7 +26,7 @@
 #include "comdef.h"
 #include "mcm_client.h"
 
-extern uint32 mcm_client_handle;
+extern uint32_t mcm_client_handle;
 
 
 int qmi_simple_ril_register_sms_events(qmi_simple_ril_cmd_input_info* cmd_params, qmi_simple_ril_cmd_ack_info* ack_info)
@@ -62,9 +62,9 @@ int qmi_simple_ril_register_sms_events(qmi_simple_ril_cmd_input_info* cmd_params
 }
 
 
-uint32 mcm_sms_send_sms(int handle, char *mobile_num, char *message_text)
+uint32_t mcm_sms_send_sms(int handle, char *mobile_num, char *message_text)
 {
-    uint32 token_id;
+    uint32_t token_id;
     mcm_error_t_v01 ret_val = MCM_ERROR_GENERIC_V01;
 
     mcm_sms_send_mo_msg_req_msg_v01 req_msg;
@@ -111,9 +111,9 @@ uint32 mcm_sms_send_sms(int handle, char *mobile_num, char *message_text)
 
 int qmi_simple_ril_wms_handler(qmi_simple_ril_cmd_input_info* cmd_params, qmi_simple_ril_cmd_ack_info* ack_info)
 {
-   uint32 token;
+   uint32_t token;
    mcm_error_t_v01 ret_code = 0;
-   uint32 done = 0;
+   uint32_t done = 0;
    char mobile_number[MCM_SMS_MAX_ADDR_LENGTH_V01+1];
    char message_text[MCM_SMS_MAX_MO_MSG_LENGTH_V01+1];
 

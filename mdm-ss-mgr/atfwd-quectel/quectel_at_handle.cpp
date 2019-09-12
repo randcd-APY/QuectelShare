@@ -108,11 +108,19 @@ extern "C" void quec_qgmr_handle( const AtCmd *cmd ,AtCmdResponse *response)
     printf("tokens[0]:%s\n", cmd->tokens[0]);
     printf("tokens[1]:%s\n", cmd->tokens[1]);
 
+    ret = 20;
+    ptr = strstr(cmd->tokens[0], "SC");
+    if (ptr) {
+        sscanf(ptr + 2, "%d%*s", &ret);
+    }
+
+    sprintf(buffer, "Quectel\nSC%d\nRevision: ", ret);
+
     if (strlen(str) == 0) {
         sprintf(str, "Linux3.18.071.01.001");
     }
 
-    sprintf(response->response, "%s%s_%s", cmd->tokens[0], cmd->tokens[1], str);
+    sprintf(response->response, "%s%s%s_%s", buffer, cmd->tokens[0], cmd->tokens[1], str);
     response->result = 1;
     return;
 }

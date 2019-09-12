@@ -529,8 +529,8 @@ void cri_voice_call_obj_dump_call(const cri_voice_call_obj_type* call_obj_ptr)
                             (int)call_obj_ptr->qmi_voice_scv_info.call_type,
                             (int)call_obj_ptr->qmi_voice_scv_info.mode );
         QCRIL_LOG_ESSENTIAL( "cri_bit_field 0x%x, 0x%x",
-                             (uint32) (call_obj_ptr->cri_bit_field >> 32),
-                             (uint32)call_obj_ptr->cri_bit_field);
+                             (uint32_t) (call_obj_ptr->cri_bit_field >> 32),
+                             (uint32_t)call_obj_ptr->cri_bit_field);
     }
     else
     {

@@ -96,3 +96,5 @@ files_search_home(wlan_initrc_t)
 kernel_search_debugfs(wlan_initrc_t)
 getty_use_fds(wlan_initrc_t)
 term_use_unallocated_ttys(wlan_initrc_t)
+#peeta
+allow NetworkManager_t initrc_t:unix_dgram_socket sendto;

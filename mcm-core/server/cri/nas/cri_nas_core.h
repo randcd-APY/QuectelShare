@@ -315,7 +315,7 @@ cri_nas_tech_reg_status_type cri_nas_is_considered_limited_service(void);
 
 void cri_nas_core_update_data_system_status();
 
-uint8 cri_nas_core_sib16_acquired_status();
+uint8_t cri_nas_core_sib16_acquired_status();
 
 qmi_error_type_v01 cri_nas_core_fetch_update_lte_sib16_nitz_time_info();
 
@@ -323,8 +323,8 @@ qmi_error_type_v01 cri_nas_core_fetch_update_nitz_time_info();
 
 void cri_nas_core_fill_nitz_time_resp(uint8_t *nitz_time_valid, char *nitz_time, uint8_t *abs_time_valid, uint64_t *abs_time, uint8_t *leap_sec_valid, int8_t *leap_sec);
 
-uint8 cri_nas_core_fill_network_time_ind(uint8_t *nitz_time_valid, char *nitz_time, uint8_t *abs_time_valid, uint64_t *abs_time, uint8_t *leap_sec_valid, int8_t *leap_sec);
+uint8_t cri_nas_core_fill_network_time_ind(uint8_t *nitz_time_valid, char *nitz_time, uint8_t *abs_time_valid, uint64_t *abs_time, uint8_t *leap_sec_valid, int8_t *leap_sec);
 
-uint8 cri_nas_core_fill_sib16_network_time_ind(uint8_t *nitz_time_valid, char *nitz_time, uint8_t *abs_time_valid, uint64_t *abs_time, uint8_t *leap_sec_valid, int8_t *leap_sec);
+uint8_t cri_nas_core_fill_sib16_network_time_ind(uint8_t *nitz_time_valid, char *nitz_time, uint8_t *abs_time_valid, uint64_t *abs_time, uint8_t *leap_sec_valid, int8_t *leap_sec);
 
 #endif

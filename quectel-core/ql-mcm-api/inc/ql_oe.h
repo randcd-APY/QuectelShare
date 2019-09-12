@@ -27,7 +27,6 @@ extern "C" {
 #include <sys/epoll.h>
 #include <sys/select.h>
 #include <dirent.h>
-#include <comdef.h>
 #include <pthread.h>
 #include <signal.h>
 #include <semaphore.h>
@@ -41,7 +40,6 @@ extern "C" {
 #include <arpa/inet.h>
 #include <net/if.h>
 // qmi-related
-#include <comdef.h>
 #include <qmi/qmi.h>
 #include <qmi/qmi_port_defs.h>
 #include <qmi/wireless_data_service_v01.h>

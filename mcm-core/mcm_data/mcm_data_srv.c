@@ -205,7 +205,7 @@ void mcm_data_qmi_ssr_ind_handler
   mcm_data_modem_ssr_status_type_t *status_info
 );
 
-int32 mcm_data_dsd_init
+int32_t mcm_data_dsd_init
 (
   void
 );
@@ -280,7 +280,7 @@ unsigned int mcm_data_cli_sockfd;
    the exit function when mcm_data service stops */
 mcm_ipc_srv_mgr_exit_func data_exit;
 
-static uint32 call_id_cntr;
+static uint32_t call_id_cntr;
 
 static qmi_csi_cb_error
 (
@@ -350,13 +350,13 @@ ds_dll_el_t* get_txn_tbl_head
   return txn_table_head;
 }
 
-int32 mcm_data_create_client_socket
+int32_t mcm_data_create_client_socket
 (
   unsigned int *sockfd
 )
 {
   MCM_DATA_LOG_FUNC_ENTRY();
-  int32 return_val =  MCM_DATA_SUCCESS;
+  int32_t return_val =  MCM_DATA_SUCCESS;
 
   if ((*sockfd = socket(AF_UNIX, SOCK_DGRAM, 0)) == MCM_DATA_ERROR)
   {
@@ -377,13 +377,13 @@ BAIL:
   return return_val;
 }
 
-int32 mcm_data_create_listener_socket
+int32_t mcm_data_create_listener_socket
 (
   void
 )
 {
   MCM_DATA_LOG_FUNC_ENTRY();
-  int32 val, return_val, len;
+  int32_t val, return_val, len;
   struct sockaddr_un mcm_data_dsi;
   struct timeval rcv_timeo;
 
@@ -457,7 +457,7 @@ int main
   char buf[MAX_BUF_LEN];
   struct sockaddr_storage server_addr;
   socklen_t addr_len = sizeof(server_addr);
-  int32 rc;
+  int32_t rc;
 
   mcm_set_service_ready(MCM_DATA_SERVICE, 0);
 
@@ -570,7 +570,7 @@ int main
   return MCM_DATA_SUCCESS;
 }
 
-int32 mcm_data_dsd_init
+int32_t mcm_data_dsd_init
 (
   void
 )
@@ -579,7 +579,7 @@ int32 mcm_data_dsd_init
   qmi_idl_service_object_type        mcm_data_dsd_service_object;
   qmi_idl_service_object_type        mcm_data_dpm_modem_ssr_object;
   qmi_client_error_type              qmi_error = QMI_NO_ERR;
-  int32                              rc = MCM_DATA_SUCCESS;
+  int32_t                              rc = MCM_DATA_SUCCESS;
   mcm_data_modem_ssr_thread_info     signal_data;
 
   mcm_data_dsd_service_object = dsd_get_service_object_v01();
@@ -743,14 +743,14 @@ static void mcm_data_modem_ssr_notify_cb
   return;
 }
 
-int32 mcm_data_init_srv
+int32_t mcm_data_init_srv
 (
   void
 )
 {
   MCM_DATA_LOG_FUNC_ENTRY();
   qmi_csi_error                      rc;
-  int32                              return_val;
+  int32_t                              return_val;
   dsd_get_system_status_resp_msg_v01 sys_resp_msg;
   dsi_data_bearer_tech_t             data_tech;
   unsigned int                       num_services = 0, num_entries = 0;
@@ -1589,7 +1589,7 @@ static qmi_csi_cb_error  mcm_data_start_data_call
   MCM_DATA_LOG_FUNC_ENTRY();
   mcm_data_start_data_call_rsp_msg_v01 resp_msg;
   mcm_data_start_data_call_req_msg_v01 *req_msg;
-  uint32 call_id;
+  uint32_t call_id;
   dsi_call_param_value_t parameter;
   mcm_data_call_table_entry *call_entry;
   mcm_data_txn_table_entry *txn_entry;
@@ -2283,7 +2283,7 @@ static qmi_csi_cb_error mcm_data_addr_count(
     goto BAIL;
   }
 
-  resp_msg.addr_count = (uint32)dsi_get_ip_addr_count(call_entry->dsi_handle);
+  resp_msg.addr_count = (uint32_t)dsi_get_ip_addr_count(call_entry->dsi_handle);
   resp_msg.resp.error = MCM_SUCCESS_V01;
   resp_msg.resp.result = MCM_RESULT_SUCCESS_V01;
 
@@ -2337,7 +2337,7 @@ static qmi_csi_cb_error  mcm_data_get_call_tech(
   }
 
   resp_msg.call_tech =
-           (uint32)dsi_get_current_data_bearer_tech(call_entry->dsi_handle);
+           (uint32_t)dsi_get_current_data_bearer_tech(call_entry->dsi_handle);
   resp_msg.resp.error = MCM_SUCCESS_V01;
   resp_msg.resp.result = MCM_RESULT_SUCCESS_V01;
 
@@ -2422,7 +2422,7 @@ static qmi_csi_cb_error  mcm_data_get_device_addr
   MCM_DATA_LOG_FUNC_ENTRY();
   mcm_data_get_device_addr_req_msg_v01 *req_msg;
   mcm_data_get_device_addr_rsp_msg_v01 resp_msg;
-  uint32 addr_count = 0;
+  uint32_t addr_count = 0;
   mcm_data_call_table_entry *call_entry;
   int rc = DSI_ERROR;
 
@@ -2447,7 +2447,7 @@ static qmi_csi_cb_error  mcm_data_get_device_addr
     goto BAIL;
   }
 
-  addr_count = (uint32)dsi_get_ip_addr_count(call_entry->dsi_handle);
+  addr_count = (uint32_t)dsi_get_ip_addr_count(call_entry->dsi_handle);
 
   rc = dsi_get_ip_addr(call_entry->dsi_handle,
                            (dsi_addr_info_t *)&resp_msg.addr_info,

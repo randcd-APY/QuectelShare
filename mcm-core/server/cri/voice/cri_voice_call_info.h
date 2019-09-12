@@ -17,17 +17,17 @@
 
 typedef struct
 {
-    uint32 total_size;
-    uint32 filled_size;
-    int8  last_sequence_number;
-    uint8* buffer;
+    uint32_t total_size;
+    uint32_t filled_size;
+    int8_t  last_sequence_number;
+    uint8_t* buffer;
 } cri_voice_call_info_conf_info_type;
 
 typedef struct
 {
     boolean qmi_ril_voice_is_voice_calls_supressed;
     cri_voice_call_info_conf_info_type conf_info;
-    uint8 clir;
+    uint8_t clir;
     util_list_info_type* call_list_ptr;
 } cri_voice_call_info_type;
 

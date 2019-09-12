@@ -36,7 +36,7 @@
 pthread_mutex_t qmi_client_mutex;
 pthread_mutexattr_t qmi_client_mutexattr;
 
-uint32 mcm_qmi_client_mutex_init()
+uint32_t mcm_qmi_client_mutex_init()
 {
     int ret_val = MCM_SUCCESS_V01;
 
@@ -88,7 +88,7 @@ void mcm_qmi_ind_cb
     void                            *ind_data = NULL;
     int                              ind_data_len = 0;
     mcm_client_handle_type           mcm_clnt_hndl = 0;
-    uint32                           ret_val = MCM_SUCCESS_V01;
+    uint32_t                           ret_val = MCM_SUCCESS_V01;
     mcm_dm_radio_mode_changed_event_ind_msg_v01 *mcm_radio_status = NULL;
 
     LOG_MSG_INFO("mcm_qmi_ind_cb ENTER msg_id:%x", msg_id);
@@ -404,7 +404,7 @@ void mcm_qmi_async_cb
 )
 {
     mcm_client_handle_type   mcm_clnt_hndl = 0;
-    uint32                   ret_val       = MCM_ERROR_GENERIC_V01;
+    uint32_t                   ret_val       = MCM_ERROR_GENERIC_V01;
     int                     *token_id_ptr  = NULL;
     mcm_client_async_cb      async_cb      = NULL;
 

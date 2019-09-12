@@ -48,7 +48,7 @@ void cri_nas_update_data_system_status()
     cri_nas_core_update_data_system_status();
 }
 
-uint8 cri_nas_sib16_acquired_status()
+uint8_t cri_nas_sib16_acquired_status()
 {
     return cri_nas_core_sib16_acquired_status();
 }
@@ -68,12 +68,12 @@ void cri_nas_fill_nitz_time_resp(uint8_t *nitz_time_valid, char *nitz_time, uint
     cri_nas_core_fill_nitz_time_resp(nitz_time_valid, nitz_time, abs_time_valid, abs_time, leap_sec_valid, leap_sec);
 }
 
-uint8 cri_nas_fill_network_time_ind(uint8_t *nitz_time_valid, char *nitz_time, uint8_t *abs_time_valid, uint64_t *abs_time, uint8_t *leap_sec_valid, int8_t *leap_sec)
+uint8_t cri_nas_fill_network_time_ind(uint8_t *nitz_time_valid, char *nitz_time, uint8_t *abs_time_valid, uint64_t *abs_time, uint8_t *leap_sec_valid, int8_t *leap_sec)
 {
     return cri_nas_core_fill_network_time_ind(nitz_time_valid, nitz_time, abs_time_valid, abs_time, leap_sec_valid, leap_sec);
 }
 
-uint8 cri_nas_fill_sib16_network_time_ind(uint8_t *nitz_time_valid, char *nitz_time, uint8_t *abs_time_valid, uint64_t *abs_time, uint8_t *leap_sec_valid, int8_t *leap_sec)
+uint8_t cri_nas_fill_sib16_network_time_ind(uint8_t *nitz_time_valid, char *nitz_time, uint8_t *abs_time_valid, uint64_t *abs_time, uint8_t *leap_sec_valid, int8_t *leap_sec)
 {
     return cri_nas_core_fill_sib16_network_time_ind(nitz_time_valid, nitz_time, abs_time_valid, abs_time, leap_sec_valid, leap_sec);
 }

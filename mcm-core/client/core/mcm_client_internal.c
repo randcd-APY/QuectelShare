@@ -64,7 +64,7 @@ mcm_msg_service_id_map mcm_msg_srv_id_map_tbl[] =
     {MCM_SRV_MANAGER_MIN,       MCM_SRV_MANAGER_MAX,       MCM_SRV_MANAGER}        /* CLIENT  */
 };
 
-uint32 mcm_client_internal_mutex_init()
+uint32_t mcm_client_internal_mutex_init()
 {
     int ret_val = MCM_SUCCESS_V01;
 
@@ -114,7 +114,7 @@ uint32 mcm_client_internal_mutex_init()
 //    event ptr
 //=============================================================================
 
-uint32 mcm_client_internal_get_mcm_client_handle
+uint32_t mcm_client_internal_get_mcm_client_handle
 (
     mcm_client_handle_type *mcm_handle
 )
@@ -124,7 +124,7 @@ uint32 mcm_client_internal_get_mcm_client_handle
     MCM_CLIENT_INTERNAL_MUTEX_UNLOCK();
     return MCM_SUCCESS_V01;
 }
-uint32 mcm_client_internal_update_cb_info
+uint32_t mcm_client_internal_update_cb_info
 (
     mcm_client_handle_type   mcm_handle,
     mcm_client_async_cb      client_resp_cb,
@@ -172,7 +172,7 @@ uint32 mcm_client_internal_update_cb_info
     return ret_val;
 }
 
-uint32 mcm_client_internal_update_async_cb_info
+uint32_t mcm_client_internal_update_async_cb_info
 (
     mcm_client_handle_type    handle,
     mcm_client_async_cb       async_resp_cb,
@@ -223,7 +223,7 @@ uint32 mcm_client_internal_update_async_cb_info
     return ret_val;
 }
 
-uint32 mcm_client_internal_update_qmi_handle
+uint32_t mcm_client_internal_update_qmi_handle
 (
     mcm_client_handle_type    mcm_handle,
     int                       service_id,
@@ -286,7 +286,7 @@ uint32 mcm_client_internal_update_qmi_handle
     return ret_val;
 }
 
-uint32 mcm_client_internal_get_async_cb_for_mcm_handle
+uint32_t mcm_client_internal_get_async_cb_for_mcm_handle
 (
     mcm_client_handle_type    mcm_handle,
     int                       token_id,
@@ -295,7 +295,7 @@ uint32 mcm_client_internal_get_async_cb_for_mcm_handle
 {
     int iter;
     int iter_list;
-    uint32 ret_val = MCM_SUCCESS_V01;
+    uint32_t ret_val = MCM_SUCCESS_V01;
 
     MCM_CLIENT_INTERNAL_MUTEX_LOCK();
     do
@@ -342,14 +342,14 @@ uint32 mcm_client_internal_get_async_cb_for_mcm_handle
     return ret_val;
 }
 
-uint32 mcm_client_internal_get_ind_cb_for_mcm_handle
+uint32_t mcm_client_internal_get_ind_cb_for_mcm_handle
 (
     mcm_client_handle_type    mcm_handle,
     mcm_client_ind_cb        *ind_cb
 )
 {
     int iter = 0;
-    uint32 ret_val = MCM_SUCCESS_V01;
+    uint32_t ret_val = MCM_SUCCESS_V01;
 
     MCM_CLIENT_INTERNAL_MUTEX_LOCK();
     do
@@ -377,14 +377,14 @@ uint32 mcm_client_internal_get_ind_cb_for_mcm_handle
     return ret_val;
 }
 
-uint32 mcm_internal_get_srv_id_for_msg_id
+uint32_t mcm_internal_get_srv_id_for_msg_id
 (
     int msg_id,
     int *srv_id
 )
 {
     int iter;
-    uint32 ret_val = MCM_SUCCESS_V01;
+    uint32_t ret_val = MCM_SUCCESS_V01;
 
     LOG_MSG_INFO("alpha MAX: %x",MCM_RIL_DMS_SERVICE_MAX);
     int tbl_size = sizeof(mcm_msg_srv_id_map_tbl)/sizeof(mcm_msg_service_id_map);
@@ -426,7 +426,7 @@ uint32 mcm_internal_get_srv_id_for_msg_id
 // @return
 //
 //=============================================================================
-uint32 mcm_client_internal_get_qmi_handle_for_mcm_handle
+uint32_t mcm_client_internal_get_qmi_handle_for_mcm_handle
 (
     mcm_client_handle_type     handle,
     int                        msg_id,
@@ -511,7 +511,7 @@ uint32 mcm_client_internal_get_qmi_handle_for_mcm_handle
 //
 //=============================================================================
 
-uint32 mcm_client_internal_get_mcm_handle_for_qmi_handle
+uint32_t mcm_client_internal_get_mcm_handle_for_qmi_handle
 (
     qmi_client_type          mcm_client_handle,
     mcm_client_handle_type  *handle
@@ -595,14 +595,14 @@ uint32 mcm_client_internal_get_mcm_handle_for_qmi_handle
 //=============================================================================
 
 
-uint32 mcm_internal_client_release
+uint32_t mcm_internal_client_release
 (
     mcm_client_handle_type handle
 )
 {
     int iter = 0;
 
-    uint32 ret_val = MCM_SUCCESS_V01;
+    uint32_t ret_val = MCM_SUCCESS_V01;
 
     MCM_CLIENT_INTERNAL_MUTEX_LOCK();
     for(iter=0; iter<MCM_MAX_CLIENTS; iter++)
@@ -653,7 +653,7 @@ uint32 mcm_internal_client_release
     }
     return ret_val;
 }
-uint32 mcm_client_internal_get_qmi_handles_for_mcm_handle
+uint32_t mcm_client_internal_get_qmi_handles_for_mcm_handle
 (
     mcm_client_handle_type mcm_handle,
     client_handle_info_type *qmi_handles_ptr

@@ -391,7 +391,7 @@ cri_core_error_type cri_voice_dial_req_handler(cri_core_context_type cri_core_co
            dial_call_req_msg.call_type   = CALL_TYPE_EMERGENCY_V02;
         }
 
-        //QCRIL_LOG_ESSENTIAL(".. final elaboration %x, %x hex", (uint32)(call_obj_ptr->elaboration >> 32),(uint32)call_obj_ptr->elaboration );
+        //QCRIL_LOG_ESSENTIAL(".. final elaboration %x, %x hex", (uint32_t)(call_obj_ptr->elaboration >> 32),(uint32_t)call_obj_ptr->elaboration );
         QCRIL_LOG_ESSENTIAL(".. call type set %d", (int)dial_call_req_msg.call_type);
 
         //cri_voice_rules_hlos_call_id_rule_data_type *hlos_call_id_rule_data_ptr = (cri_voice_rules_hlos_call_id_rule_data_type*) util_memory_alloc(sizeof(*hlos_call_id_rule_data_ptr));
@@ -523,7 +523,7 @@ int cri_voice_dial_rule_checker(void *rule_data)
 {
     int ret_code = FALSE;
 
-    uint8 cri_call_id = (int) rule_data;
+    uint8_t cri_call_id = (int) rule_data;
     cri_voice_call_obj_type* call_obj_ptr = cri_voice_call_list_find_by_cri_call_id(cri_voice_core_get_call_list(), cri_call_id);
 
     QCRIL_LOG_INFO("cri_call_id: %d, call_obj_ptr: %p", cri_call_id, call_obj_ptr);

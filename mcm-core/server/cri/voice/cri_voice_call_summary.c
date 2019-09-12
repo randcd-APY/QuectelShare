@@ -20,7 +20,7 @@ void cri_voice_call_summary_get_modom_call_summary(
 
     memset(call_summary_ptr, 0, sizeof(*call_summary_ptr));
 
-    uint32 num_of_calls;
+    uint32_t num_of_calls;
     cri_voice_call_obj_type** call_obj_dptr;
 
     cri_voice_call_list_get_filtered_call_objects(
@@ -30,7 +30,7 @@ void cri_voice_call_summary_get_modom_call_summary(
 
     if (num_of_calls && call_obj_dptr)
     {
-        uint32 i;
+        uint32_t i;
         for (i=0; i<num_of_calls; i++)
         {
             call_summary_ptr->nof_calls_overall++;

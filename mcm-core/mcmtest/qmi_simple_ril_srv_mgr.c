@@ -11,9 +11,9 @@
 #include "mcm_client_v01.h"
 #include "mcm_client.h"
 
-extern uint32 mcm_client_handle;
+extern uint32_t mcm_client_handle;
 
-mcm_srv_mgr_service_handle(int handle, int require_flag, uint16 service_list)
+mcm_srv_mgr_service_handle(int handle, int require_flag, uint16_t service_list)
 {
    int ret_val = MCM_ERROR_GENERIC_V01;
 
@@ -126,9 +126,9 @@ int qmi_simple_ril_service_manager_handler
 )
 {
 
-   uint32 token;
-   uint32 ret_code = 0;
-   uint32 done = 0;
+   uint32_t token;
+   uint32_t ret_code = 0;
+   uint32_t done = 0;
 
    char *service_str = NULL;
    int   service_id_enum  = 0;

@@ -38,6 +38,10 @@ EXTRA_OECONF += "MM_STILL_OMX_COMP=false"
 EXTRA_OECONF += "MM_STILL_OMX_FUZZ=false"
 EXTRA_OECONF_append_quec-smart += "JPEG_USE_FASTCV_OPT=false"
 
+do_compile_prepend() {
+    make clean
+}
+
 do_install_append() {
   mkdir -p ${D}/system/bin/
 #cp ${D}${bindir}/* ${D}/system/bin/

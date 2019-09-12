@@ -41,7 +41,7 @@ boolean cri_voice_settings_get_wait_1x_num(const cri_voice_settings_type *settin
     }
 }
 
-void cri_voice_settings_set_wait_1x_num_timeout(cri_voice_settings_type *settings_ptr, uint32 sec, uint32 usec)
+void cri_voice_settings_set_wait_1x_num_timeout(cri_voice_settings_type *settings_ptr, uint32_t sec, uint32_t usec)
 {
     if (settings_ptr)
     {

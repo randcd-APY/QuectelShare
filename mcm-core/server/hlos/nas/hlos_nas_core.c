@@ -281,7 +281,7 @@ void hlos_nas_core_fill_voice_registration_indication(mcm_nw_voice_registration_
 
 void hlos_nas_send_network_time_update_to_client()
 {
-    uint8 nitz_updated = FALSE;
+    uint8_t nitz_updated = FALSE;
     mcm_nw_nitz_time_ind_msg_v01 nitz_time_ind_msg;
     memset(&nitz_time_ind_msg,NIL,sizeof(nitz_time_ind_msg));
 
@@ -299,7 +299,7 @@ void hlos_nas_send_network_time_update_to_client()
         UTIL_LOG_MSG("abs time valid %d",nitz_time_ind_msg.abs_time_valid);
         if(TRUE == nitz_time_ind_msg.abs_time_valid)
         {
-            UTIL_LOG_MSG("abs time (%x, %x)", (uint32)(nitz_time_ind_msg.abs_time >> 32), (uint32)nitz_time_ind_msg.abs_time);
+            UTIL_LOG_MSG("abs time (%x, %x)", (uint32_t)(nitz_time_ind_msg.abs_time >> 32), (uint32_t)nitz_time_ind_msg.abs_time);
         }
 
         UTIL_LOG_MSG("Leap sec valid %d",nitz_time_ind_msg.leap_sec_valid);
@@ -317,7 +317,7 @@ void hlos_nas_send_network_time_update_to_client()
 
 void hlos_nas_send_sib16_network_time_update_to_client()
 {
-    uint8 nitz_updated = FALSE;
+    uint8_t nitz_updated = FALSE;
     mcm_nw_nitz_time_ind_msg_v01 nitz_time_ind_msg;
     memset(&nitz_time_ind_msg,NIL,sizeof(nitz_time_ind_msg));
 
@@ -335,7 +335,7 @@ void hlos_nas_send_sib16_network_time_update_to_client()
         UTIL_LOG_MSG("abs time valid %d",nitz_time_ind_msg.abs_time_valid);
         if(TRUE == nitz_time_ind_msg.abs_time_valid)
         {
-            UTIL_LOG_MSG("abs time (%x, %x)", (uint32)(nitz_time_ind_msg.abs_time >> 32), (uint32)nitz_time_ind_msg.abs_time);
+            UTIL_LOG_MSG("abs time (%x, %x)", (uint32_t)(nitz_time_ind_msg.abs_time >> 32), (uint32_t)nitz_time_ind_msg.abs_time);
         }
 
         UTIL_LOG_MSG("Leap sec valid %d",nitz_time_ind_msg.leap_sec_valid);
@@ -1887,7 +1887,7 @@ void hlos_nas_network_get_nitz_time_info_handler(void *event_data)
     UTIL_LOG_MSG("abs time valid %d",hlos_resp_msg.abs_time_valid);
     if(TRUE == hlos_resp_msg.abs_time_valid)
     {
-        UTIL_LOG_MSG("abs time (%x, %x)", (uint32)(hlos_resp_msg.abs_time >> 32), (uint32)hlos_resp_msg.abs_time);
+        UTIL_LOG_MSG("abs time (%x, %x)", (uint32_t)(hlos_resp_msg.abs_time >> 32), (uint32_t)hlos_resp_msg.abs_time);
     }
 
     UTIL_LOG_MSG("Leap sec valid %d",hlos_resp_msg.leap_sec_valid);

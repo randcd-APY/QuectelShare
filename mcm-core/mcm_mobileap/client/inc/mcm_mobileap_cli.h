@@ -24,7 +24,7 @@ typedef struct {
    mcm_client_handle_type           mcm_client_handle;
    uint32_t                  mcm_mobileap_handle;
    /* QCMAP CM Config */
-   uint8                     mcm_mobileap_enable;
+   uint8_t                     mcm_mobileap_enable;
 } mcm_mobileap_cb_t;
 
 #define MCM_MOBILEAP_MAX_FILE_PATH_LEN 100
@@ -103,14 +103,14 @@ RETURN VALUE
 ===========================================================================*/
 #define IPV6_ADDR_MSG(ip_addr) printf( \
                         "IPV6 Address %x:%x:%x:%x:%x:%x:%x:%x", \
-                        (uint16)(ntohs(ip_addr[0])), \
-                        (uint16)(ntohs(ip_addr[0] >> 16)), \
-                        (uint16)(ntohs(ip_addr[0] >> 32)) , \
-                        (uint16)(ntohs(ip_addr[0] >> 48)), \
-                        (uint16)(ntohs(ip_addr[1])), \
-                        (uint16)(ntohs(ip_addr[1] >> 16)), \
-                        (uint16)(ntohs(ip_addr[1] >> 32)) , \
-                        (uint16)(ntohs(ip_addr[1] >> 48)))
+                        (uint16_t)(ntohs(ip_addr[0])), \
+                        (uint16_t)(ntohs(ip_addr[0] >> 16)), \
+                        (uint16_t)(ntohs(ip_addr[0] >> 32)) , \
+                        (uint16_t)(ntohs(ip_addr[0] >> 48)), \
+                        (uint16_t)(ntohs(ip_addr[1])), \
+                        (uint16_t)(ntohs(ip_addr[1] >> 16)), \
+                        (uint16_t)(ntohs(ip_addr[1] >> 32)) , \
+                        (uint16_t)(ntohs(ip_addr[1] >> 48)))
 
 #define MAX_PROTO_VALUE          255
 #define MAX_TOS_VALUE          255

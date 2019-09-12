@@ -36,7 +36,7 @@ mask {
 // MESSAGES
 //=============================================================================
 message {
- mandatory uint16 require_service;//!< Preferred services to be loaded on the
+ mandatory uint16_t require_service;//!< Preferred services to be loaded on the
                                   //!< device, a bitmask of mcm_dm_service_type
 }mcm_client_require_req_msg;
 
@@ -45,7 +45,7 @@ message {
 }mcm_client_require_resp_msg;
 
 message {
- mandatory uint16 not_require_service;//!< Preferred services to be loaded on the
+ mandatory uint16_t not_require_service;//!< Preferred services to be loaded on the
                                       //!< device, a bitmask of mcm_dm_service_type
 }mcm_client_not_require_req_msg;
 

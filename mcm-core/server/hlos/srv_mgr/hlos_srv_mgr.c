@@ -69,9 +69,9 @@ int hlos_srv_mgr_get_srv_handle(int srv_id, qmi_client_type *user_handle)
         }
 
         qmi_service_info    *service_info = NULL;
-        uint32               num_services, num_entries;
-        uint32               retry_count = 0;
-        uint32               retry_timeout = 1000;
+        uint32_t               num_services, num_entries;
+        uint32_t               retry_count = 0;
+        uint32_t               retry_timeout = 1000;
         int rc = QMI_NO_ERR;
         service_info = &info[0];
 

@@ -1,4 +1,5 @@
-inherit autotools-brokensep externalsrc
+#inherit autotools-brokensep externalsrc
+inherit qcommon qprebuilt qlicense
 
 DESCRIPTION = "Powerapp tools"
 HOMEPAGE = "http://codeaurora.org/"
@@ -6,13 +7,18 @@ LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/\
 ${LICENSE};md5=89aea4e17d99a7cacdbeed46a0096b10"
 
-EXTERNALSRC = "${WORKSPACE}/system/core/powerapp/"
+#EXTERNALSRC = "${WORKSPACE}/system/core/powerapp/"
+S = "${WORKDIR}/system/core/powerapp/"
+SRC_DIR = "${WORKSPACE}/system/core/powerapp"
 
 PACKAGES =+ "${PN}-reboot ${PN}-shutdown ${PN}-powerconfig"
 FILES_${PN}-reboot = "${sysconfdir}/init.d/reboot"
 FILES_${PN}-shutdown = "${sysconfdir}/init.d/shutdown"
 FILES_${PN}-powerconfig = "${sysconfdir}/init.d/power_config"
 FILES_${PN} += "/data/*"
+INSANE_SKIP_${PN} = "dev-so"
+
+BBCLASSEXTEND = "native nativesdk"
 
 # TODO - add depedency on virtual/sh
 PROVIDES =+ "${PN}-reboot ${PN}-shutdown ${PN}-powerconfig"

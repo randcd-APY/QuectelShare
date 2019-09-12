@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
-#include <ql_gpio.h>
+#include <ql_gpio/ql_gpio.h>
 
 int main(int argc, char *argv[])
 {

@@ -1,7 +1,7 @@
 #include "about.h"
 
-#include <ql_in.h>
-#include <ql_power.h>
+#include <ql-mcm-api/ql_in.h>
+#include <ql_power/ql_power.h>
 #include <stdio.h>
 #include <sys/statfs.h>
 #include <unistd.h>
@@ -11,6 +11,8 @@ About::About(QObject *parent) : QObject(parent)
     m_kernelVersion = "Linux version: 3.18.0";
     m_gccVersion = "GCC version: 6.4.1";
     m_compileTime = "UTC 2019";
+
+    getBrightness4Thread();
 
     p_workerThread = new WorkerThread();
     p_workerThread->setAbout(this);
@@ -31,6 +33,7 @@ About::About(QObject *parent) : QObject(parent)
     }
 
     QByteArray str = file.readAll();
+    file.close();
     QString qStr = QString(str);
 #else
     QString qStr = QString("Linux version 3.18.71 (oe-user@oe-host) (gcc version 6.4.0 (GCC) ) #1 SMP PREEMPT Wed Jul 3 10:36:12 UTC 2019");
@@ -108,6 +111,7 @@ About::About(QObject *parent) : QObject(parent)
     }
 
     str = file.readAll();
+    file.close();
     qStr = QString(str);
     m_flashSize = "Flash Size: ";
     m_flashSize.append(qStr.trimmed());
@@ -240,6 +244,11 @@ QString About::getIMEI()
     return m_IMEI;
 }
 
+QString About::getIMEI2()
+{
+    return m_IMEI2;
+}
+
 void About::setIMEI(QString IMEI)
 {
     if (m_IMEI == IMEI)
@@ -247,6 +256,15 @@ void About::setIMEI(QString IMEI)
 
     m_IMEI = IMEI;
     emit IMEIChanged(m_IMEI);
+}
+
+void About::setIMEI2(QString IMEI2)
+{
+    if (m_IMEI2 == IMEI2)
+        return;
+
+    m_IMEI2 = IMEI2;
+    emit IMEI2Changed(m_IMEI2);
 }
 
 QString About::getMEID()
@@ -281,10 +299,59 @@ int About::getIMEIandMEID4Thread()
     } else {
 //        printf("SerialNumbers  imei:%s      meid:%s\n",
 //               dm_device_serial_numbers.imei,dm_device_serial_numbers.meid);
-        setIMEI("IMEI: " + QString(dm_device_serial_numbers.imei));
+        setIMEI("IMEI1: " + QString(dm_device_serial_numbers.imei));
         setMEID("MEID: " + QString(dm_device_serial_numbers.meid));
     }
 
+    return ret;
+}
+
+#define BUF_SIZE 32
+int About::getIMEI24Thread()
+{
+    int ret = 0;
+    char atc_cmd_req[ATC_REQ_CMD_MAX_LEN] = {0};
+    char atc_cmd_resp[ATC_RESP_CMD_MAX_LEN] = {0};
+    atc_client_handle_type h_atc = 0;
+
+    ret = QL_ATC_Client_Init(&h_atc);
+    printf("QL_ATC_Client_Init ret=%d with h_atc=0x%x\n", ret, h_atc);
+    if(ret == E_QL_OK){
+        memset(atc_cmd_req,  0, sizeof(atc_cmd_req));
+        memset(atc_cmd_resp, 0, sizeof(atc_cmd_resp));
+
+        //strcpy(atc_cmd_req,"at+qcfg=\"hotswap\",1");
+        //ret = QL_ATC_Send_Cmd(h_atc, atc_cmd_req, atc_cmd_resp, ATC_RESP_CMD_MAX_LEN);
+        //printf("QL_ATC_Send_Cmd \"%s\" ret=%d with resp=\n%s\n", atc_cmd_req, ret, atc_cmd_resp);
+
+        strcpy(atc_cmd_req,"AT+EGMR=0,10");
+        ret = QL_ATC_Send_Cmd(h_atc, atc_cmd_req, atc_cmd_resp, ATC_RESP_CMD_MAX_LEN);
+        printf("QL_ATC_Send_Cmd \"%s\" ret=%d with resp=\n%s\n", atc_cmd_req, ret, atc_cmd_resp);
+
+         ret = QL_ATC_Client_Deinit(h_atc);
+         printf("QL_ATC_Client_Deinit ret=%d\n", ret);
+    }else{
+        printf("init failed.\n");
+    }
+    QString qStr = QString(atc_cmd_resp);
+    QStringList list = qStr.split("\r\n", QString::QString::SkipEmptyParts);
+    QRegExp rx;
+    QString newStr;
+    int pos;
+    for (int i = 0; i < list.size();i++) {
+        qDebug() << list.at(i);
+        if (list.at(i).contains("+EGMR:")) {
+            QString rxStr = QString("\\S+: \"(\\d+)\"");
+            rx.setPattern(rxStr);
+            pos = list.at(i).indexOf(rx);
+            if (pos >= 0) {
+                newStr = "IMEI2: ";
+                newStr.append(rx.cap(1).trimmed());
+                setIMEI2(newStr);
+            }
+            break;
+        }
+    }
     return ret;
 }
 
@@ -333,6 +400,7 @@ int About::getMemInfos4Thread()
     }
 
     QByteArray str = file.readAll();
+    file.close();
     QString qStr = QString(str);
     QStringList list = qStr.split("\n", QString::QString::SkipEmptyParts);
     for (int i = 0; i < list.size();i++) {
@@ -502,6 +570,69 @@ void About::setRtcTime(QString rtcTime)
     emit rtcTimeChanged(m_rtcTime);
 }
 
+#define LCD_BRIGHTNESS_PATH     "/sys/class/leds/lcd-backlight/brightness"
+int About::brightness()
+{
+    return m_brightness;
+}
+
+void About::setBrightness(int brightness)
+{
+    QFile file;
+
+    if (brightness < 0 && brightness > 255)
+        return;
+
+    if (m_brightness == brightness)
+        return;
+
+    /* brightness */
+    file.setFileName(LCD_BRIGHTNESS_PATH);
+    if (!file.exists()) {
+        qErrnoWarning("brightness file is not exists!");
+        return;
+    }
+
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        qErrnoWarning("brightness file open failed!");
+        return;
+    }
+
+    QString qStr = QString::number(brightness);
+    qint64 ret = file.write(qStr.toLocal8Bit(), qStr.size());
+    file.close();
+    if (ret == -1)
+        return;
+
+    m_brightness = brightness;
+    emit brightnessChanged(m_brightness);
+}
+
+int About::getBrightness4Thread()
+{
+    QFile file;
+
+    /* brightness */
+    file.setFileName(LCD_BRIGHTNESS_PATH);
+    if (!file.exists()) {
+        qErrnoWarning("brightness file is not exists!");
+        return -1;
+    }
+
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qErrnoWarning("brightness file open failed!");
+        return -2;
+    }
+
+    QByteArray str = file.readAll();
+    file.close();
+    QString qStr = QString(str);
+
+    setBrightness(qStr.toInt(nullptr, 10));
+
+    return 0;
+}
+
 void About::timerout_update()
 {
     if (p_rtcFile != nullptr) {
@@ -531,10 +662,13 @@ void WorkerThread::run()
         if (QThread::currentThread()->isInterruptionRequested()) {
             return;
         }
+
+        ret = p_about->getBrightness4Thread();
         ret = p_about->getMemInfos4Thread();
         ret = p_about->getPowerInfos4Thread();
         ret = p_about->getSDInfos4Thread();
         ret = p_about->getIMEIandMEID4Thread();
+        ret = p_about->getIMEI24Thread();
         ret = p_about->getbpVersion4Thread();
 
         QThread::sleep(3);

@@ -1122,4 +1122,6 @@ extern int dsi_get_ril_instance(void);
 
 extern int dsi_get_modem_subs_id(void);
 
+extern int dsi_profile_adjust(dsi_store_t *hndl);
+
 #endif

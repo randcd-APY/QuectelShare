@@ -161,24 +161,24 @@ long int txn_entry_callid_stop_call_i
 
 mcm_data_call_table_entry* get_calltbl_entry_i
 (
-  uint32 call_id
+  uint32_t call_id
 );
 
 mcm_data_txn_table_entry* get_txntbl_entry_i
 (
-  uint32 call_id,
+  uint32_t call_id,
   condition condtion
 );
 
-int32 del_txntbl_entry_callid_i
+int32_t del_txntbl_entry_callid_i
 (
-  uint32 call_id,
+  uint32_t call_id,
   condition del_condtion
 );
 
-int32 del_calltbl_entry_callid_i
+int32_t del_calltbl_entry_callid_i
 (
-  uint32 call_id
+  uint32_t call_id
 );
 
 void print_txntbl_entries_i
@@ -191,12 +191,12 @@ void print_calltbl_entries_i
   void
 );
 
-uint8 is_call_valid_i
+uint8_t is_call_valid_i
 (
   mcm_data_call_table_entry *node
 );
 
-uint8 is_txn_valid_i
+uint8_t is_txn_valid_i
 (
   mcm_data_txn_table_entry *node
 );

@@ -24,7 +24,7 @@ int qmi_simple_ril_mcm_nw_event_register(qmi_simple_ril_cmd_input_info* cmd_para
 
 int qmi_simple_ril_mcm_nw_status(qmi_simple_ril_cmd_input_info* cmd_params, qmi_simple_ril_cmd_ack_info* ack_info);
 
-int simple_ril_nas_ind_handler(uint32 msg_id, void *ind_c_struct);
+int simple_ril_nas_ind_handler(uint32_t msg_id, void *ind_c_struct);
 
 int qmi_simple_ril_perform_network_scan_handler(qmi_simple_ril_cmd_input_info* cmd_params, qmi_simple_ril_cmd_ack_info* ack_info);
 

@@ -3,13 +3,13 @@
   <demos>
     <example filename="/usr/bin/camerademo" name="Camera" image="screenshots/QuecCam.jpg"/>
     <example filename="/usr/bin/networkdetector" name="Network" image="screenshots/Data.jpg"/>
-   <example filename="/usr/bin/player" name="Video" image="screenshots/Video.jpg"/>
+   <example filename="/usr/bin/qmlvideo" name="Video" image="screenshots/Video.jpg"/>
    <example filename="/usr/bin/MusicDemo" name="Audio" image="screenshots/Audio.jpg"/>
    <example filename="/usr/bin/Gallery" name="Photo" image="screenshots/Photo.jpg"/>
   <example filename="/usr/bin/Call" name="Call" image="screenshots/Call.jpg"/>
   <example filename="/usr/bin/Msg" name="Msg" image="screenshots/Msg.jpg"/>
   <example filename="/usr/bin/sensordemo" name="Sensor" image="screenshots/Sensor.jpg"/>
-  <example filename="/usr/bin/wifiApp" name="Wifi" image="screenshots/Wifi.jpg"/>
+  <example filename="/usr/bin/wifiSettings" name="Wifi" image="screenshots/Wifi.jpg"/>
   <example filename="/usr/bin/btdemo" name="BlueTooth" image="screenshots/BT.jpg"/>
   <example filename="/usr/bin/GpsDemo" name="Gps" image="screenshots/Gps.jpg"/>
  <example filename="/usr/bin/settings" name="Setting" image="screenshots/Setting.jpg"/>

@@ -229,18 +229,18 @@ void qmi_simple_ril_core_set_cond_var( char* cond_var_name, char* cond_var_value
 void simple_ril_async_cb
 (
     mcm_client_handle_type clnt_handle,
-    uint32      msg_id,
+    uint32_t      msg_id,
     void             *resp_c_struct,
-    uint32               resp_c_struct_len,
+    uint32_t               resp_c_struct_len,
     void             *token_id
 );
 
 void simple_ril_ind_cb
 (
     mcm_client_handle_type clnt_hndl,
-    uint32      msg_id,
+    uint32_t      msg_id,
     void             *ind_c_struct,
-    uint32               ind_c_struct_len
+    uint32_t               ind_c_struct_len
 );
 
 

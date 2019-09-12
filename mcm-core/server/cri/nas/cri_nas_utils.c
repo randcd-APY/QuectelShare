@@ -120,7 +120,7 @@ unsigned char cri_nas_ussd_pack(
 }
 
 
-uint16 cri_nas_ussd_unpack
+uint16_t cri_nas_ussd_unpack
 (
     unsigned char *str,
     size_t str_sz,
@@ -179,7 +179,7 @@ uint16 cri_nas_ussd_unpack
 
 void cri_nas_ons_decode_packed_7bit_gsm_string
 (
-    const uint8 *src,
+    const uint8_t *src,
     size_t       src_length,
     char        *dest,
     size_t       dest_sz
@@ -208,7 +208,7 @@ void cri_nas_ons_decode_packed_7bit_gsm_string
 }
 
 
-uint16 cri_nas_convert_gsm_def_alpha_string_to_utf8
+uint16_t cri_nas_convert_gsm_def_alpha_string_to_utf8
 (
   const char *gsm_data,
   char        gsm_data_len,
@@ -439,15 +439,15 @@ int cri_nas_ConvertUTF16toUTF8
 int cri_nas_convert_gsm8bit_alpha_string_to_utf8
 (
     const char *gsm_data,
-    uint16 gsm_data_len,
+    uint16_t gsm_data_len,
     char *utf8_buf,
     size_t utf8_buf_sz
 )
 {
     size_t i, j;
-    uint8 hi_utf8, lo_utf8;
-    uint16 unicode;
-    uint16 ret_value = 0;
+    uint8_t hi_utf8, lo_utf8;
+    uint16_t unicode;
+    uint16_t ret_value = 0;
 
     unsigned int gsm_char;
 
@@ -472,8 +472,8 @@ int cri_nas_convert_gsm8bit_alpha_string_to_utf8
         if ( gsm_char <= 127 )
         {
           unicode = gsm_def_alpha_to_utf8_table[ gsm_char ];
-          hi_utf8 = ( uint8 ) ( ( unicode & 0xFF00 ) >> 8 );
-          lo_utf8 = ( uint8 ) unicode & 0x00FF;
+          hi_utf8 = ( uint8_t ) ( ( unicode & 0xFF00 ) >> 8 );
+          lo_utf8 = ( uint8_t ) unicode & 0x00FF;
 
           /* Make sure to only write a pair of bytes if we have space in the buffer */
           if ( (hi_utf8 > 0 && j + 1 < utf8_buf_sz - 1) || (hi_utf8 == 0) )

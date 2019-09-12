@@ -110,6 +110,19 @@ ApplicationWindow {
         }
 
         Text {
+            id: imei2_id
+            font.pixelSize: 30
+            text: about_id.IMEI2
+        }
+
+        Rectangle{//模拟线段
+            width: 800
+            height:1  //高
+            visible: (about_id.IMEI2.length == 0)? false:true
+            color:"lightgray" //颜色
+        }
+
+        Text {
             id: meid_id
             font.pixelSize: 30
             text: about_id.MEID
@@ -220,6 +233,28 @@ ApplicationWindow {
             width: 800
             height:1  //高
             color:"lightgray" //颜色
+        }
+
+        RowLayout {
+            spacing: 40
+            Text {
+                id: brightness_id
+                font.pixelSize: 30
+                visible: (about_id.brightness < 0 || about_id.brightness > 255) ? false:true
+                text: "Brightness:"
+            }
+
+            Slider {
+                width: 255
+                visible: (about_id.brightness < 0 || about_id.brightness > 255) ? false:true
+                from: 0
+                to: 255
+                value: about_id.brightness+10
+                stepSize:5
+                onValueChanged: {
+                    about_id.brightness = value
+                }
+            }
         }
     }
 }

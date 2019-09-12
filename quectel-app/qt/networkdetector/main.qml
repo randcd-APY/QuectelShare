@@ -198,6 +198,18 @@ ApplicationWindow {
             text: networkDetector_id.pingAvgTime
         }
 
+        Text {
+            font.pixelSize: 30
+            visible: (text.length == 0) ? false:true
+            text: networkDetector_id.primaryDNS
+        }
+
+        Text {
+            font.pixelSize: 30
+            visible: (text.length == 0) ? false:true
+            text: networkDetector_id.secondDNS
+        }
+
         Rectangle{//模拟线段
             height:1  //高
             width: 800

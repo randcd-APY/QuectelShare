@@ -30,5 +30,11 @@ do_install_append() {
     install -m 0755 ${S}/at_network_le -D ${D}${sysconfdir}/initscripts/at_network_le
 }
 
+PACKAGES = "${PN}"
 FILES_${PN} += "/lib/systemd/*"
 FILES_${PN} += "/etc/*"
+FILES_${PN} += "${libdir}/*"
+FILES_${PN} += "/usr/include/*"
+INSANE_SKIP_${PN} = "dev-deps"
+INSANE_SKIP_${PN} += "dev-so"
+BBCLASSEXTEND = "native nativesdk"

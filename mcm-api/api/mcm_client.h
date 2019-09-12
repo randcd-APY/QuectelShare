@@ -12,8 +12,8 @@
    Confidential and Proprietary - Qualcomm Technologies, Inc.
 *====*====*====*====*====*====*====*====*====*====*====*====*====*====*====*/
 
+#include <stdint.h>
 #include "mcm_common_v01.h"
-#include "comdef.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,23 +23,23 @@ extern "C" {
 // DATA TYPES
 //=============================================================================
 
-typedef uint32 mcm_client_handle_type;
+typedef uint32_t mcm_client_handle_type;
 
 typedef void (*mcm_client_async_cb)
 (
   mcm_client_handle_type hndl,
-  uint32                 msg_id,
+  uint32_t                 msg_id,
   void                  *resp_c_struct,
-  uint32                 resp_len,
+  uint32_t                 resp_len,
   void                  *token_id
 );
 
 typedef void (*mcm_client_ind_cb)
 (
   mcm_client_handle_type hndl,
-  uint32                 msg_id,
+  uint32_t                 msg_id,
   void                  *ind_c_struct,
-  uint32                 ind_len
+  uint32_t                 ind_len
 );
 
 //=============================================================================
@@ -64,7 +64,7 @@ typedef void (*mcm_client_ind_cb)
     MCM_SUCCESS -- 0 is success. \n
     MCM_ERROR_TBD...
 */
-uint32 mcm_client_init
+uint32_t mcm_client_init
 (
   mcm_client_handle_type   *hndl,
   mcm_client_ind_cb         ind_cb,
@@ -92,7 +92,7 @@ uint32 mcm_client_init
    MCM_SUCCESS -- 0 is success. \n
    MCM_ERROR_TBD...
 */
-uint32 mcm_client_execute_command_async
+uint32_t mcm_client_execute_command_async
 (
   mcm_client_handle_type     hndl,
   int                        msg_id,
@@ -129,7 +129,7 @@ uint32 mcm_client_execute_command_async
     MCM_SUCCESS -- 0 is success. \n
     MCM_ERROR_TBD...
 */
-uint32 mcm_client_execute_command_sync
+uint32_t mcm_client_execute_command_sync
 (
   mcm_client_handle_type      hndl,
   int                         msg_id,
@@ -166,7 +166,7 @@ uint32 mcm_client_execute_command_sync
     MCM_SUCCESS -- 0 is success. \n
     MCM_ERROR_TBD...
 */
-uint32 mcm_client_execute_command_sync_ex
+uint32_t mcm_client_execute_command_sync_ex
 (
   mcm_client_handle_type      hndl,
   int                         msg_id,
@@ -174,7 +174,7 @@ uint32 mcm_client_execute_command_sync_ex
   int                         req_c_struct_len,
   void                       *resp_c_struct,
   int                         resp_c_struct_len,
-  uint32                      timeout
+  uint32_t                      timeout
 );
 
 #define MCM_CLIENT_EXECUTE_COMMAND_SYNC_EX(hndl, msg_id, req_ptr, resp_ptr, timeout) \
@@ -197,7 +197,7 @@ uint32 mcm_client_execute_command_sync_ex
    MCM_SUCCESS -- 0 is success. \n
    MCM_ERROR_TBD...
 */
-uint32 mcm_client_release(mcm_client_handle_type hndl);
+uint32_t mcm_client_release(mcm_client_handle_type hndl);
 
 #ifdef __cplusplus
 }

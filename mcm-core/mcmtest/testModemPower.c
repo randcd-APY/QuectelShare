@@ -38,9 +38,9 @@ int ind_received = FALSE;
 typedef void (*mcm_client_async_cb)
 (
   mcm_client_handle_type hndl,
-  uint32                 msg_id,
+  uint32_t                 msg_id,
   void                  *resp_c_struct,
-  uint32                 resp_len,
+  uint32_t                 resp_len,
   void                  *token_id
 );
 
@@ -50,7 +50,7 @@ void mcm_set_power_resp_cb
 (
    unsigned int       msg_id,
    void              *resp_c_struct,
-   uint32             resp_len,
+   uint32_t             resp_len,
    void              *token_id
 )
 {
@@ -63,7 +63,7 @@ void mcm_client2_async_cb
 (
    unsigned int       msg_id,
    void              *resp_c_struct,
-   uint32             resp_len,
+   uint32_t             resp_len,
    void              *token_id
 )
 {
@@ -75,7 +75,7 @@ void mcm_client2_ind_cb
 (
    unsigned int      msg_id,
    void             *ind_c_struct,
-   uint32             ind_len
+   uint32_t             ind_len
 )
 {
    printf("mcm_client2_ind_cb msg_id - %d\n", msg_id);
@@ -85,7 +85,7 @@ void mcm_client1_async_cb
 (
    unsigned int       msg_id,
    void              *resp_c_struct,
-   uint32             resp_len,
+   uint32_t             resp_len,
    void              *token_id
 )
 {
@@ -97,7 +97,7 @@ void mcm_client1_ind_cb
 (
    unsigned int      msg_id,
    void             *ind_c_struct,
-   uint32            ind_len
+   uint32_t            ind_len
 )
 {
    printf("mcm_client1_ind_cb msg_id - %d\n", msg_id);

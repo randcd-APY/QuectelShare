@@ -21,7 +21,10 @@ RCONFLICTS_${PN} = "timezones timezone-africa timezone-america timezone-antarcti
 
 S = "${WORKDIR}"
 
-DEFAULT_TIMEZONE ?= "Universal"
+SRC_URI += "file://zoneinfo/Asia/Shanghai"
+
+#DEFAULT_TIMEZONE ?= "Universal"
+DEFAULT_TIMEZONE ?= "Asia/Shanghai"
 INSTALL_TIMEZONE_FILE ?= "1"
 
 TZONES= "africa antarctica asia australasia europe northamerica southamerica  \
@@ -47,6 +50,8 @@ do_install () {
         cp -pP "${S}/zone.tab" ${D}${datadir}/zoneinfo
         cp -pP "${S}/zone1970.tab" ${D}${datadir}/zoneinfo
         cp -pP "${S}/iso3166.tab" ${D}${datadir}/zoneinfo
+
+        cp -pP ${S}/zoneinfo/Asia/Shanghai ${D}${datadir}/zoneinfo/Asia/
 
         # Install default timezone
         if [ -e ${D}${datadir}/zoneinfo/${DEFAULT_TIMEZONE} ]; then

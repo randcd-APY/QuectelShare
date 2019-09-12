@@ -63,7 +63,7 @@ void mcm_util_memory_free
 }
 
 
-uint32 convert_qmi_err_to_mcm
+uint32_t convert_qmi_err_to_mcm
 (
     qmi_client_error_type client_err
 )

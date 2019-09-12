@@ -2575,3 +2575,119 @@ void dsi_release_internal(void)
 
   DSI_LOG_DEBUG( "%s", "dsi_release_internal: EXIT" );
 }/* dsi_release_internal() */
+
+static int wds_adjust_profile(qmi_client_type wds_clnt,
+        wds_profile_type_enum_v01 profile_type,
+        unsigned char profile_idx)
+{
+        qmi_client_error_type ret;
+        wds_get_profile_list_req_msg_v01 list_req;
+        wds_get_profile_list_resp_msg_v01 *plist_resp;
+        wds_create_profile_req_msg_v01 req;
+        wds_create_profile_resp_msg_v01 resp;
+    int i;
+
+    if(profile_type != WDS_PROFILE_TYPE_3GPP_V01)
+    {
+        DSI_LOG_ERROR("%s", "Only support 3GPP");
+        return -1;
+    }
+
+    if(profile_idx > 16 || profile_idx==0)
+    {
+        DSI_LOG_ERROR("Invalid profile_idx : %d", profile_idx);
+        return -1;
+    }
+
+    plist_resp = malloc(sizeof(*plist_resp));
+
+    if(NULL != plist_resp)
+    {
+        memset(&list_req, 0, sizeof(list_req));
+        memset(plist_resp, 0, sizeof(*plist_resp));
+
+        list_req.profile_type_valid = 1;
+        list_req.profile_type = profile_type;
+        ret = qmi_client_send_msg_sync(wds_clnt, QMI_WDS_GET_PROFILE_LIST_REQ_V01,
+                &list_req, sizeof(list_req), plist_resp, sizeof(*plist_resp), 5000);
+        if(QMI_NO_ERR != ret || QMI_RESULT_SUCCESS_V01 != plist_resp->resp.result) {
+            DSI_LOG_ERROR("get profile type %d list failure: error %d", list_req.profile_type, plist_resp->resp.error);
+            free(plist_resp);
+            return -2;
+        }
+
+        for(i=0; i<plist_resp->profile_list_len; i++)
+        {
+            if(plist_resp->profile_list[i].profile_index == profile_idx)
+            {
+                DSI_LOG_ERROR("Found profile_index:%d", profile_idx);
+                free(plist_resp);
+                return 0;
+            }
+        }
+        free(plist_resp);
+    }
+
+    for(i=0; i<profile_idx; i++)
+    {
+        memset(&req, 0, sizeof(req));
+        memset(&resp, 0, sizeof(resp));
+        req.profile_type = profile_type;
+        req.pdp_type_valid = 1;
+        req.pdp_type = WDS_PDP_TYPE_PDP_IPV4V6_V01;
+        req.apn_name_valid = 1;
+        strncpy(req.apn_name, "3gpp", sizeof(req.apn_name)-1);
+
+        ret = qmi_client_send_msg_sync(wds_clnt, QMI_WDS_CREATE_PROFILE_REQ_V01,
+                &req, sizeof(req), &resp, sizeof(resp), 5000);
+
+        if(QMI_NO_ERR != ret || QMI_RESULT_SUCCESS_V01 != resp.resp.result)
+        {
+            DSI_LOG_ERROR("Failed to create profile %d, ret=%d, result=%d, err=%d",
+                    profile_idx, ret, resp.resp.result, resp.resp.error);
+            return -3;
+        }
+
+        if(resp.profile.profile_index >= profile_idx)
+        {
+            DSI_LOG_ERROR("succeed to add profile : %d", profile_idx);
+            break;
+        }
+    }
+
+        return 0;
+}
+
+int dsi_profile_adjust(dsi_store_t *hndl)
+{
+    int ret = -1;
+    int modem;
+
+    if(NULL == hndl)
+    {
+        return -1;
+    }
+    if(hndl->priv.start_nw_params.profile_index_valid==0
+            || hndl->priv.start_nw_params.profile_index==0)
+    {
+        return 0;
+    }
+
+    for (modem=0; modem<DSI_MAX_MODEMS; modem++)
+    {
+        if(DSI_MODEM_GET_DEFAULT_WDS_HNDL(modem) == DSI_INVALID_WDS_HNDL)
+        {
+            continue;
+        }
+
+        if(0 == wds_adjust_profile(DSI_MODEM_GET_DEFAULT_WDS_HNDL(modem),
+                    WDS_PROFILE_TYPE_3GPP_V01,
+                    hndl->priv.start_nw_params.profile_index))
+        {
+            ret = 0;
+        }
+    }
+
+    return ret;
+}
+/** add by tyler.kuang@20181214 end */

@@ -12,3 +12,4 @@ poky/build/conf/bblayers.conf
 poky/build/conf/sanity_info
 poky/build/conf/templateconf.cfg
 poky/build/sstate-cache/
+poky/build/downloads

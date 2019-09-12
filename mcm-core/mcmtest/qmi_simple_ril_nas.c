@@ -26,7 +26,7 @@
 
 extern int mcm_client_handle;
 extern int radio_state;
-int simple_ril_nas_ind_handler(uint32 msg_id, void *ind_c_struct)
+int simple_ril_nas_ind_handler(uint32_t msg_id, void *ind_c_struct)
 {
     mcm_nw_voice_registration_event_ind_msg_v01 *voice_ind_msg;
     mcm_nw_data_registration_event_ind_msg_v01 *data_ind_msg;
@@ -135,7 +135,7 @@ int simple_ril_nas_ind_handler(uint32 msg_id, void *ind_c_struct)
             qmi_util_log("abs time valid is: %d", nitz_time_ind_msg->abs_time_valid);
             if(TRUE == nitz_time_ind_msg->abs_time_valid)
             {
-                qmi_util_log("abs time is: (%x, %x)", (uint32)(nitz_time_ind_msg->abs_time >> 32), (uint32)nitz_time_ind_msg->abs_time);
+                qmi_util_log("abs time is: (%x, %x)", (uint32_t)(nitz_time_ind_msg->abs_time >> 32), (uint32_t)nitz_time_ind_msg->abs_time);
             }
 
             qmi_util_log("Leap sec valid is: %d", nitz_time_ind_msg->leap_sec_valid);
@@ -154,7 +154,7 @@ int qmi_simple_ril_mcm_nw_set_config(qmi_simple_ril_cmd_input_info* cmd_params, 
 {
 
     int pref_mode = MCM_MODE_NONE_V01;
-    uint32 rc = MCM_ERROR_GENERIC_V01;
+    uint32_t rc = MCM_ERROR_GENERIC_V01;
     mcm_nw_roam_state_t_v01 roaming_pref;
     qmi_simple_ril_cmd_completion_info* comp_info = qmi_simple_ril_completion_info_allocate_ex(cmd_params);
     qmi_util_log("qmi_simple_ril_mcm_nw_set_config Enter\n");
@@ -282,7 +282,7 @@ int qmi_simple_ril_mcm_nw_get_nitz_time_info(qmi_simple_ril_cmd_input_info* cmd_
     qmi_util_log("abs_time valid is: %d", resp_msg.abs_time_valid);
     if ( TRUE == resp_msg.abs_time_valid )
     {
-        qmi_util_log("abs_time is: (%x, %x)", (uint32)(resp_msg.abs_time >> 32), (uint32)resp_msg.abs_time);
+        qmi_util_log("abs_time is: (%x, %x)", (uint32_t)(resp_msg.abs_time >> 32), (uint32_t)resp_msg.abs_time);
     }
 
     qmi_util_log("Leap sec valid is: %d", resp_msg.leap_sec_valid);
@@ -302,11 +302,11 @@ int qmi_simple_ril_mcm_nw_get_nitz_time_info(qmi_simple_ril_cmd_input_info* cmd_
 int qmi_simple_ril_mcm_nw_event_register(qmi_simple_ril_cmd_input_info* cmd_params, qmi_simple_ril_cmd_ack_info* ack_info)
 {
 
-    uint8 voice_valid = FALSE;
-    uint8 data_valid = FALSE;
-    uint8 cell_access_valid = FALSE;
-    uint8 signal_strength_valid = FALSE;
-    uint8 nitz_time_valid = FALSE;
+    uint8_t voice_valid = FALSE;
+    uint8_t data_valid = FALSE;
+    uint8_t cell_access_valid = FALSE;
+    uint8_t signal_strength_valid = FALSE;
+    uint8_t nitz_time_valid = FALSE;
     qmi_simple_ril_cmd_completion_info* comp_info = qmi_simple_ril_completion_info_allocate_ex(cmd_params);
     qmi_util_log("qmi_simple_ril_mcm_nw_event_register Enter\n");
 
@@ -442,7 +442,7 @@ int qmi_simple_ril_get_operator_name(qmi_simple_ril_cmd_input_info* cmd_params, 
 
 int qmi_simple_ril_perform_network_scan_handler(qmi_simple_ril_cmd_input_info* cmd_params, qmi_simple_ril_cmd_ack_info* ack_info)
 {
-    uint32 rc = MCM_ERROR_GENERIC_V01;
+    uint32_t rc = MCM_ERROR_GENERIC_V01;
     int token_id;
     mcm_nw_scan_req_msg_v01 req_msg;
     mcm_nw_scan_resp_msg_v01 *resp_msg;
@@ -574,8 +574,8 @@ int qmi_simple_ril_mcm_nw_screen_on_off(qmi_simple_ril_cmd_input_info* cmd_param
 
 int qmi_simple_ril_initiate_network_auto_register_handler(qmi_simple_ril_cmd_input_info* cmd_params, qmi_simple_ril_cmd_ack_info* ack_info)
 {
-    uint32 rc = MCM_ERROR_GENERIC_V01;
-    uint32 token_id;
+    uint32_t rc = MCM_ERROR_GENERIC_V01;
+    uint32_t token_id;
     mcm_nw_selection_req_msg_v01 req_msg;
     mcm_nw_selection_resp_msg_v01 *resp_msg;
 
@@ -615,7 +615,7 @@ int qmi_simple_ril_initiate_network_auto_register_handler(qmi_simple_ril_cmd_inp
 
 int qmi_simple_ril_get_signal_strength_handler(qmi_simple_ril_cmd_input_info* cmd_params, qmi_simple_ril_cmd_ack_info* ack_info)
 {
-    uint32 token_id;
+    uint32_t token_id;
     mcm_nw_get_signal_strength_req_msg_v01 req_msg;
     mcm_nw_get_signal_strength_resp_msg_v01 resp_msg;
 
@@ -695,8 +695,8 @@ int qmi_simple_ril_get_signal_strength_handler(qmi_simple_ril_cmd_input_info* cm
 
 int qmi_simple_ril_initiate_network_manual_register_handler(qmi_simple_ril_cmd_input_info* cmd_params, qmi_simple_ril_cmd_ack_info* ack_info)
 {
-    uint32 rc = MCM_ERROR_GENERIC_V01;
-    uint32 token_id;
+    uint32_t rc = MCM_ERROR_GENERIC_V01;
+    uint32_t token_id;
     mcm_nw_selection_req_msg_v01 req_msg;
     mcm_nw_selection_resp_msg_v01 *resp_msg;
     qmi_simple_ril_cmd_completion_info* comp_info = NULL;

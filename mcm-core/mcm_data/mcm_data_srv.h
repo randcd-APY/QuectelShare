@@ -227,7 +227,7 @@ typedef struct {
 typedef struct mcm_data_transaction_table_entry_s {
 
   /* Call_id used for generating token */
-  uint32 call_id;
+  uint32_t call_id;
 
   /* API type for which this token entry is used */
   mcm_data_api_types_t api_type;
@@ -249,7 +249,7 @@ typedef struct mcm_data_transaction_table_entry_s {
 typedef struct mcm_data_call_table_entry_s {
 
   /* Call_id obtained while registering call in mcm_data */
-  uint32 call_id;
+  uint32_t call_id;
 
   /* Handle obtained from dsi_netctrl */
   dsi_hndl_t dsi_handle;
@@ -271,22 +271,22 @@ typedef struct mcm_data_call_table_entry_s {
   Function declations for mcm_data_srv
 ---------------------------------------------------------------------------*/
 
-int32 mcm_data_init_srv
+int32_t mcm_data_init_srv
 (
   void
 );
 
-int32 create_mcm_data_socket
+int32_t create_mcm_data_socket
 (
   void
 );
 
-int32 create_mcm_data_wds_socket
+int32_t create_mcm_data_wds_socket
 (
   void
 );
 
-int32 mcm_data_create_client_socket
+int32_t mcm_data_create_client_socket
 (
   unsigned int *sockfd
 );

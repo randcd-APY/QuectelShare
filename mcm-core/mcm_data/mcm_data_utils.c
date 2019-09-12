@@ -190,7 +190,7 @@ long int txn_entry_callid_stop_call_i
 
 mcm_data_call_table_entry* get_calltbl_entry_i
 (
-  uint32 call_id
+  uint32_t call_id
 )
 {
   mcm_data_call_table_entry call_entry;
@@ -220,7 +220,7 @@ mcm_data_call_table_entry* get_calltbl_entry_i
 
 mcm_data_txn_table_entry* get_txntbl_entry_i
 (
-  uint32 call_id,
+  uint32_t call_id,
   condition condtion
 )
 {
@@ -265,9 +265,9 @@ mcm_data_txn_table_entry* get_txntbl_entry_i
   return (mcm_data_txn_table_entry *) (txn_table_node->data);
 }
 
-int32 del_txntbl_entry_callid_i
+int32_t del_txntbl_entry_callid_i
 (
-  uint32 call_id,
+  uint32_t call_id,
   condition del_condtion
 )
 {
@@ -276,7 +276,7 @@ int32 del_txntbl_entry_callid_i
   mcm_data_txn_table_entry txn_entry;
   mcm_data_txn_table_entry *txn_entry_temp;
   const void *dummy = NULL;
-  int32 rval;
+  int32_t rval;
   ds_dll_comp_f comp_func;
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
@@ -337,9 +337,9 @@ int32 del_txntbl_entry_callid_i
   return rval;
 }
 
-int32 del_calltbl_entry_callid_i
+int32_t del_calltbl_entry_callid_i
 (
-  uint32 call_id
+  uint32_t call_id
 )
 {
   ds_dll_el_t *call_table_node;
@@ -348,7 +348,7 @@ int32 del_calltbl_entry_callid_i
   mcm_data_call_table_entry *call_entry_temp;
 
   const void *dummy = NULL;
-  int32 rval;
+  int32_t rval;
 
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
@@ -406,7 +406,7 @@ void print_calltbl_entries_i
   ds_dll_el_t *call_table_node;
   const void *dummy = NULL;
   mcm_data_call_table_entry *call_entry;
-  uint32 index;
+  uint32_t index;
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
   index = 0;
@@ -443,7 +443,7 @@ void print_txntbl_entries_i
   ds_dll_el_t *txn_table_node;
   const void *dummy = NULL;
   mcm_data_txn_table_entry *txn_entry;
-  uint32 index;
+  uint32_t index;
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
   index = 0;
@@ -500,7 +500,7 @@ void MCM_DATA_format_log_msg
   va_end(ap);
 }
 
-uint8 is_call_valid_i
+uint8_t is_call_valid_i
 (
   mcm_data_call_table_entry *node
 )
@@ -511,7 +511,7 @@ uint8 is_call_valid_i
     return FALSE;
 }
 
-uint8 is_txn_valid_i
+uint8_t is_txn_valid_i
 (
   mcm_data_txn_table_entry *node
 )

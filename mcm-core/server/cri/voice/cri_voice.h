@@ -275,7 +275,7 @@ typedef struct
     boolean call_uri_valid;
     const char* call_uri;
     boolean call_hlos_id_valid;
-    uint8   call_hlos_id;
+    uint8_t   call_hlos_id;
     boolean hangup_cause_valid;
     int hangup_cause;
 } cri_voice_call_hangup_request_type;

@@ -7,6 +7,8 @@ NetworkDetector::NetworkDetector(QObject *parent) : QObject(parent)
 //    connect(p_waitThread, SIGNAL(finished()), p_waitThread, SLOT(deleteLater())); //不能有这个会导致m_mobap=0
     connect(p_waitThread, SIGNAL(singalPingAvgTime(QString)), this, SLOT(soltPingAvgTime(QString)));
     connect(p_waitThread, SIGNAL(singalNetworkState(int)), this, SLOT(setNetworkState(int)));
+    connect(p_waitThread, SIGNAL(singalPrimaryDNS(QString)), this, SLOT(setPrimaryDNS(QString)));
+    connect(p_waitThread, SIGNAL(singalSecondDNS(QString)), this, SLOT(setSecondDNS(QString)));
     setAddress("8.8.8.8");
     p_waitThread->setNetworkState(NETWORK_DISCONNECT_SUCCESSED);
     p_waitThread->start();
@@ -33,6 +35,26 @@ void NetworkDetector::setAddress(QString address)
         p_waitThread->setNetworkAddress(m_address);
 }
 
+void NetworkDetector::setPrimaryDNS(QString dns)
+{
+    if (m_primaryDNS == dns)
+        return;
+
+    m_primaryDNS = "Primary DNS: ";
+    m_primaryDNS.append(dns);
+    emit primaryDNSChanged(m_primaryDNS);
+}
+
+void NetworkDetector::setSecondDNS(QString dns)
+{
+    if (m_secondDNS == dns)
+        return;
+
+    m_secondDNS = "Second DNS: ";
+    m_secondDNS.append(dns);
+    emit secondDNSChanged(m_secondDNS);
+}
+
 bool NetworkDetector::getSwitch() const
 {
     return m_bswitch;
@@ -51,6 +73,16 @@ int NetworkDetector::networkState()
 QString NetworkDetector::getAddress()
 {
     return m_address;
+}
+
+QString NetworkDetector::getPrimaryDNS()
+{
+    return m_primaryDNS;
+}
+
+QString NetworkDetector::getSecondDNS()
+{
+    return m_secondDNS;
 }
 
 void NetworkDetector::setSwitch(bool bswitch)

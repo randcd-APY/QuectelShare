@@ -405,13 +405,14 @@ static int is_enter_fctmode(int value)
              if(0x0d == temp_ch){	
                readbuf[index]='\0';
 		
-               if(0 == strstr(readbuf, "FCT")){	
+               if(strstr(readbuf, "FCT")!=NULL){	
                   printf("enter fct\n");	
                   return 1;	
                }else{	
                   count++;	
                   if(count < 10){	
                      printf("Please input again, remaining times is %d\n", 10 - count);	
+					 printf("Please input again, the data is %s\n",readbuf );	
                      index = 0;	
                      memset(readbuf , 0 , sizeof(readbuf));	
                      continue;	

@@ -1,5 +1,6 @@
-#include <ql_in.h>
+#include <ql-mcm-api/ql_in.h>
 #include "test_base.h"
+#include <arpa/inet.h>
 
 extern func_api_test_t t_mobap_test;
 
@@ -406,8 +407,22 @@ static int test_mobap(void)
         case 24://"QL_MCM_MobileAP_GetIPv4WWANCfg"
         {
             QL_MOBAP_IPV4_WWAN_CONFIG_INFO_T    t_wwan_cfg = {0};
+            struct in_addr addr;
+            char command[128];
             ret = QL_MCM_MobileAP_GetIPv4WWANCfg(h_mobap, &t_wwan_cfg);
             printf("QL_MCM_MobileAP_GetIPv4WWANCfg ret = %d, IPV4 Config Info:...\n", ret);            
+            if(ret == 0){
+                addr.s_addr = ntohl(t_wwan_cfg.v4_addr);
+                printf("v4_addr_valid:%d v4_addr:%s \n",t_wwan_cfg.v4_addr_valid,inet_ntoa(addr));
+                addr.s_addr = ntohl(t_wwan_cfg.v4_prim_dns_addr);
+                printf("v4_prim_dns_addr_valid:%d v4_prim_dns_addr:%s \n",t_wwan_cfg.v4_prim_dns_addr_valid,inet_ntoa(addr));
+                snprintf(command, sizeof(command), "echo 'nameserver %s' >> /etc/resolv.conf",inet_ntoa(addr));
+                system(command);                                                                                                                                             
+                addr.s_addr = ntohl(t_wwan_cfg.v4_sec_dns_addr);
+                printf("v4_sec_dns_addr_valid:%d v4_sec_dns_addr:%s \n",t_wwan_cfg.v4_sec_dns_addr_valid,inet_ntoa(addr));
+                snprintf(command, sizeof(command), "echo 'nameserver %s' >> /etc/resolv.conf",inet_ntoa(addr));
+                system(command);                                                                                                                                             
+            }
             break;
         }
             

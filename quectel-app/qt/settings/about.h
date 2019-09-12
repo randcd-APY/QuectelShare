@@ -28,12 +28,14 @@ private:
 class About : public QObject
 {
     Q_OBJECT
+    //属性声明
     Q_PROPERTY(QString kernelVersion READ kernelVersion WRITE setKernelVersion)
     Q_PROPERTY(QString gccVersion READ gccVersion WRITE setGccVersion)
     Q_PROPERTY(QString compileTime READ compileTime WRITE setCompileTime)
     Q_PROPERTY(QString bpVersion READ bpVersion WRITE setBpVersion NOTIFY bpVersionChanged)
     Q_PROPERTY(QString IMEI READ getIMEI WRITE setIMEI NOTIFY IMEIChanged)
     Q_PROPERTY(QString MEID READ getMEID WRITE setMEID NOTIFY MEIDChanged)
+    Q_PROPERTY(QString IMEI2 READ getIMEI2 WRITE setIMEI2 NOTIFY IMEI2Changed)
     Q_PROPERTY(QString memTotal READ memTotal WRITE setMemTotal NOTIFY memTotalChanged)
     Q_PROPERTY(QString memAvailable READ memAvailable WRITE setMemAvailable NOTIFY memAvailableChanged)
     Q_PROPERTY(QString flashSize READ flashSize WRITE setFlashSize NOTIFY flashSizeChanged)
@@ -42,6 +44,7 @@ class About : public QObject
     Q_PROPERTY(QString sdTotalSize READ sdTotalSize WRITE setSDTotalSize NOTIFY sdTotalSizeChanged)
     Q_PROPERTY(QString sdAvailableSize READ sdAvailableSize WRITE setSDAvailableSize NOTIFY sdAvailableSizeChanged)
     Q_PROPERTY(QString rtcTime READ rtcTime WRITE setRtcTime NOTIFY rtcTimeChanged)
+    Q_PROPERTY(int brightness READ brightness WRITE setBrightness NOTIFY brightnessChanged)
 
 public:
     explicit About(QObject *parent = nullptr);
@@ -63,10 +66,16 @@ public:
     QString getIMEI();
     void setIMEI(QString IMEI);
 
+    QString getIMEI2();
+    void setIMEI2(QString IMEI2);
+
     QString getMEID();
     void setMEID(QString MEID);
 
+
     int getIMEIandMEID4Thread();
+
+    int getIMEI24Thread();
 
     QString memTotal();
     void setMemTotal(QString memTotal);
@@ -95,12 +104,18 @@ public:
     QString rtcTime();
     void setRtcTime(QString rtcTime);
 
+    int brightness();
+    void setBrightness(int brightness);
+    int getBrightness4Thread();
+
 signals:
     void bpVersionChanged(QString bpVersion);
 
     void IMEIChanged(QString IMEI);
 
     void MEIDChanged(QString IMEI);
+
+    void IMEI2Changed(QString IMEI2);
 
     void memTotalChanged(QString memTotal);
 
@@ -118,6 +133,8 @@ signals:
 
     void rtcTimeChanged(QString rtcTime);
 
+    void brightnessChanged(int brightness);
+
 public slots:
     void timerout_update();
 //    void slotUpdate_bpVersion(QString bpVersion);
@@ -129,6 +146,7 @@ private:
     QString m_bpVersion;
     QString m_IMEI;
     QString m_MEID;
+    QString m_IMEI2;
     QString m_memTotal;
     QString m_memAvailable;
     QString m_flashSize;
@@ -137,6 +155,7 @@ private:
     QString m_sdTotalSize;
     QString m_sdAvailableSize;
     QString m_rtcTime;
+    int m_brightness;
 
     QFile *p_rtcFile;
     QTimer *p_timer;

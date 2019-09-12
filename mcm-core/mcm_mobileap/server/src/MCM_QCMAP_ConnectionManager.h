@@ -119,29 +119,29 @@ public:
                          int max_entries, mcm_error_t_v01 *qmi_err_num);
 
    /* Add a DMZ IP address to the configuration and update XML file. */
-   boolean AddDMZ(uint32 dmz_ip, mcm_error_t_v01 *qmi_err_num);
+   boolean AddDMZ(uint32_t dmz_ip, mcm_error_t_v01 *qmi_err_num);
 
    /* Get the DMZ IP address from the configuration . */
-   boolean GetDMZ(uint32* dmz_ip, mcm_error_t_v01 *qmi_err_num);
+   boolean GetDMZ(uint32_t* dmz_ip, mcm_error_t_v01 *qmi_err_num);
 
    /* Delete a DMZ IP address from the configuration and update XML file. */
-   boolean DeleteDMZ(uint32 dmz_ip, mcm_error_t_v01 *qmi_err_num);
+   boolean DeleteDMZ(uint32_t dmz_ip, mcm_error_t_v01 *qmi_err_num);
 
    /* Set NAT Timeout in the configuration and update XML file. */
-   boolean SetNATEntryTimeout(uint16 timeout, mcm_error_t_v01 *qmi_err_num);
+   boolean SetNATEntryTimeout(uint16_t timeout, mcm_error_t_v01 *qmi_err_num);
 
    /* Get NAT Timeout from the configuration and update XML file. */
-   boolean GetNATEntryTimeout(uint16 *timeout, mcm_error_t_v01 *qmi_err_num);
+   boolean GetNATEntryTimeout(uint16_t *timeout, mcm_error_t_v01 *qmi_err_num);
 
    /* Set/Get VPN Pass Through modes in the configuration and update XML file. */
    boolean SetIPSECVpnPassThrough(boolean enable, mcm_error_t_v01 *qmi_err_num);
-   boolean GetIPSECVpnPassThrough(uint8 *vpn_value, mcm_error_t_v01 *qmi_err_num);
+   boolean GetIPSECVpnPassThrough(uint8_t *vpn_value, mcm_error_t_v01 *qmi_err_num);
 
    boolean SetL2TPVpnPassThrough(boolean enable, mcm_error_t_v01 *qmi_err_num);
-   boolean GetL2TPVpnPassThrough(uint8 *vpn_value, mcm_error_t_v01 *qmi_err_num);
+   boolean GetL2TPVpnPassThrough(uint8_t *vpn_value, mcm_error_t_v01 *qmi_err_num);
 
    boolean SetPPTPVpnPassThrough(boolean enable, mcm_error_t_v01 *qmi_err_num);
-   boolean GetPPTPVpnPassThrough(uint8*vpn_value, mcm_error_t_v01 *qmi_err_num);
+   boolean GetPPTPVpnPassThrough(uint8_t*vpn_value, mcm_error_t_v01 *qmi_err_num);
 
    /* Set firewall state in the configuration and update XML file. */
    boolean SetFirewall(boolean enable, boolean pkts_allowed, mcm_error_t_v01 *qmi_err_num);
@@ -179,7 +179,7 @@ public:
    /*Get Firewall rule handles from the configuration*/
    boolean GetFireWallHandleList(qcmap_cm_extd_firewall_conf_t* extd_firewall_conf, mcm_error_t_v01 *qmi_err_num);
 
-   boolean GetIPv4WWANNetworkConfiguration(uint32 *public_ip, uint32 *primary_dns, uint32 *secondary_dns, mcm_error_t_v01 *qmi_err_num);
+   boolean GetIPv4WWANNetworkConfiguration(uint32_t *public_ip, uint32_t *primary_dns, uint32_t *secondary_dns, mcm_error_t_v01 *qmi_err_num);
 
    /*Change NAT Type based on the option given */
    boolean ChangeNatType(qcmap_cm_nat_type nat_type, mcm_error_t_v01 *qmi_err_num);
@@ -201,14 +201,14 @@ public:
    boolean DisableWLAN(mcm_error_t_v01 *qmi_err_num);
 
    /* Bring up/down and configure DualAP mode. */
-   boolean SetDualAPConfig(boolean enable, uint32 a5_ip_addr, uint32 sub_net_mask, mcm_error_t_v01 *qmi_err_num);
+   boolean SetDualAPConfig(boolean enable, uint32_t a5_ip_addr, uint32_t sub_net_mask, mcm_error_t_v01 *qmi_err_num);
 
    /* start and stop the Linux HostAPD server. */
    boolean StopHostAPD(int intf);
    boolean StartHostAPD(int intf);
 
    /* Configure, start and stop the Linux DHCPD server. */
-   boolean SetDHCPDConfig(int intf, uint32 start, uint32 end, char * leasetime, mcm_error_t_v01 *qmi_err_num);
+   boolean SetDHCPDConfig(int intf, uint32_t start, uint32_t end, char * leasetime, mcm_error_t_v01 *qmi_err_num);
    boolean StartDHCPD(void);
    boolean StopDHCPD(void);
 
@@ -221,8 +221,8 @@ public:
    boolean AddSNATEntryOnA5(qcmap_cm_port_fwding_entry_conf_t* nat_entry, mcm_error_t_v01 *qmi_err_num);
    boolean DeleteSNATEntryOnA5(qcmap_cm_port_fwding_entry_conf_t* nat_entry, mcm_error_t_v01 *qmi_err_num);
 
-   boolean AddDMZOnA5(uint32 dmz_ip, mcm_error_t_v01 *qmi_err_num);
-   boolean DeleteDMZOnA5(uint32 dmz_ip, mcm_error_t_v01 *qmi_err_num);
+   boolean AddDMZOnA5(uint32_t dmz_ip, mcm_error_t_v01 *qmi_err_num);
+   boolean DeleteDMZOnA5(uint32_t dmz_ip, mcm_error_t_v01 *qmi_err_num);
 
    boolean SetIPSECVpnPassThroughOnA5(boolean enable, mcm_error_t_v01 *qmi_err_num);
    boolean SetL2TPVpnPassThroughOnA5(boolean enable, mcm_error_t_v01 *qmi_err_num);

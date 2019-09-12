@@ -106,12 +106,12 @@ enum {
 } mcm_cbs_cmae_certainty_type_t;
 
 struct {
-   uint8 year;        //!< Year -- Range 00 to 99 (UTC).
-   uint8 month;       //!< Month -- Range 1 to 12 (UTC).
-   uint8 day;         //!< Day -- Range 1 to 31 (UTC).
-   uint8 hours;       //!< Hour -- Range 0 to 23 (UTC).
-   uint8 minutes;     //!< Minutes -- Range 0 to 59 (UTC).
-   uint8 seconds;     //!< Seconds -- Range 0 to 59 (UTC).
+   uint8_t year;        //!< Year -- Range 00 to 99 (UTC).
+   uint8_t month;       //!< Month -- Range 1 to 12 (UTC).
+   uint8_t day;         //!< Day -- Range 1 to 31 (UTC).
+   uint8_t hours;       //!< Hour -- Range 0 to 23 (UTC).
+   uint8_t minutes;     //!< Minutes -- Range 0 to 59 (UTC).
+   uint8_t seconds;     //!< Seconds -- Range 0 to 59 (UTC).
 } mcm_cbs_cmae_expire_t;
 
 struct {
@@ -127,10 +127,10 @@ struct {
 } mcm_cbs_cmae_record_type_1_t;
 
 struct {
-    uint16                   id;             //!< Identification of the message.
-    uint8                    alert_handling; //!< Indicates whether this alert message requires special handling.
+    uint16_t                   id;             //!< Identification of the message.
+    uint8_t                    alert_handling; //!< Indicates whether this alert message requires special handling.
     mcm_cbs_cmae_expire_t    expire;         //!< Expiration date and time of the CMAS alert.
-    uint8                    language;       //!< Language used for the message content.
+    uint8_t                    language;       //!< Language used for the message content.
 } mcm_cbs_cmae_record_type_2_t;
 
 //=============================================================================
@@ -151,7 +151,7 @@ struct {
 //----------------------------------------------------------------------------
 message {
     mandatory string service_center_addr<MCM_SMS_MAX_ADDR_LENGTH>; //!< Address of the service center.
-    optional int64 validity_time;           //!< Validity time.
+    optional int64_t validity_time;           //!< Validity time.
 }mcm_sms_set_service_center_cfg_type_req_msg;
 
 //! @MSG  MCM_SMS_SET_SERVICE_CENTER_CFG_TYPE_RESP
@@ -191,7 +191,7 @@ message {
 message {
      mandatory mcm_response_t response;  //!< Result code.
      optional string service_center_addr<MCM_SMS_MAX_ADDR_LENGTH>; //!< Address of the service center.
-     optional int64 validity_time;          //!< Validity time.
+     optional int64_t validity_time;          //!< Validity time.
 }mcm_sms_get_service_center_cfg_type_resp_msg;
 /** @ERROR
     MCM_SUCCESS
@@ -323,7 +323,7 @@ message {
 message {
     mandatory mcm_sms_reception_mode_t reception_mode;
     /**< Reception mode. */
-    optional int64 last_absorbed_message_id;
+    optional int64_t last_absorbed_message_id;
     /**< Last absorbed message ID. */
 }mcm_sms_set_reception_mode_req_msg;
 
@@ -399,7 +399,7 @@ message {
     /**< Message content. */
     mandatory string source_address<MCM_SMS_MAX_ADDR_LENGTH>;
     /**< Source address. */
-    mandatory int64 message_id;
+    mandatory int64_t message_id;
     /**< Message ID. */
     optional mcm_sms_message_class_t message_class;
     /**< Message class. */

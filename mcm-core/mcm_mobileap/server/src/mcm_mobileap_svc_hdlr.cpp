@@ -132,7 +132,7 @@ typedef struct {
   qmi_req_handle                 nat_op_req_handle;
 
   boolean                        client_enabled;
-  uint32                          event_mask;
+  uint32_t                          event_mask;
 }mcm_mobileap_svc_client_info_type;
 
 static mcm_mobileap_svc_state_info_type    mcm_mobileap_svc_state;
@@ -1409,7 +1409,7 @@ int create_intr_svc_cb_socket()
 }
 
 #ifdef TARGET_IS_9615
-void mcm_mobileap_evnt_hndl_fn(int handle, uint32 evt, void *user_data)
+void mcm_mobileap_evnt_hndl_fn(int handle, uint32_t evt, void *user_data)
 {
   mcm_mobileap_svc_client_info_type *qcmap_cp=NULL;
   mcm_mobileap_svc_status_cb_data   *cb_data;
@@ -3592,7 +3592,7 @@ static qmi_csi_cb_error mcm_mobileap_svc_hdlr_set_auto_connect
   mcm_mobileap_svc_handle_type  *map_handle;
   int err_num=0;
   unsigned int index;
-  uint8    auto_connect_flag=0;
+  uint8_t    auto_connect_flag=0;
   int              ret_val;
   boolean ret;
   mcm_error_t_v01 mcm_err_num = MCM_SUCCESS_V01;
@@ -3804,7 +3804,7 @@ static qmi_csi_cb_error  mcm_mobileap_svc_hdlr_delete_dmz
   mcm_error_t_v01 mcm_err_num = MCM_SUCCESS_V01;
 #ifndef TARGET_IS_9615
   qmi_error_type_v01 qmi_err_num = QMI_ERR_NONE_V01;
-  uint32 dmz_ip = 0;
+  uint32_t dmz_ip = 0;
 #endif /* !(TARGET_IS_9615) */
 
 /*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
@@ -4036,7 +4036,7 @@ static qmi_csi_cb_error mcm_mobileap_svc_hdlr_get_ipsec_vpn_pt
   mcm_mobileap_get_ipsec_vpn_pass_through_resp_msg_v01 resp_msg;
   mcm_mobileap_svc_handle_type *map_handle;
   unsigned int index;
-  uint8    ipsec_vpn_pt_flag=0;
+  uint8_t    ipsec_vpn_pt_flag=0;
   mcm_error_t_v01 mcm_err_num = MCM_SUCCESS_V01;
   boolean ret;
 #ifndef TARGET_IS_9615
@@ -4139,7 +4139,7 @@ static qmi_csi_cb_error mcm_mobileap_svc_hdlr_set_ipsec_vpn_pt
   mcm_mobileap_set_ipsec_vpn_pass_through_resp_msg_v01 resp_msg;
   mcm_mobileap_svc_handle_type *map_handle;
   unsigned int  index;
-  uint8    ipsec_vpn_pt_flag=0;
+  uint8_t    ipsec_vpn_pt_flag=0;
   boolean ret, enable;
   mcm_error_t_v01 mcm_err_num = MCM_SUCCESS_V01;
 #ifndef TARGET_IS_9615
@@ -4243,7 +4243,7 @@ static qmi_csi_cb_error mcm_mobileap_svc_hdlr_get_pptp_vpn_pt
   mcm_mobileap_get_pptp_vpn_pass_through_resp_msg_v01 resp_msg;
   mcm_mobileap_svc_handle_type  *map_handle;
   unsigned int index;
-  uint8  pptp_vpn_pt_flag=0;
+  uint8_t  pptp_vpn_pt_flag=0;
   boolean ret;
   mcm_error_t_v01 mcm_err_num = MCM_SUCCESS_V01;
 #ifndef TARGET_IS_9615
@@ -4344,7 +4344,7 @@ static qmi_csi_cb_error mcm_mobileap_svc_hdlr_set_pptp_vpn_pt
   mcm_mobileap_svc_handle_type  *map_handle;
 
   unsigned int index;
-  uint8 pptp_vpn_pt_flag=0;
+  uint8_t pptp_vpn_pt_flag=0;
   boolean ret;
   mcm_error_t_v01 mcm_err_num = MCM_SUCCESS_V01;
 #ifndef TARGET_IS_9615
@@ -4450,7 +4450,7 @@ static qmi_csi_cb_error mcm_mobileap_svc_hdlr_get_l2tp_vpn_pt
   mcm_mobileap_svc_handle_type  *map_handle;
 
   unsigned int index;
-  uint8 l2tp_vpn_pt_flag=0;
+  uint8_t l2tp_vpn_pt_flag=0;
   boolean ret;
   mcm_error_t_v01 mcm_err_num = MCM_SUCCESS_V01;
 #ifndef TARGET_IS_9615
@@ -4555,7 +4555,7 @@ static qmi_csi_cb_error mcm_mobileap_svc_hdlr_set_l2tp_vpn_pt
   mcm_mobileap_svc_handle_type  *map_handle;
 
   unsigned int index;
-  uint8 l2tp_vpn_pt_flag=0;
+  uint8_t l2tp_vpn_pt_flag=0;
   boolean ret;
   mcm_error_t_v01 mcm_err_num = MCM_SUCCESS_V01;
 #ifndef TARGET_IS_9615
@@ -5047,7 +5047,7 @@ static qmi_csi_cb_error  mcm_mobileap_svc_hdlr_get_extd_firewall_entry
       {
         memcpy(resp_msg.ip6_src_addr.addr,
                ip_filter.ip_hdr.v6.src.addr.in6_u.u6_addr8,
-               MCM_MOBILEAP_IPV6_ADDR_LEN_V01*sizeof(uint8));
+               MCM_MOBILEAP_IPV6_ADDR_LEN_V01*sizeof(uint8_t));
 
         resp_msg.ip6_src_addr.prefix_len =
           ip_filter.ip_hdr.v6.src.prefix_len;
@@ -5065,7 +5065,7 @@ static qmi_csi_cb_error  mcm_mobileap_svc_hdlr_get_extd_firewall_entry
 
         memcpy(resp_msg.ip6_dst_addr.addr,
                ip_filter.ip_hdr.v6.dst.addr.in6_u.u6_addr8,
-               MCM_MOBILEAP_IPV6_ADDR_LEN_V01*sizeof(uint8));
+               MCM_MOBILEAP_IPV6_ADDR_LEN_V01*sizeof(uint8_t));
         resp_msg.ip6_dst_addr.prefix_len = ip_filter.ip_hdr.v6.dst.prefix_len;
         resp_msg.ip6_dst_addr_valid = TRUE;
         LOG_MSG_INFO1("IPV6 dst_addr is:",
@@ -5347,7 +5347,7 @@ static qmi_csi_cb_error  mcm_mobileap_svc_hdlr_add_extd_firewall_entry
       {
         memcpy(ip_filter.ip_hdr.v6.src.addr.in6_u.u6_addr8,
                req_ptr->ip6_src_addr.addr,
-               MCM_MOBILEAP_IPV6_ADDR_LEN_V01*sizeof(uint8));
+               MCM_MOBILEAP_IPV6_ADDR_LEN_V01*sizeof(uint8_t));
 
         ip_filter.ip_hdr.v6.src.prefix_len =
                                  req_ptr->ip6_src_addr.prefix_len;
@@ -5697,7 +5697,7 @@ static qmi_csi_cb_error mcm_mobileap_svc_hdlr_get_nat_timeout
   mcm_mobileap_svc_handle_type  *map_handle;
 
   unsigned int index;
-  uint32 timeout= 0;
+  uint32_t timeout= 0;
   boolean ret;
   mcm_error_t_v01 mcm_err_num = MCM_SUCCESS_V01;
 #ifndef TARGET_IS_9615
@@ -5759,7 +5759,7 @@ static qmi_csi_cb_error mcm_mobileap_svc_hdlr_get_nat_timeout
   ---------------------------------------------------------------------*/
 
 #ifdef TARGET_IS_9615
-  ret = QcMapMgr->GetNATEntryTimeout((uint16 *)&timeout, &mcm_err_num);
+  ret = QcMapMgr->GetNATEntryTimeout((uint16_t *)&timeout, &mcm_err_num);
 #else /* TARGET_IS_9615 */
   ret = QcMapClient->GetNatTimeout(
                     (qcmap_msgr_nat_timeout_enum_v01 )(req_ptr->timeout_type),
@@ -5864,11 +5864,11 @@ static qmi_csi_cb_error mcm_mobileap_svc_hdlr_set_nat_timeout
    Set NAT Timeout.
   ---------------------------------------------------------------------*/
 #ifdef TARGET_IS_9615
-  ret = QcMapMgr->SetNATEntryTimeout((uint16)req_ptr->timeout_value, &mcm_err_num);
+  ret = QcMapMgr->SetNATEntryTimeout((uint16_t)req_ptr->timeout_value, &mcm_err_num);
 #else /* TARGET_IS_9615 */
   ret = QcMapClient->SetNatTimeout(
                      (qcmap_msgr_nat_timeout_enum_v01 )req_ptr->timeout_type,
-                     (uint32)req_ptr->timeout_value, &qmi_err_num );
+                     (uint32_t)req_ptr->timeout_value, &qmi_err_num );
   mcm_err_num = qmi_to_mcm_error[qmi_err_num];
 #endif /* !(TARGET_IS_9615) */
   if ( ret )
@@ -6017,7 +6017,7 @@ static qmi_csi_cb_error mcm_mobileap_svc_hdlr_set_roaming
 
   mcm_mobileap_set_roaming_pref_req_msg_v01 *req_ptr;
   mcm_mobileap_set_roaming_pref_resp_msg_v01 resp_msg;
-  uint8    roaming_flag=0;
+  uint8_t    roaming_flag=0;
   unsigned int     index;
   mcm_mobileap_svc_handle_type    *map_handle;
   boolean ret;
@@ -6966,7 +6966,7 @@ static qmi_csi_cb_error  mcm_mobileap_svc_hdlr_set_dhcpd_config
   qcmap_msgr_lan_config_v01 lan_config, get_lan_config;
   qmi_error_type_v01 qmi_err_num = QMI_ERR_NONE_V01;
   char *endptr;
-  uint32 val, time_in_secs = 0;
+  uint32_t val, time_in_secs = 0;
 #endif /* !(TARGET_IS_9615) */
 
   /*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
@@ -7415,9 +7415,9 @@ static qmi_csi_cb_error mcm_mobileap_svc_hdlr_get_ipv4_wwan_config
    Get IPV4 WWAN Network Configuration
    ---------------------------------------------------------------------*/
 #ifdef TARGET_IS_9615
-  ret = QcMapMgr->GetIPv4WWANNetworkConfiguration((uint32 *)&resp_msg.v4_addr,
-                                                (uint32 *)&resp_msg.v4_prim_dns_addr,
-                                                (uint32 *)&resp_msg.v4_sec_dns_addr,
+  ret = QcMapMgr->GetIPv4WWANNetworkConfiguration((uint32_t *)&resp_msg.v4_addr,
+                                                (uint32_t *)&resp_msg.v4_prim_dns_addr,
+                                                (uint32_t *)&resp_msg.v4_sec_dns_addr,
                                                 &mcm_err_num);
 #else /* TARGET_IS_9615 */
   ip_family = QCMAP_MSGR_IP_FAMILY_V4_V01;

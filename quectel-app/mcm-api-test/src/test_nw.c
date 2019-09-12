@@ -1,4 +1,4 @@
-#include <ql_in.h>
+#include <ql-mcm-api/ql_in.h>
 #include "test_base.h"
 
 static nw_client_handle_type    h_nw     = 0;

@@ -795,7 +795,7 @@ void cri_voice_ind_hdlr_update_remote_party_number_by_info_rec_ind(
             }
             else
             {
-                switch((uint8)info_rec_ind_ptr->clir_cause)
+                switch((uint8_t)info_rec_ind_ptr->clir_cause)
                 {
                     case QMI_VOICE_CLIR_CAUSE_NO_CAUSE_V02:
                         number_pi_valid = TRUE;

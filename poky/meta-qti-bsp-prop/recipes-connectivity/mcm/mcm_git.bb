@@ -20,3 +20,10 @@ do_install () {
         qprebuilt_do_install
     fi
 }
+
+PACKAGES = "${PN}"
+#FILES_${PN} += "${libdir}/*"
+FILES_${PN} += "${includedir}/*"
+INSANE_SKIP_${PN} = "dev-so"
+
+BBCLASSEXTEND = "native nativesdk"

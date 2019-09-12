@@ -214,6 +214,7 @@ allow qcmap_cm_t var_run_t:file { read getattr open };
 allow qcmap_cm_t default_t:dir search;
 
 allow NetworkManager_t initrc_t:unix_stream_socket connectto;
+allow NetworkManager_t initrc_t:unix_dgram_socket sendto;
 allow NetworkManager_t socket_device_t:dir { write remove_name add_name };
 allow NetworkManager_t socket_device_t:sock_file { write create unlink };
 allow kmod_t persist_t:dir search;

@@ -5,5 +5,4 @@ dirs = src
 SUBDIRS = $(dirs)
 
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = wifi.pc
 EXTRA_DIST = $(pkgconfig_DATA)

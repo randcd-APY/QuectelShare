@@ -8,11 +8,21 @@ SRC_URI = "file://quectel-core/ql-mcm-api"
 SRC_DIR = "${WORKSPACE}/quectel-core/ql-mcm-api"
 S = "${WORKDIR}/quectel-core/ql-mcm-api"
 
-FILES_${PN} += "${libdir}/" 
+PACKAGES = "${PN}"
+FILES_${PN} += "${libdir}/*"
+FILES_${PN}-dbg += "${libdir}/.debug/*"
+FILES_${PN} += "${includedir}/*"
 FILES_SOLIBSDEV = ""
+INSANE_SKIP_${PN} = "dev-so"
+
+BBCLASSEXTEND = "native nativesdk"
+
 do_install() {
     install -d ${D}${libdir}
     install -m 0755 lib/* ${D}${libdir}
+
+    install -d ${D}${includedir}/ql-mcm-api
+    install -m 0644 ${WORKSPACE}/quectel-core/ql-mcm-api/inc/*.h ${D}${includedir}/ql-mcm-api/
 }
 
 do_package_qa() {

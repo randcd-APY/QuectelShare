@@ -127,13 +127,13 @@ typedef enum {
 int cri_nas_convert_gsm8bit_alpha_string_to_utf8
 (
     const char *gsm_data,
-    uint16 gsm_data_len,
+    uint16_t gsm_data_len,
     char *utf8_buf,
     size_t utf8_buf_sz
 );
 
 
-uint16 cri_nas_convert_gsm_def_alpha_string_to_utf8
+uint16_t cri_nas_convert_gsm_def_alpha_string_to_utf8
 (
   const char *gsm_data,
   char        gsm_data_len,

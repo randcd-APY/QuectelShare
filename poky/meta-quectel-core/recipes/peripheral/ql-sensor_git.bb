@@ -13,10 +13,24 @@ FILES_${PN} += "${libdir}/"
 FILES_SOLIBSDEV = ""
 
 do_install() {
-		 install -d ${D}${libdir}
-		 install -m 0755 lib/* ${D}${libdir}
-		 ln -sf libql_sensor.so ${D}${libdir}/libql_sensor.so.0
+    install -d ${D}${libdir}
+    install -m 0755 lib/* ${D}${libdir}
+    ln -sf libql_sensor.so ${D}${libdir}/libql_sensor.so.0
+
+    install -d ${D}${includedir}/ql_sensor
+    install -m 0644 ${WORKSPACE}/quectel-core/ql-peripheral/ql-sensor/include/ql_sensor.h ${D}${includedir}/ql_sensor
 }
 
 do_compile() {
 }
+
+do_package_qa() {
+}
+
+PACKAGES = "${PN}"
+FILES_${PN} += "${libdir}/*"
+FILES_${PN}-dbg += "${libdir}/.debug/*"
+FILES_${PN} += "${includedir}/*"
+INSANE_SKIP_${PN} = "dev-so"
+
+BBCLASSEXTEND = "native nativesdk"

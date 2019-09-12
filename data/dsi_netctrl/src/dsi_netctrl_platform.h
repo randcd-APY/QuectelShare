@@ -42,14 +42,18 @@ when       who     what, where, why
 
 #define DSI_INLINE inline
 
-#ifdef FEATURE_EXTERNAL_AP
+#define FEATURE_DSI_TEST_1
+#define FEATURE_DATA_LOG_STDERR_1
+//#ifdef FEATURE_EXTERNAL_AP
+#ifdef ALPHA_LXZHA
 #define  DSI_LOG_DEBUG(...) do {break;} while(0);
 #define  DSI_LOG_ERROR(...) do {break;} while(0);
 #define  DSI_LOG_FATAL(...) do {break;} while(0);
 #define  DSI_LOG_VERBOSE(...) do {break;} while(0);
 #define  DSI_LOG_INFO(...) do {break;} while(0);
 
-#elif defined(FEATURE_QMI_TEST)
+//#elif defined(FEATURE_QMI_TEST)
+#elif defined(ALPHA_LXZHA)
 #include "tf_log.h"
 #define DSI_LOG_DEBUG   TF_MSG_INFO
 #define DSI_LOG_ERROR   TF_MSG_ERROR
@@ -57,7 +61,8 @@ when       who     what, where, why
 #define DSI_LOG_VERBOSE TF_MSG_INFO
 #define DSI_LOG_INFO    TF_MSG_INFO
 
-#elif defined(FEATURE_DSI_TEST) || defined(FEATURE_DATA_LOG_STDERR)
+//#elif defined(FEATURE_DSI_TEST) || defined(FEATURE_DATA_LOG_STDERR)
+#elif defined(FEATURE_DSI_TEST_1) || defined(FEATURE_DATA_LOG_STDERR_1)
 #include <stdio.h>
 #define DSI_LOG_DEBUG(...) \
   printf("%s:%d:%s(): ",__FILE__, __LINE__, __func__); \

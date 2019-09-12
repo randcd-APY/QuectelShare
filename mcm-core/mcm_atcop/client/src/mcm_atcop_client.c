@@ -44,8 +44,8 @@ Qualcomm Technologies Proprietary and Confidential.
 
 
 mcm_atcop_cb_t mcm_atcop_config;
-uint8 services_available = FALSE;
-uint16 service_list = MCM_ATCOP_V01;
+uint8_t services_available = FALSE;
+uint16_t service_list = MCM_ATCOP_V01;
 int token_id =0 ;
 mcm_client_require_resp_msg_v01      *mcm_client_require_resp_msg = NULL;
 mcm_client_not_require_resp_msg_v01  *mcm_client_not_require_resp_msg = NULL;
@@ -57,15 +57,15 @@ int mcm_atcop_srv_mgr_service_handle
 (
   int           handle,
   int           require_flag,
-  uint16        service_list
+  uint16_t        service_list
 );
 
 void mcm_atcop_async_cb
 (
   mcm_client_handle_type hndl,
-  uint32                 msg_id,
+  uint32_t                 msg_id,
   void                  *resp_c_struct,
-  uint32                 resp_c_struct_len,
+  uint32_t                 resp_c_struct_len,
   void                  *token_id
 );
 
@@ -135,8 +135,8 @@ int main(int argc, char **argv)
   mcm_atcop_resp_msg_v01 resp_msg;
 
   char scan_string[MCM_ATCOP_MAX_CMD_LEN + 1] = {0};
-  uint8 type;
-  uint32 error_num, opt= 0, num_entries, tmp_input;
+  uint8_t type;
+  uint32_t error_num, opt= 0, num_entries, tmp_input;
   mcm_error_t_v01 mcm_error;
   int result;
 
@@ -290,7 +290,7 @@ int mcm_atcop_srv_mgr_service_handle
 (
   int           handle,
   int           require_flag,
-  uint16        service_list
+  uint16_t        service_list
 )
 {
   int ret_val = MCM_ERROR_GENERIC_V01;
@@ -402,9 +402,9 @@ int mcm_atcop_srv_mgr_service_handle
 void mcm_atcop_async_cb
 (
   mcm_client_handle_type hndl,
-  uint32                 msg_id,
+  uint32_t                 msg_id,
   void                  *resp_c_struct,
-  uint32                 resp_c_struct_len,
+  uint32_t                 resp_c_struct_len,
   void                  *token_id
 )
 {

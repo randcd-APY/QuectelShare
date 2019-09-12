@@ -1,4 +1,4 @@
-#include <ql_in.h>
+#include <ql-mcm-api/ql_in.h>
 #include "test_base.h"
 
 #define ATC_REQ_CMD_MAX_LEN     513
