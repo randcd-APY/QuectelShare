@@ -1,13 +1,29 @@
-/**
- *@file     ql_mcm_nw.h
- *@date     2018-02-22
- *@author   
- *@brief    
- */   
+/*================================================================
+  Copyright (c) 2018 Quectel Wireless Solution, Co., Ltd.  All Rights Reserved.
+  Quectel Wireless Solution Proprietary and Confidential.
+  =================================================================*/
+/*=================================================================
+
+  EDIT HISTORY FOR MODULE
+
+  This section contains comments describing changes made to the module.
+  Notice that changes are listed in reverse chronological order.
+
+  WHEN             WHO         WHAT, WHERE, WHY
+  ------------     -------     ---------------------------------------
+  12/10/2018       laurence    Init.
+
+  =================================================================*/
+  
 #ifndef __QL_MCM_NW_H__
 #define __QL_MCM_NW_H__
 
 typedef uint32 nw_client_handle_type;
+
+/** Maxmum cells in cell info response. */
+#define QL_MCM_NW_CELL_INFO_GSM_MAX     20
+#define QL_MCM_NW_CELL_INFO_UMTS_MAX    20
+#define QL_MCM_NW_CELL_INFO_LTE_MAX     20
 
 
 #define QL_MCM_NW_MODE_NONE     0x00    /**<  No network. */
@@ -230,6 +246,33 @@ typedef struct
     E_QL_MCM_NW_RADIO_TECH_TYPE_T   rat;                                    /**<   Radio technology.*/
 }QL_MCM_NW_SELECTION_INFO_T;
 
+typedef struct
+{
+    uint32_t    cid;        /**<   Cell ID, (0 indicates information is not represent).*/
+    char        plmn[3];    /**<   MCC/MNC inforamtion coded as octet 3, 4, and 5 in 3GPP TS 24.008 Section 10.5.1.3.(This field should be ignored when cid is not present). */
+    uint16_t    lac;        /**<   Location area code.(This field should be ignord when cid is not present). */
+    uint16_t    arfcn;      /**<   Absolute RF channel number. */
+    uint8_t     bsic;       /**<   Base station identity code. (0 indicates information is not present). */
+}QL_MCM_NW_GSM_INFO_T;
+
+typedef struct
+{
+    uint32_t cid;           /**<   Cell ID (0 indicates information is not present). */
+    uint32_t lcid;          /**<   UTRAN Cell ID (0 indicates information is not present). */
+    char plmn[3];           /**<   MCC/MNC information coded as octet 3, 4, and 5 in 3GPP TS 24.008 Section 10.5.1.3.(This field should be ignored when cid is not present). */
+    uint16_t lac;           /**<   Location area code. (This field should be ignored when cid is not present). */
+    uint16_t uarfcn;        /**<   UTRA absolute RF channel number. */
+    uint16_t psc;           /**<   Primary scrambling code. */
+}QL_MCM_NW_UMTS_INFO_T;
+
+typedef struct
+{
+    uint32_t cid;           /**<   Global cell ID in the system information block (0 indicates information is not present). */
+    char plmn[3];           /**<   MCC/MNC information coded as octet 3, 4, and 5 in 3GPP TS 24.008 Sextion 10.5.1.3.(This filed should be ignored when cid is not present). */
+    uint16_t tac;           /**<   Tracing area code (This field should be ignored when cid is not present). */
+    uint16_t pci;           /**<   Physical cell ID. Range: 0 to 503. */
+    uint16_t earfcn;        /**<   E-UTRA absolute radio frequency channel number of the cell. RANGE: 0 TO 65535. */
+}QL_MCM_NW_LTE_INFO_T;
 
 typedef struct 
 {
@@ -301,6 +344,22 @@ typedef enum
     E_QL_MCM_NW_CELL_ACCESS_NO_CALLS        = 0x03,             /**<  Cell access is not allowed for any call type. */
     E_QL_MCM_NW_CELL_ACCESS_ALL_CALLS       = 0x04,             /**<  Cell access is allowed for all call types. */
 }E_QL_MCM_NW_CELL_ACCESS_STATE_TYPE_T;
+
+
+/** Gets cell information. */
+typedef struct 
+{
+    E_QL_MCM_NW_RADIO_TECH_TYPE_T serving_rat;
+    uint8_t                 gsm_info_valid;                         /**< Must be set to TRUE if gsm_info is being passed. */
+    uint8_t                 gsm_info_len;                           /**< Must be set to the number of elements in entry*/
+    QL_MCM_NW_GSM_INFO_T    gsm_info[QL_MCM_NW_CELL_INFO_GSM_MAX];  /**<   GSM cell information (Serving and neighbor. */  
+    uint8_t                 umts_info_valid;                        /**< Must be set to TRUE if umts_info is being passed. */
+    uint8_t                 umts_info_len;                          /**< Must be set to the number of elements in entry*/
+    QL_MCM_NW_UMTS_INFO_T   umts_info[QL_MCM_NW_CELL_INFO_UMTS_MAX];/**<   UMTS cell information (Serving and neighbor). */
+    uint8_t                 lte_info_valid;                         /**< Must be set to TRUE if lte_info is being passed. */
+    uint8_t                 lte_info_len;                           /**< Must be set to the number of elements in entry*/
+    QL_MCM_NW_LTE_INFO_T    lte_info[QL_MCM_NW_CELL_INFO_LTE_MAX];  /**<   LTE cell information (Serving and neighbor). */
+}QL_MCM_NW_CELL_INFO_T;
 
 
 /* @bridef Callback function registered to QL_MCM_NW_AddRxMsgHandler 
@@ -461,5 +520,10 @@ E_QL_ERROR_CODE_T QL_MCM_NW_AddRxMsgHandler
     void* contextPtr
 );
 
+E_QL_ERROR_CODE_T QL_MCM_NW_GetCellInfo
+(
+    nw_client_handle_type               h_nw,
+    QL_MCM_NW_CELL_INFO_T               *pt_info
+);
 
 #endif//__QL_MCM_NW_H__

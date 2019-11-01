@@ -1564,18 +1564,24 @@ GnssAdapter::startTrackingCommand(LocationAPI* client, LocationOptions& options)
             mOptions(options) {}
         inline virtual void proc() const {
             LocationError err = LOCATION_ERROR_SUCCESS;
+            LOC_LOGD("alpha startTrackingCommand come here1.\n");
             if (!mAdapter.hasTrackingCallback(mClient) &&
                 !mAdapter.hasMeasurementsCallback(mClient)) {
+                LOC_LOGD("alpha startTrackingCommand come here2.\n");
                 err = LOCATION_ERROR_CALLBACK_MISSING;
             } else if (0 == mOptions.size) {
+                LOC_LOGD("alpha startTrackingCommand come here3.\n");
                 err = LOCATION_ERROR_INVALID_PARAMETER;
             } else {
+                LOC_LOGD("alpha startTrackingCommand come here4.\n");
                 // Api doesn't support multiple clients for time based tracking, so mutiplex
                 err = mAdapter.startTrackingMultiplex(mOptions);
                 if (LOCATION_ERROR_SUCCESS == err) {
+                    LOC_LOGD("alpha startTrackingCommand come here5.\n");
                     mAdapter.saveTrackingSession(mClient, mSessionId, mOptions);
                 }
             }
+            LOC_LOGD("alpha startTrackingCommand come here6.\n");
             mAdapter.reportResponse(mClient, err, mSessionId);
         }
     };
@@ -1617,10 +1623,14 @@ GnssAdapter::startTracking(const LocationOptions& options)
     LocationError err = LOCATION_ERROR_SUCCESS;
     LocPosMode locPosMode = {};
     convertOptions(locPosMode, options);
+    LOC_LOGD("alpha start Tracking come here1");
     if (!mUlpProxy->sendFixMode(locPosMode)) {
+	LOC_LOGD("alpha start Tracking come here2");
         // do nothing
     }
-    if (!mUlpProxy->sendStartFix()) {
+    LOC_LOGD("alpha start Tracking come here3");
+    if (!mUlpProxy->sendStartFix()) {        
+	LOC_LOGD("alpha start Tracking come here4");
         // inform engine hub that GNSS session is about to start
         mEngHubProxy->gnssSetFixMode(locPosMode);
         mEngHubProxy->gnssStartFix();

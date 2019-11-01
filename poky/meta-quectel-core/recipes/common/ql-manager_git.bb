@@ -10,6 +10,11 @@ S = "${WORKDIR}/quectel-core/ql-manager"
 
 FILES_${PN} += "/lib/systemd/*"
 
+PACKAGES = "${PN}"
+FILES_${PN} += "${libdir}/*"
+FILES_${PN}-dbg += "${libdir}/.debug/*"
+FILES_${PN} += "${includedir}/*"
+INSANE_SKIP_${PN} = "dev-so"
 do_install() {
        install -m 0755 ${WORKDIR}/quectel-core/ql-manager/etc/start_ql_manager_server_le -D ${D}${sysconfdir}/init.d/start_ql_manager_server_le
        install -m 0755 ${WORKDIR}/quectel-core/ql-manager/etc/start_emac_le -D ${D}${sysconfdir}/init.d/start_emac_le

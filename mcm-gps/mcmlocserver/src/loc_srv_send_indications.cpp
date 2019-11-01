@@ -37,7 +37,7 @@ void loc_srv_send_location_ind (Location location) {
                              MCM_LOC_LOCATION_INFO_IND_V01,
                              (void*)&payload,
                              sizeof(mcm_loc_location_info_ind_msg_v01));
-            LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s. Sent Indication To : %p",__func__,client_info->client_handle);
+            LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s. Sent Indication To : %p\n",__func__,client_info->client_handle);
 
         }
     }
@@ -65,7 +65,7 @@ void loc_srv_send_status_ind (LocGpsStatus* status) {
                              MCM_LOC_STATUS_INFO_IND_V01,
                              (void*)&payload,
                              sizeof(mcm_loc_status_info_ind_msg_v01));
-            LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s. Sent Indication To : %p",__func__,client_info->client_handle);
+            LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s. Sent Indication To : %p\n",__func__,client_info->client_handle);
 
         }
     }
@@ -93,7 +93,7 @@ void loc_srv_send_sv_status_ind (GnssSvNotification gnssSvNotification) {
                              MCM_LOC_SV_INFO_IND_V01,
                              (void*)&payload,
                              sizeof(mcm_loc_sv_info_ind_msg_v01));
-            LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s. Sent Indication To : %p",__func__,client_info->client_handle);
+            LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s. Sent Indication To : %p\n",__func__,client_info->client_handle);
 
         }
     }
@@ -125,7 +125,7 @@ void loc_srv_send_nmea_ind (GnssNmeaNotification gnssNmeaNotification){
                              MCM_LOC_NMEA_INFO_IND_V01,
                              (void*)&payload,
                              sizeof(mcm_loc_nmea_info_ind_msg_v01));
-            LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s. Sent Indication To : %p",__func__,client_info->client_handle);
+            LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s. Sent Indication To : %p\n",__func__,client_info->client_handle);
 
         }
     }
@@ -155,7 +155,7 @@ void loc_srv_send_set_capabilities_ind (uint32_t capabilities) {
                              MCM_LOC_CAPABILITIES_INFO_IND_V01,
                              (void*)&payload,
                              sizeof(mcm_loc_capabilities_info_ind_msg_v01));
-            LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s. Sent Indication To : %p",__func__,client_info->client_handle);
+            LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s. Sent Indication To : %p\n",__func__,client_info->client_handle);
 
         }
     }
@@ -184,7 +184,7 @@ void loc_srv_send_utc_time_req_ind () {
                              MCM_LOC_UTC_TIME_REQ_IND_V01,
                              (void*)&payload,
                              sizeof(mcm_loc_utc_time_req_ind_msg_v01));
-            LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s. Sent Indication To : %p",__func__,client_info->client_handle);
+            LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s. Sent Indication To : %p\n",__func__,client_info->client_handle);
 
         }
     }
@@ -213,7 +213,7 @@ void loc_srv_send_gps_xtra_data_req_ind () {
                              MCM_LOC_XTRA_DATA_REQ_IND_V01,
                              (void*)&payload,
                              sizeof(mcm_loc_xtra_data_req_ind_msg_v01));
-            LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s. Sent Indication To : %p",__func__,client_info->client_handle);
+            LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s. Sent Indication To : %p\n",__func__,client_info->client_handle);
 
         }
     }
@@ -244,19 +244,19 @@ void loc_srv_send_gps_xtra_report_server_ind (const char* server1,
     if (server1 != NULL)
     {
         strlcpy(payload.server1, server1, strlen(server1));
-        LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s. server1: %s playload.server1: %s",__func__, server1, payload.server1);
+        LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s. server1: %s playload.server1: %s\n",__func__, server1, payload.server1);
     }
 
     if (server2 != NULL)
     {
         strlcpy(payload.server2, server2, strlen(server2));
-        LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s. server2: %s playload.server2: %s",__func__, server2, payload.server2);
+        LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s. server2: %s playload.server2: %s\n",__func__, server2, payload.server2);
     }
 
     if (server3 != NULL)
     {
         strlcpy(payload.server3, server3, strlen(server3));
-        LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s. server3: %s playload.server3: %s",__func__, server3, payload.server3);
+        LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s. server3: %s playload.server3: %s\n",__func__, server3, payload.server3);
     }
 
     qmi_csi_error rc = QMI_CSI_NO_ERR;
@@ -267,7 +267,7 @@ void loc_srv_send_gps_xtra_report_server_ind (const char* server1,
                              MCM_LOC_XTRA_REPORT_SERVER_IND_V01,
                              (void*)&payload,
                              sizeof(mcm_loc_xtra_report_server_ind_msg_v01));
-            LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s. Sent Indication To : %p rc : %d",__func__,client_info->client_handle, rc);
+            LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s. Sent Indication To : %p rc : %d\n",__func__,client_info->client_handle, rc);
 
         }
     }
@@ -295,7 +295,7 @@ void loc_srv_send_agps_status_ind (AGpsExtStatus * status) {
                              MCM_LOC_AGPS_STATUS_IND_V01,
                              (void*)&payload,
                              sizeof(mcm_loc_agps_status_ind_msg_v01));
-            LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s. Sent Indication To : %p",__func__,client_info->client_handle);
+            LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s. Sent Indication To : %p\n",__func__,client_info->client_handle);
 
         }
     }
@@ -324,7 +324,7 @@ void loc_srv_send_gps_ni_ind (uint32_t id, GnssNiNotification gnssNiNotification
                              MCM_LOC_NI_NOTIFICATION_IND_V01,
                              (void*)&payload,
                              sizeof(mcm_loc_ni_notification_ind_msg_v01));
-            LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s. Sent Indication To : %p",__func__,client_info->client_handle);
+            LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s. Sent Indication To : %p\n",__func__,client_info->client_handle);
 
         }
     }

@@ -11,10 +11,10 @@
 #ifndef LOC_SRV_LOG_H
 #define LOC_SRV_LOG_H
 
-#define LOC_SRV_LOGE     LOC_LOGE
-#define LOC_SRV_LOGI     LOC_LOGI
-#define LOC_SRV_LOGD     LOC_LOGD
-#define LOC_SRV_LOGW     LOC_LOGW
-#define LOC_SRV_LOGV     LOC_LOGV
+#define LOC_SRV_LOGE     printf 
+#define LOC_SRV_LOGI     printf 
+#define LOC_SRV_LOGD     printf 
+#define LOC_SRV_LOGW     printf 
+#define LOC_SRV_LOGV     printf 
 
 #endif // LOC_SRV_LOG_H

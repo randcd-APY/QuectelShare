@@ -64,6 +64,8 @@ typedef  uint32_t           uint32;
 #include "ql_mcm_voice.h"
 #include "ql_mcm_dm.h"
 #include "ql_utils.h"
+#include "ql_mcm_dev.h"
+#include "ql_mcm_gps.h"
 #ifdef __cplusplus
 }
 #endif

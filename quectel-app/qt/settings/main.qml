@@ -56,6 +56,7 @@ ApplicationWindow {
         Rectangle{//模拟线段
             width: 800
             height:1  //高
+            visible: (about_id.kernelVersion.length == 0)? false:true
             color:"lightgray" //颜色
         }
 
@@ -132,6 +133,32 @@ ApplicationWindow {
             width: 800
             height:1  //高
             visible: (about_id.MEID.length == 0)? false:true
+            color:"lightgray" //颜色
+        }
+
+        Text {
+            id: wifimac_id
+            font.pixelSize: 30
+            text: about_id.WIFIMAC
+        }
+
+        Rectangle{//模拟线段
+            width: 800
+            height:1  //高
+            visible: (about_id.WIFIMAC.length == 0)? false:true
+            color:"lightgray" //颜色
+        }
+
+        Text {
+            id: btmac_id
+            font.pixelSize: 30
+            text: about_id.BTMAC
+        }
+
+        Rectangle{//模拟线段
+            width: 800
+            height:1  //高
+            visible: (about_id.BTMAC.length == 0)? false:true
             color:"lightgray" //颜色
         }
 
@@ -232,6 +259,7 @@ ApplicationWindow {
         Rectangle{//模拟线段
             width: 800
             height:1  //高
+            visible: (about_id.rtcTime.length == 0) ? false:true
             color:"lightgray" //颜色
         }
 

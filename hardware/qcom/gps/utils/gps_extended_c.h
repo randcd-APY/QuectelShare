@@ -130,6 +130,8 @@ typedef struct {
     /* Provider indicator for HYBRID or GPS */
     uint16_t        position_source;
     LocPosTechMask  tech_mask;
+    int             rawDataSize;         /* in # of bytes */
+    void            * rawData;
     bool            unpropagatedPosition;
 } UlpLocation;
 

@@ -12,7 +12,7 @@ SRC_URI = "file://hardware/qcom/gps/"
 SRC_DIR = "${WORKSPACE}/hardware/qcom/gps/"
 S = "${WORKDIR}/hardware/qcom/gps"
 
-DEPENDS = "loc-core loc-flp-hdr"
+DEPENDS = "data qmi qmi-framework loc-core loc-flp-hdr loc-pla loc-stub"
 EXTRA_OECONF = "--with-locpla-includes=${STAGING_INCDIR}/loc-pla \
                 --with-core-includes=${WORKSPACE}/system/core/include \
                 --with-glib"
@@ -22,6 +22,8 @@ CPPFLAGS += "-I${WORKSPACE}/base/include"
 PACKAGES = "${PN}"
 INHIBIT_PACKAGE_DEBUG_SPLIT = "1"
 FILES_${PN} = "${libdir}/* ${sysconfdir}"
+FILES_${PN} += "/usr/include/*"
+FILES_${PN} += "/usr/include/loc-hal/*"
 INSANE_SKIP_${PN} = "dev-so"
 
 do_install_append() {

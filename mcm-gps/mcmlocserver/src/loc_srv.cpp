@@ -14,12 +14,14 @@
 #include <loc_pla.h>
 #include <log_util.h>
 #include "loc_srv_log.h"
+#include "loc_extended.h"
 #include "qmi_idl_lib.h"
 #include "qmi_csi.h"
 #include "mcm_common_v01.h"
 #include "mcm_loc_v01.h"
 #include "mcm_client_v01.h"
 #include "mcm_ipc.h"
+#include "mcm_constants.h"
 #include "loc_srv_utils.h"
 #include "loc_srv.h"
 #include "loc_srv_hal_indications.h"
@@ -33,6 +35,21 @@ static loc_gps_set_capabilities sCapabilitiesCb = nullptr;
 
 static loc_srv_hal_instance_t loc_srv_hal_instance = {
     NULL, NULL, NULL
+};
+
+GpsExtCallbacks loc_srv_gps_ext_cb = {
+    sizeof(GpsExtCallbacks),
+    loc_srv_set_capabilities_ind,
+    loc_srv_gps_acquire_wakelock_ind,
+    loc_srv_gps_release_wakelock_ind,
+    loc_srv_gps_create_thread_ind,
+    loc_srv_utc_time_req_ind
+};
+
+GpsXtraExtCallbacks loc_srv_gps_xtra_cb = {
+    loc_srv_gps_xtra_data_req_ind,
+    loc_srv_gps_create_thread_ind,
+    loc_srv_gps_xtra_report_server_ind
 };
 
 static LocationCallbacks sLocationCallbacks = {
@@ -57,7 +74,7 @@ public:
     McmAPIClient() = default;
     ~McmAPIClient() = default;
     void onStartTrackingCb(LocationError error) {
-        LOC_SRV_LOGD("%s]: (%d)", __FUNCTION__, error);
+        LOC_SRV_LOGD("%s]: (%d)\n", __FUNCTION__, error);
         pthread_mutex_lock(&sMutex);
         if (error == LOCATION_ERROR_SUCCESS && sGnssStatusCb != nullptr) {
             LocGpsStatus status;
@@ -71,7 +88,7 @@ public:
     }
 
     void onStopTrackingCb(LocationError error) {
-        LOC_SRV_LOGD("%s]: (%d)", __FUNCTION__, error);
+        LOC_SRV_LOGD("%s]: (%d)\n", __FUNCTION__, error);
         pthread_mutex_lock(&sMutex);
         if (error == LOCATION_ERROR_SUCCESS && sGnssStatusCb != nullptr) {
             LocGpsStatus status;
@@ -85,9 +102,11 @@ public:
     }
 
     void onCapabilitiesCb(LocationCapabilitiesMask capabilitiesMask) {
-        LOC_SRV_LOGD("%s]: (%x)", __FUNCTION__, capabilitiesMask);
+        LOC_SRV_LOGD("%s]: (%x)\n", __FUNCTION__, capabilitiesMask);
         pthread_mutex_lock(&sMutex);
+        LOC_SRV_LOGD("alpha come here0 : %s.\n",__func__);
         if (sCapabilitiesCb != nullptr) {
+            LOC_SRV_LOGD("alpha come here : %s.\n",__func__);
             sCapabilitiesCb(capabilitiesMask);
         }
         pthread_mutex_unlock(&sMutex);
@@ -184,6 +203,23 @@ const GnssInterface* loc_srv_get_inject_iface_ptr() {
     return loc_srv_hal_instance.gnss_interface;
 }
 
+static int loc_srv_initialize_interfaces() {
+    int rc = LOC_SRV_FAILURE;
+
+
+
+    // Initialize loc extended interface
+    loc_extended_init(&loc_srv_gps_ext_cb);
+
+
+    // Initialize xtra interface
+    loc_extended_xtra_init(&loc_srv_gps_xtra_cb);
+
+
+    return rc;
+}
+
+
 //=============================================================================
 // FUNCTION: loc_srv_set_loc_indications
 //
@@ -206,14 +242,40 @@ void loc_srv_set_loc_indications (
     int xtra_report_server_ind)
 {
     pthread_mutex_lock(&sMutex);
-    sGnssStatusCb = status_ind ? loc_srv_status_ind : nullptr;
+	static int initialized = 0;
+    
+    int rc = LOC_SRV_SUCCESS;
+    if(!initialized) {
+        rc = loc_srv_initialize_interfaces();
+        LOC_SRV_LOGE("<MCM_LOC_SVC> Location Server initialize interfaces returned %d", rc);
+        initialized = 1;
+    }
+
+    loc_srv_gps_xtra_cb.download_request_cb =
+        (xtra_data_req_ind) ? (loc_srv_gps_xtra_data_req_ind) : (NULL);
+
+    loc_srv_gps_xtra_cb.report_xtra_server_cb =
+        (xtra_report_server_ind) ? (loc_srv_gps_xtra_report_server_ind) : (NULL);
+
+
+
+/*    sGnssStatusCb = status_ind ? loc_srv_status_ind : nullptr;
     sCapabilitiesCb = cap_ind ? loc_srv_set_capabilities_ind : nullptr;
     sLocationCallbacks.trackingCb = loc_ind ? loc_srv_location_ind : nullptr;
     sLocationCallbacks.gnssSvCb = sv_ind ? loc_srv_sv_status_ind : nullptr;
     sLocationCallbacks.gnssNmeaCb = nmea_ind ? loc_srv_nmea_ind : nullptr;
+    sLocationCallbacks.gnssNmeaCb = nmea_ind ? loc_srv_nmea_ind : nullptr;
     sLocationCallbacks.gnssNiCb = ni_ind ? loc_srv_gps_ni_ind : nullptr;
+*/
 
-    int rc = LOC_SRV_SUCCESS;
+    sGnssStatusCb = loc_srv_status_ind;
+    sCapabilitiesCb = loc_srv_set_capabilities_ind;
+    sLocationCallbacks.trackingCb = loc_srv_location_ind;
+    sLocationCallbacks.gnssSvCb = loc_srv_sv_status_ind;
+    sLocationCallbacks.gnssNmeaCb = loc_srv_nmea_ind;
+    sLocationCallbacks.gnssNiCb = loc_srv_gps_ni_ind;
+
+    //int rc = LOC_SRV_SUCCESS;
     if (loc_srv_hal_instance.client == nullptr) {
         loc_srv_hal_instance.client = new McmAPIClient();
     }
@@ -563,17 +625,17 @@ static int loc_srv_initialize_hal() {
 
     static bool getGnssInterfaceFailed = false;
     if (nullptr == loc_srv_hal_instance.gnss_interface && !getGnssInterfaceFailed) {
-        LOC_SRV_LOGD("%s]: loading libgnss.so::getGnssInterface ...", __func__);
+        LOC_SRV_LOGD("%s]: loading libgnss.so::getGnssInterface ...\n", __func__);
         getLocationInterface* getter = NULL;
         const char *error = NULL;
         dlerror();
         void *handle = dlopen("libgnss.so", RTLD_NOW);
         if (NULL == handle || (error = dlerror()) != NULL)  {
-            LOC_SRV_LOGW("dlopen for libgnss.so failed, error = %s", error);
+            LOC_SRV_LOGW("dlopen for libgnss.so failed, error = %s\n", error);
         } else {
             getter = (getLocationInterface*)dlsym(handle, "getGnssInterface");
             if ((error = dlerror()) != NULL)  {
-                LOC_SRV_LOGW("dlsym for libgnss.so::getGnssInterface failed, error = %s", error);
+                LOC_SRV_LOGW("dlsym for libgnss.so::getGnssInterface failed, error = %s\n", error);
                 getter = NULL;
             }
         }
@@ -586,7 +648,6 @@ static int loc_srv_initialize_hal() {
     }
     LOC_SRV_NULL_CHECK(loc_srv_hal_instance.gnss_interface);
 
-    loc_srv_hal_instance.control_client->locAPIEnable(LOCATION_TECHNOLOGY_TYPE_GNSS);
     return LOC_SRV_SUCCESS;
 }
 
@@ -630,7 +691,7 @@ static int loc_srv_init() {
     qmi_csi_error rc = QMI_CSI_NO_ERR;
 
     if( LOC_SRV_FAILURE == loc_srv_initialize_hal()) {
-        LOC_SRV_LOGE("<MCM_LOC_SVC>  Location Server HAL Initialization failed");
+        LOC_SRV_LOGE("<MCM_LOC_SVC>  Location Server HAL Initialization failed\n");
         return LOC_SRV_FAILURE;
     }
     memset((void*)&loc_srv_cookie, 0, sizeof(loc_srv_state_info_cookie_t));
@@ -643,7 +704,7 @@ static int loc_srv_init() {
                           &(loc_srv_cookie.service_handle));
 
     if(rc != QMI_CSI_NO_ERR) {
-        LOC_SRV_LOGE("<MCM_LOC_SVC>  Location service registration failed ");
+        LOC_SRV_LOGE("<MCM_LOC_SVC>  Location service registration failed \n");
         return LOC_SRV_FAILURE;
     }
     return LOC_SRV_SUCCESS;
@@ -677,29 +738,30 @@ static void loc_srv_deinit() {
 
 static void loc_srv_sig_hdlr(int signal) {
 
-    LOC_SRV_LOGE("<MCM_LOC_SVC> Location Service received a Signal");
+    LOC_SRV_LOGE("<MCM_LOC_SVC> Location Service received a Signal\n");
     switch(signal) {
         case SIGTERM:
-            LOC_SRV_LOGE("<MCM_LOC_SVC> %s","SIGTERM");
+            LOC_SRV_LOGE("<MCM_LOC_SVC> %s\n","SIGTERM");
             break;
         case SIGINT:
-            LOC_SRV_LOGE("<MCM_LOC_SVC> %s","SIGINT");
+            LOC_SRV_LOGE("<MCM_LOC_SVC> %s\n","SIGINT");
             break;
         case SIGSEGV:
-            LOC_SRV_LOGE("<MCM_LOC_SVC> %s","SIGSEGV");
+            LOC_SRV_LOGE("<MCM_LOC_SVC> %s\n","SIGSEGV");
             break;
         default:
-            LOC_SRV_LOGE("<MCM_LOC_SVC> Unexpected Signal");
+            LOC_SRV_LOGE("<MCM_LOC_SVC> Unexpected Signal\n");
             break;
     }
+    mcm_set_service_ready(MCM_LOC_SERVICE, 0);
     loc_srv_deinit();
     exit(0);
 }
 
 void loc_srv_exit_func() {
-    LOC_SRV_LOGI("<MCM_LOC_SVC> mcm_loc_exit_func() ENTER");
+    LOC_SRV_LOGI("<MCM_LOC_SVC> mcm_loc_exit_func() ENTER\n");
     loc_srv_deinit();
-    LOC_SRV_LOGI("<MCM_LOC_SVC> mcm_loc_exit_func() EXIT");
+    LOC_SRV_LOGI("<MCM_LOC_SVC> mcm_loc_exit_func() EXIT\n");
     exit(0);
 }
 
@@ -723,15 +785,20 @@ int main(int argc, char **argv) {
     signal(SIGSEGV,loc_srv_sig_hdlr);
 
     if(LOC_SRV_FAILURE == loc_srv_init()) {
-        LOC_SRV_LOGE("<MCM_LOC_SVC> Location Server Initialization Failed");
+        LOC_SRV_LOGE("<MCM_LOC_SVC> Location Server Initialization Failed\n");
         return LOC_SRV_FAILURE;
     }
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Lociation Service Started");
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Lociation Service Started\n");
 
     loc_srv_exit.srv_id = MCM_LOC_V01;
     loc_srv_exit.srv_exit_func = loc_srv_exit_func;
     mcm_ipc_srv_mgr_start(&loc_srv_exit);
 
+    while(mcm_ipc_get_service_is_ready()==0) {
+        usleep(100000);
+    }
+
+    mcm_set_service_ready(MCM_LOC_SERVICE, 1);
     while(1) {
         fds = os_params.fds;
         if(select(os_params.max_fd+1, &fds, NULL, NULL, NULL) == -1) {
@@ -743,7 +810,8 @@ int main(int argc, char **argv) {
         qmi_csi_handle_event(loc_srv_cookie.service_handle, &os_params_in);
     }
     loc_srv_deinit();
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Location Server De-initialized");
+    mcm_set_service_ready(MCM_LOC_SERVICE, 0);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Location Server De-initialized\n");
     return 0;
 }
 

@@ -20,6 +20,24 @@ GENERAL DESCRIPTION
    It was generated on: Mon Oct 23 2017 (Spin 0)
    From IDL File: mcm_nw_v01.idl */
 
+
+/*============================================================================== 
+ 
+                        EDIT HISTORY FOR MODULE 
+ 
+This section contains comments describing changes made to the module. 
+Notice that changes are listed in reverse chronological order. 
+ 
+ 
+WHEN                WHO          WHAT, WHERE, WHY 
+----------         ----------    ------------------------------------------------
+24/05/2019         Nebula Li     Fix error:The time message got by QL_MCM_NW_GetNitzTimeInfo is incomplete.
+                                 NO event report after registering event by QL_MCM_NW_EventRegister.
+
+================================================================================*/ 
+
+
+
 #include "stdint.h"
 #include "qmi_idl_lib_internal.h"
 #include "mcm_nw_v01.h"
@@ -168,6 +186,69 @@ static const uint8_t mcm_nw_selection_t_data_v01[] = {
 
   QMI_IDL_GENERIC_4_BYTE,
   QMI_IDL_OFFSET8(mcm_nw_selection_t_v01, rat),
+
+  QMI_IDL_FLAG_END_VALUE
+};
+
+static const uint8_t mcm_nw_gsm_info_t_data_v01[] = {
+  QMI_IDL_GENERIC_4_BYTE,
+  QMI_IDL_OFFSET8(mcm_nw_gsm_info_t_v01, cid),
+
+  QMI_IDL_FLAGS_IS_ARRAY |QMI_IDL_GENERIC_1_BYTE,
+  QMI_IDL_OFFSET8(mcm_nw_gsm_info_t_v01, plmn),
+  3,
+
+  QMI_IDL_GENERIC_2_BYTE,
+  QMI_IDL_OFFSET8(mcm_nw_gsm_info_t_v01, lac),
+
+  QMI_IDL_GENERIC_2_BYTE,
+  QMI_IDL_OFFSET8(mcm_nw_gsm_info_t_v01, arfcn),
+
+  QMI_IDL_GENERIC_1_BYTE,
+  QMI_IDL_OFFSET8(mcm_nw_gsm_info_t_v01, bsic),
+
+  QMI_IDL_FLAG_END_VALUE
+};
+
+static const uint8_t mcm_nw_umts_info_t_data_v01[] = {
+  QMI_IDL_GENERIC_4_BYTE,
+  QMI_IDL_OFFSET8(mcm_nw_umts_info_t_v01, cid),
+
+  QMI_IDL_GENERIC_4_BYTE,
+  QMI_IDL_OFFSET8(mcm_nw_umts_info_t_v01, lcid),
+
+  QMI_IDL_FLAGS_IS_ARRAY |QMI_IDL_GENERIC_1_BYTE,
+  QMI_IDL_OFFSET8(mcm_nw_umts_info_t_v01, plmn),
+  3,
+
+  QMI_IDL_GENERIC_2_BYTE,
+  QMI_IDL_OFFSET8(mcm_nw_umts_info_t_v01, lac),
+
+  QMI_IDL_GENERIC_2_BYTE,
+  QMI_IDL_OFFSET8(mcm_nw_umts_info_t_v01, uarfcn),
+
+  QMI_IDL_GENERIC_2_BYTE,
+  QMI_IDL_OFFSET8(mcm_nw_umts_info_t_v01, psc),
+
+  QMI_IDL_FLAG_END_VALUE
+};
+
+static const uint8_t mcm_nw_lte_info_t_data_v01[] = {
+  QMI_IDL_GENERIC_4_BYTE,
+  QMI_IDL_OFFSET8(mcm_nw_lte_info_t_v01, cid),
+
+  QMI_IDL_FLAGS_IS_ARRAY |QMI_IDL_GENERIC_1_BYTE,
+  QMI_IDL_OFFSET8(mcm_nw_lte_info_t_v01, plmn),
+  3,
+
+  QMI_IDL_GENERIC_2_BYTE,
+  QMI_IDL_OFFSET8(mcm_nw_lte_info_t_v01, tac),
+
+  QMI_IDL_GENERIC_2_BYTE,
+  QMI_IDL_OFFSET8(mcm_nw_lte_info_t_v01, pci),
+
+  QMI_IDL_GENERIC_2_BYTE,
+  QMI_IDL_OFFSET8(mcm_nw_lte_info_t_v01, earfcn),
 
   QMI_IDL_FLAG_END_VALUE
 };
@@ -544,6 +625,47 @@ static const uint8_t mcm_nw_event_register_resp_msg_data_v01[] = {
   QMI_IDL_TYPE88(1, 0)
 };
 
+/*
+ * mcm_nw_get_cell_info_req_msg is empty
+ * static const uint8_t mcm_nw_get_cell_info_req_msg_data_v01[] = {
+ * };
+ */
+
+static const uint8_t mcm_nw_get_cell_info_resp_msg_data_v01[] = {
+  0x01,
+   QMI_IDL_AGGREGATE,
+  QMI_IDL_OFFSET8(mcm_nw_get_cell_info_resp_msg_v01, response),
+  QMI_IDL_TYPE88(1, 0),
+
+  0x02,
+   QMI_IDL_GENERIC_4_BYTE,
+  QMI_IDL_OFFSET8(mcm_nw_get_cell_info_resp_msg_v01, serving_rat),
+
+  QMI_IDL_TLV_FLAGS_OPTIONAL | (QMI_IDL_OFFSET8(mcm_nw_get_cell_info_resp_msg_v01, gsm_info) - QMI_IDL_OFFSET8(mcm_nw_get_cell_info_resp_msg_v01, gsm_info_valid)),
+  0x10,
+  QMI_IDL_FLAGS_IS_ARRAY | QMI_IDL_FLAGS_IS_VARIABLE_LEN |  QMI_IDL_AGGREGATE,
+  QMI_IDL_OFFSET8(mcm_nw_get_cell_info_resp_msg_v01, gsm_info),
+  MCM_CELL_INFO_GSM_MAX_V01,
+  QMI_IDL_OFFSET8(mcm_nw_get_cell_info_resp_msg_v01, gsm_info) - QMI_IDL_OFFSET8(mcm_nw_get_cell_info_resp_msg_v01, gsm_info_len),
+  QMI_IDL_TYPE88(0, 6),
+
+  QMI_IDL_TLV_FLAGS_OPTIONAL | (QMI_IDL_OFFSET16RELATIVE(mcm_nw_get_cell_info_resp_msg_v01, umts_info) - QMI_IDL_OFFSET16RELATIVE(mcm_nw_get_cell_info_resp_msg_v01, umts_info_valid)),
+  0x11,
+  QMI_IDL_FLAGS_IS_ARRAY | QMI_IDL_FLAGS_IS_VARIABLE_LEN |  QMI_IDL_FLAGS_OFFSET_IS_16 | QMI_IDL_AGGREGATE,
+  QMI_IDL_OFFSET16ARRAY(mcm_nw_get_cell_info_resp_msg_v01, umts_info),
+  MCM_CELL_INFO_UMTS_MAX_V01,
+  QMI_IDL_OFFSET16RELATIVE(mcm_nw_get_cell_info_resp_msg_v01, umts_info) - QMI_IDL_OFFSET16RELATIVE(mcm_nw_get_cell_info_resp_msg_v01, umts_info_len),
+  QMI_IDL_TYPE88(0, 7),
+
+  QMI_IDL_TLV_FLAGS_LAST_TLV | QMI_IDL_TLV_FLAGS_OPTIONAL | (QMI_IDL_OFFSET16RELATIVE(mcm_nw_get_cell_info_resp_msg_v01, lte_info) - QMI_IDL_OFFSET16RELATIVE(mcm_nw_get_cell_info_resp_msg_v01, lte_info_valid)),
+  0x12,
+  QMI_IDL_FLAGS_IS_ARRAY | QMI_IDL_FLAGS_IS_VARIABLE_LEN |  QMI_IDL_FLAGS_OFFSET_IS_16 | QMI_IDL_AGGREGATE,
+  QMI_IDL_OFFSET16ARRAY(mcm_nw_get_cell_info_resp_msg_v01, lte_info),
+  MCM_CELL_INFO_LTE_MAX_V01,
+  QMI_IDL_OFFSET16RELATIVE(mcm_nw_get_cell_info_resp_msg_v01, lte_info) - QMI_IDL_OFFSET16RELATIVE(mcm_nw_get_cell_info_resp_msg_v01, lte_info_len),
+  QMI_IDL_TYPE88(0, 8)
+};
+
 static const uint8_t mcm_nw_voice_registration_event_ind_msg_data_v01[] = {
   QMI_IDL_TLV_FLAGS_OPTIONAL | (QMI_IDL_OFFSET8(mcm_nw_voice_registration_event_ind_msg_v01, voice_registration) - QMI_IDL_OFFSET8(mcm_nw_voice_registration_event_ind_msg_v01, voice_registration_valid)),
   0x10,
@@ -654,13 +776,45 @@ static const qmi_idl_type_table_entry  mcm_nw_type_table_v01[] = {
   {sizeof(mcm_nw_3gpp_registration_t_v01), mcm_nw_3gpp_registration_t_data_v01},
   {sizeof(mcm_nw_3gpp2_registration_t_v01), mcm_nw_3gpp2_registration_t_data_v01},
   {sizeof(mcm_nw_selection_t_v01), mcm_nw_selection_t_data_v01},
+
+/**
+* Nebula Li -2019/05/24: [delete]
+* Fix error: The time message got by QL_MCM_NW_GetNitzTimeInfo is incomplete.
+* These message can not be here. They will break index of the follow messeage.
+
+    @{
+*/
+
+  //{sizeof(mcm_nw_gsm_info_t_v01), mcm_nw_gsm_info_t_data_v01},
+  //{sizeof(mcm_nw_umts_info_t_v01), mcm_nw_umts_info_t_data_v01},
+  //{sizeof(mcm_nw_lte_info_t_v01), mcm_nw_lte_info_t_data_v01},
+
+/** 
+    @}
+*/
+
   {sizeof(mcm_nw_gsm_sig_info_t_v01), mcm_nw_gsm_sig_info_t_data_v01},
   {sizeof(mcm_nw_wcdma_sig_info_t_v01), mcm_nw_wcdma_sig_info_t_data_v01},
   {sizeof(mcm_nw_tdscdma_sig_info_t_v01), mcm_nw_tdscdma_sig_info_t_data_v01},
   {sizeof(mcm_nw_lte_sig_info_t_v01), mcm_nw_lte_sig_info_t_data_v01},
   {sizeof(mcm_nw_cdma_sig_info_t_v01), mcm_nw_cdma_sig_info_t_data_v01},
   {sizeof(mcm_nw_hdr_sig_info_t_v01), mcm_nw_hdr_sig_info_t_data_v01},
-  {sizeof(mcm_nw_nitz_time_t_v01), mcm_nw_nitz_time_t_data_v01}
+  {sizeof(mcm_nw_nitz_time_t_v01), mcm_nw_nitz_time_t_data_v01},
+
+/**
+* Nebula Li -2019/05/24: [add]
+* Fix error: The time message got by QL_MCM_NW_GetNitzTimeInfo is incomplete.
+* 
+    @{
+*/
+
+  {sizeof(mcm_nw_gsm_info_t_v01), mcm_nw_gsm_info_t_data_v01},
+  {sizeof(mcm_nw_umts_info_t_v01), mcm_nw_umts_info_t_data_v01},
+  {sizeof(mcm_nw_lte_info_t_v01), mcm_nw_lte_info_t_data_v01},
+
+/** 
+    @}
+*/
 };
 
 /* Message Table */
@@ -687,11 +841,37 @@ static const qmi_idl_message_table_entry mcm_nw_message_table_v01[] = {
   {sizeof(mcm_nw_get_nitz_time_info_resp_msg_v01), mcm_nw_get_nitz_time_info_resp_msg_data_v01},
   {sizeof(mcm_nw_event_register_req_msg_v01), mcm_nw_event_register_req_msg_data_v01},
   {sizeof(mcm_nw_event_register_resp_msg_v01), mcm_nw_event_register_resp_msg_data_v01},
+/**
+* Nebula Li -2019/05/24: [delete]
+* Fix error: NO event report after registering event by QL_MCM_NW_EventRegister.
+* These message can not be here. They will break index of the follow messeage.
+    @{
+*/
+  //{sizeof(mcm_nw_get_cell_info_req_msg_v01), 0},
+  //{sizeof(mcm_nw_get_cell_info_resp_msg_v01), mcm_nw_get_cell_info_resp_msg_data_v01},
+/** 
+    @}
+*/
+  
   {sizeof(mcm_nw_voice_registration_event_ind_msg_v01), mcm_nw_voice_registration_event_ind_msg_data_v01},
   {sizeof(mcm_nw_data_registration_event_ind_msg_v01), mcm_nw_data_registration_event_ind_msg_data_v01},
   {sizeof(mcm_nw_signal_strength_event_ind_msg_v01), mcm_nw_signal_strength_event_ind_msg_data_v01},
   {sizeof(mcm_nw_cell_access_state_change_event_ind_msg_v01), mcm_nw_cell_access_state_change_event_ind_msg_data_v01},
-  {sizeof(mcm_nw_nitz_time_ind_msg_v01), mcm_nw_nitz_time_ind_msg_data_v01}
+  {sizeof(mcm_nw_nitz_time_ind_msg_v01), mcm_nw_nitz_time_ind_msg_data_v01},
+
+/**
+* Nebula Li -2019/05/24: [add]
+* Fix error: NO event report after registering event by QL_MCM_NW_EventRegister.
+
+    @{
+*/
+  
+  {sizeof(mcm_nw_get_cell_info_req_msg_v01), 0},
+  {sizeof(mcm_nw_get_cell_info_resp_msg_v01), mcm_nw_get_cell_info_resp_msg_data_v01}
+   
+/** 
+    @}
+*/
 };
 
 /* Range Table */

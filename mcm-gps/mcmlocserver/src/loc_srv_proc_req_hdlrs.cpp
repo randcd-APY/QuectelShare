@@ -5,6 +5,7 @@
 =============================================================================*/
 
 
+#include <loc_extended.h>
 #include "qmi_idl_lib.h"
 #include "qmi_csi.h"
 #include "mcm_loc_v01.h"
@@ -54,7 +55,7 @@ int ni_ind, int xtra_report_server_ind
                         utc_req_ind, xtra_data_req_ind, agps_status_ind,
                         ni_ind, xtra_report_server_ind);
 
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s returning %d",__func__,rc);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s returning %d\n",__func__,rc);
     return rc;
 }
 
@@ -96,7 +97,7 @@ int loc_set_position_mode_proc_req_hdlr (mcm_gps_position_mode_t_v01 mode,
 
     loc_srv_get_gnss_client()->locAPIUpdateTrackingOptions(sOptions);
 
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s returning %d",__func__,rc);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s returning %d\n",__func__,rc);
     return rc;
 }
 
@@ -115,9 +116,17 @@ int loc_start_nav_proc_req_hdlr (){
 
     int rc = LOC_SRV_FAILURE;
     LOC_SRV_NULL_CHECK(loc_srv_get_gnss_client());
+    sOptions.size = sizeof(LocationOptions);
+    sOptions.minInterval = 1000;
+    LOC_SRV_LOGI("sOptions minInterval : %d\n",sOptions.minInterval);
+    LOC_SRV_LOGI("sOptions minDistance : %d\n",sOptions.minDistance);
+    LOC_SRV_LOGI("sOptions mode : %d\n",sOptions.mode);
+    if(loc_srv_get_gnss_control_client() != nullptr){
+	loc_srv_get_gnss_control_client()->locAPIEnable(LOCATION_TECHNOLOGY_TYPE_GNSS);
+    }
     rc = (loc_srv_get_gnss_client()->locAPIStartTracking(sOptions) == 0);
 
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s returning %d",__func__,rc);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s returning %d\n",__func__,rc);
     return rc;
 }
 
@@ -137,7 +146,7 @@ int loc_stop_nav_proc_req_hdlr (){
     LOC_SRV_NULL_CHECK(loc_srv_get_gnss_client());
     loc_srv_get_gnss_client()->locAPIStopTracking();
 
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s returning %d",__func__,rc);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s returning %d\n",__func__,rc);
     return rc;
 }
 
@@ -162,7 +171,7 @@ int loc_delete_aiding_data_proc_req_hdlr (mcm_gps_aiding_data_t_v01 flags){
     loc_srv_conv_mcm_gps_aiding_data(flags, f);
     loc_srv_get_gnss_control_client()->locAPIGnssDeleteAidingData(f);
 
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s returning %d",__func__,rc);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s returning %d\n",__func__,rc);
     return rc;
 }
 
@@ -189,7 +198,7 @@ int loc_inject_time_proc_req_hdlr (int64_t time,
     LOC_SRV_NULL_CHECK(loc_srv_get_inject_iface_ptr());
     loc_srv_get_inject_iface_ptr()->injectTime(time, time_reference, uncertainty);
 
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s returning %d",__func__,rc);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s returning %d\n",__func__,rc);
     return rc;
 }
 
@@ -216,7 +225,7 @@ int loc_inject_location_proc_req_hdlr (double latitude,
     LOC_SRV_NULL_CHECK(loc_srv_get_inject_iface_ptr());
     loc_srv_get_inject_iface_ptr()->injectLocation(latitude, longitude, accuracy);
 
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s returning %d",__func__,rc);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s returning %d\n",__func__,rc);
     return rc;
 }
 
@@ -234,13 +243,14 @@ int loc_inject_location_proc_req_hdlr (double latitude,
 //    0 -- Success
 //    -1 -- Failure
 //=============================================================================
-int loc_xtra_inject_data_proc_req_hdlr (uint8_t * data,
+int loc_xtra_inject_data_proc_req_hdlr (char * data,
                                       int32_t length){
 
     int rc = LOC_SRV_FAILURE;
-    LOC_SRV_LOGW("<MCM_LOC_SVC> Function:%s Don't support xtra injection",__func__);
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s Xtra Data Length:%d",__func__,length);
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s returning %d",__func__,rc);
+    rc = loc_extended_xtra_inject_data(data, length);
+    //LOC_SRV_LOGW("<MCM_LOC_SVC> Function:%s Don't support xtra injection\n",__func__);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s Xtra Data Length:%d\n",__func__,length);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s returning %d\n",__func__,rc);
     return rc;
 }
 
@@ -265,8 +275,8 @@ int loc_agps_data_conn_open_proc_req_hdlr (mcm_agps_t_v01 /*agps_type*/,
                                          mcm_agps_bearer_t_v01 /*bearer_type*/){
 
     int rc = LOC_SRV_FAILURE;
-    LOC_SRV_LOGW("<MCM_LOC_SVC> Function:%s Don't support agnss",__func__);
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s returning %d",__func__,rc);
+    LOC_SRV_LOGW("<MCM_LOC_SVC> Function:%s Don't support agnss\n",__func__);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s returning %d\n",__func__,rc);
     return rc;
 }
 
@@ -285,8 +295,8 @@ int loc_agps_data_conn_open_proc_req_hdlr (mcm_agps_t_v01 /*agps_type*/,
 int loc_agps_data_conn_closed_proc_req_hdlr (mcm_agps_t_v01 /*agps_type*/){
 
     int rc = LOC_SRV_FAILURE;
-    LOC_SRV_LOGW("<MCM_LOC_SVC> Function:%s Don't support agnss",__func__);
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s returning %d",__func__,rc);
+    LOC_SRV_LOGW("<MCM_LOC_SVC> Function:%s Don't support agnss\n",__func__);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s returning %d\n",__func__,rc);
     return rc;
 }
 
@@ -305,8 +315,8 @@ int loc_agps_data_conn_closed_proc_req_hdlr (mcm_agps_t_v01 /*agps_type*/){
 int loc_agps_data_conn_failed_proc_req_hdlr (mcm_agps_t_v01 /*agps_type*/){
 
     int rc = LOC_SRV_FAILURE;
-    LOC_SRV_LOGW("<MCM_LOC_SVC> Function:%s Don't support agnss",__func__);
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s returning %d",__func__,rc);
+    LOC_SRV_LOGW("<MCM_LOC_SVC> Function:%s Don't support agnss\n",__func__);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s returning %d\n",__func__,rc);
     return rc;
 }
 
@@ -329,8 +339,8 @@ int loc_agps_set_server_proc_req_hdlr (mcm_agps_t_v01 /*agps_type*/,
                                      uint32_t /*port*/){
 
     int rc = LOC_SRV_FAILURE;
-    LOC_SRV_LOGW("<MCM_LOC_SVC> Function:%s Don't support agnss",__func__);
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s returning %d",__func__,rc);
+    LOC_SRV_LOGW("<MCM_LOC_SVC> Function:%s Don't support agnss\n",__func__);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s returning %d\n",__func__,rc);
     return rc;
 }
 
@@ -358,7 +368,7 @@ int loc_ni_respond_proc_req_hdlr (int32_t notif_id,
         return LOC_SRV_FAILURE;
     loc_srv_get_gnss_client()->locAPIGnssNiResponse(notif_id, u);
 
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s returning %d",__func__,rc);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s returning %d\n",__func__,rc);
     return rc;
 }
 
@@ -379,8 +389,8 @@ int loc_agps_ril_update_network_availability_proc_req_hdlr (int32_t available,
                                                           const char* apn){
 
     int rc = LOC_SRV_FAILURE;
-    LOC_SRV_LOGW("<MCM_LOC_SVC> Function:%s Don't support network availability report",__func__);
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s returning %d",__func__,rc);
+    LOC_SRV_LOGW("<MCM_LOC_SVC> Function:%s Don't support network availability report\n",__func__);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s returning %d\n",__func__,rc);
     return rc;
 }
 

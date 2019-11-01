@@ -103,6 +103,12 @@ service mcm_ril_service{
   //! @ID MCM_NW_NITZ_TIME_IND
    mcm_nw_nitz_time_ind_msg             MCM_NW_NITZ_TIME_IND;
 
+/** add by tommy.zhang@20191028 start : for get cell info */
+   // 0x0510
+  // !@ID MCM_NW_GET_CELL_INFO
+  mcm_nw_get_cell_info_req_msg   MCM_NW_GET_CELL_INFO_REQ,
+  mcm_nw_get_cell_info_resp_msg  MCM_NW_GET_CELL_INFO_RESP;
+
   //0x0700
  //!@ID MCM_SMS_SET_SERVICE_CENTER_CFG_TYPE
  mcm_sms_set_service_center_cfg_type_req_msg MCM_SMS_SET_SERVICE_CENTER_CFG_TYPE_REQ,

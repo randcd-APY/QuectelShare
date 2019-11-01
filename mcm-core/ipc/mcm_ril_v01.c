@@ -71,6 +71,19 @@ static const qmi_idl_service_message_table_entry mcm_ril_service_service_command
   {MCM_NW_GET_CELL_ACCESS_STATE_REQ_V01, QMI_IDL_TYPE16(4, 16), 0},
   {MCM_NW_GET_NITZ_TIME_INFO_REQ_V01, QMI_IDL_TYPE16(4, 18), 0},
   {MCM_NW_EVENT_REGISTER_REQ_V01, QMI_IDL_TYPE16(4, 20), 20},
+
+/**
+* Tommy.zhang -2019/10/23: [added]
+* Fix error: NO event report after registering event by QL_MCM_NW_EventRegister.
+* Change the index of MCM_NW_GET_CELL_INFO_REQ_V01 in the Message Table
+    @{
+*/
+  //{MCM_NW_GET_CELL_INFO_REQ_V01, QMI_IDL_TYPE16(4, 22), 0},
+  {MCM_NW_GET_CELL_INFO_REQ_V01, QMI_IDL_TYPE16(4, 27), 0},
+/** 
+    @}
+*/
+
   {MCM_SMS_SET_SERVICE_CENTER_CFG_TYPE_REQ_V01, QMI_IDL_TYPE16(3, 0), 266},
   {MCM_SMS_GET_SERVICE_CENTER_CFG_TYPE_REQ_V01, QMI_IDL_TYPE16(3, 2), 0},
   {MCM_SMS_SEND_MO_MSG_REQ_V01, QMI_IDL_TYPE16(3, 4), 1712},
@@ -122,6 +135,17 @@ static const qmi_idl_service_message_table_entry mcm_ril_service_service_respons
   {MCM_NW_GET_CELL_ACCESS_STATE_RESP_V01, QMI_IDL_TYPE16(4, 17), 18},
   {MCM_NW_GET_NITZ_TIME_INFO_RESP_V01, QMI_IDL_TYPE16(4, 19), 60},
   {MCM_NW_EVENT_REGISTER_RESP_V01, QMI_IDL_TYPE16(4, 21), 11},
+  /**
+* Tommy.zhang -2019/10/28: [modify]
+* Fix error: NO event report after registering event by QL_MCM_NW_EventRegister.
+* Change the index of MCM_NW_GET_CELL_INFO_RESP_V01 in the Message Table
+    @{
+*/
+  //{MCM_NW_GET_CELL_INFO_RESP_V01, QMI_IDL_TYPE16(4, 23), 870},
+  {MCM_NW_GET_CELL_INFO_RESP_V01, QMI_IDL_TYPE16(4, 28), 870},
+/** 
+    @}
+*/
   {MCM_SMS_SET_SERVICE_CENTER_CFG_TYPE_RESP_V01, QMI_IDL_TYPE16(3, 1), 11},
   {MCM_SMS_GET_SERVICE_CENTER_CFG_TYPE_RESP_V01, QMI_IDL_TYPE16(3, 3), 277},
   {MCM_SMS_SEND_MO_MSG_RESP_V01, QMI_IDL_TYPE16(3, 5), 11},

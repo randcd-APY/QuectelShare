@@ -33,6 +33,7 @@ GENERAL DESCRIPTION
 
 #include "loc_extended.h"
 #include <loc_pla.h>
+#include <loc_eng.h>
 
 // Global data structure for location engine
 loc_eng_data_s_type loc_prop_data;

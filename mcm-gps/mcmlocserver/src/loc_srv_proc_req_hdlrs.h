@@ -179,7 +179,7 @@ int loc_inject_location_proc_req_hdlr (double latitude,
 //    0 -- Success
 //    -1 -- Failure
 //=============================================================================
-int loc_xtra_inject_data_proc_req_hdlr (uint8_t * data,
+int loc_xtra_inject_data_proc_req_hdlr (char * data,
                                       int32_t length);
 
 

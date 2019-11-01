@@ -307,6 +307,7 @@
 			qcom,bms-vadc = <&pm8909_vadc>;
 			qcom,bms-adc_tm = <&pm8909_adc_tm>;
 			qcom,pmic-revid = <&pm8909_revid>;
+			qcom,use-voltage-soc;
 
 			qcom,force-s3-on-suspend;
 			qcom,force-s2-in-charging;

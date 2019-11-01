@@ -3,7 +3,7 @@ inherit qcommon qprebuilt qlicense
 DESCRIPTION = "Quectel Api system"
 PR = "r7"
 
-DEPENDS = "diag dsutils glib-2.0 qmi qmi-framework ql-syslog"
+DEPENDS = "diag dsutils glib-2.0 qmi qmi-framework ql-syslog  mcm-core curl ql-mcm-api"
 
 SRC_DIR = "${WORKSPACE}/quectel-core/ql-common-api/"
 

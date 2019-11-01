@@ -9,7 +9,7 @@ SRC_URI = "file://gps/framework/native/"
 SRC_DIR = "${WORKSPACE}/gps/framework/native/"
 S = "${WORKDIR}/gps/framework/native"
 
-DEPENDS = "data-items loc-mq-client lowi-client ulp2"
+DEPENDS = "data-items loc-mq-client lowi-client ulp2 loc-hal"
 EXTRA_OECONF = "--with-core-includes=${WORKSPACE}/system/core/include \
                 --with-locpla-includes=${STAGING_INCDIR}/loc-pla \
                 --with-glib"

@@ -41,6 +41,9 @@ core_event_lookup_map_type hlos_request_map[] =
    {MCM_NW_GET_SIGNAL_STRENGTH_REQ_V01, hlos_nas_network_get_signal_strength_handler},
    {MCM_NW_GET_CELL_ACCESS_STATE_REQ_V01, hlos_nas_get_cell_access_state_handler},
    {MCM_NW_GET_NITZ_TIME_INFO_REQ_V01, hlos_nas_network_get_nitz_time_info_handler},
+   /** add by tommy.zhang 20191023 start : for get cell info */
+   {MCM_NW_GET_CELL_INFO_REQ_V01, hlos_nas_get_cell_info_handler},
+   /** add by tommy.zhang 20191023 end */
    {MCM_VOICE_DIAL_REQ_V01,            hlos_voice_dial_request_handler},
    {MCM_VOICE_HANGUP_REQ_V01,          hlos_voice_hangup_request_handler},
    {MCM_VOICE_COMMAND_REQ_V01,         hlos_voice_command_request_handler},

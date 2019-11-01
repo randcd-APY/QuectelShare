@@ -34,13 +34,13 @@ qmi_csi_cb_error loc_srv_client_connect_req_cb (qmi_client_handle client_handle,
     unsigned int index = 0;
 
     if( (!connection_handle) || (!service_cookie) ) {
-        LOC_SRV_LOGE("<MCM_LOC_SVC> Error in Connection Request. Invalid input arguments");
+        LOC_SRV_LOGE("<MCM_LOC_SVC> Error in Connection Request. Invalid input arguments\n");
         return QMI_CSI_CB_INTERNAL_ERR;
     }
 
     srv_state_ptr = (loc_srv_state_info_cookie_t*)service_cookie;
 
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Connection Request Received from Client:%d",client_handle);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Connection Request Received from Client:%d\n",client_handle);
 
     /* look for a free slot in client_handle_list to allocate memory for this
        client. */
@@ -49,7 +49,7 @@ qmi_csi_cb_error loc_srv_client_connect_req_cb (qmi_client_handle client_handle,
             client_info_ptr =
                   (loc_srv_client_info_t*)malloc(sizeof(loc_srv_client_info_t));
             if(!client_info_ptr) {
-                LOC_SRV_LOGE("<MCM_LOC_SVC> Connect: Memory allocation to Client Info failed");
+                LOC_SRV_LOGE("<MCM_LOC_SVC> Connect: Memory allocation to Client Info failed\n");
                 return QMI_CSI_CB_NO_MEM;
             } else {
                 break;
@@ -59,7 +59,7 @@ qmi_csi_cb_error loc_srv_client_connect_req_cb (qmi_client_handle client_handle,
 
     /* Refuse connection if free slot not found */
     if(index == LOC_SRV_MAX_CLIENT_HANDLES) {
-        LOC_SRV_LOGE("<MCM_LOC_SVC> Connect: Maximum number of client handles exceeded");
+        LOC_SRV_LOGE("<MCM_LOC_SVC> Connect: Maximum number of client handles exceeded\n");
         return QMI_CSI_CB_CONN_REFUSED;
     }
 
@@ -93,10 +93,10 @@ void loc_srv_client_disconnect_req_cb (void *connection_handle,
     unsigned int index = 0;
 
     if ( (!service_cookie) || (!connection_handle) ) {
-        LOC_SRV_LOGE("<MCM_LOC_SVC> Error in Diconnect Request. Invalid Input arguments");
+        LOC_SRV_LOGE("<MCM_LOC_SVC> Error in Diconnect Request. Invalid Input arguments\n");
         return;
     }
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Disconnect Request Received");
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Disconnect Request Received\n");
     srv_state_ptr = (loc_srv_state_info_cookie_t*)service_cookie;
     for( ; index < LOC_SRV_MAX_CLIENT_HANDLES ; index++) {
         if(srv_state_ptr->client_handle_list[index] ==
@@ -106,14 +106,14 @@ void loc_srv_client_disconnect_req_cb (void *connection_handle,
     }
 
     if(index == LOC_SRV_MAX_CLIENT_HANDLES) {
-        LOC_SRV_LOGI("<MCM_LOC_SVC> Disconnect: Already Disconnected");
+        LOC_SRV_LOGI("<MCM_LOC_SVC> Disconnect: Already Disconnected\n");
         return;
     }
 
     client_info_ptr =
         (loc_srv_client_info_t*)srv_state_ptr->client_handle_list[index];
 
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Checking if Client is enabled = %d",client_info_ptr->enabled);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Checking if Client is enabled = %d\n",client_info_ptr->enabled);
     if(client_info_ptr->enabled == LOC_SRV_TRUE) {
 
         if(srv_state_ptr->client_ref_count >= 1) {
@@ -121,14 +121,14 @@ void loc_srv_client_disconnect_req_cb (void *connection_handle,
         }
         client_info_ptr->enabled = LOC_SRV_FALSE;
 
-        LOC_SRV_LOGI("<MCM_LOC_SVC> Checking if Client has issued a start nav");
+        LOC_SRV_LOGI("<MCM_LOC_SVC> Checking if Client has issued a start nav\n");
         // Check if Client has issued a start nav
         if(client_info_ptr->in_navigation) {
 
-            LOC_SRV_LOGI("<MCM_LOC_SVC> Yes Client has issued a start nav");
+            LOC_SRV_LOGI("<MCM_LOC_SVC> Yes Client has issued a start nav\n");
             mcm_loc_stop_nav_req_msg_v01 pseudo_req;
 
-            LOC_SRV_LOGI("<MCM_LOC_SVC> Pseudo Proc Req for Stop Nav");
+            LOC_SRV_LOGI("<MCM_LOC_SVC> Pseudo Proc Req for Stop Nav\n");
             // Issue a pseudo stop proc request
             loc_srv_client_process_req_cb (connection_handle,
                                            0, //No Resp reqd.Pseudo proc req
@@ -170,13 +170,13 @@ qmi_csi_cb_error loc_srv_client_process_req_cb (void *connection_handle,
     loc_srv_fwrk_proc_req_hdlr_func_t req_hdlr_func;
 
     if( (!connection_handle) || (!service_cookie) || (!req_c_struct) ) {
-        LOC_SRV_LOGE("<MCM_LOC_SVC> Error in Process Request: Invalid Input arguments");
+        LOC_SRV_LOGE("<MCM_LOC_SVC> Error in Process Request: Invalid Input arguments\n");
         return QMI_CSI_CB_INTERNAL_ERR;
     }
 
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Process Request");
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Connection Handle: %p",connection_handle);
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Message ID: %d",msg_id);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Process Request\n");
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Connection Handle: %p\n",connection_handle);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Message ID: %d\n",msg_id);
 
     srv_state_ptr = (loc_srv_state_info_cookie_t*)service_cookie;
 
@@ -187,7 +187,7 @@ qmi_csi_cb_error loc_srv_client_process_req_cb (void *connection_handle,
     }
 
     if( index == LOC_SRV_MAX_CLIENT_HANDLES ) {
-        LOC_SRV_LOGE("<MCM_LOC_SVC> Process Requst: Could not find active client");
+        LOC_SRV_LOGE("<MCM_LOC_SVC> Process Requst: Could not find active client\n");
         return QMI_CSI_CB_INTERNAL_ERR;
     }
 
@@ -203,12 +203,12 @@ qmi_csi_cb_error loc_srv_client_process_req_cb (void *connection_handle,
                                 service_cookie);
         }
         else {
-            LOC_SRV_LOGE("<MCM_LOC_SVC> Process Request: Null Proc Request Handler function");
+            LOC_SRV_LOGE("<MCM_LOC_SVC> Process Request: Null Proc Request Handler function\n");
             return QMI_CSI_CB_INTERNAL_ERR;
         }
     }
     else {
-        LOC_SRV_LOGE("<MCM_LOC_SVC> Process Request: Invalid Arguments");
+        LOC_SRV_LOGE("<MCM_LOC_SVC> Process Request: Invalid Arguments\n");
         return QMI_CSI_CB_UNSUPPORTED_ERR;
     }
     return rc;

@@ -29,6 +29,24 @@ AC_PROG_MAKE_SET
 PKG_PROG_PKG_CONFIG
 
 # Checks for libraries.
+PKG_CHECK_MODULES([QMI], [qmi])
+AC_SUBST([QMI_CFLAGS])
+AC_SUBST([QMI_LIBS])
+
+PKG_CHECK_MODULES([QMIF], [qmi-framework])
+AC_SUBST([QMIF_CFLAGS])
+AC_SUBST([QMIF_LIBS])
+PKG_CHECK_MODULES([DATA], [data])
+AC_SUBST([DATA_CFLAGS])
+AC_SUBST([DATA_LIBS])
+PKG_CHECK_MODULES([LOCPLA], [loc-pla])
+AC_SUBST([LOCPLA_CFLAGS])
+AC_SUBST([LOCPLA_LIBS])
+
+PKG_CHECK_MODULES([LOCSTUB], [loc-stub])
+AC_SUBST([LOCSTUB_CFLAGS])
+AC_SUBST([LOCSTUB_LIBS])
+
 PKG_CHECK_MODULES([GPSUTILS], [gps-utils])
 AC_SUBST([GPSUTILS_CFLAGS])
 AC_SUBST([GPSUTILS_LIBS])
@@ -81,6 +99,8 @@ AM_CONDITIONAL(USE_GLIB, test "x${with_glib}" = "xyes")
 AC_CONFIG_FILES([ \
         Makefile \
         gnss/Makefile \
+        utils/Makefile \
+        loc_api/Makefile \
         loc-hal.pc \
         ])
 

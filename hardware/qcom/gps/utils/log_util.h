@@ -77,12 +77,14 @@ extern "C"
  *
  *============================================================================*/
 /* LOC LOGGER */
+#ifndef LOC_LOGGER_S_T
 typedef struct loc_logger_s
 {
   unsigned long  DEBUG_LEVEL;
   unsigned long  TIMESTAMP;
 } loc_logger_s_type;
-
+#define LOC_LOGGER_S_T
+#endif
 /*=============================================================================
  *
  *                               EXTERNAL DATA

@@ -6,6 +6,7 @@
 #include <QFile>
 #include <QDebug>
 #include <QThread>
+#include <QProcess>
 
 class About;
 
@@ -29,13 +30,15 @@ class About : public QObject
 {
     Q_OBJECT
     //属性声明
-    Q_PROPERTY(QString kernelVersion READ kernelVersion WRITE setKernelVersion)
+    Q_PROPERTY(QString kernelVersion READ getKernelVersion WRITE setKernelVersion NOTIFY kernelVersionChanged)
     Q_PROPERTY(QString gccVersion READ gccVersion WRITE setGccVersion)
     Q_PROPERTY(QString compileTime READ compileTime WRITE setCompileTime)
     Q_PROPERTY(QString bpVersion READ bpVersion WRITE setBpVersion NOTIFY bpVersionChanged)
     Q_PROPERTY(QString IMEI READ getIMEI WRITE setIMEI NOTIFY IMEIChanged)
     Q_PROPERTY(QString MEID READ getMEID WRITE setMEID NOTIFY MEIDChanged)
     Q_PROPERTY(QString IMEI2 READ getIMEI2 WRITE setIMEI2 NOTIFY IMEI2Changed)
+    Q_PROPERTY(QString WIFIMAC READ getWIFIMAC WRITE setWIFIMAC NOTIFY WIFIMACChanged)
+    Q_PROPERTY(QString BTMAC READ getBTMAC WRITE setBTMAC NOTIFY BTMACChanged)
     Q_PROPERTY(QString memTotal READ memTotal WRITE setMemTotal NOTIFY memTotalChanged)
     Q_PROPERTY(QString memAvailable READ memAvailable WRITE setMemAvailable NOTIFY memAvailableChanged)
     Q_PROPERTY(QString flashSize READ flashSize WRITE setFlashSize NOTIFY flashSizeChanged)
@@ -49,7 +52,9 @@ class About : public QObject
 public:
     explicit About(QObject *parent = nullptr);
 
-    QString kernelVersion();
+    QString getRtcTime(void);
+
+    QString getKernelVersion();
     void setKernelVersion(QString kernelVersion);
 
     QString gccVersion();
@@ -72,10 +77,19 @@ public:
     QString getMEID();
     void setMEID(QString MEID);
 
+    QString getWIFIMAC();
+    void setWIFIMAC(QString WIFIMAC);
+
+    QString getBTMAC();
+    void setBTMAC(QString BTMAC);
 
     int getIMEIandMEID4Thread();
 
     int getIMEI24Thread();
+
+    int getWIFIMAC4Thread();
+
+    int getBTMAC4Thread();
 
     QString memTotal();
     void setMemTotal(QString memTotal);
@@ -111,11 +125,17 @@ public:
 signals:
     void bpVersionChanged(QString bpVersion);
 
+    void kernelVersionChanged(QString kernelVersion);
+
     void IMEIChanged(QString IMEI);
 
     void MEIDChanged(QString IMEI);
 
     void IMEI2Changed(QString IMEI2);
+
+    void WIFIMACChanged(QString WIFIMAC);
+
+    void BTMACChanged(QString BTMAC);
 
     void memTotalChanged(QString memTotal);
 
@@ -134,7 +154,6 @@ signals:
     void rtcTimeChanged(QString rtcTime);
 
     void brightnessChanged(int brightness);
-
 public slots:
     void timerout_update();
 //    void slotUpdate_bpVersion(QString bpVersion);
@@ -147,6 +166,8 @@ private:
     QString m_IMEI;
     QString m_MEID;
     QString m_IMEI2;
+    QString m_WIFIMAC;
+    QString m_BTMAC;
     QString m_memTotal;
     QString m_memAvailable;
     QString m_flashSize;

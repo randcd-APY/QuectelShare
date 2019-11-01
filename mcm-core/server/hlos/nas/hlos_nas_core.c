@@ -2050,6 +2050,168 @@ uint32_t hlos_nas_convert_qmi_prefmode_to_mcm_prefmode(uint32_t qmi_pref_mode)
     return mcm_pref_mode;
 }
 
+/* 2019/10/23 added by tommy.zhang */
+void hlos_nas_core_populate_serving_rate_info(mcm_nw_get_cell_info_resp_msg_v01 *resp)
+{
+    void *reg_info;
+    cri_nas_rte_gsm_reg_info_type *gsm_data_reg_info;
+    cri_nas_rte_wcdma_reg_info_type *wcdma_data_reg_info;
+    cri_nas_rte_cdma_reg_info_type *cdma_data_reg_info;
+    cri_nas_rte_hdr_reg_info_type *hdr_data_reg_info;
+    cri_nas_rte_lte_reg_info_type *lte_data_reg_info;
+    cri_nas_rte_tdscdma_reg_info_type *tdscdma_data_reg_info;
 
+    cri_nas_rte_type data_rte;
+
+    reg_info = cri_nas_retrieve_data_rte(&data_rte);
+
+    if ( reg_info == NULL )
+    {
+        data_rte = CRI_NAS_RTE_UNKNOWN;
+    }
+
+    switch(data_rte)
+    {
+        case CRI_NAS_RTE_GSM:
+            gsm_data_reg_info = (cri_nas_rte_gsm_reg_info_type*)reg_info;
+            resp->serving_rat = hlos_nas_convert_cri_radiotech_to_mcm_radiotech(gsm_data_reg_info->reg_info.tech);
+            break;
+
+        case CRI_NAS_RTE_WCDMA:
+            wcdma_data_reg_info = (cri_nas_rte_wcdma_reg_info_type*)reg_info;
+            resp->serving_rat = hlos_nas_convert_cri_radiotech_to_mcm_radiotech(wcdma_data_reg_info->reg_info.tech);
+            break;
+
+        case CRI_NAS_RTE_CDMA:
+            cdma_data_reg_info = (cri_nas_rte_cdma_reg_info_type*)reg_info;
+            resp->serving_rat = hlos_nas_convert_cri_radiotech_to_mcm_radiotech(cdma_data_reg_info->reg_info.tech);
+            break;
+
+        case CRI_NAS_RTE_HDR:
+            hdr_data_reg_info = (cri_nas_rte_hdr_reg_info_type*)reg_info;
+            resp->serving_rat = hlos_nas_convert_cri_radiotech_to_mcm_radiotech(hdr_data_reg_info->reg_info.tech);
+            break;
+
+        case CRI_NAS_RTE_LTE:
+            lte_data_reg_info = (cri_nas_rte_lte_reg_info_type*)reg_info;
+            resp->serving_rat = hlos_nas_convert_cri_radiotech_to_mcm_radiotech(lte_data_reg_info->reg_info.tech);
+            break;
+
+        case CRI_NAS_RTE_TDSCDMA:
+            tdscdma_data_reg_info = (cri_nas_rte_tdscdma_reg_info_type*)reg_info;
+            resp->serving_rat = hlos_nas_convert_cri_radiotech_to_mcm_radiotech(tdscdma_data_reg_info->reg_info.tech);
+            break;
+
+        case CRI_NAS_RTE_UNKNOWN:
+            UTIL_LOG_MSG("\nUnknown voice RTE\n");
+            break;
+    }
+}
+
+void hlos_nas_get_cell_info_handler(void *event_data)
+{
+    int i;
+    qmi_error_type_v01 ret_val = QMI_ERR_INTERNAL_V01;
+
+    mcm_nw_get_cell_info_req_msg_v01 *hlos_req_msg;
+    mcm_nw_get_cell_info_resp_msg_v01 hlos_resp_msg;
+    hlos_core_hlos_request_data_type *hlos_core_hlos_request_data;
+    hlos_core_hlos_request_data = (hlos_core_hlos_request_data_type*) event_data;
+    hlos_req_msg = (void *)hlos_core_hlos_request_data->data;
+    nas_get_cell_location_info_req_msg_v01 nas_req_msg;
+    nas_get_cell_location_info_resp_msg_v01 nas_resp_msg;
+
+    memset(&nas_req_msg, 0, sizeof(nas_req_msg));
+    memset(&nas_resp_msg, 0, sizeof(nas_resp_msg));
+
+    memset(&hlos_resp_msg, 0, sizeof(hlos_resp_msg));
+
+    ret_val = cri_core_qmi_send_msg_sync( cri_nas_core_retrieve_client_id(),
+            QMI_NAS_GET_CELL_LOCATION_INFO_REQ_MSG_V01,
+            &nas_req_msg,
+            sizeof(nas_req_msg),
+            &nas_resp_msg,
+            sizeof(nas_resp_msg),
+            CRI_CORE_MAX_TIMEOUT );
+
+    if(QMI_ERR_NONE_V01 != ret_val)
+    {
+        UTIL_LOG("cri_nas_core_network_scan_request_handler error - %d\n", ret_val);
+    }
+    else {
+        if(nas_resp_msg.lte_intra_valid) {
+            hlos_resp_msg.lte_info_valid = 1;
+            hlos_resp_msg.lte_info_len = nas_resp_msg.lte_intra.cells_len + 1;
+            hlos_resp_msg.lte_info[0].cid = nas_resp_msg.lte_intra.global_cell_id;
+            memcpy(hlos_resp_msg.lte_info[0].plmn, nas_resp_msg.lte_intra.plmn, 3);
+            hlos_resp_msg.lte_info[0].tac = nas_resp_msg.lte_intra.tac;
+            hlos_resp_msg.lte_info[0].pci = 0;
+            hlos_resp_msg.lte_info[0].earfcn = nas_resp_msg.lte_intra.earfcn;
+
+            for(i=0; i<nas_resp_msg.lte_intra.cells_len; i++) {
+                hlos_resp_msg.lte_info[i+1].pci = nas_resp_msg.lte_intra.cells[i].pci;
+            }
+        }
+
+        if(nas_resp_msg.geran_info_valid) {
+            nas_geran_cell_info_type_v01 *pinfo = &nas_resp_msg.geran_info;
+
+            hlos_resp_msg.gsm_info_valid = 1;
+            hlos_resp_msg.gsm_info_len = pinfo->nmr_cell_info_len + 1;
+            hlos_resp_msg.gsm_info[0].cid = pinfo->cell_id;
+            memcpy(hlos_resp_msg.gsm_info[0].plmn, pinfo->plmn, 3);
+            hlos_resp_msg.gsm_info[0].lac = pinfo->lac;
+            hlos_resp_msg.gsm_info[0].arfcn = pinfo->arfcn;
+            hlos_resp_msg.gsm_info[0].bsic = pinfo->bsic;
+
+            for(i=0; i<pinfo->nmr_cell_info_len; i++) {
+                nas_nmr_cell_info_type_v01 *pi = &pinfo->nmr_cell_info[i];
+                hlos_resp_msg.gsm_info[i+1].cid = pi->nmr_cell_id;
+                memcpy(hlos_resp_msg.gsm_info[i+1].plmn, pi->nmr_plmn, 3);
+                hlos_resp_msg.gsm_info[i+1].lac = pi->nmr_lac;
+                hlos_resp_msg.gsm_info[i+1].arfcn = pi->nmr_arfcn;
+                hlos_resp_msg.gsm_info[i+1].bsic = pi->nmr_bsic;
+            }
+        }
+
+        if(nas_resp_msg.umts_info_valid) {
+            int oft = 0;
+            nas_umts_cell_info_type_v01 *pinfo = &nas_resp_msg.umts_info;
+            hlos_resp_msg.umts_info_valid = 1;
+            hlos_resp_msg.umts_info_len = pinfo->umts_monitored_cell_len + pinfo->umts_geran_nbr_cell_len + 1;
+
+            hlos_resp_msg.umts_info[oft].cid = pinfo->cell_id;
+            memcpy(hlos_resp_msg.umts_info[oft].plmn, pinfo->plmn, 3);
+            hlos_resp_msg.umts_info[oft].lcid = 0;
+            hlos_resp_msg.umts_info[oft].lac = pinfo->lac;
+            hlos_resp_msg.umts_info[oft].uarfcn = pinfo->uarfcn;
+            hlos_resp_msg.umts_info[oft].psc = pinfo->psc;
+            oft++;
+
+            for(i=0; i<pinfo->umts_monitored_cell_len; i++) {
+                nas_umts_monitored_cell_set_info_type_v01 *pi = &pinfo->umts_monitored_cell[i];
+                hlos_resp_msg.umts_info[oft].uarfcn = pi->umts_uarfcn;
+                hlos_resp_msg.umts_info[oft].psc = pi->umts_psc;
+                oft++;
+            }
+
+            for(i=0; i<pinfo->umts_geran_nbr_cell_len; i++) {
+                nas_umts_geran_nbr_cell_set_info_type_v01 *pi = &pinfo->umts_geran_nbr_cell[i];
+                hlos_resp_msg.umts_info[oft].uarfcn = pi->geran_arfcn;
+                oft++;
+            }
+        }
+    }
+
+    hlos_nas_core_populate_serving_rate_info(&hlos_resp_msg);
+
+    hlos_resp_msg.response.result = MCM_RESULT_SUCCESS_V01;
+    hlos_resp_msg.response.error = MCM_SUCCESS_V01;
+
+    hlos_core_send_response_handler(ret_val,
+            hlos_core_hlos_request_data,
+            &hlos_resp_msg,
+            sizeof(hlos_resp_msg));
+}
 
 

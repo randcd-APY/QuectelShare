@@ -30,6 +30,8 @@ export SOFTAP_W_DUN="N"
 export ANDROID_LOG_TAGS="*:d"
 export LS_COLORS="none"
 
+sleep 5
+
 case "$1" in
   start)
 	if [ -d /sys/class/android_usb/android0/f_ffs ]

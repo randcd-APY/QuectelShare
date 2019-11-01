@@ -8,7 +8,7 @@
 
 About::About(QObject *parent) : QObject(parent)
 {
-    m_kernelVersion = "Linux version: 3.18.0";
+//    m_kernelVersion = "Linux version: 3.18.0";
     m_gccVersion = "GCC version: 6.4.1";
     m_compileTime = "UTC 2019";
 
@@ -48,8 +48,8 @@ About::About(QObject *parent) : QObject(parent)
 
         rx.setPattern("\\s");
         pos = rx.indexIn(newStr, 0);
-        m_kernelVersion = QString("Linux version: ");
-        m_kernelVersion.append(newStr.mid(0, pos + 1));
+//        m_kernelVersion = QString("Linux version: ");
+//        m_kernelVersion.append(newStr.mid(0, pos + 1));
     //    qDebug(m_kernelVersion.toUtf8());
     } else {
         qErrnoWarning("/proc/version dosen't contains Linux version");
@@ -116,37 +116,59 @@ About::About(QObject *parent) : QObject(parent)
     m_flashSize = "Flash Size: ";
     m_flashSize.append(qStr.trimmed());
 
-    p_rtcFile = new QFile("/sys/class/rtc/rtc0/time");
-    if (!p_rtcFile->exists()) {
-        qErrnoWarning("/sys/class/rtc/rtc0/time is not exists!");
-        p_rtcFile = nullptr;
-        return;
-    }
+//    p_rtcFile = new QFile("/sys/class/rtc/rtc0/time");
+//    if (!p_rtcFile->exists()) {
+//        qErrnoWarning("/sys/class/rtc/rtc0/time is not exists!");
+//        p_rtcFile = nullptr;
+//        return;
+//    }
 
-    if (!p_rtcFile->open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qErrnoWarning("/sys/class/rtc/rtc0/time open failed!");
-        return;
-    }
+//    if (!p_rtcFile->open(QIODevice::ReadOnly | QIODevice::Text)) {
+//        qErrnoWarning("/sys/class/rtc/rtc0/time open failed!");
+//        return;
+//    }
 
-    str = p_rtcFile->readAll();
+//    str = p_rtcFile->readAll();
+//    qStr = "RTC Time: ";
+//    qStr.append(QString(str).trimmed());
+//    m_rtcTime = qStr;
+//    qDebug() << "rtc Time: " << qStr;
+//    p_timer = new QTimer();
+//    connect(p_timer, SIGNAL(timeout()), this, SLOT(timerout_update()));
+//    p_timer->start(1000);
     qStr = "RTC Time: ";
-    qStr.append(QString(str).trimmed());
-    m_rtcTime = qStr;
-    qDebug() << "rtc Time: " << qStr;
+    m_rtcTime = qStr.append(getRtcTime());
     p_timer = new QTimer();
     connect(p_timer, SIGNAL(timeout()), this, SLOT(timerout_update()));
     p_timer->start(1000);
 }
 
-QString About::kernelVersion()
+QString About::getRtcTime()
 {
-    return m_kernelVersion;
+    QString program = "/bin/date";
+//    QStringList arguments;
+    QByteArray a;
+//    arguments << "";
+    QProcess *myProcess = new QProcess(this);
+    myProcess->setProcessChannelMode(QProcess::MergedChannels);
+    myProcess->start(program);
+    if (myProcess->waitForFinished(100)) {
+        a = myProcess->readAll();
+    } else {
+        qDebug() << "get rtc timeout";
+    }
+    QString date = QString(a).simplified();
+//    qDebug() <<"rtc time:" << date;
+    QRegExp rx("");
+    int pos;
+    QString newStr;
+    rx.setPattern("\\d+:\\d+:\\d+");
+    pos = rx.indexIn(date, 0);
+    newStr = date.mid(pos,8);
+//    qDebug() << "rtc time1:" << newStr;
+    return newStr;
 }
 
-void About::setKernelVersion(QString kernelVersion)
-{
-    m_kernelVersion = kernelVersion;
-}
 
 QString About::gccVersion()
 {
@@ -206,7 +228,7 @@ int About::getbpVersion4Thread()
     memset(atc_cmd_req,  0, sizeof(atc_cmd_req));
     memset(atc_cmd_resp, 0, sizeof(atc_cmd_resp));
 
-    strcpy((char *)atc_cmd_req, "ati");
+    strcpy((char *)atc_cmd_req, "AT+QGMR?");
     ret = QL_ATC_Send_Cmd(h_atc, atc_cmd_req, atc_cmd_resp, ATC_RESP_CMD_MAX_LEN);
     printf("QL_ATC_Send_Cmd \"%s\" ret=%d with resp=\n%s\n", atc_cmd_req, ret, atc_cmd_resp);
     if (ret < 0) {
@@ -218,25 +240,62 @@ int About::getbpVersion4Thread()
     QStringList list = qStr.split("\r\n", QString::QString::SkipEmptyParts);
 
     QRegExp rx;
+    QRegExp bprx("");
     QString newStr;
+    QString bpStr;
     int pos;
+    int bppos;
     for (int i = 0; i < list.size();i++) {
         qDebug() << list.at(i);
         if (list.at(i).contains("Revision:")) {
-
-            QString rxStr = QString("Revision:(.*)");
+            QString rxStr = QString("Revision:(.*)_BP");
+            qDebug() << list.at(i);
             rx.setPattern(rxStr);
+            bprx.setPattern("BP");
+            bppos = bprx.indexIn(list.at(i), 0);
+            bpStr = list.at(i).mid(bppos);
+            QString midStr;
+            midStr = bpStr.mid(0, 8);
             pos = list.at(i).indexOf(rx);
             if (pos >= 0) {
                 newStr = "BP Version: ";
+                newStr.append(midStr);
+                newStr.append("(");
                 newStr.append(rx.cap(1).trimmed());
+                newStr.append(")");
                 setBpVersion(newStr);
             }
             break;
         }
     }
-
+    //get linux version
+    QRegExp klrx("");
+    QString linuxStr;
+    QString klStr;
+//    int pos;
+    int klpos;
+    for (int i = 0; i < list.size();i++) {
+        qDebug() << list.at(i);
+        if (list.at(i).contains("Revision:")) {
+            klrx.setPattern("3.18.071");
+            klpos = klrx.indexIn(list.at(i), 0);
+            klStr = list.at(i).mid(klpos);
+            QString midStr;
+            midStr = klStr.mid(0, 15);
+            if (klpos >= 0) {
+                linuxStr = "Linux Version: ";
+                linuxStr.append(midStr);
+                setKernelVersion(linuxStr);
+            }
+            break;
+        }
+    }
     return 0;
+}
+
+QString About::getKernelVersion()
+{
+    return m_kernelVersion;
 }
 
 QString About::getIMEI()
@@ -247,6 +306,25 @@ QString About::getIMEI()
 QString About::getIMEI2()
 {
     return m_IMEI2;
+}
+
+QString About::getWIFIMAC()
+{
+    return m_WIFIMAC;
+}
+
+QString About::getBTMAC()
+{
+    return m_BTMAC;
+}
+
+void About::setKernelVersion(QString kernelVersion)
+{
+    if (m_kernelVersion == kernelVersion)
+        return;
+
+    m_kernelVersion = kernelVersion;
+    emit kernelVersionChanged(m_kernelVersion);
 }
 
 void About::setIMEI(QString IMEI)
@@ -265,6 +343,24 @@ void About::setIMEI2(QString IMEI2)
 
     m_IMEI2 = IMEI2;
     emit IMEI2Changed(m_IMEI2);
+}
+
+void About::setWIFIMAC(QString WIFIMAC)
+{
+    if (m_WIFIMAC == WIFIMAC)
+        return;
+
+    m_WIFIMAC = WIFIMAC;
+    emit WIFIMACChanged(m_WIFIMAC);
+}
+
+void About::setBTMAC(QString BTMAC)
+{
+    if (m_BTMAC == BTMAC)
+        return;
+
+    m_BTMAC = BTMAC;
+    emit BTMACChanged(m_BTMAC);
 }
 
 QString About::getMEID()
@@ -319,11 +415,6 @@ int About::getIMEI24Thread()
     if(ret == E_QL_OK){
         memset(atc_cmd_req,  0, sizeof(atc_cmd_req));
         memset(atc_cmd_resp, 0, sizeof(atc_cmd_resp));
-
-        //strcpy(atc_cmd_req,"at+qcfg=\"hotswap\",1");
-        //ret = QL_ATC_Send_Cmd(h_atc, atc_cmd_req, atc_cmd_resp, ATC_RESP_CMD_MAX_LEN);
-        //printf("QL_ATC_Send_Cmd \"%s\" ret=%d with resp=\n%s\n", atc_cmd_req, ret, atc_cmd_resp);
-
         strcpy(atc_cmd_req,"AT+EGMR=0,10");
         ret = QL_ATC_Send_Cmd(h_atc, atc_cmd_req, atc_cmd_resp, ATC_RESP_CMD_MAX_LEN);
         printf("QL_ATC_Send_Cmd \"%s\" ret=%d with resp=\n%s\n", atc_cmd_req, ret, atc_cmd_resp);
@@ -353,6 +444,91 @@ int About::getIMEI24Thread()
         }
     }
     return ret;
+}
+
+int About::getWIFIMAC4Thread()
+{
+    int ret = 0;
+    char atc_cmd_req[ATC_REQ_CMD_MAX_LEN] = {0};
+    char atc_cmd_resp[ATC_RESP_CMD_MAX_LEN] = {0};
+    atc_client_handle_type h_atc = 0;
+
+    ret = QL_ATC_Client_Init(&h_atc);
+    printf("QL_ATC_Client_Init ret=%d with h_atc=0x%x\n", ret, h_atc);
+    if(ret == E_QL_OK){
+        memset(atc_cmd_req,  0, sizeof(atc_cmd_req));
+        memset(atc_cmd_resp, 0, sizeof(atc_cmd_resp));
+        strcpy(atc_cmd_req,"AT+QNVR=4678,0");
+        ret = QL_ATC_Send_Cmd(h_atc, atc_cmd_req, atc_cmd_resp, ATC_RESP_CMD_MAX_LEN);
+        printf("QL_ATC_Send_Cmd \"%s\" ret=%d with resp=\n%s\n", atc_cmd_req, ret, atc_cmd_resp);
+
+         ret = QL_ATC_Client_Deinit(h_atc);
+         printf("QL_ATC_Client_Deinit ret=%d\n", ret);
+    }else{
+        printf("init failed.\n");
+    }
+    QString qStr = QString(atc_cmd_resp);
+    QStringList list = qStr.split("\r\n", QString::QString::SkipEmptyParts);
+    QRegExp rx;
+    QString newStr;
+    int pos;
+    for (int i = 0; i < list.size();i++) {
+        qDebug() << list.at(i);
+        if (list.at(i).contains("+QNVR:")) {
+            QString rxStr = QString("\\S+: \"(.+)\"");
+            rx.setPattern(rxStr);
+            pos = list.at(i).indexOf(rx);
+            if (pos >= 0) {
+                newStr = "WIFI ADDRESS: ";
+                newStr.append(rx.cap(1).trimmed());
+                setWIFIMAC(newStr);
+            }
+            break;
+        }
+    }
+    return ret;
+}
+
+int About::getBTMAC4Thread()
+{
+    int ret = 0;
+    char atc_cmd_req[ATC_REQ_CMD_MAX_LEN] = {0};
+    char atc_cmd_resp[ATC_RESP_CMD_MAX_LEN] = {0};
+    atc_client_handle_type h_atc = 0;
+
+    ret = QL_ATC_Client_Init(&h_atc);
+    printf("QL_ATC_Client_Init ret=%d with h_atc=0x%x\n", ret, h_atc);
+    if(ret == E_QL_OK){
+        memset(atc_cmd_req,  0, sizeof(atc_cmd_req));
+        memset(atc_cmd_resp, 0, sizeof(atc_cmd_resp));
+        strcpy(atc_cmd_req,"AT+QNVR=447,0");
+        ret = QL_ATC_Send_Cmd(h_atc, atc_cmd_req, atc_cmd_resp, ATC_RESP_CMD_MAX_LEN);
+        printf("QL_ATC_Send_Cmd \"%s\" ret=%d with resp=\n%s\n", atc_cmd_req, ret, atc_cmd_resp);
+
+         ret = QL_ATC_Client_Deinit(h_atc);
+         printf("QL_ATC_Client_Deinit ret=%d\n", ret);
+    }else{
+        printf("init failed.\n");
+    }
+    QString qStr = QString(atc_cmd_resp);
+    QStringList list = qStr.split("\r\n", QString::QString::SkipEmptyParts);
+    QRegExp rx;
+    QString newStr;
+    int pos;
+    for (int i = 0; i < list.size();i++) {
+        qDebug() << list.at(i);
+        if (list.at(i).contains("+QNVR:")) {
+            QString rxStr = QString("\\S+: \"(.+)\"");
+            rx.setPattern(rxStr);
+            pos = list.at(i).indexOf(rx);
+            if (pos >= 0) {
+                newStr = "BT ADDRESS: ";
+                newStr.append(rx.cap(1).trimmed());
+                setBTMAC(newStr);
+            }
+            break;
+        }
+    }
 }
 
 QString About::memTotal()
@@ -635,14 +811,17 @@ int About::getBrightness4Thread()
 
 void About::timerout_update()
 {
-    if (p_rtcFile != nullptr) {
-        p_rtcFile->seek(0);
-        QString str = p_rtcFile->readAll();
-        QString qStr = "RTC Time: ";
-        qStr.append(QString(str).trimmed());
-        setRtcTime(qStr);
-    } else
-        qDebug() << "p_rtcFile is nullptr";
+//    if (p_rtcFile != nullptr) {
+//        p_rtcFile->seek(0);
+//        QString str = p_rtcFile->readAll();
+//        QString qStr = "RTC Time: ";
+//        qStr.append(QString(str).trimmed());
+//        setRtcTime(qStr);
+//    } else
+//        qDebug() << "p_rtcFile is nullptr";
+    QString qStr = "RTC Time: ";
+    qStr.append(getRtcTime());
+    setRtcTime(qStr);
 }
 
 //void About::slotUpdate_bpVersion(QString bpVersion)
@@ -669,6 +848,8 @@ void WorkerThread::run()
         ret = p_about->getSDInfos4Thread();
         ret = p_about->getIMEIandMEID4Thread();
         ret = p_about->getIMEI24Thread();
+        ret = p_about->getWIFIMAC4Thread();
+        ret = p_about->getBTMAC4Thread();
         ret = p_about->getbpVersion4Thread();
 
         QThread::sleep(3);

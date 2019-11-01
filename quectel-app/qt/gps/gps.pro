@@ -35,9 +35,10 @@ FORMS += \
         gps.ui
 
 INCLUDEPATH += \
-        $(WORKSPACE)/quectel-core/ql-gnss/inc 
+        $(WORKSPACE)/quectel-core/ql-gnss/inc \
+		$(WORKSPACE)/quectel-core/ql-common-api/include
 		
-unix|win32: LIBS += -lql_gnss
+unix|win32: LIBS += -lql_gnss -lql_common_api -lcurl -ldsi_netctrl -lqmi -lql_mcm_api -lql_mgmt_client
 
 target.path = /gpsdemo
 

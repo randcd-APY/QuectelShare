@@ -78,7 +78,8 @@ do_install_append() {
       ln -sf ${systemd_unitdir}/system/logd.service ${D}${systemd_unitdir}/system/multi-user.target.wants/logd.service
       ln -sf ${systemd_unitdir}/system/logd.service ${D}${systemd_unitdir}/system/ffbm.target.wants/logd.service
       install -m 0644 ${S}/usb/usb.service -D ${D}${systemd_unitdir}/system/usb.service
-      ln -sf ${systemd_unitdir}/system/usb.service ${D}${systemd_unitdir}/system/multi-user.target.wants/usb.service
+      install -m 0644 ${S}/usb/quec_usb.service -D ${D}${systemd_unitdir}/system/quec_usb.service
+      ln -sf ${systemd_unitdir}/system/quec_usb.service ${D}${systemd_unitdir}/system/multi-user.target.wants/quec_usb.service
       ln -sf ${systemd_unitdir}/system/usb.service ${D}${systemd_unitdir}/system/ffbm.target.wants/usb.service
       install -m 0644 ${S}/rootdir/etc/init_post_boot.service -D ${D}${systemd_unitdir}/system/init_post_boot.service
       ln -sf ${systemd_unitdir}/system/init_post_boot.service \
@@ -181,7 +182,7 @@ FILES_${PN}-usb-dbg  = "${bindir}/.debug/usb_composition_switch"
 FILES_${PN}-usb      = "${sysconfdir}/init.d/usb ${base_sbindir}/usb_composition ${bindir}/usb_composition_switch ${base_sbindir}/usb/compositions/*"
 FILES_${PN}-usb     += "${sysconfdir}/usb/*"
 FILES_${PN}-usb     += "${base_sbindir}/usb/* ${base_sbindir}/usb_debug ${base_sbindir}/usb/debuger/*"
-FILES_${PN}-usb     += "${systemd_unitdir}/system/usb.service ${systemd_unitdir}/system/multi-user.target.wants/usb.service ${systemd_unitdir}/system/ffbm.target.wants/usb.service ${sysconfdir}/initscripts/usb"
+FILES_${PN}-usb     += "${systemd_unitdir}/system/usb.service ${systemd_unitdir}/system/quec_usb.service ${systemd_unitdir}/system/multi-user.target.wants/quec_usb.service ${systemd_unitdir}/system/ffbm.target.wants/usb.service ${sysconfdir}/initscripts/usb"
 
 PACKAGES =+ "${PN}-post-boot"
 FILES_${PN}-post-boot  = "${sysconfdir}/init.d/init_post_boot"

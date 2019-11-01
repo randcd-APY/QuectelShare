@@ -16,12 +16,14 @@ GENERAL DESCRIPTION
 #ifndef LOC_EXTENDED_H
 #define LOC_EXTENDED_H
 
+#include "gps_extended.h"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include "gps_extended.h"
+//#include "gps_extended.h"
 
 int loc_extended_init(GpsExtCallbacks* callbacks);
 void loc_extended_cleanup();

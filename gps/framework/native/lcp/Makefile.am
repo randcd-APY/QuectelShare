@@ -2,6 +2,8 @@
 #
 
 AM_CFLAGS = \
+     $(LOCPLA_CFLAGS) \
+     $(LOC_CFLAGS) \
      $(GPSUTILS_CFLAGS) \
      $(LOCCORE_CFLAGS) \
      $(LOWICLIENT_CFLAGS) \
@@ -12,10 +14,14 @@ AM_CFLAGS = \
      -I../service \
      -I../adapter \
      -I./izat_api  \
+     -I./observers/common/inc  \
+     -I./observers/common/inc/internal \
      -I./observers/IPCHandler/inc \
      -I./observers/IPCHandler/inc/internal \
      -I./observers/IPCClient/inc \
      -I./observers/IPCClient/inc/internal \
+     -I${WORKSPACE}/hardware/qcom/gps/loc_api/libloc_api_50001 \
+     -I${WORKSPACE}/hardware/qcom/gps/utils/platform_lib_abstractions/loc_pla/include \
      -I./observers/FreeWifiScanObserver/inc \
      -I./observers/FreeWifiScanObserver/inc/internal \
      -I./izat-provider-service/inc \
@@ -36,6 +42,7 @@ ACLOCAL_AMFLAGS = -I m4
 
 liblocationservice_la_SOURCES = \
         ../adapter/LBSAdapter.cpp \
+        ../service/loc_extended.cpp \
         observers/IPCClient/src/IPCClient.cpp \
         observers/IPCHandler/src/IPCHandler.cpp \
         observers/FreeWifiScanObserver/src/FreeWifiScanObserver.cpp \
@@ -63,7 +70,7 @@ liblocationservice_la_LDFLAGS = -Wl,-z,defs -lpthread -shared -version-info 1:0:
 liblocationservice_la_CPPFLAGS = $(AM_CFLAGS) $(AM_CPPFLAGS)
 endif
 
-liblocationservice_la_LIBADD = -lstdc++ $(GPSUTILS_LIBS) $(LOCCORE_LIBS) $(LOWICLIENT_LIBS) $(LBSCORE_LIBS) $(LOCBASEUTIL_LIBS) $(LOCMQCLIENT_LIBS) $(ULP2_LIBS) $(DATAITEMS_LIBS)
+liblocationservice_la_LIBADD = -lstdc++ $(GPSUTILS_LIBS) $(LOCCORE_LIBS) $(LOC_LIBS) $(LOWICLIENT_LIBS) $(LBSCORE_LIBS) $(LOCBASEUTIL_LIBS) $(LOCMQCLIENT_LIBS) $(ULP2_LIBS) $(DATAITEMS_LIBS)
 
 library_include_HEADERS = \
     ../service/ulp_service.h \

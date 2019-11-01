@@ -24,6 +24,18 @@ extern "C" {
     @}
   */
 
+/** @addtogroup mcm_nw_consts
+    @{
+  */
+
+/** Maximum cells in cell info response.  */
+#define MCM_CELL_INFO_GSM_MAX_V01 20
+#define MCM_CELL_INFO_UMTS_MAX_V01 20
+#define MCM_CELL_INFO_LTE_MAX_V01 20
+/**
+    @}
+  */
+
 typedef uint64_t mcm_nw_mode_type_v01;
 
 /** @addtogroup mcm_nw_consts
@@ -361,6 +373,92 @@ typedef struct {
   mcm_nw_radio_tech_t_v01 rat;
   /**<   Radio technology.*/
 }mcm_nw_selection_t_v01;  /* Type */
+/**
+    @}
+  */
+
+/** @addtogroup mcm_nw_aggregates
+    @{
+  */
+typedef struct {
+
+  uint32_t cid;
+  /**<   Cell ID (0 indicates information is not present). */
+
+  char plmn[3];
+  /**<   MCC/MNC information coded as octet 3, 4, and 5 in
+       3GPP TS 24.008 Section 10.5.1.3.
+       (This field should be ignored when cid is not present). */
+
+  uint16_t lac;
+  /**<   Location area code. (This field should be ignored when cid is not present). */
+
+  uint16_t arfcn;
+  /**<   Absolute RF channel number. */
+
+  uint8_t bsic;
+  /**<   Base station identity code. (0 indicates information is not present). */
+
+}mcm_nw_gsm_info_t_v01;  /* Type */
+/**
+    @}
+  */
+
+/** @addtogroup mcm_nw_aggregates
+    @{
+  */
+typedef struct {
+
+  uint32_t cid;
+  /**<   Cell ID (0 indicates information is not present). */
+
+  uint32_t lcid;
+  /**<   UTRAN Cell ID (0 indicates information is not present). */
+
+  char plmn[3];
+  /**<   MCC/MNC information coded as octet 3, 4, and 5 in
+       3GPP TS 24.008 Section 10.5.1.3.
+       (This field should be ignored when cid is not present). */
+
+  uint16_t lac;
+  /**<   Location area code. (This field should be ignored when cid is not present). */
+
+  /*  UARFCN */
+  uint16_t uarfcn;
+  /**<   UTRA absolute RF channel number. */
+
+  /*  PSC */
+  uint16_t psc;
+  /**<   Primary scrambling code. */
+
+}mcm_nw_umts_info_t_v01;  /* Type */
+/**
+    @}
+  */
+
+/** @addtogroup mcm_nw_aggregates
+    @{
+  */
+typedef struct {
+
+  uint32_t cid;
+  /**<   Global cell ID in the system information block (0 indicates information is not present). */
+
+  char plmn[3];
+  /**<   MCC/MNC information coded as octet 3, 4, and 5 in
+       3GPP TS 24.008 Section 10.5.1.3.
+       (This field should be ignored when cid is not present.) */
+
+  uint16_t tac;
+  /**<   Tracking area code (This field should be ignored when cid is not present). */
+
+  uint16_t pci;
+  /**<   Physical cell ID. Range: 0 to 503. */
+
+  uint16_t earfcn;
+  /**<   E-UTRA absolute radio frequency channel number of the cell. Range: 0 to 65535. */
+
+}mcm_nw_lte_info_t_v01;  /* Type */
 /**
     @}
   */
@@ -1049,6 +1147,57 @@ typedef struct {
     @}
   */
 
+/** @addtogroup mcm_nw_messages
+    @{
+  */
+/** Request Message; Get cell location-related information. */
+typedef struct {
+  /* This element is a placeholder to prevent the declaration of
+     an empty struct.  DO NOT USE THIS FIELD UNDER ANY CIRCUMSTANCE */
+  char __placeholder;
+}mcm_nw_get_cell_info_req_msg_v01;
+
+/** @endcond */
+
+/** @addtogroup mcm_nw_messages
+    @{
+  */
+/** Response message; Gets cell location-related information. */
+typedef struct {
+
+  /* Mandatory */
+  mcm_response_t_v01 response;
+  /**<   Result code.*/
+
+  /* Mandatory */
+  mcm_nw_radio_tech_t_v01 serving_rat;
+  /**<   Serving radio access technology.
+       The serving cell will be represented by the first element
+       of one of the TLVs below that matches the serving rat.*/
+
+  /* Optional */
+  uint8_t gsm_info_valid;  /**< Must be set to TRUE if gsm_info is being passed. */
+  uint32_t gsm_info_len;  /**< Must be set to the number of elements in entry. */
+  mcm_nw_gsm_info_t_v01 gsm_info[MCM_CELL_INFO_GSM_MAX_V01];
+  /**<   GSM cell information (Serving and neighbor). */
+
+  /* Optional */
+  uint8_t umts_info_valid;  /**< Must be set to TRUE if umts_info is being passed. */
+  uint32_t umts_info_len;  /**< Must be set to the number of elements in entry. */
+  mcm_nw_umts_info_t_v01 umts_info[MCM_CELL_INFO_UMTS_MAX_V01];
+  /**<   UMTS cell information (Serving and neighbor). */
+
+  /* Optional */
+  uint8_t lte_info_valid;  /**< Must be set to TRUE if lte_info is being passed. */
+  uint32_t lte_info_len;  /**< Must be set to the number of elements in entry. */
+  mcm_nw_lte_info_t_v01 lte_info[MCM_CELL_INFO_LTE_MAX_V01];
+  /**<   LTE cell information (Serving and neighbor). */
+
+}mcm_nw_get_cell_info_resp_msg_v01;  /* Message */
+/**
+    @}
+  */
+
 /** @addtogroup mcm_nw_msg_ids
     @{
   */
@@ -1079,8 +1228,8 @@ typedef struct {
 #define MCM_NW_SIGNAL_STRENGTH_EVENT_IND_V01 0x050D
 #define MCM_NW_CELL_ACCESS_STATE_CHANGE_EVENT_IND_V01 0x050E
 #define MCM_NW_NITZ_TIME_IND_V01 0x050F
-
-
+#define MCM_NW_GET_CELL_INFO_REQ_V01 0x0510
+#define MCM_NW_GET_CELL_INFO_RESP_V01 0x0510
 
 
 /**

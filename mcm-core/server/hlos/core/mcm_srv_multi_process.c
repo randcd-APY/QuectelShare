@@ -554,7 +554,7 @@ mcm_srv_mgr_start_services(char *buffer_str, int is_essential)
         service_ref_counts[LOC_SRV]++;
         pid = fork();
         if (pid == 0)
-        { /* child process */
+        { // child process
             char *argv[] = {LOC_EXEC_STR, NULL};
             execv(LOC_EXEC_STR, argv);
             exit(127);

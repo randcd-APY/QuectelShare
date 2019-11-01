@@ -370,52 +370,52 @@ extern "C" void quec_qdevinfo_handle(const AtCmd *cmd, AtCmdResponse *response)
         //printf("%s:%d  Peeta I'm here", __func__, __LINE__);
         //get_file_info(QUEC_EMCP_INFO,devinfo);
         if (get_flash_info(devinfo) == 0) {
-            offset += sprintf(resp_buf + offset, "+QDEVINFO:\"Flash\",%s", devinfo);
+            offset += sprintf(resp_buf + offset, "+QDEVINFO: \"Flash\",%s", devinfo);
             response->result = 1;
         } else {
-            offset += sprintf(resp_buf + offset, "+QDEVINFO:\"Flash\",NULL");
+            offset += sprintf(resp_buf + offset, "+QDEVINFO: \"Flash\",NULL");
             response->result = 1;
         }
     } else if(strcasecmp(cmd->tokens[0], "BB") == 0) {
         get_cpu_info(devinfo);
-        offset += sprintf(resp_buf+offset, "+QDEVINFO:\"BB\",%s",devinfo);
+        offset += sprintf(resp_buf+offset, "+QDEVINFO: \"BB\",%s",devinfo);
     } else if(strcasecmp(cmd->tokens[0], "PA")==0) {
 
         if(cmd->tokens[1] && cmd->tokens[2])
-            offset += sprintf(resp_buf+offset, "+QDEVINFO:\"PA\",%s,%s", cmd->tokens[1], cmd->tokens[2]);//PA
+            offset += sprintf(resp_buf+offset, "+QDEVINFO: \"PA\",%s,%s", cmd->tokens[1], cmd->tokens[2]);//PA
         else if (cmd->tokens[1])
-            offset += sprintf(resp_buf+offset, "+QDEVINFO:\"PA\",%s", cmd->tokens[1]);//PA
+            offset += sprintf(resp_buf+offset, "+QDEVINFO: \"PA\",%s", cmd->tokens[1]);//PA
         else
-            offset += sprintf(resp_buf+offset, "+QDEVINFO:\"PA\",NULL");
+            offset += sprintf(resp_buf+offset, "+QDEVINFO: \"PA\",NULL");
     } else if (strcasecmp(cmd->tokens[0], "PMIC") == 0) {
         get_file_info(QUEC_PMU_INFO,devinfo);
-        offset += sprintf(resp_buf+offset, "+QDEVINFO:\"PMIC\",%s", devinfo);
+        offset += sprintf(resp_buf+offset, "+QDEVINFO: \"PMIC\",%s", devinfo);
     } else if (strcasecmp(cmd->tokens[0], "CHECK") == 0) {
         //printf("%s:%d Peeta:I'm here!", __func__, __LINE__);
-        offset += sprintf(resp_buf+offset, "+QDEVINFO:\"BB\"\n");//bb
-        offset += sprintf(resp_buf + offset, "+QDEVINFO:\"Flash\"\n");
-        offset += sprintf(resp_buf + offset, "+QDEVINFO:\"PMIC\"\n");//pmic
-        offset += sprintf(resp_buf+offset, "+QDEVINFO:\"PA\"");//PA
+        offset += sprintf(resp_buf+offset, "+QDEVINFO: \"BB\"\n");//bb
+        offset += sprintf(resp_buf + offset, "+QDEVINFO: \"Flash\"\n");
+        offset += sprintf(resp_buf + offset, "+QDEVINFO: \"PMIC\"\n");//pmic
+        offset += sprintf(resp_buf+offset, "+QDEVINFO: \"PA\"");//PA
     } else if(strcasecmp(cmd->tokens[0], "ALL") == 0) {
         memset(devinfo, 0, QUEC_INFO_LEN);
         get_cpu_info(devinfo);
-        offset += sprintf(resp_buf+offset, "+QDEVINFO:\"BB\",%s\n", devinfo);//bb
+        offset += sprintf(resp_buf+offset, "+QDEVINFO: \"BB\",%s\n", devinfo);//bb
 
         memset(devinfo, 0, QUEC_INFO_LEN);
         if (get_flash_info(devinfo) == 0) {
-            offset += sprintf(resp_buf + offset, "+QDEVINFO:\"Flash\",%s\n", devinfo);
+            offset += sprintf(resp_buf + offset, "+QDEVINFO: \"Flash\",%s\n", devinfo);
         } else
-            offset += sprintf(resp_buf + offset, "+QDEVINFO:\"Flash\",NULL\n");
+            offset += sprintf(resp_buf + offset, "+QDEVINFO: \"Flash\",NULL\n");
 
         memset(devinfo, 0, QUEC_INFO_LEN);
         get_file_info(QUEC_PMU_INFO,devinfo);
-        offset += sprintf(resp_buf + offset, "+QDEVINFO:\"PMIC\",%s\n", devinfo);//pmic
+        offset += sprintf(resp_buf + offset, "+QDEVINFO: \"PMIC\",%s\n", devinfo);//pmic
         if(cmd->tokens[1] && cmd->tokens[2])
-            offset += sprintf(resp_buf+offset, "+QDEVINFO:\"PA\",%s,%s", cmd->tokens[1], cmd->tokens[2]);//PA
+            offset += sprintf(resp_buf+offset, "+QDEVINFO: \"PA\",%s,%s", cmd->tokens[1], cmd->tokens[2]);//PA
         else if (cmd->tokens[1])
-            offset += sprintf(resp_buf+offset, "+QDEVINFO:\"PA\",%s", cmd->tokens[1]);//PA
+            offset += sprintf(resp_buf+offset, "+QDEVINFO: \"PA\",%s", cmd->tokens[1]);//PA
         else
-            offset += sprintf(resp_buf+offset, "+QDEVINFO:\"PA\",NULL");
+            offset += sprintf(resp_buf+offset, "+QDEVINFO: \"PA\",NULL");
         //printf("%s:%d length = %ld, resp_buf: %s", __func__, __LINE__, strlen(resp_buf), resp_buf);
     } else {
         printf("%s:%d something is wrong!\n", __func__, __LINE__);

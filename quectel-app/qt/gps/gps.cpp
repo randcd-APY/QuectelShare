@@ -5,6 +5,7 @@
 #include <QTime>
 #include <QTableView>
 #include <QStandardItemModel>
+#include "ql_cell_locator.h"
 
 
 
@@ -13,8 +14,8 @@ Location gpsloc_g;
 GnssSvNotification Gsv_g;
 bool gps_status=false;
 QStandardItemModel  *model = new QStandardItemModel();
-
-
+bool net_loc_init=false;
+ql_cell_resp resp;
 
 
 void quec_location_cb (Location loc){
@@ -77,8 +78,15 @@ void gps::on_ButtonStart_clicked()
 {
     ui->ButtonStart->setEnabled(false);
     QL_Gnss_Init(Qlc);
+    if(!net_loc_init){
+    	ql_cell_locator_init();
+	net_loc_init=true;
+    }
+    
     myThread *thread1 = new myThread;
        thread1->start();
+    ql_cell_locator_perform(&resp);
+    qDebug("lat:%f lon:%f acc:%d\n",resp.lon, resp.lat, resp.accuracy);
     ui->ButtonStop->setEnabled(true);
 }
 
@@ -88,12 +96,27 @@ void gps::gps_update()
 {
     QString str;
     QString SvType[10]={"","GPS","SBAS","GLONASS","QZSS","BEIDOW","GALILEO"};
+    int ret=0;
+    static int NetLocTime=1;
+    static int NetLocCheckGap=30;
 
-    if(gps_status)
+     
+    NetLocTime++;
+    if(net_loc_init && !(NetLocTime % NetLocCheckGap)){
+	 qDebug("NetLoc:Gap:%d\n",NetLocCheckGap);
+    	ret = ql_cell_locator_perform(&resp); 
+	qDebug("lat:%f lon:%f acc:%d\n",resp.lon, resp.lat, resp.accuracy);
+	NetLocCheckGap+=300;
+    }
+    if(gps_status ||  resp.accuracy > 0)
     {
-        str.sprintf("Fixed:LAT=%f LON=%f",gpsloc_g.latitude,gpsloc_g.longitude);
+	if(gps_status && (((resp.accuracy>0) && gpsloc_g.accuracy < resp.accuracy)|| resp.accuracy ==0) ){
+        	str.sprintf("Fixed:LAT=%f LON=%f ACC=%f",gpsloc_g.latitude,gpsloc_g.longitude,gpsloc_g.accuracy);
+		gps_status=false;
+	}else{
+		str.sprintf("Fixed:LAT=%f LON=%f ACC=%d",resp.lat,resp.lon,resp.accuracy);
+	}
         ui->label_fix->setText(str);
-	gps_status=false;
    }else{
         ui->label_fix->setText("No Fix");
     }

@@ -25,13 +25,21 @@ typedef enum {
     QL_SDK_LOG_MAX
 } QL_SDK_LOG_PRIORITY_E;
 
+#if 0
 #define QL_API_LOGV(fmt, ...) ql_log_print(__FUNCTION__, __LINE__, QL_SDK_LOG_VERBOSE, fmt, ##__VA_ARGS__)
 #define QL_API_LOGD(fmt, ...) ql_log_print(__FUNCTION__, __LINE__, QL_SDK_LOG_DEBUG,   fmt, ##__VA_ARGS__)
 #define QL_API_LOGI(fmt, ...) ql_log_print(__FUNCTION__, __LINE__, QL_SDK_LOG_INFO,    fmt, ##__VA_ARGS__)
 #define QL_API_LOGW(fmt, ...) ql_log_print(__FUNCTION__, __LINE__, QL_SDK_LOG_WARN,    fmt, ##__VA_ARGS__)
 #define QL_API_LOGE(fmt, ...) ql_log_print(__FUNCTION__, __LINE__, QL_SDK_LOG_ERROR,   fmt, ##__VA_ARGS__)
 #define QL_API_LOGF(fmt, ...) ql_log_print(__FUNCTION__, __LINE__, QL_SDK_LOG_FATAL,   fmt, ##__VA_ARGS__)
-
+#else
+#define QL_API_LOGV (printf("\n[%s:%d]",__FUNCTION__, __LINE__),printf)
+#define QL_API_LOGD (printf("\n[%s:%d]",__FUNCTION__, __LINE__),printf)
+#define QL_API_LOGI (printf("\n[%s:%d]",__FUNCTION__, __LINE__),printf)
+#define QL_API_LOGW (printf("\n[%s:%d]",__FUNCTION__, __LINE__),printf)
+#define QL_API_LOGE (printf("\n[%s:%d]",__FUNCTION__, __LINE__),printf)
+#define QL_API_LOGF (printf("\n[%s:%d]",__FUNCTION__, __LINE__),printf)
+#endif
 
 /**-------------------------------------------------------------------------------------------------
  * @brief Get file size 

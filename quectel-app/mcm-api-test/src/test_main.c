@@ -62,13 +62,14 @@ void show_group_list()
 
 extern func_api_test_t t_atc_test;
 extern func_api_test_t t_dm_test; 
-/* extern func_api_test_t t_gps_test; */
+extern func_api_test_t t_gps_test;
 extern func_api_test_t t_nw_test; 
 extern func_api_test_t t_sim_test;
 extern func_api_test_t t_data_test;
 extern func_api_test_t t_mobap_test;
 /* extern func_api_test_t t_sms_test;   */
 extern func_api_test_t t_voice_test;
+extern func_api_test_t t_dev_test;
 
 int main(int argc, char *argv[])
 {
@@ -76,13 +77,14 @@ int main(int argc, char *argv[])
 
     add_test_node(&t_atc_test);
     add_test_node(&t_dm_test); 
-    /* add_test_node(&t_gps_test); */
+    add_test_node(&t_gps_test);
     add_test_node(&t_nw_test); 
     add_test_node(&t_sim_test);
     add_test_node(&t_mobap_test);
     add_test_node(&t_data_test);
     /* add_test_node(&t_sms_test);   */
     add_test_node(&t_voice_test);
+    add_test_node(&t_dev_test);
     
     show_group_list();
     while(1)

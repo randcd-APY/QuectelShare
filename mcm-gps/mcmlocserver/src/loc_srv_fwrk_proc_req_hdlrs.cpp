@@ -45,7 +45,8 @@ qmi_csi_cb_error loc_set_ind_fwrk_proc_req_hdlr (
 
     mcm_loc_set_indications_req_msg_v01 *req;
     mcm_loc_set_indications_resp_msg_v01 resp;
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s",__FUNCTION__);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s\n",__FUNCTION__);
+    LOC_SRV_LOGI("msg id : %u\n",msg_id);
 
 
     req = (mcm_loc_set_indications_req_msg_v01*)req_c_struct;
@@ -68,6 +69,9 @@ qmi_csi_cb_error loc_set_ind_fwrk_proc_req_hdlr (
     client_info->ind_flags.xtra_report_server_ind =
                                (req->register_xtra_report_server_ind_valid &&
                                 req->register_xtra_report_server_ind);
+    LOC_SRV_LOGI("loc_ind : %d\n",req->register_location_info_ind);
+    LOC_SRV_LOGI("status_ind : %d\n",req->register_status_info_ind);
+    LOC_SRV_LOGI("nmea_ind : %d\n",req->register_nmea_info_ind);
     result = loc_set_ind_proc_req_hdlr(
                  client_info->ind_flags.loc_ind,
                  client_info->ind_flags.status_ind,
@@ -80,6 +84,7 @@ qmi_csi_cb_error loc_set_ind_fwrk_proc_req_hdlr (
                  client_info->ind_flags.ni_ind,
                  client_info->ind_flags.xtra_report_server_ind);
 
+    LOC_SRV_LOGI("alpha come here12.\n");
     resp.resp.result = MCM_RESULT_SUCCESS_V01;
     qmi_csi_send_resp(req_handle, msg_id, &resp,
                       sizeof(mcm_loc_set_indications_resp_msg_v01));
@@ -110,7 +115,7 @@ qmi_csi_cb_error loc_set_position_mode_fwrk_proc_req_hdlr (
 
     mcm_loc_set_position_mode_req_msg_v01 *req;
     mcm_loc_set_position_mode_resp_msg_v01 resp;
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s",__FUNCTION__);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s\n",__FUNCTION__);
 
 
     req = (mcm_loc_set_position_mode_req_msg_v01*)req_c_struct;
@@ -153,7 +158,7 @@ qmi_csi_cb_error loc_start_nav_fwrk_proc_req_hdlr (
     int result = 0;
     mcm_loc_start_nav_resp_msg_v01 resp;
 
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s",__FUNCTION__);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s\n",__FUNCTION__);
 
     memset(&resp, 0 ,sizeof(mcm_loc_start_nav_resp_msg_v01));
 
@@ -162,7 +167,7 @@ qmi_csi_cb_error loc_start_nav_fwrk_proc_req_hdlr (
         client_info->in_navigation++;
     }
     else {
-        LOC_SRV_LOGI("<MCM_LOC_SVC> Client(%p) already in Nav",client_info);
+        LOC_SRV_LOGI("<MCM_LOC_SVC> Client(%p) already in Nav\n",client_info);
     }
     resp.resp.result = (result == -1) ? (MCM_RESULT_FAILURE_V01)
                                   :(MCM_RESULT_SUCCESS_V01);
@@ -199,7 +204,7 @@ qmi_csi_cb_error loc_stop_nav_fwrk_proc_req_hdlr (
     loc_srv_state_info_cookie_t *srv_state_ptr =
         (loc_srv_state_info_cookie_t*)service_cookie;
 
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s",__FUNCTION__);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s\n",__FUNCTION__);
 
     memset(&resp, 0, sizeof(mcm_loc_stop_nav_resp_msg_v01));
 
@@ -260,7 +265,7 @@ qmi_csi_cb_error loc_delete_aiding_data_fwrk_proc_req_hdlr (
 
     mcm_loc_delete_aiding_data_req_msg_v01 *req;
     mcm_loc_delete_aiding_data_resp_msg_v01 resp;
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s",__FUNCTION__);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s\n",__FUNCTION__);
 
     memset(&resp, 0, sizeof(mcm_loc_delete_aiding_data_resp_msg_v01));
 
@@ -298,7 +303,7 @@ qmi_csi_cb_error loc_inject_time_fwrk_proc_req_hdlr (
     int result = 0;
     mcm_loc_inject_time_req_msg_v01 *req;
     mcm_loc_inject_time_resp_msg_v01 resp;
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s",__FUNCTION__);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s\n",__FUNCTION__);
 
     memset(&resp, 0, sizeof(mcm_loc_inject_time_resp_msg_v01));
 
@@ -340,7 +345,7 @@ qmi_csi_cb_error loc_inject_location_fwrk_proc_req_hdlr (
     int result = 0;
     mcm_loc_inject_location_req_msg_v01 *req;
     mcm_loc_inject_location_resp_msg_v01 resp;
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s",__FUNCTION__);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s\n",__FUNCTION__);
 
     memset(&resp, 0, sizeof(mcm_loc_inject_location_resp_msg_v01));
 
@@ -382,15 +387,15 @@ qmi_csi_cb_error loc_xtra_inject_data_fwrk_proc_req_hdlr (
     int result = 0;
     mcm_loc_xtra_inject_data_req_msg_v01 *req;
     mcm_loc_xtra_inject_data_resp_msg_v01 resp;
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s",__FUNCTION__);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s\n",__FUNCTION__);
 
     memset(&resp, 0, sizeof(mcm_loc_xtra_inject_data_resp_msg_v01));
 
     req = (mcm_loc_xtra_inject_data_req_msg_v01*)req_c_struct;
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s Length of Xtra Data:%d",__FUNCTION__,req->data_len);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s Length of Xtra Data:%d\n",__FUNCTION__,req->data_len);
 
     result = loc_xtra_inject_data_proc_req_hdlr(
-                 req->data,
+                 (char *)req->data,
                  req->data_len);
 
     resp.resp.result = (result == -1) ? (MCM_RESULT_FAILURE_V01)
@@ -424,7 +429,7 @@ qmi_csi_cb_error loc_agps_data_conn_open_fwrk_proc_req_hdlr (
     int result = 0;
     mcm_loc_agps_data_conn_open_req_msg_v01 *req;
     mcm_loc_agps_data_conn_open_resp_msg_v01 resp;
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s",__FUNCTION__);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s\n",__FUNCTION__);
 
     memset(&resp, 0, sizeof(mcm_loc_agps_data_conn_open_resp_msg_v01));
 
@@ -465,7 +470,7 @@ qmi_csi_cb_error loc_agps_data_conn_closed_fwrk_proc_req_hdlr (
     int result = 0;
     mcm_loc_agps_data_conn_closed_req_msg_v01 *req;
     mcm_loc_agps_data_conn_closed_resp_msg_v01 resp;
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s",__FUNCTION__);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s\n",__FUNCTION__);
 
     memset(&resp, 0, sizeof(mcm_loc_agps_data_conn_closed_resp_msg_v01));
 
@@ -503,7 +508,7 @@ qmi_csi_cb_error loc_agps_data_conn_failed_fwrk_proc_req_hdlr (
     int result = 0;
     mcm_loc_agps_data_conn_failed_req_msg_v01 *req;
     mcm_loc_agps_data_conn_failed_resp_msg_v01 resp;
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s",__FUNCTION__);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s\n",__FUNCTION__);
 
     memset(&resp, 0, sizeof(mcm_loc_agps_data_conn_failed_resp_msg_v01));
     req = (mcm_loc_agps_data_conn_failed_req_msg_v01*)req_c_struct;
@@ -540,7 +545,7 @@ qmi_csi_cb_error loc_agps_set_server_fwrk_proc_req_hdlr (
     int result = 0;
     mcm_loc_agps_set_server_req_msg_v01 *req;
     mcm_loc_agps_set_server_resp_msg_v01 resp;
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s",__FUNCTION__);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s\n",__FUNCTION__);
 
     memset(&resp, 0, sizeof(mcm_loc_agps_set_server_resp_msg_v01));
     req = (mcm_loc_agps_set_server_req_msg_v01*)req_c_struct;
@@ -580,7 +585,7 @@ qmi_csi_cb_error loc_ni_respond_fwrk_proc_req_hdlr (
     int result = 0;
     mcm_loc_ni_respond_req_msg_v01 *req;
     mcm_loc_ni_respond_resp_msg_v01 resp;
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s",__FUNCTION__);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s\n",__FUNCTION__);
 
     memset(&resp, 0, sizeof(mcm_loc_ni_respond_resp_msg_v01));
 
@@ -619,7 +624,7 @@ qmi_csi_cb_error loc_agps_ril_update_network_availability_fwrk_proc_req_hdlr (
     int result = 0;
     mcm_loc_agps_ril_update_network_availability_req_msg_v01 *req;
     mcm_loc_agps_ril_update_network_availability_resp_msg_v01 resp;
-    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s",__FUNCTION__);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> Function:%s\n",__FUNCTION__);
 
     memset(&resp, 0,
            sizeof(mcm_loc_agps_ril_update_network_availability_resp_msg_v01));

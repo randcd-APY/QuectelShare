@@ -1193,6 +1193,22 @@ fct_item_type fct_items_all[]=
         {"GPS",0},
 };
 
+fct_item_type fct_items_auto_all[]=
+//fct_item_type fct_items[]=
+{
+        {"L HEADSET",0},
+	{"R HEADSET", 0},
+        {"VIBRATOR",0},
+	{"LOUDSPEAKER", 0},
+	{"CAMERA BACK", 0},
+	{"CAMERA FRONT", 0},
+	{"HANDSET",0},
+	{"SDCARD", 0},
+        {"EMMC",0},
+	{"SIMCARD1", 0},
+	{"SIMCARD2", 0},
+};
+
  char* set_response_buf(fct_item_type *fct_items, int num)
 {
 	int i,offset=0;
@@ -1303,22 +1319,62 @@ int read_file(const char *filepath, char *buf, int size){
 
 void quec_qfct_handle(AtCmdResponse *response)
 {
-	#define FCT_RESULT_FILE	 "/data/FTM_AP/mmi.res"
+    char FCT_RESULT_FILE[64] = {0};
 	int total_items;
 	char line_text[64] = {0};
 	FILE *fp = NULL;
 	char mmi_res_name[32] = {0};
 	int  i,offset=-1;
-    int items_length = ARRARY_SIZE(fct_items_all);
+    int fct_arrary_type = 0;
+    int items_length = 0;
 	LOGI("quec_qfct_handle start\n");
-    total_items = items_length;
-    fct_item_type fct_items[total_items];        
-      
-    for(i=0; i<total_items; i++)
+          
+    if((fp=fopen("/data/FTM_AP/mmi-check","r"))!=NULL)
     {
-        fct_items[i].name = fct_items_all[i].name;
-        fct_items[i].result = 0;
+        while(fgets(line_text,64,fp)!=NULL)
+        {
+            if(strstr(line_text, "mmi-auto.res"))
+            {
+                snprintf(FCT_RESULT_FILE,64,"/data/FTM_AP/mmi-auto.res");
+                fct_arrary_type = 1;
+            }
+            else if(strstr(line_text, "mmi.res"))
+            {
+                snprintf(FCT_RESULT_FILE,64,"/data/FTM_AP/mmi.res");
+                fct_arrary_type = 0;
+            }
+        }
     }
+    else
+    {
+        snprintf(FCT_RESULT_FILE,64,"/data/FTM_AP/mmi.res");    
+    }  
+    if(fct_arrary_type == 0)
+    {
+		items_length = ARRARY_SIZE(fct_items_all);      
+	}
+    else
+    {
+		items_length = ARRARY_SIZE(fct_items_auto_all);   
+	}
+    total_items = items_length;
+    fct_item_type fct_items[total_items];
+    if(fct_arrary_type == 0)
+    {   
+        for(i=0; i<total_items; i++) 
+        {
+            fct_items[i].name = fct_items_all[i].name;
+            fct_items[i].result = 0;
+        }
+	}
+    else
+    {
+        for(i=0; i<total_items; i++) 
+        {
+            fct_items[i].name = fct_items_auto_all[i].name;
+            fct_items[i].result = 0;
+        }		
+	}
     
 	if((fp=fopen(FCT_RESULT_FILE, "r")) == NULL)
 	{

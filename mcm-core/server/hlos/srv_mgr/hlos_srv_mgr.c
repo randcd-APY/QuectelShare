@@ -71,7 +71,7 @@ int hlos_srv_mgr_get_srv_handle(int srv_id, qmi_client_type *user_handle)
         qmi_service_info    *service_info = NULL;
         uint32_t               num_services, num_entries;
         uint32_t               retry_count = 0;
-        uint32_t               retry_timeout = 1000;
+        uint32_t               retry_timeout = 300;
         int rc = QMI_NO_ERR;
         service_info = &info[0];
 
@@ -88,7 +88,7 @@ int hlos_srv_mgr_get_srv_handle(int srv_id, qmi_client_type *user_handle)
             UTIL_LOG_MSG("\n wait for %d milli seconds for server to come up\n",retry_timeout);
             QMI_CCI_OS_SIGNAL_WAIT(&os_params, retry_timeout);
             retry_count++;
-            retry_timeout = 500;
+            retry_timeout = 100;
             UTIL_LOG_MSG("\n Get service list retry - %d\n",retry_count);
         }
 
@@ -127,7 +127,7 @@ int hlos_srv_mgr_get_srv_handle(int srv_id, qmi_client_type *user_handle)
 // DESCRIPTION:
 // Query service and send indication for current available services
 //=============================================================================
-int hlos_srv_mgr_get_service(int pre_load_service)
+int hlos_srv_mgr_get_service(int mask) //-1 means pre_load_service
 {
    UTIL_LOG_MSG("hlos_srv_mgr_get_service ENTER");
 
@@ -135,7 +135,7 @@ int hlos_srv_mgr_get_service(int pre_load_service)
 
    do
    {
-      if ( TRUE == pre_load_service)
+      if (-1 == mask)
       {
          if ( NULL == user_handle[DATA_SRV])
          {
@@ -191,37 +191,37 @@ int hlos_srv_mgr_get_service(int pre_load_service)
       }
       else
       {
-         if ( ( NULL == user_handle[DATA_SRV]) ||
-              ((NULL != user_handle[DATA_SRV]) && (FALSE == user_handle_expect[DATA_SRV]))
-              )
+         if ((( NULL == user_handle[DATA_SRV]) ||
+              ((NULL != user_handle[DATA_SRV]) && (FALSE == user_handle_expect[DATA_SRV])))
+           && ( MCM_DATA_V01 & mask))
          {
              hlos_srv_mgr_get_srv_handle(MCM_DATA_V01, &user_handle[DATA_SRV]);
              user_handle_expect[DATA_SRV] = TRUE;
          }
-         if ( ( NULL == user_handle[LOC_SRV]) ||
-              ((NULL != user_handle[LOC_SRV]) && (FALSE == user_handle_expect[LOC_SRV]))
-              )
+         if ((( NULL == user_handle[LOC_SRV]) ||
+              ((NULL != user_handle[LOC_SRV]) && (FALSE == user_handle_expect[LOC_SRV])))
+           && ( MCM_LOC_V01 & mask))
          {
              hlos_srv_mgr_get_srv_handle(MCM_LOC_V01, &user_handle[LOC_SRV]);
              user_handle_expect[LOC_SRV] = TRUE;
          }
-         if ( ( NULL == user_handle[ATCOP_SRV] )||
-              ((NULL != user_handle[ATCOP_SRV]) && (FALSE == user_handle_expect[ATCOP_SRV]))
-              )
+         if ((( NULL == user_handle[ATCOP_SRV] )||
+              ((NULL != user_handle[ATCOP_SRV]) && (FALSE == user_handle_expect[ATCOP_SRV])))
+           && ( MCM_ATCOP_V01 & mask))
          {
              hlos_srv_mgr_get_srv_handle(MCM_ATCOP_V01, &user_handle[ATCOP_SRV]);
              user_handle_expect[ATCOP_SRV] = TRUE;
          }
-         if ( ( NULL == user_handle[MOBILEAP_SRV])||
-              ((NULL != user_handle[MOBILEAP_SRV]) && (FALSE == user_handle_expect[MOBILEAP_SRV]))
-              )
+         if ((( NULL == user_handle[MOBILEAP_SRV])||
+              ((NULL != user_handle[MOBILEAP_SRV]) && (FALSE == user_handle_expect[MOBILEAP_SRV])))
+           && ( MCM_MOBILEAP_V01 & mask))
          {
              hlos_srv_mgr_get_srv_handle(MCM_MOBILEAP_V01, &user_handle[MOBILEAP_SRV]);
              user_handle_expect[MOBILEAP_SRV] = TRUE;
          }
-         if ( ( NULL == user_handle[UIM_SRV]) ||
-              ((NULL != user_handle[UIM_SRV]) &&( FALSE == user_handle_expect[UIM_SRV]))
-              )
+         if ((( NULL == user_handle[UIM_SRV]) ||
+              ((NULL != user_handle[UIM_SRV]) &&( FALSE == user_handle_expect[UIM_SRV])))
+           && ( MCM_SIM_V01 & mask))
          {
              hlos_srv_mgr_get_srv_handle(MCM_SIM_V01, &user_handle[UIM_SRV]);
              user_handle_expect[UIM_SRV] = TRUE;
@@ -285,7 +285,7 @@ int hlos_srv_start_srv_if_required(int srv_id)
            {
               pid = fork();
               if (pid == 0)
-              { /* child process */
+              { // child process
                char *argv[] = {LOC_EXEC_STR_ARG, NULL};
                execv(LOC_EXEC_STR, argv);
                exit(127);
@@ -432,8 +432,48 @@ void hlos_srv_mgr_require_handle(void *event_data)
     }while(FALSE);
 
     /* Update qmi handle for each service */
-    sleep(1);
-    hlos_srv_mgr_get_service(FALSE);
+    /** add by tyler.kuang@20180503 start : check whether the services is ready */
+    do {
+        int all_ready = 0;
+        int retry_cnt = (10*1000)/100; /* waiting 10 secs */
+        while(retry_cnt>0 && !all_ready) {
+            usleep(100000);
+            retry_cnt --;
+            all_ready = 1;
+            if ( MCM_SIM_V01 & mcm_require_req->require_service) {
+                if(!mcm_get_service_is_ready(MCM_SIM_SERVICE))  {
+                    all_ready = 0;
+                    continue;
+                }
+            }
+            if ( MCM_DATA_V01 & mcm_require_req->require_service) {
+                if(!mcm_get_service_is_ready(MCM_DATA_SERVICE))  {
+                    all_ready = 0;
+                    continue;
+                }
+            }
+            if ( MCM_ATCOP_V01 & mcm_require_req->require_service) {
+                if(!mcm_get_service_is_ready(MCM_ATCOP_SERVICE))  {
+                    all_ready = 0;
+                    continue;
+                }
+            }
+            if ( MCM_LOC_V01 & mcm_require_req->require_service) {
+                if(!mcm_get_service_is_ready(MCM_LOC_SERVICE))  {
+                    all_ready = 0;
+                    continue;
+                }
+            }
+            if ( MCM_MOBILEAP_V01 & mcm_require_req->require_service) {
+                if(!mcm_get_service_is_ready(MCM_MOBILEAP_SERVICE))  {
+                    all_ready = 0;
+                    continue;
+                }
+            }
+        }
+    } while(0);
+    /** add by tyler.kuang@20180503 end */
+    hlos_srv_mgr_get_service(mcm_require_req->require_service);
 
     if(NULL != hlos_core_hlos_request_data)
     {
@@ -488,6 +528,7 @@ int hlos_srv_mgr_stop_srv_if_required(int srv_id)
            {
                write(snd_rcv_nfd[RECEIVING_THREAD_FD], SEND_STR, sizeof(SEND_STR));
                qmi_client_release(user_handle[UIM_SRV]);
+               ret_val_i = QMI_ERR_NONE_V01;
            }
            else
            {
@@ -760,7 +801,7 @@ void hlos_srv_mgr_not_require_handle(void *event_data)
 
     /* Update qmi handle for each service */
     sleep(1);
-    hlos_srv_mgr_get_service(FALSE);
+    hlos_srv_mgr_get_service(mcm_not_require_req->not_require_service);
 
     if (NULL != hlos_core_hlos_request_data)
     {

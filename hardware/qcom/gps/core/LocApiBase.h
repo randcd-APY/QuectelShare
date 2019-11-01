@@ -56,7 +56,7 @@ int decodeAddress(char *addr_string, int string_size,
     for (int i = 0; i <MAX_ADAPTERS && NULL != (adapters)[i] && !(call); i++);
 
 enum xtra_version_check {
-    DISABLED,
+    XDISABLED,
     AUTO,
     XTRA2,
     XTRA3

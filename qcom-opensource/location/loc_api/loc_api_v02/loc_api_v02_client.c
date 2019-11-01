@@ -1093,6 +1093,10 @@ bool locClientRegisterEventMask(
 
   regEventsReq.eventRegMask = eventRegMask;
   reqUnion.pRegEventsReq = &regEventsReq;
+  LOC_LOGE("alpha regEventsReq : %d\n",regEventsReq.eventRegMask);
+  if(regEventsReq.eventRegMask == 0){
+      return true;
+  }
 
   status = locClientSendReq(clientHandle,
                             QMI_LOC_REG_EVENTS_REQ_V02,

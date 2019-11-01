@@ -472,8 +472,10 @@ LocApiV02 :: open(LOC_API_ADAPTER_EVENT_MASK_T mask)
 bool LocApiV02 :: registerEventMask(locClientEventMaskType qmiMask)
 {
     // if NOT in session and NOT the Background Loc Client, adjust the mask
+    LOC_LOGd("alpha mInsession : %d \n",mInSession);
     if (!mInSession && (LocDualContext::mBgExclMask & mMask)) {
         qmiMask = adjustMaskForNoSession(qmiMask);
+	LOC_LOGd("alpha adjust.\n");
     }
     LOC_LOGd("mQmiMask=0x%" PRIx64 " qmiMask=0x%" PRIx64 "", mQmiMask, qmiMask);
     return locClientRegisterEventMask(clientHandle, qmiMask);

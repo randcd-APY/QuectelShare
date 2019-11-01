@@ -35,7 +35,7 @@ static void* loc_srv_pthread_func (void *arg) {
 //=============================================================================
 void loc_srv_location_ind (Location location){
 
-    LOC_SRV_LOGI("<MCM_LOC_SVC> HAL Indication Function:%s",__func__);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> HAL Indication Function:%s\n",__func__);
     if(loc_srv_check_location_ind_registration()) {
         loc_srv_send_location_ind(location);
     }
@@ -52,7 +52,7 @@ void loc_srv_location_ind (Location location){
 //=============================================================================
 void loc_srv_status_ind (LocGpsStatus* status){
 
-    LOC_SRV_LOGI("<MCM_LOC_SVC> HAL Indication Function:%s",__func__);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> HAL Indication Function:%s\n",__func__);
     if(loc_srv_check_status_ind_registration()) {
         loc_srv_send_status_ind(status);
     }
@@ -69,7 +69,7 @@ void loc_srv_status_ind (LocGpsStatus* status){
 //=============================================================================
 void loc_srv_sv_status_ind (GnssSvNotification gnssSvNotification){
 
-    LOC_SRV_LOGI("<MCM_LOC_SVC> HAL Indication Function:%s",__func__);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> HAL Indication Function:%s\n",__func__);
     if(loc_srv_check_sv_ind_registration()) {
         loc_srv_send_sv_status_ind(gnssSvNotification);
     }
@@ -86,7 +86,7 @@ void loc_srv_sv_status_ind (GnssSvNotification gnssSvNotification){
 //=============================================================================
 void loc_srv_nmea_ind (GnssNmeaNotification gnssNmeaNotification){
 
-    LOC_SRV_LOGI("<MCM_LOC_SVC> HAL Indication Function:%s",__func__);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> HAL Indication Function:%s\n",__func__);
     if(loc_srv_check_nmea_ind_registration()) {
         loc_srv_send_nmea_ind(gnssNmeaNotification);
     }
@@ -103,7 +103,7 @@ void loc_srv_nmea_ind (GnssNmeaNotification gnssNmeaNotification){
 //=============================================================================
 void loc_srv_set_capabilities_ind (uint32_t capabilities){
 
-   LOC_SRV_LOGI("<MCM_LOC_SVC> HAL Indication Function:%s",__func__);
+   LOC_SRV_LOGI("<MCM_LOC_SVC> HAL Indication Function:%s\n",__func__);
     if(loc_srv_check_cap_ind_registration()) {
         loc_srv_send_set_capabilities_ind(capabilities);
     }
@@ -120,7 +120,7 @@ void loc_srv_set_capabilities_ind (uint32_t capabilities){
 //=============================================================================
 void loc_srv_utc_time_req_ind (){
 
-    LOC_SRV_LOGI("<MCM_LOC_SVC> HAL Indication Function:%s",__func__);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> HAL Indication Function:%s\n",__func__);
     if(loc_srv_check_utc_req_ind_registration()) {
         loc_srv_send_utc_time_req_ind();
     }
@@ -137,7 +137,7 @@ void loc_srv_utc_time_req_ind (){
 //=============================================================================
 void loc_srv_gps_xtra_data_req_ind (){
 
-    LOC_SRV_LOGI("<MCM_LOC_SVC> HAL Indication Function:%s",__func__);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> HAL Indication Function:%s\n",__func__);
     if(loc_srv_check_xtra_data_req_ind_registration()) {
         loc_srv_send_gps_xtra_data_req_ind();
     }
@@ -156,7 +156,7 @@ void loc_srv_gps_xtra_report_server_ind (const char* server1,
                                          const char* server2,
                                          const char* server3)
 {
-    LOC_SRV_LOGI("<MCM_LOC_SVC> HAL Indication Function:%s",__func__);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> HAL Indication Function:%s\n",__func__);
     if(loc_srv_check_xtra_report_server_ind_registration()) {
         loc_srv_send_gps_xtra_report_server_ind(server1, server2, server3);
     }
@@ -173,7 +173,7 @@ void loc_srv_gps_xtra_report_server_ind (const char* server1,
 //=============================================================================
 void loc_srv_agps_status_ind (AGpsExtStatus * status) {
 
-    LOC_SRV_LOGI("<MCM_LOC_SVC> HAL Indication Function:%s",__func__);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> HAL Indication Function:%s\n",__func__);
     if(loc_srv_check_agps_status_ind_registration()) {
         loc_srv_send_agps_status_ind(status);
     }
@@ -190,7 +190,7 @@ void loc_srv_agps_status_ind (AGpsExtStatus * status) {
 //=============================================================================
 void loc_srv_gps_ni_ind (uint32_t id, GnssNiNotification gnssNiNotification){
 
-    LOC_SRV_LOGI("<MCM_LOC_SVC> HAL Indication Function:%s",__func__);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> HAL Indication Function:%s\n",__func__);
     if(loc_srv_check_ni_ind_registration()) {
         loc_srv_send_gps_ni_ind(id, gnssNiNotification);
     }
@@ -206,7 +206,7 @@ void loc_srv_gps_ni_ind (uint32_t id, GnssNiNotification gnssNiNotification){
 //       void
 //=============================================================================
 void loc_srv_gps_acquire_wakelock_ind (){
-    LOC_SRV_LOGI("<MCM_LOC_SVC> HAL Indication Function:%s",__func__);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> HAL Indication Function:%s\n",__func__);
 }
 
 //=============================================================================
@@ -219,7 +219,7 @@ void loc_srv_gps_acquire_wakelock_ind (){
 //       void
 //=============================================================================
 void loc_srv_gps_release_wakelock_ind (){
-    LOC_SRV_LOGI("<MCM_LOC_SVC> HAL Indication Function:%s",__func__);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> HAL Indication Function:%s\n",__func__);
 }
 
 //=============================================================================
@@ -237,9 +237,9 @@ pthread_t loc_srv_gps_create_thread_ind (const char *name,
 
     pthread_t thread_id;
     loc_srv_thread_start_func = start;
-    LOC_SRV_LOGI("<MCM_LOC_SVC> HAL Indication Function:%s",__func__);
+    LOC_SRV_LOGI("<MCM_LOC_SVC> HAL Indication Function:%s\n",__func__);
     if( 0 > pthread_create(&thread_id, NULL, loc_srv_pthread_func, arg) ) {
-        LOC_SRV_LOGE("<MCM_LOC_SVC> Create Thread Ind: Could not Create Thread");
+        LOC_SRV_LOGE("<MCM_LOC_SVC> Create Thread Ind: Could not Create Thread\n");
     }
     return thread_id;
 }

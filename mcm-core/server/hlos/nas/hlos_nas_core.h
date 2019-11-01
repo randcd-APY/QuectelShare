@@ -145,5 +145,11 @@ void hlos_nas_network_get_nitz_time_info_handler
     void *event_data
 );
 
+/* 2019/10/23 added by tommy.zhang */
+void hlos_nas_get_cell_info_handler
+(
+    void *event_data
+);
+
 #endif
 

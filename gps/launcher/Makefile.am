@@ -27,7 +27,7 @@ loc_launcher_LDFLAGS = -Wl,-z,defs -lpthread -shared -version-info 1:0:0
 loc_launcher_CPPFLAGS = $(AM_CFLAGS) $(AM_CPPFLAGS)
 endif
 
-loc_launcher_LDADD = -lstdc++ -ldl -llog $(LOCBASEUTIL_LIBS) $(GPSUTILS_LIBS) $(LOCMQCLIENT_LIBS)
+loc_launcher_LDADD = -lstdc++ -ldl $(LOCBASEUTIL_LIBS) $(GPSUTILS_LIBS) $(LOCMQCLIENT_LIBS)
 
 #Create and Install libraries
 bin_PROGRAMS = loc_launcher
