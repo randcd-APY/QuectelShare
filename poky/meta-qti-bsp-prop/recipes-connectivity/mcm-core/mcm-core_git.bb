@@ -8,7 +8,7 @@ SRC_URI = "file://mcm-core/"
 S = "${WORKDIR}/mcm-core/"
 SRC_DIR = "${WORKSPACE}/mcm-core/"
 
-DEPENDS = "common-headers qmi qmi-framework mcm xmllib dsutils glib-2.0 data alsa-intf diag"
+DEPENDS = "common-headers qmi qmi-framework mcm xmllib dsutils glib-2.0 data alsa-intf-msm8909 diag"
 
 EXTRA_OECONF = "--with-glib \
                 --with-common-includes=${STAGING_INCDIR} \

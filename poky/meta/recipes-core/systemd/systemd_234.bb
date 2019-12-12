@@ -43,6 +43,7 @@ SRC_URI = "git://github.com/systemd/systemd.git;protocol=git \
            file://0001-Use-uintmax_t-for-handling-rlim_t.patch \
            file://0001-core-evaluate-presets-after-generators-have-run-6526.patch \
            file://0001-main-skip-many-initialization-steps-when-running-in-.patch \
+           file://0020-fix-open-fails-with-Too-many-levels-of-symbolic-link.patch \
            "
 SRC_URI_append_qemuall = " file://0001-core-device.c-Change-the-default-device-timeout-to-2.patch"
 

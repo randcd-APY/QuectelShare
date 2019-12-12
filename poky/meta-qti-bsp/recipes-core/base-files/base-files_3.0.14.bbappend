@@ -71,7 +71,10 @@ do_install_append(){
     ln -s /mnt/sdcard ${D}/sdcard
 
     rmdir ${D}/tmp
-    ln -s /var/tmp ${D}/tmp
+    ln -sf /var/volatile/tmp ${D}/tmp
+
+    rm -f ${D}/var/tmp
+    ln -sf /var/volatile/tmp ${D}/var/tmp
 
     if [ ${BASEMACHINE} == "mdm9650" ]; then
       ln -s /etc/resolvconf/run/resolv.conf ${D}/etc/resolv.conf

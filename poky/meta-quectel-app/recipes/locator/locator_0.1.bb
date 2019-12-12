@@ -18,4 +18,8 @@ FILES_${PN} += "${libdir}/*"
 FILES_${PN} += "/usr/include/*"
 INSANE_SKIP_${PN} = "dev-deps"
 
+do_install_append() {
+   install -m 0644 -D ${WORKDIR}/quectel-app/locator/src/loc_cfg.conf ${D}${sysconfdir}/loc_cfg.conf
+}
+
 

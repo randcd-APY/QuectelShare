@@ -153,9 +153,9 @@ extern "C" void quec_qapsub_handle(const AtCmd *cmd, AtCmdResponse *response)
     }
 
     if (strlen(str) == 0) {
-        sprintf(response->response, "V01");
+        sprintf(response->response, "APSubEdition: V01");
     } else {
-        sprintf(response->response, "%s", str);
+        sprintf(response->response, "APSubEdition: %s", str);
     }
 
     response->result = 1;

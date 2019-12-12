@@ -64,7 +64,7 @@ int mcm_srv_snd_init()
     int ret = 0;
     mcm_audio_handler *tmp_audio_handler = NULL;
 
-    UTIL_LOG_MSG("Enter mcm_srv_snd_init, Audio shared Library: %s", MCM_AUDIO_SHARED_LIBRARY_NAME);
+    UTIL_LOG_MSG("ellis Enter mcm_srv_snd_init, Audio shared Library: %s.->", MCM_AUDIO_SHARED_LIBRARY_NAME);
 
     dlerror();
     library_handle = dlopen(MCM_AUDIO_SHARED_LIBRARY_NAME, RTLD_NOW);
@@ -244,8 +244,8 @@ int mcm_srv_disable_audio_stream()
 
 #include <sound/asound.h>
 
-#include <alsa-intf/alsa_ucm.h>
-#include <alsa-intf/alsa_audio.h>
+#include <alsa-intf-msm8909/alsa_ucm.h>
+#include <alsa-intf-msm8909/alsa_audio.h>
 
 /* Global data */
 static snd_use_case_mgr_t *uc_mgr;
@@ -261,6 +261,7 @@ struct snd_card_mapping
 
 static struct snd_card_mapping snd_card_mapping_list[] =
 {
+    {"msm8909-snd-card", "snd_soc_msm_9x07_Tomtom_I2S"},
     {"mdm9615-tabla-snd-card", "snd_soc_msm_I2S"},
     {"mdm9615-tabla-snd-card-i2s", "snd_soc_msm_I2S"},
     {"mdm9625-taiko-i2s-snd-card", "snd_soc_msm_Taiko_I2S"},
@@ -460,7 +461,14 @@ static int record_file(unsigned rate, unsigned channels, int fd, unsigned count,
         pcm_close(pcm);
         return -errno;
     }
-    while(1);
+    UTIL_LOG_MSG("Arec:pcm_prepare...");
+    while(1){
+        //UTIL_LOG_MSG("Aplay:voice waiting.0");
+        if(!voice_pcm){
+         return;
+         }
+    };
+
 
     bufsize = pcm->period_size;
 
@@ -626,11 +634,11 @@ static int play_file(unsigned rate, unsigned channels, int fd,
     if (channels == 1)
         flags |= PCM_MONO;
     else if (channels == 4)
-	flags |= PCM_QUAD;
+    flags |= PCM_QUAD;
     else if (channels == 6)
-	flags |= PCM_5POINT1;
+    flags |= PCM_5POINT1;
     /*else if (channels == 8)
-	flags |= PCM_7POINT1;*/
+    flags |= PCM_7POINT1;*/
     else
         flags |= PCM_STEREO;
 
@@ -700,7 +708,7 @@ static int play_file(unsigned rate, unsigned channels, int fd,
     {
        if (pcm_prepare(pcm))
        {
-           UTIL_LOG_MSG("Aplay:Failed in pcm_prepare");
+           UTIL_LOG_MSG("Aplay:Failed in pcm_prepare.0");
            pcm_close(pcm);
            return -errno;
        }
@@ -711,7 +719,14 @@ static int play_file(unsigned rate, unsigned channels, int fd,
            pcm_close(pcm);
            return -errno;
        }
-       while(1);
+       voice_pcm = pcm;
+       UTIL_LOG_MSG("Aplay:waiting.0");
+       while(1){
+           //UTIL_LOG_MSG("Aplay:voice waiting.0");
+           if(!voice_pcm){
+            return;
+            }
+       };
     }
 
     remainingData = data_sz;
@@ -720,6 +735,7 @@ static int play_file(unsigned rate, unsigned channels, int fd,
     {
         u_int8_t *dst_addr = NULL;
         struct snd_pcm_sync_ptr *sync_ptr1 = pcm->sync_ptr;
+        UTIL_LOG_MSG("Aplay:if");
         if (mmap_buffer(pcm))
         {
             UTIL_LOG_MSG("Aplay:params setting failed");
@@ -728,7 +744,7 @@ static int play_file(unsigned rate, unsigned channels, int fd,
         }
         if (pcm_prepare(pcm))
         {
-            UTIL_LOG_MSG("Aplay:Failed in pcm_prepare");
+            UTIL_LOG_MSG("Aplay:Failed in pcm_prepare.1");
             pcm_close(pcm);
             return -errno;
         }
@@ -747,7 +763,7 @@ static int play_file(unsigned rate, unsigned channels, int fd,
             {
                 if (pcm_prepare(pcm))
                 {
-                    UTIL_LOG_MSG("Aplay:Failed in pcm_prepare");
+                    UTIL_LOG_MSG("Aplay:Failed in pcm_prepare.2");
                     pcm_close(pcm);
                     return -errno;
                 }
@@ -900,9 +916,10 @@ start_done:
     }//if (flags & PCM_MMAP)
     else
     {
+        UTIL_LOG_MSG("Aplay:else");
         if (pcm_prepare(pcm))
         {
-            UTIL_LOG_MSG("Aplay:Failed in pcm_prepare");
+            UTIL_LOG_MSG("Aplay:Failed in pcm_prepare.4");
             pcm_close(pcm);
             return -errno;
         }
@@ -1022,12 +1039,16 @@ static int play_wav(const char *fg, int rate, int ch, const char *device, const 
             UTIL_LOG_MSG("aplay: Playing '%s':%s", fn, cformat);
         }
 
+        UTIL_LOG_MSG("aplay: Playing parameter->'hdr.sample_rate:%d,hdr.num_channels:%d';device:%s,hdr.data_sz:%d", hdr.sample_rate, hdr.num_channels, device, hdr.data_sz);
+
         err = play_file(hdr.sample_rate, hdr.num_channels, fd, flag, device, hdr.data_sz, pcm);
     }while(0);
 
     if (0 != err)
     {
        UTIL_LOG_MSG("failed to play file: %d", err);
+    }else{
+       UTIL_LOG_MSG("succeed to play file: %d", err);
     }
     return err;
 }
@@ -1035,18 +1056,23 @@ static int play_wav(const char *fg, int rate, int ch, const char *device, const 
 static void play_voice_thrd()
 {
     pcm_flag = 0;
-    return play_wav("N", 44100, 2, "hw:0,2", "dummy", audio_pcm);
+    UTIL_LOG_MSG("play_voice_thrd Start..->change 0,0,0");
+    return play_wav("N", 44100, 1, "hw:0,34", "dummy", voice_pcm);//voice_pcm,audio_pcm
+    //return play_wav("N", 44100, 1, "hw:0,34", "dummy", audio_pcm);
 }
 
 static void play_audio_thrd()
 {
     pcm_flag = 1;
-    return play_wav("N", 44100, 2, "hw:0,0", "/usr/bin/test_11.wav", voice_pcm);
+    UTIL_LOG_MSG("play_audio_thrd Start..->change audio");
+    return play_wav("N", 44100, 2, "hw:0,0", "/etc/mmi/qualsound.wav", audio_pcm);//voice_pcm,audio_pcm
+    //return play_wav("N", 44100, 2, "hw:0,0", "/etc/mmi/qualsound.wav", voice_pcm);
 }
 
 static void rec_voice_thrd()
 {
-    record_file(44100, 2, 0, 2147483648LL, PCM_NMMAP, "hw:0,2");
+    UTIL_LOG_MSG("rec_voice_thrd Start..->rec voice");
+    record_file(44100, 1, 0, 2147483648LL, PCM_NMMAP, "hw:0,34");
 }
 
 static void play_voice()
@@ -1080,7 +1106,7 @@ static int mcm_srv_enable_voice_stream()
 {
     int err = 0;
 
-    UTIL_LOG_MSG("mcm_srv_enable_voice_stream ENTER");
+    UTIL_LOG_MSG("mcm_srv_enable_voice_stream ENTER.");
     do
     {
         if (NULL == uc_mgr)
@@ -1097,7 +1123,8 @@ static int mcm_srv_enable_voice_stream()
            break;
        }
 
-       err = snd_use_case_set(uc_mgr, "_enadev", "Headphones");
+       //err = snd_use_case_set(uc_mgr, "_enadev", "Headphones");
+       err = snd_use_case_set(uc_mgr, "_enadev", "Earpiece");
        if ( err < 0)
        {
            UTIL_LOG_MSG(" failed to use_case_set enadev Headphone err:%d", err);
@@ -1105,7 +1132,8 @@ static int mcm_srv_enable_voice_stream()
            break;
        }
 
-       err = snd_use_case_set(uc_mgr, "_enadev", "Headset");
+       //err = snd_use_case_set(uc_mgr, "_enadev", "Headset");
+       err = snd_use_case_set(uc_mgr, "_enadev", "Handset");
        if ( err < 0)
        {
            UTIL_LOG_MSG(" failed to use_case_set enadev Headset err:%d", err);
@@ -1115,6 +1143,7 @@ static int mcm_srv_enable_voice_stream()
        play_voice();
 
        sleep(2);
+       UTIL_LOG_MSG("play voice->rec voice");
        rec_voice();
     }while (0); 
 
@@ -1137,14 +1166,18 @@ static int mcm_srv_enable_audio_stream()
         }
 
         err = snd_use_case_set(uc_mgr, "_verb\0", "HiFi");
+        //err = snd_use_case_set(uc_mgr, "_verb\0", "Play Music");
+        
         if (err < 0)
         {
             UTIL_LOG_MSG(" failed to use_case_set _verb err:%d", err);
             err = 1;
             break;
         }
+        UTIL_LOG_MSG("set check err:%d", err);
 
-        err = snd_use_case_set(uc_mgr, "_enadev", "Headphones");
+        //err = snd_use_case_set(uc_mgr, "_enadev", "Headphones");
+        err = snd_use_case_set(uc_mgr, "_enadev", "Speaker");
         if ( err < 0)
         {
             UTIL_LOG_MSG(" failed to use_case_set enadev Headphone err:%d", err);
@@ -1178,7 +1211,8 @@ static int mcm_srv_disable_audio_stream()
             break;
         }
 
-        err = snd_use_case_set(uc_mgr, "_disdev", "Headphones");
+        //err = snd_use_case_set(uc_mgr, "_disdev", "Headphones");
+        err = snd_use_case_set(uc_mgr, "_disdev", "Speaker");
         if ( err < 0)
         {
             UTIL_LOG_MSG(" failed to use_case_set enadev Headphone err:%d", err);
@@ -1202,9 +1236,21 @@ static int mcm_srv_disable_voice_stream()
         {
             UTIL_LOG_MSG("voice_pcm not NULL, close it");
             pcm_close(voice_pcm);
+            voice_pcm = NULL;
+        }else{
+            UTIL_LOG_MSG("voice_pcm is NULL, not need to close it");
+        }
+        if (pcm != NULL)
+        {
+            UTIL_LOG_MSG("voice_rec_pcm not NULL, close it");
+            pcm_close(pcm);
+            pcm = NULL;
+        }else{
+            UTIL_LOG_MSG("voice_rec_pcm is NULL, not need to close it");
         }
 
-        err = snd_use_case_set(uc_mgr, "_disdev", "Headphones");
+        //err = snd_use_case_set(uc_mgr, "_disdev", "Headphones");
+        err = snd_use_case_set(uc_mgr, "_disdev", "Earpiece");
         if ( err < 0)
         {
             UTIL_LOG_MSG(" failed to use_case_set disdev Headphone err:%d", err);
@@ -1212,7 +1258,8 @@ static int mcm_srv_disable_voice_stream()
             break;
         }
 
-        err = snd_use_case_set(uc_mgr, "_disdev", "Headset");
+        //err = snd_use_case_set(uc_mgr, "_disdev", "Headset");
+        err = snd_use_case_set(uc_mgr, "_disdev", "Handset");
         if ( err < 0)
         {
             UTIL_LOG_MSG(" failed to use_case_set disdev Headset err:%d", err);
@@ -1346,6 +1393,7 @@ static int mcm_srv_snd_init()
     int ret = 0;
     char *ucm_sound_card_name = NULL;
     int tries = 0;
+    UTIL_LOG_MSG("ellis ifdef-->>mcm_srv_snd_init.");
 
     do
     {
@@ -1367,8 +1415,8 @@ static int mcm_srv_snd_init()
                 sleep(MCM_SRV_AUDIO_OPEN_WAIT);
                 continue;
             }
-
-            UTIL_LOG_MSG("ucm_sound_card_name:%s", ucm_sound_card_name);
+            ucm_sound_card_name = "snd_soc_msm_9x07_Tomtom_I2S";
+            UTIL_LOG_MSG("ucm_sound_card_name:%s.->20191030", ucm_sound_card_name);
             ret = snd_use_case_mgr_open(&uc_mgr, ucm_sound_card_name);
 
             if (ret != 0)
@@ -1403,6 +1451,8 @@ mcm_audio_handler the_audio_handler =
 };
 mcm_audio_handler * get_audio_handler()
 {
+    UTIL_LOG_MSG("ellis ifdef-->>get_audio_handler");
+
     return &the_audio_handler;
 }
 

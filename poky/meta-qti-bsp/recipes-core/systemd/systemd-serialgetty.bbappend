@@ -5,7 +5,7 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/systemd-serialgetty:"
 SRC_URI_remove = "file://serial-getty@.service"
 SRC_URI_append = " file://serial-getty@ttyDEV.service"
 
-SERIAL_CONSOLES ?= "115200 ttyHSL0"
+SERIAL_CONSOLES ?= "ttyHSL0"
 
 # Override default do_install, QTI targets support only one baudrate per ttydevice
 do_install() {

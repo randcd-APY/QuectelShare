@@ -162,6 +162,35 @@ static int csr_write_bd_addr(int dd, bdaddr_t *bdaddr)
 	return 0;
 }
 
+#define OCF_NVM_ACCESS_CODE 0x000B
+#define EDL_NVM_ACCESS_SET_REQ_CMD 0x01
+typedef struct {
+uint8_t req_cmd;
+uint8_t tag_id;
+uint8_t size;
+bdaddr_t bdaddr;
+} __attribute__ ((packed)) qca_write_bd_addr_cp;
+
+static int qca_write_bd_addr(int dd, bdaddr_t *bdaddr)
+{
+	struct hci_request rq;
+	qca_write_bd_addr_cp cp;
+
+	memset(&cp, 0, sizeof(cp));
+	cp.req_cmd = EDL_NVM_ACCESS_SET_REQ_CMD;
+	cp.tag_id = 0x02; /* tag ID */
+	cp.size = sizeof(bdaddr_t);
+	bacpy(&cp.bdaddr, bdaddr);
+
+	if(hci_send_cmd(dd, OGF_VENDOR_CMD, OCF_NVM_ACCESS_CODE, sizeof(cp), &cp) < 0)
+           return -1;
+
+    if (hci_send_cmd(dd, 0x03, 0x03, 0, NULL)<0)
+		return -1;
+
+	return 0;
+}
+
 static int csr_reset_device(int dd)
 {
 	unsigned char cmd[] = { 0x02, 0x00, 0x09, 0x00,
@@ -316,6 +345,7 @@ static struct {
 	{ 48,		st_write_bd_addr,	generic_reset_device	},
 	{ 57,		ericsson_write_bd_addr,	generic_reset_device	},
 	{ 72,		mrvl_write_bd_addr,	generic_reset_device	},
+	{ 29,		qca_write_bd_addr,	generic_reset_device	},
 	{ 65535,	NULL,			NULL			},
 };
 
@@ -475,5 +505,5 @@ int main(int argc, char *argv[])
 	printf("\n");
 	fprintf(stderr, "Unsupported manufacturer\n");
 
-	exit(1);
+	return 1;
 }

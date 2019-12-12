@@ -15,7 +15,8 @@ FILES_SOLIBSDEV = ""
 
 do_install() {
     install -d ${D}${libdir}
-    install -m 0755 lib/* ${D}${libdir}
+    #install -m 0755 lib/* ${D}${libdir}
+    cp -a lib/* ${D}${libdir}
 }
 
 do_compile() {

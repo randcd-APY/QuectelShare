@@ -11,6 +11,7 @@ After=thermal-engine.service
 [Service]
 Type=simple
 EnvironmentFile=-/etc/environment
+ExecStartPre=/bin/sleep 10
 ExecStart=/usr/bin/FCT
 Restart=no
 

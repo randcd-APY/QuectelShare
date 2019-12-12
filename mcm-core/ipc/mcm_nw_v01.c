@@ -785,9 +785,9 @@ static const qmi_idl_type_table_entry  mcm_nw_type_table_v01[] = {
     @{
 */
 
-  //{sizeof(mcm_nw_gsm_info_t_v01), mcm_nw_gsm_info_t_data_v01},
-  //{sizeof(mcm_nw_umts_info_t_v01), mcm_nw_umts_info_t_data_v01},
-  //{sizeof(mcm_nw_lte_info_t_v01), mcm_nw_lte_info_t_data_v01},
+  {sizeof(mcm_nw_gsm_info_t_v01), mcm_nw_gsm_info_t_data_v01},
+  {sizeof(mcm_nw_umts_info_t_v01), mcm_nw_umts_info_t_data_v01},
+  {sizeof(mcm_nw_lte_info_t_v01), mcm_nw_lte_info_t_data_v01},
 
 /** 
     @}
@@ -808,9 +808,9 @@ static const qmi_idl_type_table_entry  mcm_nw_type_table_v01[] = {
     @{
 */
 
-  {sizeof(mcm_nw_gsm_info_t_v01), mcm_nw_gsm_info_t_data_v01},
-  {sizeof(mcm_nw_umts_info_t_v01), mcm_nw_umts_info_t_data_v01},
-  {sizeof(mcm_nw_lte_info_t_v01), mcm_nw_lte_info_t_data_v01},
+ // {sizeof(mcm_nw_gsm_info_t_v01), mcm_nw_gsm_info_t_data_v01},
+ // {sizeof(mcm_nw_umts_info_t_v01), mcm_nw_umts_info_t_data_v01},
+ // {sizeof(mcm_nw_lte_info_t_v01), mcm_nw_lte_info_t_data_v01},
 
 /** 
     @}

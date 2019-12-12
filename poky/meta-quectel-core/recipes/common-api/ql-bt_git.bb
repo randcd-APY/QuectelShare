@@ -8,7 +8,7 @@ SRC_URI = "file://quectel-core/ql-bt"
 SRC_DIR = "${WORKSPACE}/quectel-core/ql-bt"
 S = "${WORKDIR}/quectel-core/ql-bt"
 
-DEPENDS = "btvendorhal"
+DEPENDS = "btvendorhal libcutils"
 
 
 FILES_${PN} += "${libdir}/" 

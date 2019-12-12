@@ -66,10 +66,10 @@ void sock_connect(){
     cout << "lxzha sock connect" << endl;
     if(position != -1){
         strcpy(addr_temp,AD[position]);
-        QL_BT_socket(addr_temp);
+        QL_BT_socket_connect(addr_temp);
     }else{
         strcpy(addr_temp,addr);
-        QL_BT_socket(addr_temp);
+        QL_BT_socket_connect(addr_temp);
     }
     w->updateConnState(0);
 }

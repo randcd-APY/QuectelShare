@@ -1933,6 +1933,7 @@ static int calculate_soc_from_voltage(struct qpnp_bms_chip *chip)
 {
 	int voltage_range_uv, voltage_remaining_uv, voltage_based_soc;
 	int rc, vbat_uv;
+	int status = get_battery_status(chip);
 
 	/* check if we have the averaged fifo data */
 	if (chip->voltage_soc_uv) {
@@ -1952,13 +1953,60 @@ static int calculate_soc_from_voltage(struct qpnp_bms_chip *chip)
 	voltage_based_soc = voltage_remaining_uv * 100 / voltage_range_uv;
 
 	voltage_based_soc = clamp(voltage_based_soc, 0, 100);
-
+	/*add soc change by pamul start*/
+	pr_err("quectel--voltage_based_soc=%d,chip->prev_voltage_based_soc=%d\n",voltage_based_soc,chip->prev_voltage_based_soc);
+	if((status == POWER_SUPPLY_STATUS_CHARGING) && chip->bms_psy_registered){
+		if(chip->prev_voltage_based_soc > voltage_based_soc)  //Prevent the charge from dropping
+			voltage_based_soc = chip->prev_voltage_based_soc;
+		else if(chip->prev_voltage_based_soc  < voltage_based_soc -1){//{//Prevent charging power from jumping
+				++chip->prev_voltage_based_soc;
+				voltage_based_soc = chip->prev_voltage_based_soc;
+				//schedule_delayed_work(&chip->voltage_soc_jump_work,msecs_to_jiffies(10000));
+				pr_err("update bms_psy-0,chip->prev_voltage_based_soc=%d\n",chip->prev_voltage_based_soc);
+				power_supply_changed(&chip->bms_psy);	
+		}
+		else if(chip->prev_voltage_based_soc == voltage_based_soc -1){
+				chip->prev_voltage_based_soc = voltage_based_soc;
+				pr_err("update bms_psy-1,chip->prev_voltage_based_soc=%d\n",chip->prev_voltage_based_soc);
+				power_supply_changed(&chip->bms_psy);
+		}
+			//}	
+	}
+	else if((status == POWER_SUPPLY_STATUS_DISCHARGING) && chip->bms_psy_registered){
+		if(chip->prev_voltage_based_soc < voltage_based_soc)
+			voltage_based_soc = chip->prev_voltage_based_soc ;
+		else if(chip->prev_voltage_based_soc > voltage_based_soc +1){
+				--chip->prev_voltage_based_soc;
+				voltage_based_soc = chip->prev_voltage_based_soc;
+				pr_err("update bms_psy-2,chip->prev_voltage_based_soc=%d\n",chip->prev_voltage_based_soc);
+				power_supply_changed(&chip->bms_psy);
+				//schedule_delayed_work(&chip->voltage_soc_jump_work,msecs_to_jiffies(60000));
+				
+		}
+		else if(chip->prev_voltage_based_soc == voltage_based_soc +1){
+				chip->prev_voltage_based_soc = voltage_based_soc;
+				pr_err("update bms_psy-3,chip->prev_voltage_based_soc=%d\n",chip->prev_voltage_based_soc);
+				power_supply_changed(&chip->bms_psy);
+		}
+			//}
+	}
+	else {
+			if (chip->prev_voltage_based_soc != voltage_based_soc
+					&& chip->bms_psy_registered) {
+			pr_err("update bms_psy\n");
+			power_supply_changed(&chip->bms_psy);
+		}
+		chip->prev_voltage_based_soc = voltage_based_soc;
+	}
+#if 0
 	if (chip->prev_voltage_based_soc != voltage_based_soc
 				&& chip->bms_psy_registered) {
 		pr_debug("update bms_psy\n");
 		power_supply_changed(&chip->bms_psy);
 	}
 	chip->prev_voltage_based_soc = voltage_based_soc;
+#endif
+/*add soc change by pamul end*/
 
 	pr_debug("vbat used = %duv\n", vbat_uv);
 	pr_debug("Calculated voltage based soc=%d\n", voltage_based_soc);

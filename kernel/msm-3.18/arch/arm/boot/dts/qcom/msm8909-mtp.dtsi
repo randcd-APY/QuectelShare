@@ -29,6 +29,11 @@
 		compatible = "gpio-user-ctrl";
 		reg = <0x1000000 0x800000>;
 	};
+	
+	 gpio-clock {	
+               compatible = "qcom,gpio_clk";	
+               pwm-gpio = <31>;	
+	};
 };
 
 &soc {

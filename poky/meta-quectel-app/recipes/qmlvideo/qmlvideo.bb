@@ -38,6 +38,8 @@ do_install() {
 	install -d ${D}${includedir}/qt5
 	install -d ${D}${libdir}/qt5/qml/QtMultimedia
 	install -d ${D}${bindir}
+	cp -f lib/libQt5Multimedia.so* ${D}${libdir}/qt5/qml/QtMultimedia/
+	cp -f lib/libQt5MultimediaQuick_p.so* ${D}${libdir}/qt5/qml/QtMultimedia/
 	cp -f examples/multimedia/video/qmlvideo/qmlvideo ${D}${bindir}/
 	cp -f qml/QtMultimedia/libdeclarative_multimedia.so ${D}${libdir}/qt5/qml/QtMultimedia
 	cp -f qml/QtMultimedia/qmldir ${D}${libdir}/qt5/qml/QtMultimedia

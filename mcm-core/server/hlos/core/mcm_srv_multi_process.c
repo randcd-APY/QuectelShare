@@ -741,13 +741,14 @@ int main(void)
     ret_val = Diag_LSM_Init(NULL);
     if ( !ret_val )
     {
-        UTIL_LOG_MSG("Failed to initialize DIAG interface for RIL service login");
+        printf("Failed to initialize DIAG interface for RIL service login");
         exit(1);
     }
 
-    UTIL_LOG_MSG("Initializing audio... ");
+    printf("Initializing audio... ");
+	RIL_LOG_WARN("Initializing audio....");
     mcm_srv_snd_init();
-    UTIL_LOG_MSG("Done.\n");
+    RIL_LOG_WARN("Done.\n");
 
     mcm_srv_qmi_client_init();
 
@@ -755,7 +756,7 @@ int main(void)
 
     if ( -1 == ret_val)
     {
-       UTIL_LOG_MSG("Failed to create socket\n");
+       RIL_LOG_WARN("Failed to create socket\n");
        exit(1);
     }
     /* start srv_manager service */

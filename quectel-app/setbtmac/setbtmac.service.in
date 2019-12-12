@@ -1,0 +1,11 @@
+[Unit]
+Description=Set Bt MAC
+DefaultDependencies=no
+After=btproperty.service qmuxd.service mcmat.service
+
+[Service]
+Restart=no
+ExecStart=/usr/bin/setbtmac
+
+[Install]
+WantedBy=multi-user.target

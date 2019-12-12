@@ -188,7 +188,7 @@ void hlos_voice_ind_hdlr_all_call_status_ind()
        for (i=0; i<call_list_ptr->num_of_calls; i++)
        {
            call_obj_ptr = call_list_ptr->calls_dptr[i];
-
+		   UTIL_LOG_MSG("call_obj_ptr->cri_call_state is-%d",call_obj_ptr->cri_call_state);
            if (NULL == call_obj_ptr)
            {
                UTIL_LOG_MSG("call_obj_ptr is NULL");
@@ -207,6 +207,12 @@ void hlos_voice_ind_hdlr_all_call_status_ind()
            if (CRI_VOICE_CALL_STATE_END == call_obj_ptr->cri_call_state)
            {
                cri_voice_delete_call_obj(call_obj_ptr);
+			   if (1 == audio_enabled)
+	           {
+	              UTIL_LOG_MSG("\n\n DIAL_ANSWER CRI_VOICE_CALL_STATE_END\n");
+	              mcm_srv_disable_audio_stream();
+	              audio_enabled = 0;
+	           }
            }
            if (j >= MCM_MAX_VOICE_CALLS_V01)
            {
@@ -1666,8 +1672,7 @@ void hlos_voice_auto_answer_needed()
    cri_voice_answer_request_type    cri_answer_req;
 
 
-   UTIL_LOG_MSG("\n\n\n auto_answer_enabled:%d\n\n", auto_answer_enabled);
-
+   UTIL_LOG_MSG("\n\n\n auto_answer_enabled:%d,audio_enabled:%d,audio_enabled:%d\n\n", auto_answer_enabled, audio_enabled, voice_enabled);
    timeout.tv_sec = auto_answer_timer;
 
    if (1 == auto_answer_enabled )

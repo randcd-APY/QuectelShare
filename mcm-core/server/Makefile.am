@@ -147,6 +147,6 @@ pkgconfigdir = $(libdir)/pkgconfig
 if USE_AUDIO
 libmcm_srv_audio_la_SOURCES = hlos/core/mcm_srv_audio.c
 libmcm_srv_audio_la_CPPFLAGS = -Dstrlcat=g_strlcat -Dstrlcpy=g_strlcpy -DMCM_AUDIO_SHARED_LIBRARY $(AM_CPPFLAGS)
-libmcm_srv_audio_la_LIBADD = -lpthread -lm -lalsa_intf $(DIAG_FLAGS) @GLIB_LIBS@
+libmcm_srv_audio_la_LIBADD = -lpthread -lm -lalsa_intf_msm8909 $(DIAG_FLAGS) @GLIB_LIBS@
 endif
 EXTRA_DIST = $(pkgconfig_DATA)

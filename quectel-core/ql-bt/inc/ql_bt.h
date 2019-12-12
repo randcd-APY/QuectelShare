@@ -17,9 +17,11 @@ void QL_BT_scan();
 
 void QL_BT_unscan();
 
-void QL_BT_pair(char *p);
+void QL_BT_pair(char *remote_address);
 
-void QL_BT_socket(char *p);
+int QL_BT_socket_connect(char *remote_address);
+
+int QL_BT_socket_listen(char *server_name);
 
 void QL_BT_set_scan_cb(void (*p)(const char *ap,const char*address));
 

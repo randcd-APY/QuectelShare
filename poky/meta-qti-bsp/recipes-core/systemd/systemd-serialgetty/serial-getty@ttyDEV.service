@@ -41,7 +41,8 @@ IgnoreOnIsolate=yes
 
 [Service]
 Environment="TERM=console"
-ExecStart=-/sbin/agetty -8 -L @TERMINAL@ @BAUDRATE@ $TERM
+#ExecStart=-/sbin/agetty -8 -L @TERMINAL@ @BAUDRATE@ $TERM
+ExecStart=-/sbin/agetty --autologin root -8 -L ttyHSL0 ttyHSL0 $TERM
 Type=idle
 Restart=always
 RestartSec=0

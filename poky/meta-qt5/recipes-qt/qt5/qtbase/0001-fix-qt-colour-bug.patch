@@ -1,0 +1,200 @@
+From 7881595c94f9d503382f0ea93c5d6ea9af42c8d2 Mon Sep 17 00:00:00 2001
+From: "tommy.zhang" <tommy.zhang@quectel.com>
+Date: Mon, 11 Nov 2019 10:05:44 +0800
+Subject: [PATCH] fix qt colour bug
+
+Change-Id: I75e989f45486f791dfbbe4824e5f9cc016150308
+---
+ src/plugins/platforms/linuxfb/qlinuxfbscreen.cpp | 74 +++++++++++++++++-------
+ src/plugins/platforms/linuxfb/qlinuxfbscreen.h   |  1 +
+ 2 files changed, 55 insertions(+), 20 deletions(-)
+
+diff --git a/src/plugins/platforms/linuxfb/qlinuxfbscreen.cpp b/src/plugins/platforms/linuxfb/qlinuxfbscreen.cpp
+index c85817e..15fc87d 100644
+--- a/src/plugins/platforms/linuxfb/qlinuxfbscreen.cpp
++++ b/src/plugins/platforms/linuxfb/qlinuxfbscreen.cpp
+@@ -65,6 +65,11 @@
+ 
+ QT_BEGIN_NAMESPACE
+ 
++typedef struct {
++    QImage::Format format;
++    bool swapRgb;
++} FbFormat;
++
+ static int openFramebufferDevice(const QString &dev)
+ {
+     int fd = -1;
+@@ -157,12 +162,15 @@ static QSizeF determinePhysicalSize(const fb_var_screeninfo &vinfo, const QSize
+     return QSize(mmWidth, mmHeight);
+ }
+ 
+-static QImage::Format determineFormat(const fb_var_screeninfo &info, int depth)
++static FbFormat determineFormat(const fb_var_screeninfo &info, int depth)
+ {
+     const fb_bitfield rgba[4] = { info.red, info.green,
+                                   info.blue, info.transp };
+ 
+-    QImage::Format format = QImage::Format_Invalid;
++    //QImage::Format format = QImage::Format_Invalid;
++    FbFormat fbFormat;
++    fbFormat.format = QImage::Format_Invalid;
++    fbFormat.swapRgb = false;
+ 
+     switch (depth) {
+     case 32: {
+@@ -171,11 +179,15 @@ static QImage::Format determineFormat(const fb_var_screeninfo &info, int depth)
+         const fb_bitfield abgr8888[4] = {{0, 8, 0}, {8, 8, 0},
+                                          {16, 8, 0}, {24, 8, 0}};
+         if (memcmp(rgba, argb8888, 4 * sizeof(fb_bitfield)) == 0) {
+-            format = QImage::Format_ARGB32;
++            //format = QImage::Format_ARGB32;
++	      fbFormat.format = QImage::Format_ARGB32;
+         } else if (memcmp(rgba, argb8888, 3 * sizeof(fb_bitfield)) == 0) {
+-            format = QImage::Format_RGB32;
++            //format = QImage::Format_RGB32;
++	      fbFormat.format = QImage::Format_RGB32;
+         } else if (memcmp(rgba, abgr8888, 3 * sizeof(fb_bitfield)) == 0) {
+-            format = QImage::Format_RGB32;
++            //format = QImage::Format_RGB32;
++	    fbFormat.format = QImage::Format_RGB32;
++            fbFormat.swapRgb = true;
+             // pixeltype = BGRPixel;
+         }
+         break;
+@@ -186,9 +198,12 @@ static QImage::Format determineFormat(const fb_var_screeninfo &info, int depth)
+         const fb_bitfield bgr888[4] = {{0, 8, 0}, {8, 8, 0},
+                                        {16, 8, 0}, {0, 0, 0}};
+         if (memcmp(rgba, rgb888, 3 * sizeof(fb_bitfield)) == 0) {
+-            format = QImage::Format_RGB888;
++            //format = QImage::Format_RGB888;
++		fbFormat.format = QImage::Format_RGB888;
+         } else if (memcmp(rgba, bgr888, 3 * sizeof(fb_bitfield)) == 0) {
+-            format = QImage::Format_RGB888;
++            //format = QImage::Format_RGB888;
++		fbFormat.format = QImage::Format_RGB888;
++            fbFormat.swapRgb = true;
+             // pixeltype = BGRPixel;
+         }
+         break;
+@@ -196,8 +211,10 @@ static QImage::Format determineFormat(const fb_var_screeninfo &info, int depth)
+     case 18: {
+         const fb_bitfield rgb666[4] = {{12, 6, 0}, {6, 6, 0},
+                                        {0, 6, 0}, {0, 0, 0}};
+-        if (memcmp(rgba, rgb666, 3 * sizeof(fb_bitfield)) == 0)
+-            format = QImage::Format_RGB666;
++        if (memcmp(rgba, rgb666, 3 * sizeof(fb_bitfield)) == 0){
++            //format = QImage::Format_RGB666;
++		fbFormat.format = QImage::Format_RGB666;
++	}
+         break;
+     }
+     case 16: {
+@@ -206,9 +223,12 @@ static QImage::Format determineFormat(const fb_var_screeninfo &info, int depth)
+         const fb_bitfield bgr565[4] = {{0, 5, 0}, {5, 6, 0},
+                                        {11, 5, 0}, {0, 0, 0}};
+         if (memcmp(rgba, rgb565, 3 * sizeof(fb_bitfield)) == 0) {
+-            format = QImage::Format_RGB16;
++            //format = QImage::Format_RGB16;
++		fbFormat.format = QImage::Format_RGB16;
+         } else if (memcmp(rgba, bgr565, 3 * sizeof(fb_bitfield)) == 0) {
+-            format = QImage::Format_RGB16;
++            //format = QImage::Format_RGB16;
++		fbFormat.format = QImage::Format_RGB16;
++            fbFormat.swapRgb = true;
+             // pixeltype = BGRPixel;
+         }
+         break;
+@@ -219,9 +239,12 @@ static QImage::Format determineFormat(const fb_var_screeninfo &info, int depth)
+         const fb_bitfield bgr1555[4] = {{0, 5, 0}, {5, 5, 0},
+                                         {10, 5, 0}, {15, 1, 0}};
+         if (memcmp(rgba, rgb1555, 3 * sizeof(fb_bitfield)) == 0) {
+-            format = QImage::Format_RGB555;
++            //format = QImage::Format_RGB555;
++		fbFormat.format = QImage::Format_RGB555;
+         } else if (memcmp(rgba, bgr1555, 3 * sizeof(fb_bitfield)) == 0) {
+-            format = QImage::Format_RGB555;
++            //format = QImage::Format_RGB555;
++		fbFormat.format = QImage::Format_RGB555;
++            fbFormat.swapRgb = true;
+             // pixeltype = BGRPixel;
+         }
+         break;
+@@ -229,20 +252,24 @@ static QImage::Format determineFormat(const fb_var_screeninfo &info, int depth)
+     case 12: {
+         const fb_bitfield rgb444[4] = {{8, 4, 0}, {4, 4, 0},
+                                        {0, 4, 0}, {0, 0, 0}};
+-        if (memcmp(rgba, rgb444, 3 * sizeof(fb_bitfield)) == 0)
+-            format = QImage::Format_RGB444;
++        if (memcmp(rgba, rgb444, 3 * sizeof(fb_bitfield)) == 0){
++            //format = QImage::Format_RGB444;
++		fbFormat.format = QImage::Format_RGB444;
++	}
+         break;
+     }
+     case 8:
+         break;
+     case 1:
+-        format = QImage::Format_Mono; //###: LSB???
++        //format = QImage::Format_Mono; //###: LSB???
++	fbFormat.format = QImage::Format_Mono;
+         break;
+     default:
+         break;
+     }
+ 
+-    return format;
++	return fbFormat;
++    //return format;
+ }
+ 
+ static int openTtyDevice(const QString &device)
+@@ -287,7 +314,7 @@ static void blankScreen(int fd, bool on)
+ }
+ 
+ QLinuxFbScreen::QLinuxFbScreen(const QStringList &args)
+-    : mArgs(args), mFbFd(-1), mTtyFd(-1), mBlitter(0)
++    : mArgs(args), mFbFd(-1), mTtyFd(-1), mBlitter(0), mSwapRgb(false)
+ {
+     mMmap.data = 0;
+ }
+@@ -373,7 +400,10 @@ bool QLinuxFbScreen::initialize()
+     mBytesPerLine = finfo.line_length;
+     QRect geometry = determineGeometry(vinfo, userGeometry);
+     mGeometry = QRect(QPoint(0, 0), geometry.size());
+-    mFormat = determineFormat(vinfo, mDepth);
++    //mFormat = determineFormat(vinfo, mDepth);
++	FbFormat fbFormat = determineFormat(vinfo, mDepth);
++    mFormat = fbFormat.format;
++    mSwapRgb = fbFormat.swapRgb;
+     mPhysicalSize = determinePhysicalSize(vinfo, userMmSize, geometry.size());
+ 
+     // mmap the framebuffer
+@@ -415,7 +445,11 @@ QRegion QLinuxFbScreen::doRedraw()
+     mBlitter->setCompositionMode(QPainter::CompositionMode_Source);
+     for (const QRect &rect : touched)
+ 	{
+-        mBlitter->drawImage(rect, mScreenImage, rect);
++	if (mSwapRgb) {
++		mBlitter->drawImage(rect, mScreenImage.rgbSwapped(), rect);
++	}else{
++        	mBlitter->drawImage(rect, mScreenImage, rect);
++	}
+ 	}
+ 
+     return touched;
+diff --git a/src/plugins/platforms/linuxfb/qlinuxfbscreen.h b/src/plugins/platforms/linuxfb/qlinuxfbscreen.h
+index c7ce455e..bef5cee 100644
+--- a/src/plugins/platforms/linuxfb/qlinuxfbscreen.h
++++ b/src/plugins/platforms/linuxfb/qlinuxfbscreen.h
+@@ -75,6 +75,7 @@ private:
+     } mMmap;
+ 
+     QPainter *mBlitter;
++    bool mSwapRgb;
+ };
+ 
+ QT_END_NAMESPACE
+-- 
+2.7.4
+
