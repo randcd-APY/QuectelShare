@@ -1,0 +1,6 @@
+[submodule "poky/meta-iotedge"]
+	path = poky/meta-iotedge
+	url = https://github.com/Azure/meta-iotedge
+[submodule "poky/oe-meta-go"]
+	path = poky/oe-meta-go
+	url = https://github.com/errordeveloper/oe-meta-go.git
