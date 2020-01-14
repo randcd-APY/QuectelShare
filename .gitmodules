@@ -4,3 +4,9 @@
 [submodule "poky/oe-meta-go"]
 	path = poky/oe-meta-go
 	url = https://github.com/errordeveloper/oe-meta-go.git
+[submodule "poky/meta-rust"]
+	path = poky/meta-rust
+	url = https://github.com/meta-rust/meta-rust
+[submodule "poky/meta-virtualization"]
+	path = poky/meta-virtualization
+	url = git://git.yoctoproject.org/meta-virtualization
