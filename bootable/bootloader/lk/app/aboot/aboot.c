@@ -193,7 +193,7 @@ static const char *warmboot_cmdline = " qpnp-power-on.warm_boot=1";
 static const char *baseband_apq_nowgr   = " androidboot.baseband=baseband_apq_nowgr";
 static const char *androidboot_slot_suffix = " androidboot.slot_suffix=";
 static const char *skip_ramfs = " skip_initramfs";
-static const char *sys_path_cmdline = " rootwait ro init=/init";
+static const char *sys_path_cmdline = " rootwait init=/init";
 
 #if VERITY_LE
 static const char *verity_dev = " root=/dev/dm-0";
@@ -1460,7 +1460,7 @@ int boot_linux_from_mmc(void)
 
 	if ((target_get_max_flash_size() - page_size) < imagesize_actual)
 	{
-		dprintf(CRITICAL, "booimage  size is greater than DDR can hold\n");
+		dprintf(CRITICAL, "boot image  size is greater than DDR can hold\n");
 		return -1;
 	}
 	offset = page_size;
@@ -1585,7 +1585,7 @@ int boot_linux_from_mmc(void)
 		kernel_start_addr = out_addr;
 		kernel_size = out_len;
 	} else {
-		dprintf(INFO, "Uncpmpressed kernel in use\n");
+		dprintf(INFO, "Uncompressed kernel in use\n");
 		if (!strncmp((char*)(image_addr + page_size),
 					PATCHED_KERNEL_MAGIC,
 					sizeof(PATCHED_KERNEL_MAGIC) - 1)) {

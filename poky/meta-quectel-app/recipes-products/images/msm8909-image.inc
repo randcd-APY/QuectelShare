@@ -1,3 +1,5 @@
+DISTRO_FEATURES += "virtualization"
+
 # Data proprietary source Packages
 #IMAGE_INSTALL += "helloworld"
 IMAGE_INSTALL += "apptest"
@@ -29,3 +31,12 @@ IMAGE_INSTALL += "otademo"
 IMAGE_INSTALL += "btserver"
 IMAGE_INSTALL += "setbtmac"
 IMAGE_INSTALL += "time-daemon"
+
+IMAGE_INSTALL += "docker"
+IMAGE_INSTALL += "docker-contrib"
+#IMAGE_INSTALL += "iotedge-cli"
+#IMAGE_INSTALL += "iotedge-daemon"
+IMAGE_INSTALL_append += "ca-certificates \
+                         connman \
+                         connman-client \
+                        "
